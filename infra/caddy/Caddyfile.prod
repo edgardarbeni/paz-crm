@@ -1,0 +1,31 @@
+# Production edge (served by the frontend runtime image): static panel + API proxy.
+# Required env: PAZ_DOMAIN (e.g. panel.example.mx), PAZ_API_UPSTREAM (e.g. api:8000).
+{
+	servers {
+		trusted_proxies static private_ranges
+	}
+}
+
+{$PAZ_DOMAIN} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=63072000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "no-referrer"
+		-Server
+	}
+
+	@backend path /api/* /health /ready
+	handle @backend {
+		reverse_proxy {$PAZ_API_UPSTREAM}
+	}
+
+	handle {
+		root * /srv
+		header /assets/* Cache-Control "public, max-age=31536000, immutable"
+		header Content-Security-Policy "default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; worker-src 'self' blob:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'"
+		try_files {path} /index.html
+		file_server
+	}
+}

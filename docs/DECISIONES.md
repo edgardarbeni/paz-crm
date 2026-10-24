@@ -185,6 +185,34 @@ No hay integración con RENAPO.
 4. Colección de ejemplos de la API con Bruno en `docs/api/`.
 5. El benchmark nacional se corre fuera de CI.
 
+## 7. Fase A — implementación
+
+**D-43 · Imagen propia de PostgreSQL 18 + PostGIS.** `infra/db/Dockerfile` parte de `postgres:18-bookworm` (multi-arquitectura) e instala PostGIS 3 desde PGDG.
+*Motivo:* la imagen oficial `postgis/postgis:18-3.6` solo existe para amd64; en Macs arm64 correría emulada. La misma imagen sirve para desarrollo, CI (testcontainers) y como referencia de producción.
+
+**D-44 · Separación de roles de base de datos.** Las migraciones corren con el rol **dueño** (`PAZ_MIGRATIONS_DATABASE_URL`). La API se conecta con un rol de **mínimo privilegio** (`paz_app`), que solo recibe los GRANT que emiten las migraciones:
+- DML en los esquemas de módulo;
+- en `audit`, solo `SELECT` y `EXECUTE` de `append_entry` / `verify_chain`.
+
+*Motivo:* la inmutabilidad de la bitácora y el principio de mínimo privilegio (ASVS nivel 2).
+
+**D-45 · Implementación de la bitácora (detalla D-37).**
+- La cadena de hashes se calcula **dentro de PostgreSQL**, en la función `audit.append_entry` (`SECURITY DEFINER`).
+- Una fila `audit.chain_head` bloqueada con `FOR UPDATE` serializa los eslabones hasta el commit del llamador.
+- Triggers rechazan `UPDATE`, `DELETE` y `TRUNCATE` incluso para el dueño.
+- `verify_chain` detecta filas alteradas, huecos y cola truncada.
+- Las escrituras del ORM se auditan automáticamente (`AuditedSession`, hook `after_flush`); las sentencias Core no pasan por el hook y deben usar `record_audit`.
+
+*Costo conocido:* el bloqueo es un punto de contención global; se mide en las pruebas de carga de las fases C y D.
+
+**D-46 · Convenciones de API.**
+- Los errores son RFC 9457 con `type = urn:pazos:problem:<code>` y las extensiones `code` y `request_id`, servidos como `application/problem+json` (también en el OpenAPI, así que el cliente generado los tipa como `Problem`).
+- `/health` y `/ready` quedan fuera de `/api/v1`.
+- El `X-Request-ID` entrante se respeta si es válido; si no, se genera uno.
+- Las variables de entorno del backend llevan el prefijo `PAZ_`.
+
+**D-47 · TypeScript 6 en el frontend.** Hey API (0.99) usa la API de compilador de TypeScript en JavaScript, que TypeScript 7 (nativo) ya no expone. Se fija `typescript@^6` hasta que Hey API soporte la versión 7 (deuda técnica).
+
 ---
 
 ## Suposiciones vigentes
@@ -196,5 +224,5 @@ No hay integración con RENAPO.
 
 ## Riesgos abiertos
 
-- Disponibilidad de PG18 + PostGIS en Postgres administrado (D-05).
+- ~~Disponibilidad de PG18 + PostGIS en Postgres administrado (D-05).~~ **Resuelto el 2026-10-24:** DigitalOcean administrado ofrece PostGIS en PostgreSQL 18 (Standard Edition, según su lista oficial de extensiones) y AWS RDS ofrece PostgreSQL 18.4 con PostGIS 3.6.3. Se mantiene PG18 sin fallback.
 - Cadena de hashes de la bitácora con alta concurrencia: requiere serializar la escritura del eslabón (secuencia o lock ligero) y medir su costo en carga.

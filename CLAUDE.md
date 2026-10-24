@@ -143,7 +143,8 @@ Backend:
 - structlog + OpenTelemetry.
 
 Frontend (panel):
-- React 19 + TypeScript strict, Vite, TanStack Router (SPA), TanStack Query,
+- React 19 + TypeScript strict (TypeScript 6 por compatibilidad con Hey API, D-47), Vite,
+  TanStack Router (SPA), TanStack Query,
   TanStack Form + Zod, TanStack Table.
 - Tailwind CSS 4 + shadcn/ui.
 - Cliente de API generado desde el OpenAPI del backend con Hey API (@hey-api/openapi-ts,

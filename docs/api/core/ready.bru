@@ -1,0 +1,32 @@
+meta {
+  name: Ready (readiness)
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/ready
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+  res.body.database: eq ok
+  res.body.redis: eq ok
+}
+
+docs {
+  200 si la base de datos y Redis responden. Si alguna falla devuelve 503 con un
+  Problem Details (application/problem+json), por ejemplo:
+
+  {
+    "type": "urn:pazos:problem:service-unavailable",
+    "title": "Servicio no disponible",
+    "status": 503,
+    "detail": "Dependencias no disponibles: Redis.",
+    "instance": "/ready",
+    "code": "service-unavailable",
+    "request_id": "…"
+  }
+}
