@@ -3,6 +3,33 @@
 import * as z from 'zod';
 
 /**
+ * AuditEntryOut
+ */
+export const zAuditEntryOut = z.object({
+    id: z.uuid(),
+    chain_seq: z.int(),
+    occurred_at: z.iso.datetime(),
+    actor_user_id: z.uuid().nullable(),
+    actor_ip: z.string().nullable(),
+    user_agent: z.string().nullable(),
+    request_id: z.string().nullable(),
+    action: z.string(),
+    entity_table: z.string().nullable(),
+    entity_id: z.string().nullable(),
+    before: z.record(z.string(), z.unknown()).nullable(),
+    after: z.record(z.string(), z.unknown()).nullable()
+});
+
+/**
+ * CursorPage[AuditEntryOut]
+ */
+export const zCursorPageAuditEntryOut = z.object({
+    items: z.array(zAuditEntryOut),
+    next_cursor: z.string().nullish(),
+    has_more: z.boolean()
+});
+
+/**
  * FieldViolation
  */
 export const zFieldViolation = z.object({
@@ -16,6 +43,101 @@ export const zFieldViolation = z.object({
  */
 export const zHealthStatus = z.object({
     status: z.literal('ok')
+});
+
+/**
+ * InvitationAcceptRequest
+ */
+export const zInvitationAcceptRequest = z.object({
+    token: z.string().max(256),
+    password: z.string().min(1).max(256),
+    full_name: z.string().min(2).max(200).nullish()
+});
+
+/**
+ * InvitationInfo
+ */
+export const zInvitationInfo = z.object({
+    email: z.string(),
+    full_name: z.string(),
+    expires_at: z.iso.datetime()
+});
+
+/**
+ * InvitationTokenRequest
+ */
+export const zInvitationTokenRequest = z.object({
+    token: z.string().max(256)
+});
+
+/**
+ * LoginRequest
+ */
+export const zLoginRequest = z.object({
+    email: z.email(),
+    password: z.string().min(1).max(256),
+    device_label: z.string().max(200).nullish()
+});
+
+/**
+ * MfaRequiredResponse
+ */
+export const zMfaRequiredResponse = z.object({
+    status: z.literal('mfa_required').optional().default('mfa_required'),
+    mfa_token: z.string(),
+    expires_in: z.int()
+});
+
+/**
+ * MfaStatus
+ */
+export const zMfaStatus = z.object({
+    enabled: z.boolean(),
+    required: z.boolean()
+});
+
+/**
+ * MfaVerifyRequest
+ */
+export const zMfaVerifyRequest = z.object({
+    mfa_token: z.string().max(2048),
+    code: z.string().min(6).max(8).nullish(),
+    recovery_code: z.string().max(32).nullish(),
+    device_label: z.string().max(200).nullish()
+});
+
+/**
+ * PasswordChangeRequest
+ */
+export const zPasswordChangeRequest = z.object({
+    current_password: z.string().min(1).max(256),
+    new_password: z.string().min(1).max(256)
+});
+
+/**
+ * PasswordForgotRequest
+ */
+export const zPasswordForgotRequest = z.object({
+    email: z.email()
+});
+
+/**
+ * PasswordResetRequest
+ */
+export const zPasswordResetRequest = z.object({
+    token: z.string().max(256),
+    new_password: z.string().min(1).max(256)
+});
+
+/**
+ * PermissionOut
+ */
+export const zPermissionOut = z.object({
+    id: z.uuid(),
+    code: z.string(),
+    module: z.string(),
+    action: z.string(),
+    description: z.string()
 });
 
 /**
@@ -44,6 +166,230 @@ export const zReadinessStatus = z.object({
 });
 
 /**
+ * RecoveryCodesRequest
+ */
+export const zRecoveryCodesRequest = z.object({
+    code: z.string().min(6).max(8)
+});
+
+/**
+ * RecoveryCodesResponse
+ */
+export const zRecoveryCodesResponse = z.object({
+    recovery_codes: z.array(z.string())
+});
+
+/**
+ * RevokedCount
+ */
+export const zRevokedCount = z.object({
+    revoked: z.int()
+});
+
+/**
+ * RoleCreateRequest
+ */
+export const zRoleCreateRequest = z.object({
+    code: z.string().regex(/^[a-z][a-z0-9_]{1,49}$/),
+    name: z.string().min(2).max(100),
+    description: z.string().max(500).nullish(),
+    requires_mfa: z.boolean().optional().default(false),
+    permissions: z.array(z.string()).max(200).optional()
+});
+
+/**
+ * RoleOut
+ */
+export const zRoleOut = z.object({
+    id: z.uuid(),
+    code: z.string(),
+    name: z.string(),
+    description: z.string().nullable(),
+    requires_mfa: z.boolean(),
+    is_system: z.boolean(),
+    grants_all: z.boolean(),
+    permissions: z.array(z.string()),
+    user_count: z.int()
+});
+
+/**
+ * RolePermissionsRequest
+ */
+export const zRolePermissionsRequest = z.object({
+    permissions: z.array(z.string()).max(200)
+});
+
+/**
+ * RoleSummary
+ */
+export const zRoleSummary = z.object({
+    id: z.uuid(),
+    code: z.string(),
+    name: z.string()
+});
+
+/**
+ * RoleUpdateRequest
+ */
+export const zRoleUpdateRequest = z.object({
+    name: z.string().min(2).max(100).nullish(),
+    description: z.string().max(500).nullish(),
+    requires_mfa: z.boolean().nullish()
+});
+
+/**
+ * SessionOut
+ */
+export const zSessionOut = z.object({
+    id: z.uuid(),
+    device_label: z.string().nullable(),
+    user_agent: z.string().nullable(),
+    ip_address: z.string().nullable(),
+    auth_methods: z.array(z.string()),
+    created_at: z.iso.datetime(),
+    last_seen_at: z.iso.datetime().nullable(),
+    expires_at: z.iso.datetime(),
+    current: z.boolean().optional().default(false)
+});
+
+/**
+ * TokenScope
+ */
+export const zTokenScope = z.enum(['full', 'mfa_enrollment']);
+
+/**
+ * AuthenticatedResponse
+ */
+export const zAuthenticatedResponse = z.object({
+    status: z.literal('authenticated').optional().default('authenticated'),
+    access_token: z.string(),
+    token_type: z.literal('Bearer').optional().default('Bearer'),
+    expires_in: z.int(),
+    scope: zTokenScope
+});
+
+/**
+ * TotpConfirmRequest
+ */
+export const zTotpConfirmRequest = z.object({
+    code: z.string().min(6).max(8)
+});
+
+/**
+ * TotpConfirmResponse
+ */
+export const zTotpConfirmResponse = z.object({
+    recovery_codes: z.array(z.string()),
+    access_token: z.string(),
+    expires_in: z.int()
+});
+
+/**
+ * TotpDisableRequest
+ */
+export const zTotpDisableRequest = z.object({
+    password: z.string().min(1).max(256),
+    code: z.string().min(6).max(8)
+});
+
+/**
+ * TotpSetupResponse
+ */
+export const zTotpSetupResponse = z.object({
+    secret: z.string(),
+    otpauth_uri: z.string(),
+    qr_svg: z.string()
+});
+
+/**
+ * UserInviteRequest
+ */
+export const zUserInviteRequest = z.object({
+    email: z.email(),
+    full_name: z.string().min(2).max(200),
+    role_ids: z.array(z.uuid()).max(20).optional()
+});
+
+/**
+ * UserRolesRequest
+ */
+export const zUserRolesRequest = z.object({
+    role_ids: z.array(z.uuid()).max(20)
+});
+
+/**
+ * UserStatus
+ */
+export const zUserStatus = z.enum([
+    'invited',
+    'active',
+    'disabled'
+]);
+
+/**
+ * MeResponse
+ */
+export const zMeResponse = z.object({
+    id: z.uuid(),
+    email: z.string(),
+    full_name: z.string(),
+    status: zUserStatus,
+    roles: z.array(zRoleSummary),
+    permissions: z.array(z.string()),
+    grants_all: z.boolean(),
+    mfa: zMfaStatus,
+    session_id: z.uuid(),
+    scope: zTokenScope
+});
+
+/**
+ * UserInvitedResponse
+ */
+export const zUserInvitedResponse = z.object({
+    id: z.uuid(),
+    email: z.string(),
+    full_name: z.string(),
+    status: zUserStatus,
+    roles: z.array(zRoleSummary),
+    mfa_enabled: z.boolean(),
+    locked_until: z.iso.datetime().nullable(),
+    last_login_at: z.iso.datetime().nullable(),
+    created_at: z.iso.datetime(),
+    invitation_expires_at: z.iso.datetime()
+});
+
+/**
+ * UserOut
+ */
+export const zUserOut = z.object({
+    id: z.uuid(),
+    email: z.string(),
+    full_name: z.string(),
+    status: zUserStatus,
+    roles: z.array(zRoleSummary),
+    mfa_enabled: z.boolean(),
+    locked_until: z.iso.datetime().nullable(),
+    last_login_at: z.iso.datetime().nullable(),
+    created_at: z.iso.datetime()
+});
+
+/**
+ * CursorPage[UserOut]
+ */
+export const zCursorPageUserOut = z.object({
+    items: z.array(zUserOut),
+    next_cursor: z.string().nullish(),
+    has_more: z.boolean()
+});
+
+/**
+ * UserUpdateRequest
+ */
+export const zUserUpdateRequest = z.object({
+    full_name: z.string().min(2).max(200)
+});
+
+/**
  * Successful Response
  */
 export const zGetHealthResponse = zHealthStatus;
@@ -52,3 +398,310 @@ export const zGetHealthResponse = zHealthStatus;
  * Successful Response
  */
 export const zGetReadinessResponse = zReadinessStatus;
+
+export const zLoginBody = zLoginRequest;
+
+/**
+ * Response Login
+ *
+ * Successful Response
+ */
+export const zLoginResponse = z.discriminatedUnion('status', [
+    zAuthenticatedResponse,
+    zMfaRequiredResponse
+]);
+
+export const zVerifyMfaBody = zMfaVerifyRequest;
+
+/**
+ * Successful Response
+ */
+export const zVerifyMfaResponse = zAuthenticatedResponse;
+
+/**
+ * Successful Response
+ */
+export const zRefreshSessionResponse = zAuthenticatedResponse;
+
+/**
+ * Successful Response
+ */
+export const zLogoutResponse = z.void();
+
+/**
+ * Successful Response
+ */
+export const zGetMeResponse = zMeResponse;
+
+export const zChangePasswordBody = zPasswordChangeRequest;
+
+/**
+ * Successful Response
+ */
+export const zChangePasswordResponse = z.void();
+
+export const zForgotPasswordBody = zPasswordForgotRequest;
+
+export const zResetPasswordBody = zPasswordResetRequest;
+
+/**
+ * Successful Response
+ */
+export const zResetPasswordResponse = z.void();
+
+export const zInspectInvitationBody = zInvitationTokenRequest;
+
+/**
+ * Successful Response
+ */
+export const zInspectInvitationResponse = zInvitationInfo;
+
+export const zAcceptInvitationBody = zInvitationAcceptRequest;
+
+/**
+ * Successful Response
+ */
+export const zAcceptInvitationResponse = z.void();
+
+/**
+ * Successful Response
+ */
+export const zSetupTotpResponse = zTotpSetupResponse;
+
+export const zConfirmTotpBody = zTotpConfirmRequest;
+
+/**
+ * Successful Response
+ */
+export const zConfirmTotpResponse = zTotpConfirmResponse;
+
+export const zDisableTotpBody = zTotpDisableRequest;
+
+/**
+ * Successful Response
+ */
+export const zDisableTotpResponse = z.void();
+
+export const zRegenerateRecoveryCodesBody = zRecoveryCodesRequest;
+
+/**
+ * Successful Response
+ */
+export const zRegenerateRecoveryCodesResponse = zRecoveryCodesResponse;
+
+/**
+ * Response Listmysessions
+ *
+ * Successful Response
+ */
+export const zListMySessionsResponse = z.array(zSessionOut);
+
+export const zRevokeMySessionPath = z.object({
+    session_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zRevokeMySessionResponse = z.void();
+
+/**
+ * Successful Response
+ */
+export const zRevokeMyOtherSessionsResponse = zRevokedCount;
+
+export const zListUsersQuery = z.object({
+    status: zUserStatus.nullish(),
+    q: z.string().min(2).max(100).nullish(),
+    role_id: z.uuid().nullish(),
+    limit: z.int().gte(1).lte(200).optional().default(50),
+    cursor: z.string().max(1024).nullish(),
+    sort: z.string().max(200).nullish()
+});
+
+/**
+ * Successful Response
+ */
+export const zListUsersResponse = zCursorPageUserOut;
+
+export const zInviteUserBody = zUserInviteRequest;
+
+/**
+ * Successful Response
+ */
+export const zInviteUserResponse = zUserInvitedResponse;
+
+export const zGetUserPath = z.object({
+    user_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zGetUserResponse = zUserOut;
+
+export const zUpdateUserBody = zUserUpdateRequest;
+
+export const zUpdateUserPath = z.object({
+    user_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zUpdateUserResponse = zUserOut;
+
+export const zDisableUserPath = z.object({
+    user_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zDisableUserResponse = zUserOut;
+
+export const zActivateUserPath = z.object({
+    user_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zActivateUserResponse = zUserOut;
+
+export const zUnlockUserPath = z.object({
+    user_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zUnlockUserResponse = zUserOut;
+
+export const zSetUserRolesBody = zUserRolesRequest;
+
+export const zSetUserRolesPath = z.object({
+    user_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zSetUserRolesResponse = zUserOut;
+
+export const zResendInvitationPath = z.object({
+    user_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zResendInvitationResponse = zUserInvitedResponse;
+
+export const zResetUserMfaPath = z.object({
+    user_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zResetUserMfaResponse = z.void();
+
+export const zListUserSessionsPath = z.object({
+    user_id: z.uuid()
+});
+
+/**
+ * Response Listusersessions
+ *
+ * Successful Response
+ */
+export const zListUserSessionsResponse = z.array(zSessionOut);
+
+export const zRevokeUserSessionsPath = z.object({
+    user_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zRevokeUserSessionsResponse = zRevokedCount;
+
+/**
+ * Response Listroles
+ *
+ * Successful Response
+ */
+export const zListRolesResponse = z.array(zRoleOut);
+
+export const zCreateRoleBody = zRoleCreateRequest;
+
+/**
+ * Successful Response
+ */
+export const zCreateRoleResponse = zRoleOut;
+
+export const zDeleteRolePath = z.object({
+    role_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zDeleteRoleResponse = z.void();
+
+export const zGetRolePath = z.object({
+    role_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zGetRoleResponse = zRoleOut;
+
+export const zUpdateRoleBody = zRoleUpdateRequest;
+
+export const zUpdateRolePath = z.object({
+    role_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zUpdateRoleResponse = zRoleOut;
+
+export const zSetRolePermissionsBody = zRolePermissionsRequest;
+
+export const zSetRolePermissionsPath = z.object({
+    role_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zSetRolePermissionsResponse = zRoleOut;
+
+/**
+ * Response Listpermissions
+ *
+ * Successful Response
+ */
+export const zListPermissionsResponse = z.array(zPermissionOut);
+
+export const zListAuditEntriesQuery = z.object({
+    actor_user_id: z.uuid().nullish(),
+    action: z.string().max(50).nullish(),
+    entity_table: z.string().max(100).nullish(),
+    entity_id: z.string().max(100).nullish(),
+    request_id: z.string().max(64).nullish(),
+    occurred_from: z.iso.datetime().nullish(),
+    occurred_to: z.iso.datetime().nullish(),
+    limit: z.int().gte(1).lte(200).optional().default(50),
+    cursor: z.string().max(1024).nullish(),
+    sort: z.string().max(200).nullish()
+});
+
+/**
+ * Successful Response
+ */
+export const zListAuditEntriesResponse = zCursorPageAuditEntryOut;

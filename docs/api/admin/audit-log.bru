@@ -1,0 +1,21 @@
+meta {
+  name: Bitácora de auditoría
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/v1/audit-log?limit=50
+  body: none
+  auth: bearer
+}
+
+params:query {
+  limit: 50
+  ~action: login_failed
+  ~entity_table: identity.users
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}

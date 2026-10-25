@@ -213,6 +213,62 @@ No hay integración con RENAPO.
 
 **D-47 · TypeScript 6 en el frontend.** Hey API (0.99) usa la API de compilador de TypeScript en JavaScript, que TypeScript 7 (nativo) ya no expone. Se fija `typescript@^6` hasta que Hey API soporte la versión 7 (deuda técnica).
 
+## 8. Fase B — identidad
+
+**D-48 · Tokens y sesiones.**
+- **Access token:** JWT HS256 de 15 min. Viaja en `Authorization: Bearer` y el panel lo guarda solo en memoria. Lleva el id de sesión (`sid`) y el alcance (`scope`).
+- **Refresh token:** opaco, de 256 bits, rotativo. Solo se guarda su SHA-256. Viaja en una cookie `paz_refresh` (`HttpOnly; Secure; SameSite=Strict; Path=/api/v1/auth`) y, como defensa adicional, se verifica el `Origin`.
+- **Reuso:** presentar un refresh token ya usado o revocado revoca la sesión completa y se audita como `refresh_reuse_detected`.
+- **Duración de la sesión:** 7 días de inactividad máxima y 30 días de vida absoluta.
+- **Revocación inmediata:** cada request carga usuario y sesión en una consulta (sesión viva, usuario activo). Esto reemplaza la marca en Redis que mencionaba el plan: es igual de inmediato y no depende de que Redis conserve datos.
+- **Reto de MFA:** JWT de 5 min.
+- **Alcance `mfa_enrollment`:** si el rol exige 2FA y el usuario no ha enrolado TOTP, solo puede usar los endpoints de enrolamiento, perfil y logout.
+
+**D-49 · Defensa del login.**
+- **Respuesta única:** todo fallo devuelve el mismo 401 genérico; el motivo solo queda en la bitácora (`login_failed`). Cuando la cuenta no existe se verifica un hash ficticio, para que el tiempo de respuesta no lo delate.
+- **Bloqueo:** 5 intentos fallidos (contraseña, TOTP o código de recuperación) bloquean la cuenta 15 min.
+- **Rate limiting** (ventana fija en Redis):
+
+  | Endpoint | Límite |
+  |---|---|
+  | Login, por IP | 20/min |
+  | Login, por correo | 10/15 min |
+  | MFA, por usuario | 5/5 min |
+  | Restablecer contraseña, por correo | 5/h |
+
+- **Sin enumeración:** `password/forgot` siempre responde 202.
+
+**D-50 · Contraseñas.**
+- Argon2id (t=3, m=64 MiB, p=4) con rehash transparente al iniciar sesión.
+- Política por longitud (12–128) sin reglas de composición (NIST 800-63B). Rechaza contraseñas repetitivas o que contengan el correo.
+- El cotejo contra contraseñas filtradas (ASVS 2.1.7) queda como deuda.
+
+**D-51 · Segundo factor.**
+- **TOTP:** RFC 6238 (SHA-1, 6 dígitos, 30 s, tolerancia de ±1 paso) con anti-replay por paso (`last_used_step`). El secreto, de 160 bits, se cifra con `FieldCipher` (contexto `identity.totp_credentials.secret`).
+- **QR:** se genera en el backend como data URI SVG.
+- **Códigos de recuperación:** 10 de un solo uso, de 80 bits, guardados con HMAC (no Argon2: su entropía lo permite y verificarlos sale barato).
+- **Desactivar TOTP** requiere contraseña + código y no se permite si el rol exige 2FA.
+- **Reset administrativo:** borra el TOTP y cierra las sesiones del usuario.
+
+**D-52 · Reglas de RBAC.**
+- **Superadmin:** `roles.grants_all` concede todos los permisos y lo exime del alcance geográfico.
+- **Sin escalamiento:** solo se pueden asignar roles y otorgar permisos que uno mismo tiene.
+- **Cuentas superadmin:** solo otro superadmin puede gestionarlas, y no se puede desactivar ni degradar al último.
+- **Roles protegidos:** los de sistema no se eliminan, el de superadmin es inmutable y un rol con usuarios no se puede eliminar.
+- **Permisos:** se registran en código (`Perm`) y se siembran por migración; un test detecta si código y base divergen.
+
+**D-53 · Ajustes a la auditoría automática (detalla D-45).**
+- `refresh_tokens` y `recovery_codes` no se auditan fila por fila: son secretos de alta rotación. Sus eventos se auditan explícitamente: `login_succeeded`, `login_failed`, `account_locked`, `refresh_reuse_detected`, `logout`, `password_changed`, `password_reset_requested`, `mfa_enrolled`, `mfa_disabled`, `mfa_reset` y `recovery_codes_regenerated`.
+- `__audit_ignore_fields__` evita registrar actualizaciones que solo tocan campos de bitácora interna (`user_sessions.last_seen_at`, `ip_address`).
+
+**D-54 · Ajustes al modelo de identidad (sobre `MODELO_DATOS.md` §2).**
+- Columnas nuevas: `roles.grants_all`, `user_sessions.auth_methods` (valores RFC 8176) y `user_invitations.revoked_at`.
+- El usuario invitado existe con `status = invited` y sin contraseña hasta aceptar la invitación.
+
+**D-55 · Correo y arranque.**
+- **Correo:** el backend puede ser `smtp`, `console` o `memory`. Los correos salen en segundo plano después del commit. Los enlaces apuntan a rutas del panel que se construyen en la fase E (`/aceptar-invitacion`, `/restablecer-contrasena`).
+- **Primer superadmin:** se crea con `paz users create-superadmin` y debe enrolar TOTP en su primer acceso.
+
 ---
 
 ## Suposiciones vigentes

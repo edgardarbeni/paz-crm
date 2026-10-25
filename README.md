@@ -12,7 +12,7 @@ posteriores, padrón, defensa del voto, jurídico, atención social, encuestas y
 | [`docs/fases/`](docs/fases/) | Cierre de cada fase: entregables, suposiciones, deuda y riesgos |
 | [`docs/api/`](docs/api/) | Colección de ejemplos de la API (Bruno) |
 
-**Estado:** fase A (infraestructura base, core y CI) aprobada. Siguiente: fase B (identidad).
+**Estado:** fase A aprobada · fase B (identidad) implementada, pendiente de aprobación.
 
 ## Estructura
 
@@ -48,6 +48,14 @@ docker compose up --build         # db, redis, migrate, api, frontend, caddy, ma
 Si ya tienes servicios locales en los puertos 5432, 6379, etc., cámbialos en `.env`
 (variables `PAZ_*_HOST_PORT`, ver `.env.example`).
 
+**Primer acceso.** Crea el superadministrador y entra con él (te pedirá configurar TOTP):
+
+```bash
+docker compose exec api paz users create-superadmin
+```
+
+Después invita usuarios desde la API (`POST /api/v1/users`); los correos llegan a Mailpit.
+
 ## Backend
 
 ```bash
@@ -72,6 +80,10 @@ uv run paz --help                    # CLI de operación
     usando el rol dueño.
 - **Cifrado de campos (D-31, D-32).** `FieldCipher` (AES-256-GCM con cifrado de sobre y llaves
   versionadas) y `BlindIndexer` (HMAC-SHA256). Para generar una llave: `paz keys generate`.
+- **Identidad (fase B).**
+  - El access token (JWT, 15 min) va en `Authorization: Bearer`. El refresh token es rotativo y va en la cookie `paz_refresh` (httpOnly, Secure, SameSite=Strict); reusarlo cierra la sesión.
+  - TOTP es obligatorio para los roles con `requires_mfa`.
+  - Para proteger una ruta: `user: Annotated[CurrentUser, permission(Perm.X)]`. Los permisos nuevos se declaran en el registro y se siembran por migración (D-52).
 - **Errores.** Siempre RFC 9457 (`application/problem+json`): `type` es `urn:pazos:problem:<code>`
   e incluye `request_id`.
 - **Paginación.** Por cursor (`app.core.pagination`): `limit` ≤ 200, `cursor` opaco y `sort`

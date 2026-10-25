@@ -2,6 +2,7 @@
 (PAZ_MIGRATIONS_DATABASE_URL); the application connects with the least-privilege role."""
 
 import asyncio
+import os
 from typing import Any
 
 from alembic import context
@@ -10,7 +11,7 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import create_async_engine
 
 import app.models  # noqa: F401 - registers every table model on the metadata
-from app.core.config import get_settings
+from app.core.config import as_asyncpg_url
 from app.core.db.base import metadata
 
 # Objects managed by hand-written SQL migrations, invisible to autogenerate.
@@ -31,6 +32,14 @@ def include_object(
     return schema not in _UNMANAGED_SCHEMAS
 
 
+def migrations_url() -> str:
+    """Only the owner URL is needed to migrate; application secrets are not required."""
+    url = os.environ.get("PAZ_MIGRATIONS_DATABASE_URL") or os.environ.get("PAZ_DATABASE_URL")
+    if not url:
+        raise RuntimeError("Set PAZ_MIGRATIONS_DATABASE_URL to run migrations")
+    return as_asyncpg_url(url)
+
+
 def _configure(connection: Connection | None = None, url: str | None = None) -> None:
     context.configure(
         connection=connection,
@@ -47,7 +56,7 @@ def _configure(connection: Connection | None = None, url: str | None = None) -> 
 
 
 def run_migrations_offline() -> None:
-    _configure(url=get_settings().async_migrations_database_url)
+    _configure(url=migrations_url())
     with context.begin_transaction():
         context.run_migrations()
 
@@ -59,9 +68,7 @@ def _run_sync(connection: Connection) -> None:
 
 
 async def run_migrations_online() -> None:
-    url = context.config.attributes.get("database_url") or (
-        get_settings().async_migrations_database_url
-    )
+    url = context.config.attributes.get("database_url") or migrations_url()
     engine = create_async_engine(url, poolclass=pool.NullPool)
     async with engine.connect() as connection:
         await connection.run_sync(_run_sync)

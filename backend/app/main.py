@@ -11,6 +11,7 @@ from app.core.config import Environment, Settings, get_settings
 from app.core.db.session import build_engine, build_sessionmaker
 from app.core.errors import PROBLEM_RESPONSES, install_problem_openapi, register_error_handlers
 from app.core.logging import configure_logging
+from app.core.mail import Mailer, build_mailer
 from app.core.middleware import (
     REQUEST_ID_HEADER,
     RequestContextMiddleware,
@@ -18,21 +19,31 @@ from app.core.middleware import (
 )
 from app.core.redis import build_redis
 from app.core.telemetry import configure_telemetry
+from app.modules.audit import router as audit_router
+from app.modules.identity.container import build_identity_services
+from app.modules.identity.routers import admin as identity_admin
+from app.modules.identity.routers import auth as identity_auth
 
 API_PREFIX = "/api/v1"
 
 
 def build_api_router() -> APIRouter:
     """Module routers are mounted here as each phase adds them."""
-    return APIRouter(prefix=API_PREFIX, responses=PROBLEM_RESPONSES)
+    router = APIRouter(prefix=API_PREFIX, responses=PROBLEM_RESPONSES)
+    router.include_router(identity_auth.router)
+    router.include_router(identity_admin.users_router)
+    router.include_router(identity_admin.roles_router)
+    router.include_router(audit_router.router)
+    return router
 
 
-def create_app(settings: Settings | None = None) -> FastAPI:
+def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None) -> FastAPI:
     settings = settings or get_settings()
     configure_logging(settings.log_level, json=settings.environment is not Environment.DEVELOPMENT)
 
     engine = build_engine(settings)
     redis = build_redis(settings)
+    mailer = mailer or build_mailer(settings)
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
@@ -40,6 +51,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         app.state.engine = engine
         app.state.sessionmaker = build_sessionmaker(engine)
         app.state.redis = redis
+        app.state.mailer = mailer
+        app.state.identity = build_identity_services(settings, redis, mailer)
         try:
             yield
         finally:

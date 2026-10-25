@@ -1,9 +1,11 @@
 import asyncio
 
+from alembic.config import Config
+from alembic.script import ScriptDirectory
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 
-from tests.conftest import Database, migrate
+from tests.conftest import BACKEND_DIR, Database, migrate
 
 
 async def test_core_objects_exist(owner_engine: AsyncEngine) -> None:
@@ -44,6 +46,8 @@ async def test_migrations_roundtrip(database: Database, fresh_database: str) -> 
             head = (
                 await connection.execute(text("SELECT version_num FROM public.alembic_version"))
             ).scalar_one()
-        assert head == "0002"
+        config = Config(str(BACKEND_DIR / "alembic.ini"))
+        config.set_main_option("script_location", str(BACKEND_DIR / "migrations"))
+        assert head == ScriptDirectory.from_config(config).get_current_head()
     finally:
         await engine.dispose()

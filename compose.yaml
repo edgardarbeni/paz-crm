@@ -16,6 +16,12 @@ x-backend-env: &backend-env
   PAZ_ENCRYPTION_ACTIVE_KEY_VERSION: ${PAZ_ENCRYPTION_ACTIVE_KEY_VERSION:-1}
   PAZ_BLIND_INDEX_KEY: ${PAZ_BLIND_INDEX_KEY:?Ejecuta ./scripts/bootstrap-env.sh}
   PAZ_OTEL_EXPORTER_OTLP_ENDPOINT: ${PAZ_OTEL_EXPORTER_OTLP_ENDPOINT:-}
+  PAZ_PUBLIC_BASE_URL: https://localhost
+  PAZ_JWT_SECRET: ${PAZ_JWT_SECRET:?Ejecuta ./scripts/bootstrap-env.sh}
+  PAZ_MAIL_BACKEND: smtp
+  PAZ_SMTP_HOST: mailpit
+  PAZ_SMTP_PORT: "1025"
+  PAZ_MAIL_FROM: PAZOS <no-reply@localhost>
 
 services:
   db:

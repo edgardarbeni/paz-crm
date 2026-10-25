@@ -20,6 +20,13 @@ def make_settings(**overrides: object) -> Settings:
         "encryption_active_key_version": 2,
         "blind_index_key": TEST_BLIND_KEY,
         "cors_allowed_origins": ["https://panel.test"],
+        "jwt_secret": "test-jwt-secret-with-at-least-32-bytes!!",
+        "mail_backend": "memory",
+        "public_base_url": "https://panel.test",
+        # Cheap Argon2 parameters keep the suite fast; production uses the defaults.
+        "argon2_time_cost": 1,
+        "argon2_memory_cost_kib": 1024,
+        "argon2_parallelism": 1,
     }
     values.update(overrides)
     return Settings(**values)  # type: ignore[arg-type]

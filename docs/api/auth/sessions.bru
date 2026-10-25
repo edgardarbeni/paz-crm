@@ -1,0 +1,15 @@
+meta {
+  name: 6. Mis sesiones
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}/api/v1/auth/sessions
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
