@@ -88,9 +88,15 @@ services:
       target: dev
     environment:
       VITE_API_BASE_URL: ""
+    # The whole folder is mounted (not single files) so a branch switch never leaves the
+    # container pointing at a replaced file. Dependencies live in their own volume and are
+    # synced on every start: after switching to a branch with other dependencies, run
+    # `docker compose restart frontend`.
+    command: sh -c "pnpm install --frozen-lockfile --prefer-offline && exec pnpm dev --host 0.0.0.0"
     volumes:
-      - ./frontend/src:/app/src
-      - ./frontend/index.html:/app/index.html
+      - ./frontend:/app
+      - frontend-node-modules:/app/node_modules
+      - pnpm-store:/root/.local/share/pnpm/store
     ports:
       - "127.0.0.1:${PAZ_FRONTEND_HOST_PORT:-5173}:5173"
 
@@ -116,3 +122,5 @@ volumes:
   db-data:
   redis-data:
   caddy-data:
+  frontend-node-modules:
+  pnpm-store:
