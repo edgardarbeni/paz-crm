@@ -105,7 +105,7 @@ export function PazosLogo({
   ...props
 }: React.ComponentProps<"svg"> & { title?: string }) {
   return (
-    <svg viewBox="56.05 106.41 1438 332" role="img" aria-label={title} {...props}>
+    <svg viewBox="50 99 1460 346" role="img" aria-label={title} {...props}>
       {WORDMARK}
     </svg>
   );
@@ -117,7 +117,7 @@ export function PazosMark({
   ...props
 }: React.ComponentProps<"svg"> & { title?: string }) {
   return (
-    <svg viewBox="0 0 358 332" role="img" aria-label={title} {...props}>
+    <svg viewBox="-2 -2 362 336" role="img" aria-label={title} {...props}>
       {MARK}
     </svg>
   );
