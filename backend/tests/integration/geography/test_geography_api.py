@@ -153,7 +153,8 @@ async def test_search_by_number_or_name_with_state(
             "/api/v1/geography/search", headers=root, params={"q": q, **extra}
         )
         assert response.status_code == 200, response.text
-        return response.json()
+        items: list[dict[str, Any]] = response.json()
+        return items
 
     async def keys(q: str, **extra: Any) -> list[str]:
         return [f"{item['level']}:{item['key']}" for item in await found(q, **extra)]
