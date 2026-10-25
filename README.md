@@ -48,6 +48,12 @@ docker compose up --build         # db, redis, migrate, api, frontend, caddy, ma
 Si ya tienes servicios locales en los puertos 5432, 6379, etc., cámbialos en `.env`
 (variables `PAZ_*_HOST_PORT`, ver `.env.example`).
 
+**Cambiar de rama con el stack arriba.** El panel monta la carpeta `frontend/` completa, así
+que el código nuevo se ve al instante. Las dependencias viven en un volumen y se sincronizan
+al arrancar: si la otra rama cambia `package.json`, ejecuta `docker compose restart frontend`.
+La API recarga `app/` y `migrations/` sola; si cambian sus dependencias o hay migraciones
+nuevas, ejecuta `docker compose up -d --build api migrate`.
+
 **Primer acceso.** Crea el superadministrador y entra con él (te pedirá configurar TOTP):
 
 ```bash
