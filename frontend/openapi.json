@@ -3406,10 +3406,2896 @@
           }
         }
       }
+    },
+    "/api/v1/people": {
+      "get": {
+        "tags": [
+          "people"
+        ],
+        "summary": "Buscar personas",
+        "operationId": "searchPeople",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 2,
+                  "maxLength": 100
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Nombre o apellidos.",
+              "title": "Q"
+            },
+            "description": "Nombre o apellidos."
+          },
+          {
+            "name": "curp",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 18,
+                  "maxLength": 18
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Curp"
+            }
+          },
+          {
+            "name": "phone",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 10,
+                  "maxLength": 20
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Phone"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 1024
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 200
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Campos separados por coma; prefijo '-' para descendente.",
+              "examples": [
+                "-created_at,name"
+              ],
+              "title": "Sort"
+            },
+            "description": "Campos separados por coma; prefijo '-' para descendente."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CursorPage_PersonSummary_"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "people"
+        ],
+        "summary": "Registrar persona",
+        "operationId": "createPerson",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PersonCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/people/{person_id}": {
+      "get": {
+        "tags": [
+          "people"
+        ],
+        "summary": "Detalle de persona",
+        "operationId": "getPerson",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "person_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Id de la persona.",
+              "title": "Person Id"
+            },
+            "description": "Id de la persona."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "people"
+        ],
+        "summary": "Actualizar persona",
+        "operationId": "updatePerson",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "person_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Id de la persona.",
+              "title": "Person Id"
+            },
+            "description": "Id de la persona."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PersonUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "people"
+        ],
+        "summary": "Cancelación ARCO (baja con purga diferida)",
+        "operationId": "deletePerson",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "person_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Id de la persona.",
+              "title": "Person Id"
+            },
+            "description": "Id de la persona."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeletionOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/people/{person_id}/consents": {
+      "get": {
+        "tags": [
+          "people"
+        ],
+        "summary": "Consentimientos de privacidad",
+        "operationId": "listConsents",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "person_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Id de la persona.",
+              "title": "Person Id"
+            },
+            "description": "Id de la persona."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ConsentOut"
+                  },
+                  "title": "Response Listconsents"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "people"
+        ],
+        "summary": "Registrar aceptación del aviso de privacidad",
+        "operationId": "addConsent",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "person_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Id de la persona.",
+              "title": "Person Id"
+            },
+            "description": "Id de la persona."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConsentIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsentOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/parties": {
+      "get": {
+        "tags": [
+          "candidacies"
+        ],
+        "summary": "Partidos políticos",
+        "operationId": "listParties",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PartyOut"
+                  },
+                  "type": "array",
+                  "title": "Response Listparties"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "candidacies"
+        ],
+        "summary": "Registrar partido",
+        "operationId": "createParty",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PartyIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartyOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/parties/{party_id}": {
+      "put": {
+        "tags": [
+          "candidacies"
+        ],
+        "summary": "Editar partido",
+        "operationId": "updateParty",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "party_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Party Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PartyIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartyOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/office-types": {
+      "get": {
+        "tags": [
+          "candidacies"
+        ],
+        "summary": "Tipos de cargo",
+        "operationId": "listOfficeTypes",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/OfficeTypeOut"
+                  },
+                  "type": "array",
+                  "title": "Response Listofficetypes"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "candidacies"
+        ],
+        "summary": "Agregar tipo de cargo",
+        "operationId": "createOfficeType",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OfficeTypeIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OfficeTypeOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/validation-rules": {
+      "get": {
+        "tags": [
+          "candidacies"
+        ],
+        "summary": "Catálogo de reglas de validación",
+        "operationId": "listValidationRules",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ValidationRuleOut"
+                  },
+                  "type": "array",
+                  "title": "Response Listvalidationrules"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/processes": {
+      "get": {
+        "tags": [
+          "candidacies"
+        ],
+        "summary": "Procesos electorales",
+        "operationId": "listProcesses",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ProcessOut"
+                  },
+                  "type": "array",
+                  "title": "Response Listprocesses"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "candidacies"
+        ],
+        "summary": "Crear proceso electoral",
+        "operationId": "createProcess",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProcessIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProcessOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/processes/{process_id}": {
+      "get": {
+        "tags": [
+          "candidacies"
+        ],
+        "summary": "Detalle de proceso",
+        "operationId": "getProcess",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "process_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Id del proceso electoral.",
+              "title": "Process Id"
+            },
+            "description": "Id del proceso electoral."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProcessOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "candidacies"
+        ],
+        "summary": "Editar proceso",
+        "operationId": "updateProcess",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "process_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Id del proceso electoral.",
+              "title": "Process Id"
+            },
+            "description": "Id del proceso electoral."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProcessUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProcessOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/processes/{process_id}/offices": {
+      "get": {
+        "tags": [
+          "candidacies"
+        ],
+        "summary": "Cargos en elección",
+        "operationId": "listProcessOffices",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "process_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Id del proceso electoral.",
+              "title": "Process Id"
+            },
+            "description": "Id del proceso electoral."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProcessOfficeOut"
+                  },
+                  "title": "Response Listprocessoffices"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "candidacies"
+        ],
+        "summary": "Habilitar cargos y su composición",
+        "operationId": "configureProcessOffices",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "process_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Id del proceso electoral.",
+              "title": "Process Id"
+            },
+            "description": "Id del proceso electoral."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ProcessOfficeIn"
+                },
+                "title": "Body"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProcessOfficeOut"
+                  },
+                  "title": "Response Configureprocessoffices"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/processes/{process_id}/municipalities": {
+      "get": {
+        "tags": [
+          "candidacies"
+        ],
+        "summary": "Integración de ayuntamientos y régimen por municipio",
+        "operationId": "listMunicipalitySettings",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "process_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Id del proceso electoral.",
+              "title": "Process Id"
+            },
+            "description": "Id del proceso electoral."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MunicipalitySettingOut"
+                  },
+                  "title": "Response Listmunicipalitysettings"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "candidacies"
+        ],
+        "summary": "Capturar integración de ayuntamientos (carga masiva)",
+        "operationId": "configureMunicipalities",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "process_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Id del proceso electoral.",
+              "title": "Process Id"
+            },
+            "description": "Id del proceso electoral."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/MunicipalitySettingIn"
+                },
+                "title": "Body"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MunicipalitySettingOut"
+                  },
+                  "title": "Response Configuremunicipalities"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/processes/{process_id}/rules": {
+      "get": {
+        "tags": [
+          "candidacies"
+        ],
+        "summary": "Reglas del proceso",
+        "operationId": "listProcessRules",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "process_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Id del proceso electoral.",
+              "title": "Process Id"
+            },
+            "description": "Id del proceso electoral."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProcessRuleOut"
+                  },
+                  "title": "Response Listprocessrules"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "candidacies"
+        ],
+        "summary": "Activar y parametrizar reglas",
+        "operationId": "configureProcessRules",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "process_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Id del proceso electoral.",
+              "title": "Process Id"
+            },
+            "description": "Id del proceso electoral."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ProcessRuleIn"
+                },
+                "title": "Body"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProcessRuleOut"
+                  },
+                  "title": "Response Configureprocessrules"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/processes/{process_id}/coalitions": {
+      "get": {
+        "tags": [
+          "candidacies"
+        ],
+        "summary": "Coaliciones del proceso",
+        "operationId": "listCoalitions",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "process_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Id del proceso electoral.",
+              "title": "Process Id"
+            },
+            "description": "Id del proceso electoral."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CoalitionOut"
+                  },
+                  "title": "Response Listcoalitions"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "candidacies"
+        ],
+        "summary": "Registrar coalición o candidatura común",
+        "operationId": "createCoalition",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "process_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Id del proceso electoral.",
+              "title": "Process Id"
+            },
+            "description": "Id del proceso electoral."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CoalitionIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoalitionOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/nominations": {
+      "get": {
+        "tags": [
+          "candidacies"
+        ],
+        "summary": "Postulaciones visibles para el usuario",
+        "operationId": "listNominations",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "process_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Process Id"
+            }
+          },
+          {
+            "name": "office_type_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Office Type Id"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/NominationStatus"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "party_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Party Id"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 1024
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 200
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Campos separados por coma; prefijo '-' para descendente.",
+              "examples": [
+                "-created_at,name"
+              ],
+              "title": "Sort"
+            },
+            "description": "Campos separados por coma; prefijo '-' para descendente."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CursorPage_NominationSummary_"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "candidacies"
+        ],
+        "summary": "Crear postulación",
+        "operationId": "createNomination",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NominationIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NominationOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/nominations/{nomination_id}": {
+      "get": {
+        "tags": [
+          "candidacies"
+        ],
+        "summary": "Detalle de postulación",
+        "operationId": "getNomination",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "nomination_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Id de la postulación.",
+              "title": "Nomination Id"
+            },
+            "description": "Id de la postulación."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NominationOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "candidacies"
+        ],
+        "summary": "Editar notas",
+        "operationId": "updateNomination",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "nomination_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Id de la postulación.",
+              "title": "Nomination Id"
+            },
+            "description": "Id de la postulación."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NominationUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NominationOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/nominations/{nomination_id}/submit": {
+      "post": {
+        "tags": [
+          "candidacies"
+        ],
+        "summary": "Enviar postulación",
+        "operationId": "submitNomination",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "nomination_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Id de la postulación.",
+              "title": "Nomination Id"
+            },
+            "description": "Id de la postulación."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NominationAction"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NominationOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/nominations/{nomination_id}/approve": {
+      "post": {
+        "tags": [
+          "candidacies"
+        ],
+        "summary": "Aprobar postulación",
+        "operationId": "approveNomination",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "nomination_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Id de la postulación.",
+              "title": "Nomination Id"
+            },
+            "description": "Id de la postulación."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NominationAction"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NominationOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/nominations/{nomination_id}/cancel": {
+      "post": {
+        "tags": [
+          "candidacies"
+        ],
+        "summary": "Cancelar postulación",
+        "operationId": "cancelNomination",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "nomination_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Id de la postulación.",
+              "title": "Nomination Id"
+            },
+            "description": "Id de la postulación."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NominationAction"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NominationOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/nominations/{nomination_id}/validation": {
+      "get": {
+        "tags": [
+          "candidacies"
+        ],
+        "summary": "Validar postulación (todas las reglas, paridad incluida, sin guardar)",
+        "operationId": "validateNomination",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "nomination_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Id de la postulación.",
+              "title": "Nomination Id"
+            },
+            "description": "Id de la postulación."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ViolationOut"
+                  },
+                  "title": "Response Validatenomination"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/nominations/{nomination_id}/history": {
+      "get": {
+        "tags": [
+          "candidacies"
+        ],
+        "summary": "Historial de estatus de las fórmulas",
+        "operationId": "getNominationHistory",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "nomination_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Id de la postulación.",
+              "title": "Nomination Id"
+            },
+            "description": "Id de la postulación."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StatusHistoryOut"
+                  },
+                  "title": "Response Getnominationhistory"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/nominations/{nomination_id}/formulas": {
+      "post": {
+        "tags": [
+          "candidacies"
+        ],
+        "summary": "Registrar fórmula (propietaria y suplente)",
+        "operationId": "createFormula",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "nomination_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Id de la postulación.",
+              "title": "Nomination Id"
+            },
+            "description": "Id de la postulación."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FormulaIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NominationOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/formulas/{formula_id}": {
+      "patch": {
+        "tags": [
+          "candidacies"
+        ],
+        "summary": "Cambiar integrantes (aspirante)",
+        "operationId": "updateFormulaMembers",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "formula_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Id de la fórmula.",
+              "title": "Formula Id"
+            },
+            "description": "Id de la fórmula."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FormulaMembersUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NominationOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/formulas/{formula_id}/status": {
+      "post": {
+        "tags": [
+          "candidacies"
+        ],
+        "summary": "Cambiar estatus de fórmula",
+        "operationId": "changeFormulaStatus",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "formula_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Id de la fórmula.",
+              "title": "Formula Id"
+            },
+            "description": "Id de la fórmula."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FormulaStatusIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NominationOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/formulas/{formula_id}/substitute": {
+      "post": {
+        "tags": [
+          "candidacies"
+        ],
+        "summary": "Sustituir fórmula",
+        "operationId": "substituteFormula",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "formula_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Id de la fórmula.",
+              "title": "Formula Id"
+            },
+            "description": "Id de la fórmula."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubstitutionIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NominationOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "AddressIn": {
+        "properties": {
+          "address_type": {
+            "type": "string",
+            "enum": [
+              "home",
+              "work",
+              "other"
+            ],
+            "title": "Address Type",
+            "default": "home"
+          },
+          "street": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Street"
+          },
+          "exterior_number": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 30
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exterior Number"
+          },
+          "interior_number": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 30
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Interior Number"
+          },
+          "references": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "References"
+          },
+          "postal_code": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{5}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Postal Code"
+          },
+          "state_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "State Id"
+          },
+          "municipality_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Municipality Id"
+          },
+          "section_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Section Id"
+          },
+          "locality_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Locality Id"
+          },
+          "neighborhood_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Neighborhood Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "AddressIn"
+      },
+      "AddressOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "address_type": {
+            "type": "string",
+            "title": "Address Type"
+          },
+          "street": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Street"
+          },
+          "exterior_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exterior Number"
+          },
+          "interior_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Interior Number"
+          },
+          "references": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "References"
+          },
+          "postal_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Postal Code"
+          },
+          "state_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "State Id"
+          },
+          "municipality_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Municipality Id"
+          },
+          "section_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Section Id"
+          },
+          "locality_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Locality Id"
+          },
+          "neighborhood_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Neighborhood Id"
+          },
+          "is_primary": {
+            "type": "boolean",
+            "title": "Is Primary"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "address_type",
+          "postal_code",
+          "state_id",
+          "municipality_id",
+          "section_id",
+          "locality_id",
+          "neighborhood_id",
+          "is_primary"
+        ],
+        "title": "AddressOut"
+      },
       "Ancestors": {
         "properties": {
           "section": {
@@ -3617,6 +6503,221 @@
         ],
         "title": "AuthenticatedResponse"
       },
+      "CoalitionIn": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 2,
+            "title": "Name"
+          },
+          "coalition_kind": {
+            "$ref": "#/components/schemas/CoalitionKind",
+            "default": "coalition"
+          },
+          "party_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "maxItems": 20,
+            "minItems": 2,
+            "title": "Party Ids"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "name",
+          "party_ids"
+        ],
+        "title": "CoalitionIn"
+      },
+      "CoalitionKind": {
+        "type": "string",
+        "enum": [
+          "coalition",
+          "common_candidacy"
+        ],
+        "title": "CoalitionKind"
+      },
+      "CoalitionOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "coalition_kind": {
+            "$ref": "#/components/schemas/CoalitionKind"
+          },
+          "party_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Party Ids"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "coalition_kind",
+          "party_ids"
+        ],
+        "title": "CoalitionOut"
+      },
+      "ConsentIn": {
+        "properties": {
+          "notice_version": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 1,
+            "title": "Notice Version"
+          },
+          "channel": {
+            "type": "string",
+            "enum": [
+              "panel",
+              "paper",
+              "web"
+            ],
+            "title": "Channel"
+          },
+          "evidence_uri": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evidence Uri"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "notice_version",
+          "channel"
+        ],
+        "title": "ConsentIn"
+      },
+      "ConsentOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "notice_version": {
+            "type": "string",
+            "title": "Notice Version"
+          },
+          "channel": {
+            "type": "string",
+            "title": "Channel"
+          },
+          "evidence_uri": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evidence Uri"
+          },
+          "accepted_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Accepted At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "notice_version",
+          "channel",
+          "evidence_uri",
+          "accepted_at"
+        ],
+        "title": "ConsentOut"
+      },
+      "ContactIn": {
+        "properties": {
+          "contact_type": {
+            "type": "string",
+            "enum": [
+              "mobile",
+              "landline",
+              "email"
+            ],
+            "title": "Contact Type"
+          },
+          "value": {
+            "type": "string",
+            "maxLength": 150,
+            "minLength": 5,
+            "title": "Value"
+          },
+          "is_primary": {
+            "type": "boolean",
+            "title": "Is Primary",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "contact_type",
+          "value"
+        ],
+        "title": "ContactIn"
+      },
+      "ContactOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "contact_type": {
+            "type": "string",
+            "title": "Contact Type"
+          },
+          "value": {
+            "type": "string",
+            "title": "Value",
+            "description": "Enmascarado sin el permiso people.person.read_sensitive."
+          },
+          "is_primary": {
+            "type": "boolean",
+            "title": "Is Primary"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "contact_type",
+          "value",
+          "is_primary"
+        ],
+        "title": "ContactOut"
+      },
       "CursorPage_AuditEntryOut_": {
         "properties": {
           "items": {
@@ -3749,6 +6850,72 @@
         ],
         "title": "CursorPage[ImportRunOut]"
       },
+      "CursorPage_NominationSummary_": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/NominationSummary"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor",
+            "description": "Pasar en `cursor` para obtener la siguiente página."
+          },
+          "has_more": {
+            "type": "boolean",
+            "title": "Has More"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "has_more"
+        ],
+        "title": "CursorPage[NominationSummary]"
+      },
+      "CursorPage_PersonSummary_": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PersonSummary"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor",
+            "description": "Pasar en `cursor` para obtener la siguiente página."
+          },
+          "has_more": {
+            "type": "boolean",
+            "title": "Has More"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "has_more"
+        ],
+        "title": "CursorPage[PersonSummary]"
+      },
       "CursorPage_UserOut_": {
         "properties": {
           "items": {
@@ -3782,6 +6949,35 @@
         ],
         "title": "CursorPage[UserOut]"
       },
+      "DeletionOut": {
+        "properties": {
+          "purge_after": {
+            "type": "string",
+            "title": "Purge After"
+          }
+        },
+        "type": "object",
+        "required": [
+          "purge_after"
+        ],
+        "title": "DeletionOut"
+      },
+      "ElectionLevel": {
+        "type": "string",
+        "enum": [
+          "federal",
+          "local"
+        ],
+        "title": "ElectionLevel"
+      },
+      "ElectionRegime": {
+        "type": "string",
+        "enum": [
+          "party_based",
+          "normative_system"
+        ],
+        "title": "ElectionRegime"
+      },
       "FieldViolation": {
         "properties": {
           "field": {
@@ -3805,6 +7001,260 @@
           "code"
         ],
         "title": "FieldViolation"
+      },
+      "FormulaIn": {
+        "properties": {
+          "office_type_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Office Type Id"
+          },
+          "position": {
+            "type": "integer",
+            "maximum": 500.0,
+            "minimum": 1.0,
+            "title": "Position"
+          },
+          "owner_person_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Owner Person Id"
+          },
+          "substitute_person_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Substitute Person Id",
+            "description": "Obligatoria salvo en cargos sin suplencia."
+          },
+          "origin_party_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Origin Party Id"
+          },
+          "override": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Override"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "office_type_id",
+          "position",
+          "owner_person_id"
+        ],
+        "title": "FormulaIn"
+      },
+      "FormulaMembersUpdate": {
+        "properties": {
+          "owner_person_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner Person Id"
+          },
+          "substitute_person_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Substitute Person Id"
+          },
+          "origin_party_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Origin Party Id"
+          },
+          "override": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Override"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "FormulaMembersUpdate"
+      },
+      "FormulaOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "office_type_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Office Type Id"
+          },
+          "office_code": {
+            "type": "string",
+            "title": "Office Code"
+          },
+          "position": {
+            "type": "integer",
+            "title": "Position"
+          },
+          "status": {
+            "$ref": "#/components/schemas/FormulaStatus"
+          },
+          "origin_party_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Origin Party Id"
+          },
+          "replaces_formula_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Replaces Formula Id"
+          },
+          "substitution_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Substitution Reason"
+          },
+          "owner": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MemberOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "substitute": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MemberOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "office_type_id",
+          "office_code",
+          "position",
+          "status",
+          "origin_party_id",
+          "replaces_formula_id",
+          "substitution_reason",
+          "owner",
+          "substitute"
+        ],
+        "title": "FormulaOut"
+      },
+      "FormulaStatus": {
+        "type": "string",
+        "enum": [
+          "aspirant",
+          "registered",
+          "approved",
+          "substituted",
+          "cancelled"
+        ],
+        "title": "FormulaStatus"
+      },
+      "FormulaStatusIn": {
+        "properties": {
+          "to_status": {
+            "type": "string",
+            "enum": [
+              "registered",
+              "approved",
+              "cancelled"
+            ],
+            "title": "To Status"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500,
+                "minLength": 5
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "to_status"
+        ],
+        "title": "FormulaStatusIn"
       },
       "FrameworkOut": {
         "properties": {
@@ -4171,6 +7621,18 @@
           "key"
         ],
         "title": "GeoNodeOut"
+      },
+      "GeographicLevel": {
+        "type": "string",
+        "enum": [
+          "national",
+          "electoral_region",
+          "state",
+          "federal_district",
+          "local_district",
+          "municipality"
+        ],
+        "title": "GeographicLevel"
       },
       "HealthStatus": {
         "properties": {
@@ -4579,6 +8041,38 @@
         ],
         "title": "MeResponse"
       },
+      "MemberOut": {
+        "properties": {
+          "person_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Person Id"
+          },
+          "full_name": {
+            "type": "string",
+            "title": "Full Name"
+          },
+          "sex": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sex"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "person_id",
+          "full_name",
+          "sex"
+        ],
+        "title": "MemberOut"
+      },
       "MfaRequiredResponse": {
         "properties": {
           "status": {
@@ -4676,6 +8170,92 @@
         ],
         "title": "MfaVerifyRequest"
       },
+      "MunicipalitySettingIn": {
+        "properties": {
+          "municipality_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Municipality Id"
+          },
+          "election_regime": {
+            "$ref": "#/components/schemas/ElectionRegime",
+            "default": "party_based"
+          },
+          "mr_councilor_count": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Mr Councilor Count",
+            "default": 0
+          },
+          "rp_councilor_count": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Rp Councilor Count",
+            "default": 0
+          },
+          "syndic_count": {
+            "type": "integer",
+            "maximum": 10.0,
+            "minimum": 0.0,
+            "title": "Syndic Count",
+            "default": 0
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "municipality_id"
+        ],
+        "title": "MunicipalitySettingIn"
+      },
+      "MunicipalitySettingOut": {
+        "properties": {
+          "municipality_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Municipality Id"
+          },
+          "election_regime": {
+            "$ref": "#/components/schemas/ElectionRegime",
+            "default": "party_based"
+          },
+          "mr_councilor_count": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Mr Councilor Count",
+            "default": 0
+          },
+          "rp_councilor_count": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Rp Councilor Count",
+            "default": 0
+          },
+          "syndic_count": {
+            "type": "integer",
+            "maximum": 10.0,
+            "minimum": 0.0,
+            "title": "Syndic Count",
+            "default": 0
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "municipality_id",
+          "id"
+        ],
+        "title": "MunicipalitySettingOut"
+      },
       "NodeRef": {
         "properties": {
           "id": {
@@ -4706,6 +8286,627 @@
           "key"
         ],
         "title": "NodeRef"
+      },
+      "NominationAction": {
+        "properties": {
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500,
+                "minLength": 5
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "override": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Override"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "NominationAction"
+      },
+      "NominationIn": {
+        "properties": {
+          "process_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Process Id"
+          },
+          "office_type_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Office Type Id"
+          },
+          "node_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Node Id",
+            "description": "Nodo del nivel geográfico del cargo; vacío para cargos nacionales."
+          },
+          "party_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Party Id"
+          },
+          "coalition_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Coalition Id"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "process_id",
+          "office_type_id"
+        ],
+        "title": "NominationIn"
+      },
+      "NominationKind": {
+        "type": "string",
+        "enum": [
+          "single",
+          "list",
+          "slate",
+          "member"
+        ],
+        "title": "NominationKind"
+      },
+      "NominationOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "process_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Process Id"
+          },
+          "office_type_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Office Type Id"
+          },
+          "office_code": {
+            "type": "string",
+            "title": "Office Code"
+          },
+          "geographic_level": {
+            "$ref": "#/components/schemas/GeographicLevel"
+          },
+          "node_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Node Id"
+          },
+          "party_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Party Id"
+          },
+          "coalition_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Coalition Id"
+          },
+          "status": {
+            "$ref": "#/components/schemas/NominationStatus"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "editable": {
+            "type": "boolean",
+            "title": "Editable",
+            "description": "False: el usuario solo puede consultarla (alcance parcial)."
+          },
+          "complete": {
+            "type": "boolean",
+            "title": "Complete"
+          },
+          "slots": {
+            "items": {
+              "$ref": "#/components/schemas/SlotOut"
+            },
+            "type": "array",
+            "title": "Slots"
+          },
+          "formulas": {
+            "items": {
+              "$ref": "#/components/schemas/FormulaOut"
+            },
+            "type": "array",
+            "title": "Formulas"
+          },
+          "warnings": {
+            "items": {
+              "$ref": "#/components/schemas/ViolationOut"
+            },
+            "type": "array",
+            "title": "Warnings"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "process_id",
+          "office_type_id",
+          "office_code",
+          "geographic_level",
+          "node_id",
+          "party_id",
+          "coalition_id",
+          "status",
+          "created_at",
+          "notes",
+          "editable",
+          "complete",
+          "slots",
+          "formulas"
+        ],
+        "title": "NominationOut"
+      },
+      "NominationStatus": {
+        "type": "string",
+        "enum": [
+          "draft",
+          "submitted",
+          "approved",
+          "cancelled"
+        ],
+        "title": "NominationStatus"
+      },
+      "NominationSummary": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "process_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Process Id"
+          },
+          "office_type_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Office Type Id"
+          },
+          "office_code": {
+            "type": "string",
+            "title": "Office Code"
+          },
+          "geographic_level": {
+            "$ref": "#/components/schemas/GeographicLevel"
+          },
+          "node_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Node Id"
+          },
+          "party_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Party Id"
+          },
+          "coalition_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Coalition Id"
+          },
+          "status": {
+            "$ref": "#/components/schemas/NominationStatus"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "process_id",
+          "office_type_id",
+          "office_code",
+          "geographic_level",
+          "node_id",
+          "party_id",
+          "coalition_id",
+          "status",
+          "created_at"
+        ],
+        "title": "NominationSummary"
+      },
+      "NominationUpdate": {
+        "properties": {
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "NominationUpdate"
+      },
+      "OfficeTypeIn": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{1,49}$",
+            "title": "Code"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 2,
+            "title": "Name"
+          },
+          "election_level": {
+            "$ref": "#/components/schemas/ElectionLevel"
+          },
+          "geographic_level": {
+            "$ref": "#/components/schemas/GeographicLevel"
+          },
+          "principle": {
+            "$ref": "#/components/schemas/Principle"
+          },
+          "nomination_kind": {
+            "$ref": "#/components/schemas/NominationKind"
+          },
+          "default_positions": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 500.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Default Positions"
+          },
+          "has_substitute": {
+            "type": "boolean",
+            "title": "Has Substitute",
+            "default": true
+          },
+          "sort_order": {
+            "type": "integer",
+            "title": "Sort Order",
+            "default": 100
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "name",
+          "election_level",
+          "geographic_level",
+          "principle",
+          "nomination_kind"
+        ],
+        "title": "OfficeTypeIn"
+      },
+      "OfficeTypeOut": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{1,49}$",
+            "title": "Code"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 2,
+            "title": "Name"
+          },
+          "election_level": {
+            "$ref": "#/components/schemas/ElectionLevel"
+          },
+          "geographic_level": {
+            "$ref": "#/components/schemas/GeographicLevel"
+          },
+          "principle": {
+            "$ref": "#/components/schemas/Principle"
+          },
+          "nomination_kind": {
+            "$ref": "#/components/schemas/NominationKind"
+          },
+          "default_positions": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 500.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Default Positions"
+          },
+          "has_substitute": {
+            "type": "boolean",
+            "title": "Has Substitute",
+            "default": true
+          },
+          "sort_order": {
+            "type": "integer",
+            "title": "Sort Order",
+            "default": 100
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "name",
+          "election_level",
+          "geographic_level",
+          "principle",
+          "nomination_kind",
+          "id"
+        ],
+        "title": "OfficeTypeOut"
+      },
+      "Override": {
+        "properties": {
+          "rules": {
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]{1,49}$"
+            },
+            "type": "array",
+            "maxItems": 10,
+            "minItems": 1,
+            "title": "Rules",
+            "description": "Reglas que se aceptan violar."
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 5,
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "rules",
+          "reason"
+        ],
+        "title": "Override"
+      },
+      "PartyIn": {
+        "properties": {
+          "acronym": {
+            "type": "string",
+            "maxLength": 20,
+            "minLength": 1,
+            "title": "Acronym"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 150,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "is_own_party": {
+            "type": "boolean",
+            "title": "Is Own Party",
+            "default": false
+          },
+          "color_hex": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^#[0-9A-Fa-f]{6}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Color Hex"
+          },
+          "logo_uri": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Logo Uri"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "acronym",
+          "name"
+        ],
+        "title": "PartyIn"
+      },
+      "PartyOut": {
+        "properties": {
+          "acronym": {
+            "type": "string",
+            "maxLength": 20,
+            "minLength": 1,
+            "title": "Acronym"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 150,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "is_own_party": {
+            "type": "boolean",
+            "title": "Is Own Party",
+            "default": false
+          },
+          "color_hex": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^#[0-9A-Fa-f]{6}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Color Hex"
+          },
+          "logo_uri": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Logo Uri"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "acronym",
+          "name",
+          "id"
+        ],
+        "title": "PartyOut"
       },
       "PasswordChangeRequest": {
         "properties": {
@@ -4802,6 +9003,440 @@
         ],
         "title": "PermissionOut"
       },
+      "PersonCreate": {
+        "properties": {
+          "given_names": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Given Names"
+          },
+          "paternal_surname": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Paternal Surname"
+          },
+          "maternal_surname": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Maternal Surname"
+          },
+          "birth_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Birth Date"
+          },
+          "sex": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "H",
+                  "M",
+                  "X"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sex"
+          },
+          "birth_entity": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Z]{2}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Birth Entity"
+          },
+          "curp": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 22,
+                "minLength": 18
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Curp"
+          },
+          "accept_curp_incoherence": {
+            "type": "boolean",
+            "title": "Accept Curp Incoherence",
+            "description": "Forzar el registro aunque la CURP no coincida con los datos (requiere permiso).",
+            "default": false
+          },
+          "contacts": {
+            "items": {
+              "$ref": "#/components/schemas/ContactIn"
+            },
+            "type": "array",
+            "maxItems": 10,
+            "title": "Contacts"
+          },
+          "address": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AddressIn"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "given_names",
+          "paternal_surname"
+        ],
+        "title": "PersonCreate"
+      },
+      "PersonOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "full_name": {
+            "type": "string",
+            "title": "Full Name"
+          },
+          "sex": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sex"
+          },
+          "birth_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Birth Date"
+          },
+          "curp": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Curp",
+            "description": "Enmascarada sin el permiso people.person.read_sensitive."
+          },
+          "given_names": {
+            "type": "string",
+            "title": "Given Names"
+          },
+          "paternal_surname": {
+            "type": "string",
+            "title": "Paternal Surname"
+          },
+          "maternal_surname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Maternal Surname"
+          },
+          "birth_entity": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Birth Entity"
+          },
+          "curp_coherence_overridden": {
+            "type": "boolean",
+            "title": "Curp Coherence Overridden"
+          },
+          "contacts": {
+            "items": {
+              "$ref": "#/components/schemas/ContactOut"
+            },
+            "type": "array",
+            "title": "Contacts"
+          },
+          "addresses": {
+            "items": {
+              "$ref": "#/components/schemas/AddressOut"
+            },
+            "type": "array",
+            "title": "Addresses"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "full_name",
+          "sex",
+          "birth_date",
+          "curp",
+          "given_names",
+          "paternal_surname",
+          "maternal_surname",
+          "birth_entity",
+          "curp_coherence_overridden",
+          "contacts",
+          "addresses",
+          "created_at"
+        ],
+        "title": "PersonOut"
+      },
+      "PersonSummary": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "full_name": {
+            "type": "string",
+            "title": "Full Name"
+          },
+          "sex": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sex"
+          },
+          "birth_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Birth Date"
+          },
+          "curp": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Curp",
+            "description": "Enmascarada sin el permiso people.person.read_sensitive."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "full_name",
+          "sex",
+          "birth_date",
+          "curp"
+        ],
+        "title": "PersonSummary"
+      },
+      "PersonUpdate": {
+        "properties": {
+          "given_names": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 120,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Given Names"
+          },
+          "paternal_surname": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Paternal Surname"
+          },
+          "maternal_surname": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Maternal Surname"
+          },
+          "birth_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Birth Date"
+          },
+          "sex": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "H",
+                  "M",
+                  "X"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sex"
+          },
+          "birth_entity": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Z]{2}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Birth Entity"
+          },
+          "curp": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 22,
+                "minLength": 18
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Curp"
+          },
+          "accept_curp_incoherence": {
+            "type": "boolean",
+            "title": "Accept Curp Incoherence",
+            "default": false
+          },
+          "contacts": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ContactIn"
+                },
+                "type": "array",
+                "maxItems": 10
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contacts"
+          },
+          "address": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AddressIn"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "PersonUpdate"
+      },
+      "Principle": {
+        "type": "string",
+        "enum": [
+          "mr",
+          "rp"
+        ],
+        "title": "Principle"
+      },
       "Problem": {
         "properties": {
           "type": {
@@ -4880,6 +9515,414 @@
         ],
         "title": "Problem",
         "description": "RFC 9457 problem document. `code` and `request_id` are extension members."
+      },
+      "ProcessIn": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 2,
+            "title": "Name"
+          },
+          "election_year": {
+            "type": "integer",
+            "maximum": 2100.0,
+            "minimum": 2000.0,
+            "title": "Election Year"
+          },
+          "process_type": {
+            "$ref": "#/components/schemas/ProcessType",
+            "default": "ordinary"
+          },
+          "election_level": {
+            "$ref": "#/components/schemas/ElectionLevel"
+          },
+          "state_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "State Id",
+            "description": "Obligatorio en procesos locales."
+          },
+          "election_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Election Date"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "name",
+          "election_year",
+          "election_level"
+        ],
+        "title": "ProcessIn"
+      },
+      "ProcessOfficeIn": {
+        "properties": {
+          "office_type_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Office Type Id"
+          },
+          "is_enabled": {
+            "type": "boolean",
+            "title": "Is Enabled"
+          },
+          "positions": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 500.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Positions"
+          },
+          "slate_parent_office_type_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slate Parent Office Type Id"
+          },
+          "rp_method": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RpMethod"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "rp_method_params": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Rp Method Params"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "office_type_id",
+          "is_enabled"
+        ],
+        "title": "ProcessOfficeIn"
+      },
+      "ProcessOfficeOut": {
+        "properties": {
+          "office_type_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Office Type Id"
+          },
+          "is_enabled": {
+            "type": "boolean",
+            "title": "Is Enabled"
+          },
+          "positions": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 500.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Positions"
+          },
+          "slate_parent_office_type_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slate Parent Office Type Id"
+          },
+          "rp_method": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RpMethod"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "rp_method_params": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Rp Method Params"
+          },
+          "office_code": {
+            "type": "string",
+            "title": "Office Code"
+          },
+          "office_name": {
+            "type": "string",
+            "title": "Office Name"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "office_type_id",
+          "is_enabled",
+          "office_code",
+          "office_name"
+        ],
+        "title": "ProcessOfficeOut"
+      },
+      "ProcessOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "election_year": {
+            "type": "integer",
+            "title": "Election Year"
+          },
+          "process_type": {
+            "$ref": "#/components/schemas/ProcessType"
+          },
+          "election_level": {
+            "$ref": "#/components/schemas/ElectionLevel"
+          },
+          "state_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "State Id"
+          },
+          "framework_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Framework Id"
+          },
+          "election_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Election Date"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ProcessStatus"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "election_year",
+          "process_type",
+          "election_level",
+          "state_id",
+          "framework_id",
+          "election_date",
+          "status"
+        ],
+        "title": "ProcessOut"
+      },
+      "ProcessRuleIn": {
+        "properties": {
+          "rule_code": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{1,49}$",
+            "title": "Rule Code"
+          },
+          "office_type_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Office Type Id"
+          },
+          "is_enabled": {
+            "type": "boolean",
+            "title": "Is Enabled"
+          },
+          "severity": {
+            "$ref": "#/components/schemas/Severity",
+            "default": "blocking"
+          },
+          "params": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Params"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "rule_code",
+          "is_enabled"
+        ],
+        "title": "ProcessRuleIn"
+      },
+      "ProcessRuleOut": {
+        "properties": {
+          "rule_code": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{1,49}$",
+            "title": "Rule Code"
+          },
+          "office_type_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Office Type Id"
+          },
+          "is_enabled": {
+            "type": "boolean",
+            "title": "Is Enabled"
+          },
+          "severity": {
+            "$ref": "#/components/schemas/Severity",
+            "default": "blocking"
+          },
+          "params": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Params"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "effective_params": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Effective Params"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "rule_code",
+          "is_enabled",
+          "id",
+          "effective_params"
+        ],
+        "title": "ProcessRuleOut"
+      },
+      "ProcessStatus": {
+        "type": "string",
+        "enum": [
+          "draft",
+          "active",
+          "closed"
+        ],
+        "title": "ProcessStatus"
+      },
+      "ProcessType": {
+        "type": "string",
+        "enum": [
+          "ordinary",
+          "extraordinary"
+        ],
+        "title": "ProcessType"
+      },
+      "ProcessUpdate": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200,
+                "minLength": 2
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "election_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Election Date"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProcessStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "ProcessUpdate"
       },
       "ReadinessStatus": {
         "properties": {
@@ -5152,6 +10195,15 @@
         "type": "object",
         "title": "RoleUpdateRequest"
       },
+      "RpMethod": {
+        "type": "string",
+        "enum": [
+          "closed_list",
+          "best_loser",
+          "mixed"
+        ],
+        "title": "RpMethod"
+      },
       "ScopeIn": {
         "properties": {
           "level": {
@@ -5329,6 +10381,182 @@
           "expires_at"
         ],
         "title": "SessionOut"
+      },
+      "Severity": {
+        "type": "string",
+        "enum": [
+          "blocking",
+          "warning"
+        ],
+        "title": "Severity"
+      },
+      "SlotOut": {
+        "properties": {
+          "office_type_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Office Type Id"
+          },
+          "office_code": {
+            "type": "string",
+            "title": "Office Code"
+          },
+          "office_name": {
+            "type": "string",
+            "title": "Office Name"
+          },
+          "expected": {
+            "type": "integer",
+            "title": "Expected"
+          },
+          "filled": {
+            "type": "integer",
+            "title": "Filled"
+          },
+          "missing_positions": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Missing Positions"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "office_type_id",
+          "office_code",
+          "office_name",
+          "expected",
+          "filled",
+          "missing_positions"
+        ],
+        "title": "SlotOut"
+      },
+      "StatusHistoryOut": {
+        "properties": {
+          "formula_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Formula Id"
+          },
+          "office_code": {
+            "type": "string",
+            "title": "Office Code"
+          },
+          "position": {
+            "type": "integer",
+            "title": "Position"
+          },
+          "from_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "From Status"
+          },
+          "to_status": {
+            "type": "string",
+            "title": "To Status"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "changed_by_user_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Changed By User Id"
+          },
+          "changed_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Changed At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "formula_id",
+          "office_code",
+          "position",
+          "from_status",
+          "to_status",
+          "reason",
+          "changed_by_user_id",
+          "changed_at"
+        ],
+        "title": "StatusHistoryOut"
+      },
+      "SubstitutionIn": {
+        "properties": {
+          "owner_person_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner Person Id",
+            "description": "Vacío: conserva a la propietaria."
+          },
+          "substitute_person_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Substitute Person Id",
+            "description": "Vacío: conserva a la suplente."
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 5,
+            "title": "Reason"
+          },
+          "override": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Override"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "reason"
+        ],
+        "title": "SubstitutionIn"
       },
       "TokenScope": {
         "type": "string",
@@ -5660,6 +10888,77 @@
           "full_name"
         ],
         "title": "UserUpdateRequest"
+      },
+      "ValidationRuleOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "default_params": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Default Params"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "code",
+          "name",
+          "description",
+          "default_params"
+        ],
+        "title": "ValidationRuleOut"
+      },
+      "ViolationOut": {
+        "properties": {
+          "rule": {
+            "type": "string",
+            "title": "Rule"
+          },
+          "severity": {
+            "$ref": "#/components/schemas/Severity"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "formula_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Formula Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "rule",
+          "severity",
+          "message"
+        ],
+        "title": "ViolationOut"
       }
     },
     "securitySchemes": {

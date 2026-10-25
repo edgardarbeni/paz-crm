@@ -1,6 +1,6 @@
 # Cierre de fase C — Geografía y alcance geográfico
 
-**Fecha:** 2026-10-25 · **Rama:** `feat/phase-c-geography` · **Estado:** implementada, pendiente de aprobación.
+**Fecha:** 2026-10-25 · **Rama:** `feat/phase-c-geography` · **Estado:** aprobada el 2026-10-25 · PR [#3](https://github.com/edgardarbeni/paz-crm/pull/3) (D-64).
 
 ## Criterios de aceptación (PLAN_FASES.md)
 
@@ -94,7 +94,7 @@ En la primera medición, la tesela de manzanas del usuario acotado dio 207 ms. L
 | DT-18 | El catálogo de colonias se lee del `.xls` con `xlrd`; si el INE deja de publicar `.xls`, habrá que leer el `.mdb` | Cuando cambie el formato |
 | DT-19 | Las incidencias `catalog_pair_without_overlap` son muchas (miles por estado) y se guardan una por una | Resumir por colonia si estorban en el visor |
 | DT-20 | Las importaciones se lanzan solo por CLI; el panel solo las consulta (D-42) | Fase posterior (worker) |
-| DT-21 | Faltan los domicilios de personas en el remapeo de marcos | Fase D |
+| DT-21 | ~~Faltan los domicilios de personas en el remapeo de marcos~~ | Cerrada en la fase D |
 
 ## Riesgos
 

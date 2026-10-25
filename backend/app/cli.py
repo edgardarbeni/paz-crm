@@ -227,6 +227,27 @@ def geo_activate(
     asyncio.run(run())
 
 
+people_cli = typer.Typer(help="Personas (datos personales).", no_args_is_help=True)
+cli.add_typer(people_cli, name="people")
+
+
+@people_cli.command("purge")
+def people_purge() -> None:
+    """Anonimiza a las personas dadas de baja cuyo plazo de retención venció (tarea programada)."""
+    from app.core.db.session import build_engine, build_sessionmaker  # noqa: PLC0415
+    from app.modules.people.service import purge_due  # noqa: PLC0415
+
+    async def run() -> int:
+        engine = build_engine(get_settings())
+        try:
+            async with build_sessionmaker(engine)() as db:
+                return await purge_due(db)
+        finally:
+            await engine.dispose()
+
+    typer.echo(f"Personas anonimizadas: {asyncio.run(run())}")
+
+
 @keys_cli.command("generate")
 def keys_generate() -> None:
     """Genera una llave aleatoria de 32 bytes en base64 (para .env)."""

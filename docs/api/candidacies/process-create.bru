@@ -1,0 +1,30 @@
+meta {
+  name: Crear proceso
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/v1/processes
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "name": "Proceso local 2027",
+    "election_year": 2027,
+    "election_level": "local",
+    "state_id": "{{stateId}}",
+    "election_date": "2027-06-06"
+  }
+}
+
+docs {
+  Crea una fila por cargo del nivel, todas deshabilitadas, y las reglas con solo
+  unique_person_in_process activa (D-23, D-28).
+}

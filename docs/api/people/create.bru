@@ -1,0 +1,43 @@
+meta {
+  name: Registrar persona
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/v1/people
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "given_names": "María José",
+    "paternal_surname": "García",
+    "maternal_surname": "López",
+    "curp": "GALM850315MASRPR03",
+    "accept_curp_incoherence": false,
+    "contacts": [
+      {
+        "contact_type": "mobile",
+        "value": "449 123 4567",
+        "is_primary": true
+      }
+    ],
+    "address": {
+      "street": "Av. Madero",
+      "exterior_number": "100",
+      "postal_code": "20000",
+      "section_id": "{{nodeId}}"
+    }
+  }
+}
+
+docs {
+  La fecha, el sexo y la entidad se derivan de la CURP si no se capturan. Si no coinciden: 409
+  curp-incoherent, salvo accept_curp_incoherence con permiso read_sensitive (D-30, D-66).
+}

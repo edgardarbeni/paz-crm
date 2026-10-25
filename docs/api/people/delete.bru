@@ -1,0 +1,20 @@
+meta {
+  name: Baja (ARCO)
+  type: http
+  seq: 6
+}
+
+delete {
+  url: {{baseUrl}}/api/v1/people/{{personId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+docs {
+  Soft-delete con purge_after = hoy + 30 días; `paz people purge` anonimiza después (D-69).
+  No procede si la persona integra una fórmula vigente.
+}

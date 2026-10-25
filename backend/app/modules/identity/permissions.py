@@ -22,6 +22,16 @@ class Perm(StrEnum):
     AUDIT_READ = "audit.log.read"
     GEOGRAPHY_READ = "geography.node.read"
     GEOGRAPHY_IMPORT_READ = "geography.import.read"
+    PERSON_READ = "people.person.read"
+    PERSON_WRITE = "people.person.write"
+    PERSON_READ_SENSITIVE = "people.person.read_sensitive"
+    PERSON_DELETE = "people.person.delete"
+    CANDIDACIES_READ = "candidacies.read"
+    CATALOG_MANAGE = "candidacies.catalog.manage"
+    PROCESS_MANAGE = "candidacies.process.manage"
+    NOMINATION_WRITE = "candidacies.nomination.write"
+    NOMINATION_APPROVE = "candidacies.nomination.approve"
+    RULE_OVERRIDE = "candidacies.rule.override"
 
 
 PERMISSIONS: frozenset[str] = frozenset(Perm)

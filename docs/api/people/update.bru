@@ -1,0 +1,31 @@
+meta {
+  name: Actualizar persona
+  type: http
+  seq: 4
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/people/{{personId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "contacts": [
+      {
+        "contact_type": "email",
+        "value": "maria@example.com",
+        "is_primary": true
+      }
+    ]
+  }
+}
+
+docs {
+  contacts y address reemplazan los vigentes cuando se envían.
+}

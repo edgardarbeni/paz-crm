@@ -1,0 +1,26 @@
+meta {
+  name: Sustituir fórmula
+  type: http
+  seq: 11
+}
+
+post {
+  url: {{baseUrl}}/api/v1/formulas/{{formulaId}}/substitute
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "owner_person_id": "{{personId}}",
+    "reason": "Renuncia de la propietaria"
+  }
+}
+
+docs {
+  Crea una fórmula nueva en la misma posición; la anterior queda como substituted (D-29).
+}

@@ -1,0 +1,22 @@
+meta {
+  name: Registrar consentimiento
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/api/v1/people/{{personId}}/consents
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "notice_version": "2026-01",
+    "channel": "panel"
+  }
+}

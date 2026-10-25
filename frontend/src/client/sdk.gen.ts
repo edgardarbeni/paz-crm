@@ -2,8 +2,8 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { AcceptInvitationData, AcceptInvitationErrors, AcceptInvitationResponses, ActivateUserData, ActivateUserErrors, ActivateUserResponses, ChangePasswordData, ChangePasswordErrors, ChangePasswordResponses, ConfirmTotpData, ConfirmTotpErrors, ConfirmTotpResponses, CreateRoleData, CreateRoleErrors, CreateRoleResponses, DeleteRoleData, DeleteRoleErrors, DeleteRoleResponses, DisableTotpData, DisableTotpErrors, DisableTotpResponses, DisableUserData, DisableUserErrors, DisableUserResponses, ForgotPasswordData, ForgotPasswordErrors, ForgotPasswordResponses, GetGeoNodeData, GetGeoNodeErrors, GetGeoNodeResponses, GetHealthData, GetHealthErrors, GetHealthResponses, GetImportRunData, GetImportRunErrors, GetImportRunResponses, GetMeData, GetMeErrors, GetMeResponses, GetReadinessData, GetReadinessErrors, GetReadinessResponses, GetRoleData, GetRoleErrors, GetRoleResponses, GetUserData, GetUserErrors, GetUserResponses, GetUserScopesData, GetUserScopesErrors, GetUserScopesResponses, GetVectorTileData, GetVectorTileErrors, GetVectorTileResponses, InspectInvitationData, InspectInvitationErrors, InspectInvitationResponses, InviteUserData, InviteUserErrors, InviteUserResponses, ListAuditEntriesData, ListAuditEntriesErrors, ListAuditEntriesResponses, ListFrameworksData, ListFrameworksErrors, ListFrameworksResponses, ListGeoNodesData, ListGeoNodesErrors, ListGeoNodesResponses, ListImportIssuesData, ListImportIssuesErrors, ListImportIssuesResponses, ListImportRunsData, ListImportRunsErrors, ListImportRunsResponses, ListMySessionsData, ListMySessionsErrors, ListMySessionsResponses, ListPermissionsData, ListPermissionsErrors, ListPermissionsResponses, ListRolesData, ListRolesErrors, ListRolesResponses, ListUsersData, ListUsersErrors, ListUserSessionsData, ListUserSessionsErrors, ListUserSessionsResponses, ListUsersResponses, LocatePointData, LocatePointErrors, LocatePointResponses, LoginData, LoginErrors, LoginResponses, LogoutData, LogoutErrors, LogoutResponses, RefreshSessionData, RefreshSessionErrors, RefreshSessionResponses, RegenerateRecoveryCodesData, RegenerateRecoveryCodesErrors, RegenerateRecoveryCodesResponses, ResendInvitationData, ResendInvitationErrors, ResendInvitationResponses, ResetPasswordData, ResetPasswordErrors, ResetPasswordResponses, ResetUserMfaData, ResetUserMfaErrors, ResetUserMfaResponses, RevokeMyOtherSessionsData, RevokeMyOtherSessionsErrors, RevokeMyOtherSessionsResponses, RevokeMySessionData, RevokeMySessionErrors, RevokeMySessionResponses, RevokeUserSessionsData, RevokeUserSessionsErrors, RevokeUserSessionsResponses, SearchGeographyData, SearchGeographyErrors, SearchGeographyResponses, SetRolePermissionsData, SetRolePermissionsErrors, SetRolePermissionsResponses, SetupTotpData, SetupTotpErrors, SetupTotpResponses, SetUserRolesData, SetUserRolesErrors, SetUserRolesResponses, SetUserScopesData, SetUserScopesErrors, SetUserScopesResponses, UnlockUserData, UnlockUserErrors, UnlockUserResponses, UpdateRoleData, UpdateRoleErrors, UpdateRoleResponses, UpdateUserData, UpdateUserErrors, UpdateUserResponses, VerifyMfaData, VerifyMfaErrors, VerifyMfaResponses } from './types.gen';
-import { zAcceptInvitationResponse, zActivateUserResponse, zChangePasswordResponse, zConfirmTotpResponse, zCreateRoleResponse, zDeleteRoleResponse, zDisableTotpResponse, zDisableUserResponse, zGetGeoNodeResponse, zGetHealthResponse, zGetImportRunResponse, zGetMeResponse, zGetReadinessResponse, zGetRoleResponse, zGetUserResponse, zGetUserScopesResponse, zInspectInvitationResponse, zInviteUserResponse, zListAuditEntriesResponse, zListFrameworksResponse, zListGeoNodesResponse, zListImportIssuesResponse, zListImportRunsResponse, zListMySessionsResponse, zListPermissionsResponse, zListRolesResponse, zListUserSessionsResponse, zListUsersResponse, zLocatePointResponse, zLoginResponse, zLogoutResponse, zRefreshSessionResponse, zRegenerateRecoveryCodesResponse, zResendInvitationResponse, zResetPasswordResponse, zResetUserMfaResponse, zRevokeMyOtherSessionsResponse, zRevokeMySessionResponse, zRevokeUserSessionsResponse, zSearchGeographyResponse, zSetRolePermissionsResponse, zSetupTotpResponse, zSetUserRolesResponse, zSetUserScopesResponse, zUnlockUserResponse, zUpdateRoleResponse, zUpdateUserResponse, zVerifyMfaResponse } from './zod.gen';
+import type { AcceptInvitationData, AcceptInvitationErrors, AcceptInvitationResponses, ActivateUserData, ActivateUserErrors, ActivateUserResponses, AddConsentData, AddConsentErrors, AddConsentResponses, ApproveNominationData, ApproveNominationErrors, ApproveNominationResponses, CancelNominationData, CancelNominationErrors, CancelNominationResponses, ChangeFormulaStatusData, ChangeFormulaStatusErrors, ChangeFormulaStatusResponses, ChangePasswordData, ChangePasswordErrors, ChangePasswordResponses, ConfigureMunicipalitiesData, ConfigureMunicipalitiesErrors, ConfigureMunicipalitiesResponses, ConfigureProcessOfficesData, ConfigureProcessOfficesErrors, ConfigureProcessOfficesResponses, ConfigureProcessRulesData, ConfigureProcessRulesErrors, ConfigureProcessRulesResponses, ConfirmTotpData, ConfirmTotpErrors, ConfirmTotpResponses, CreateCoalitionData, CreateCoalitionErrors, CreateCoalitionResponses, CreateFormulaData, CreateFormulaErrors, CreateFormulaResponses, CreateNominationData, CreateNominationErrors, CreateNominationResponses, CreateOfficeTypeData, CreateOfficeTypeErrors, CreateOfficeTypeResponses, CreatePartyData, CreatePartyErrors, CreatePartyResponses, CreatePersonData, CreatePersonErrors, CreatePersonResponses, CreateProcessData, CreateProcessErrors, CreateProcessResponses, CreateRoleData, CreateRoleErrors, CreateRoleResponses, DeletePersonData, DeletePersonErrors, DeletePersonResponses, DeleteRoleData, DeleteRoleErrors, DeleteRoleResponses, DisableTotpData, DisableTotpErrors, DisableTotpResponses, DisableUserData, DisableUserErrors, DisableUserResponses, ForgotPasswordData, ForgotPasswordErrors, ForgotPasswordResponses, GetGeoNodeData, GetGeoNodeErrors, GetGeoNodeResponses, GetHealthData, GetHealthErrors, GetHealthResponses, GetImportRunData, GetImportRunErrors, GetImportRunResponses, GetMeData, GetMeErrors, GetMeResponses, GetNominationData, GetNominationErrors, GetNominationHistoryData, GetNominationHistoryErrors, GetNominationHistoryResponses, GetNominationResponses, GetPersonData, GetPersonErrors, GetPersonResponses, GetProcessData, GetProcessErrors, GetProcessResponses, GetReadinessData, GetReadinessErrors, GetReadinessResponses, GetRoleData, GetRoleErrors, GetRoleResponses, GetUserData, GetUserErrors, GetUserResponses, GetUserScopesData, GetUserScopesErrors, GetUserScopesResponses, GetVectorTileData, GetVectorTileErrors, GetVectorTileResponses, InspectInvitationData, InspectInvitationErrors, InspectInvitationResponses, InviteUserData, InviteUserErrors, InviteUserResponses, ListAuditEntriesData, ListAuditEntriesErrors, ListAuditEntriesResponses, ListCoalitionsData, ListCoalitionsErrors, ListCoalitionsResponses, ListConsentsData, ListConsentsErrors, ListConsentsResponses, ListFrameworksData, ListFrameworksErrors, ListFrameworksResponses, ListGeoNodesData, ListGeoNodesErrors, ListGeoNodesResponses, ListImportIssuesData, ListImportIssuesErrors, ListImportIssuesResponses, ListImportRunsData, ListImportRunsErrors, ListImportRunsResponses, ListMunicipalitySettingsData, ListMunicipalitySettingsErrors, ListMunicipalitySettingsResponses, ListMySessionsData, ListMySessionsErrors, ListMySessionsResponses, ListNominationsData, ListNominationsErrors, ListNominationsResponses, ListOfficeTypesData, ListOfficeTypesErrors, ListOfficeTypesResponses, ListPartiesData, ListPartiesErrors, ListPartiesResponses, ListPermissionsData, ListPermissionsErrors, ListPermissionsResponses, ListProcessesData, ListProcessesErrors, ListProcessesResponses, ListProcessOfficesData, ListProcessOfficesErrors, ListProcessOfficesResponses, ListProcessRulesData, ListProcessRulesErrors, ListProcessRulesResponses, ListRolesData, ListRolesErrors, ListRolesResponses, ListUsersData, ListUsersErrors, ListUserSessionsData, ListUserSessionsErrors, ListUserSessionsResponses, ListUsersResponses, ListValidationRulesData, ListValidationRulesErrors, ListValidationRulesResponses, LocatePointData, LocatePointErrors, LocatePointResponses, LoginData, LoginErrors, LoginResponses, LogoutData, LogoutErrors, LogoutResponses, RefreshSessionData, RefreshSessionErrors, RefreshSessionResponses, RegenerateRecoveryCodesData, RegenerateRecoveryCodesErrors, RegenerateRecoveryCodesResponses, ResendInvitationData, ResendInvitationErrors, ResendInvitationResponses, ResetPasswordData, ResetPasswordErrors, ResetPasswordResponses, ResetUserMfaData, ResetUserMfaErrors, ResetUserMfaResponses, RevokeMyOtherSessionsData, RevokeMyOtherSessionsErrors, RevokeMyOtherSessionsResponses, RevokeMySessionData, RevokeMySessionErrors, RevokeMySessionResponses, RevokeUserSessionsData, RevokeUserSessionsErrors, RevokeUserSessionsResponses, SearchGeographyData, SearchGeographyErrors, SearchGeographyResponses, SearchPeopleData, SearchPeopleErrors, SearchPeopleResponses, SetRolePermissionsData, SetRolePermissionsErrors, SetRolePermissionsResponses, SetupTotpData, SetupTotpErrors, SetupTotpResponses, SetUserRolesData, SetUserRolesErrors, SetUserRolesResponses, SetUserScopesData, SetUserScopesErrors, SetUserScopesResponses, SubmitNominationData, SubmitNominationErrors, SubmitNominationResponses, SubstituteFormulaData, SubstituteFormulaErrors, SubstituteFormulaResponses, UnlockUserData, UnlockUserErrors, UnlockUserResponses, UpdateFormulaMembersData, UpdateFormulaMembersErrors, UpdateFormulaMembersResponses, UpdateNominationData, UpdateNominationErrors, UpdateNominationResponses, UpdatePartyData, UpdatePartyErrors, UpdatePartyResponses, UpdatePersonData, UpdatePersonErrors, UpdatePersonResponses, UpdateProcessData, UpdateProcessErrors, UpdateProcessResponses, UpdateRoleData, UpdateRoleErrors, UpdateRoleResponses, UpdateUserData, UpdateUserErrors, UpdateUserResponses, ValidateNominationData, ValidateNominationErrors, ValidateNominationResponses, VerifyMfaData, VerifyMfaErrors, VerifyMfaResponses } from './types.gen';
+import { zAcceptInvitationResponse, zActivateUserResponse, zAddConsentResponse, zApproveNominationResponse, zCancelNominationResponse, zChangeFormulaStatusResponse, zChangePasswordResponse, zConfigureMunicipalitiesResponse, zConfigureProcessOfficesResponse, zConfigureProcessRulesResponse, zConfirmTotpResponse, zCreateCoalitionResponse, zCreateFormulaResponse, zCreateNominationResponse, zCreateOfficeTypeResponse, zCreatePartyResponse, zCreatePersonResponse, zCreateProcessResponse, zCreateRoleResponse, zDeletePersonResponse, zDeleteRoleResponse, zDisableTotpResponse, zDisableUserResponse, zGetGeoNodeResponse, zGetHealthResponse, zGetImportRunResponse, zGetMeResponse, zGetNominationHistoryResponse, zGetNominationResponse, zGetPersonResponse, zGetProcessResponse, zGetReadinessResponse, zGetRoleResponse, zGetUserResponse, zGetUserScopesResponse, zInspectInvitationResponse, zInviteUserResponse, zListAuditEntriesResponse, zListCoalitionsResponse, zListConsentsResponse, zListFrameworksResponse, zListGeoNodesResponse, zListImportIssuesResponse, zListImportRunsResponse, zListMunicipalitySettingsResponse, zListMySessionsResponse, zListNominationsResponse, zListOfficeTypesResponse, zListPartiesResponse, zListPermissionsResponse, zListProcessesResponse, zListProcessOfficesResponse, zListProcessRulesResponse, zListRolesResponse, zListUserSessionsResponse, zListUsersResponse, zListValidationRulesResponse, zLocatePointResponse, zLoginResponse, zLogoutResponse, zRefreshSessionResponse, zRegenerateRecoveryCodesResponse, zResendInvitationResponse, zResetPasswordResponse, zResetUserMfaResponse, zRevokeMyOtherSessionsResponse, zRevokeMySessionResponse, zRevokeUserSessionsResponse, zSearchGeographyResponse, zSearchPeopleResponse, zSetRolePermissionsResponse, zSetupTotpResponse, zSetUserRolesResponse, zSetUserScopesResponse, zSubmitNominationResponse, zSubstituteFormulaResponse, zUnlockUserResponse, zUpdateFormulaMembersResponse, zUpdateNominationResponse, zUpdatePartyResponse, zUpdatePersonResponse, zUpdateProcessResponse, zUpdateRoleResponse, zUpdateUserResponse, zValidateNominationResponse, zVerifyMfaResponse } from './zod.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -574,4 +574,468 @@ export const getGeoNode = <ThrowOnError extends boolean = false>(options: Option
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/v1/geography/{level}/{node_id}',
     ...options
+});
+
+/**
+ * Buscar personas
+ */
+export const searchPeople = <ThrowOnError extends boolean = false>(options?: Options<SearchPeopleData, ThrowOnError>): RequestResult<SearchPeopleResponses, SearchPeopleErrors, ThrowOnError> => (options?.client ?? client).get<SearchPeopleResponses, SearchPeopleErrors, ThrowOnError>({
+    responseValidator: async (data) => await zSearchPeopleResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/people',
+    ...options
+});
+
+/**
+ * Registrar persona
+ */
+export const createPerson = <ThrowOnError extends boolean = false>(options: Options<CreatePersonData, ThrowOnError>): RequestResult<CreatePersonResponses, CreatePersonErrors, ThrowOnError> => (options.client ?? client).post<CreatePersonResponses, CreatePersonErrors, ThrowOnError>({
+    responseValidator: async (data) => await zCreatePersonResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/people',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Cancelación ARCO (baja con purga diferida)
+ */
+export const deletePerson = <ThrowOnError extends boolean = false>(options: Options<DeletePersonData, ThrowOnError>): RequestResult<DeletePersonResponses, DeletePersonErrors, ThrowOnError> => (options.client ?? client).delete<DeletePersonResponses, DeletePersonErrors, ThrowOnError>({
+    responseValidator: async (data) => await zDeletePersonResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/people/{person_id}',
+    ...options
+});
+
+/**
+ * Detalle de persona
+ */
+export const getPerson = <ThrowOnError extends boolean = false>(options: Options<GetPersonData, ThrowOnError>): RequestResult<GetPersonResponses, GetPersonErrors, ThrowOnError> => (options.client ?? client).get<GetPersonResponses, GetPersonErrors, ThrowOnError>({
+    responseValidator: async (data) => await zGetPersonResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/people/{person_id}',
+    ...options
+});
+
+/**
+ * Actualizar persona
+ */
+export const updatePerson = <ThrowOnError extends boolean = false>(options: Options<UpdatePersonData, ThrowOnError>): RequestResult<UpdatePersonResponses, UpdatePersonErrors, ThrowOnError> => (options.client ?? client).patch<UpdatePersonResponses, UpdatePersonErrors, ThrowOnError>({
+    responseValidator: async (data) => await zUpdatePersonResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/people/{person_id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Consentimientos de privacidad
+ */
+export const listConsents = <ThrowOnError extends boolean = false>(options: Options<ListConsentsData, ThrowOnError>): RequestResult<ListConsentsResponses, ListConsentsErrors, ThrowOnError> => (options.client ?? client).get<ListConsentsResponses, ListConsentsErrors, ThrowOnError>({
+    responseValidator: async (data) => await zListConsentsResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/people/{person_id}/consents',
+    ...options
+});
+
+/**
+ * Registrar aceptación del aviso de privacidad
+ */
+export const addConsent = <ThrowOnError extends boolean = false>(options: Options<AddConsentData, ThrowOnError>): RequestResult<AddConsentResponses, AddConsentErrors, ThrowOnError> => (options.client ?? client).post<AddConsentResponses, AddConsentErrors, ThrowOnError>({
+    responseValidator: async (data) => await zAddConsentResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/people/{person_id}/consents',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Partidos políticos
+ */
+export const listParties = <ThrowOnError extends boolean = false>(options?: Options<ListPartiesData, ThrowOnError>): RequestResult<ListPartiesResponses, ListPartiesErrors, ThrowOnError> => (options?.client ?? client).get<ListPartiesResponses, ListPartiesErrors, ThrowOnError>({
+    responseValidator: async (data) => await zListPartiesResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/parties',
+    ...options
+});
+
+/**
+ * Registrar partido
+ */
+export const createParty = <ThrowOnError extends boolean = false>(options: Options<CreatePartyData, ThrowOnError>): RequestResult<CreatePartyResponses, CreatePartyErrors, ThrowOnError> => (options.client ?? client).post<CreatePartyResponses, CreatePartyErrors, ThrowOnError>({
+    responseValidator: async (data) => await zCreatePartyResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/parties',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Editar partido
+ */
+export const updateParty = <ThrowOnError extends boolean = false>(options: Options<UpdatePartyData, ThrowOnError>): RequestResult<UpdatePartyResponses, UpdatePartyErrors, ThrowOnError> => (options.client ?? client).put<UpdatePartyResponses, UpdatePartyErrors, ThrowOnError>({
+    responseValidator: async (data) => await zUpdatePartyResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/parties/{party_id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Tipos de cargo
+ */
+export const listOfficeTypes = <ThrowOnError extends boolean = false>(options?: Options<ListOfficeTypesData, ThrowOnError>): RequestResult<ListOfficeTypesResponses, ListOfficeTypesErrors, ThrowOnError> => (options?.client ?? client).get<ListOfficeTypesResponses, ListOfficeTypesErrors, ThrowOnError>({
+    responseValidator: async (data) => await zListOfficeTypesResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/office-types',
+    ...options
+});
+
+/**
+ * Agregar tipo de cargo
+ */
+export const createOfficeType = <ThrowOnError extends boolean = false>(options: Options<CreateOfficeTypeData, ThrowOnError>): RequestResult<CreateOfficeTypeResponses, CreateOfficeTypeErrors, ThrowOnError> => (options.client ?? client).post<CreateOfficeTypeResponses, CreateOfficeTypeErrors, ThrowOnError>({
+    responseValidator: async (data) => await zCreateOfficeTypeResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/office-types',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Catálogo de reglas de validación
+ */
+export const listValidationRules = <ThrowOnError extends boolean = false>(options?: Options<ListValidationRulesData, ThrowOnError>): RequestResult<ListValidationRulesResponses, ListValidationRulesErrors, ThrowOnError> => (options?.client ?? client).get<ListValidationRulesResponses, ListValidationRulesErrors, ThrowOnError>({
+    responseValidator: async (data) => await zListValidationRulesResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/validation-rules',
+    ...options
+});
+
+/**
+ * Procesos electorales
+ */
+export const listProcesses = <ThrowOnError extends boolean = false>(options?: Options<ListProcessesData, ThrowOnError>): RequestResult<ListProcessesResponses, ListProcessesErrors, ThrowOnError> => (options?.client ?? client).get<ListProcessesResponses, ListProcessesErrors, ThrowOnError>({
+    responseValidator: async (data) => await zListProcessesResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/processes',
+    ...options
+});
+
+/**
+ * Crear proceso electoral
+ */
+export const createProcess = <ThrowOnError extends boolean = false>(options: Options<CreateProcessData, ThrowOnError>): RequestResult<CreateProcessResponses, CreateProcessErrors, ThrowOnError> => (options.client ?? client).post<CreateProcessResponses, CreateProcessErrors, ThrowOnError>({
+    responseValidator: async (data) => await zCreateProcessResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/processes',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Detalle de proceso
+ */
+export const getProcess = <ThrowOnError extends boolean = false>(options: Options<GetProcessData, ThrowOnError>): RequestResult<GetProcessResponses, GetProcessErrors, ThrowOnError> => (options.client ?? client).get<GetProcessResponses, GetProcessErrors, ThrowOnError>({
+    responseValidator: async (data) => await zGetProcessResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/processes/{process_id}',
+    ...options
+});
+
+/**
+ * Editar proceso
+ */
+export const updateProcess = <ThrowOnError extends boolean = false>(options: Options<UpdateProcessData, ThrowOnError>): RequestResult<UpdateProcessResponses, UpdateProcessErrors, ThrowOnError> => (options.client ?? client).patch<UpdateProcessResponses, UpdateProcessErrors, ThrowOnError>({
+    responseValidator: async (data) => await zUpdateProcessResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/processes/{process_id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Cargos en elección
+ */
+export const listProcessOffices = <ThrowOnError extends boolean = false>(options: Options<ListProcessOfficesData, ThrowOnError>): RequestResult<ListProcessOfficesResponses, ListProcessOfficesErrors, ThrowOnError> => (options.client ?? client).get<ListProcessOfficesResponses, ListProcessOfficesErrors, ThrowOnError>({
+    responseValidator: async (data) => await zListProcessOfficesResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/processes/{process_id}/offices',
+    ...options
+});
+
+/**
+ * Habilitar cargos y su composición
+ */
+export const configureProcessOffices = <ThrowOnError extends boolean = false>(options: Options<ConfigureProcessOfficesData, ThrowOnError>): RequestResult<ConfigureProcessOfficesResponses, ConfigureProcessOfficesErrors, ThrowOnError> => (options.client ?? client).put<ConfigureProcessOfficesResponses, ConfigureProcessOfficesErrors, ThrowOnError>({
+    responseValidator: async (data) => await zConfigureProcessOfficesResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/processes/{process_id}/offices',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Integración de ayuntamientos y régimen por municipio
+ */
+export const listMunicipalitySettings = <ThrowOnError extends boolean = false>(options: Options<ListMunicipalitySettingsData, ThrowOnError>): RequestResult<ListMunicipalitySettingsResponses, ListMunicipalitySettingsErrors, ThrowOnError> => (options.client ?? client).get<ListMunicipalitySettingsResponses, ListMunicipalitySettingsErrors, ThrowOnError>({
+    responseValidator: async (data) => await zListMunicipalitySettingsResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/processes/{process_id}/municipalities',
+    ...options
+});
+
+/**
+ * Capturar integración de ayuntamientos (carga masiva)
+ */
+export const configureMunicipalities = <ThrowOnError extends boolean = false>(options: Options<ConfigureMunicipalitiesData, ThrowOnError>): RequestResult<ConfigureMunicipalitiesResponses, ConfigureMunicipalitiesErrors, ThrowOnError> => (options.client ?? client).put<ConfigureMunicipalitiesResponses, ConfigureMunicipalitiesErrors, ThrowOnError>({
+    responseValidator: async (data) => await zConfigureMunicipalitiesResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/processes/{process_id}/municipalities',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Reglas del proceso
+ */
+export const listProcessRules = <ThrowOnError extends boolean = false>(options: Options<ListProcessRulesData, ThrowOnError>): RequestResult<ListProcessRulesResponses, ListProcessRulesErrors, ThrowOnError> => (options.client ?? client).get<ListProcessRulesResponses, ListProcessRulesErrors, ThrowOnError>({
+    responseValidator: async (data) => await zListProcessRulesResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/processes/{process_id}/rules',
+    ...options
+});
+
+/**
+ * Activar y parametrizar reglas
+ */
+export const configureProcessRules = <ThrowOnError extends boolean = false>(options: Options<ConfigureProcessRulesData, ThrowOnError>): RequestResult<ConfigureProcessRulesResponses, ConfigureProcessRulesErrors, ThrowOnError> => (options.client ?? client).put<ConfigureProcessRulesResponses, ConfigureProcessRulesErrors, ThrowOnError>({
+    responseValidator: async (data) => await zConfigureProcessRulesResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/processes/{process_id}/rules',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Coaliciones del proceso
+ */
+export const listCoalitions = <ThrowOnError extends boolean = false>(options: Options<ListCoalitionsData, ThrowOnError>): RequestResult<ListCoalitionsResponses, ListCoalitionsErrors, ThrowOnError> => (options.client ?? client).get<ListCoalitionsResponses, ListCoalitionsErrors, ThrowOnError>({
+    responseValidator: async (data) => await zListCoalitionsResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/processes/{process_id}/coalitions',
+    ...options
+});
+
+/**
+ * Registrar coalición o candidatura común
+ */
+export const createCoalition = <ThrowOnError extends boolean = false>(options: Options<CreateCoalitionData, ThrowOnError>): RequestResult<CreateCoalitionResponses, CreateCoalitionErrors, ThrowOnError> => (options.client ?? client).post<CreateCoalitionResponses, CreateCoalitionErrors, ThrowOnError>({
+    responseValidator: async (data) => await zCreateCoalitionResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/processes/{process_id}/coalitions',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Postulaciones visibles para el usuario
+ */
+export const listNominations = <ThrowOnError extends boolean = false>(options?: Options<ListNominationsData, ThrowOnError>): RequestResult<ListNominationsResponses, ListNominationsErrors, ThrowOnError> => (options?.client ?? client).get<ListNominationsResponses, ListNominationsErrors, ThrowOnError>({
+    responseValidator: async (data) => await zListNominationsResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/nominations',
+    ...options
+});
+
+/**
+ * Crear postulación
+ */
+export const createNomination = <ThrowOnError extends boolean = false>(options: Options<CreateNominationData, ThrowOnError>): RequestResult<CreateNominationResponses, CreateNominationErrors, ThrowOnError> => (options.client ?? client).post<CreateNominationResponses, CreateNominationErrors, ThrowOnError>({
+    responseValidator: async (data) => await zCreateNominationResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/nominations',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Detalle de postulación
+ */
+export const getNomination = <ThrowOnError extends boolean = false>(options: Options<GetNominationData, ThrowOnError>): RequestResult<GetNominationResponses, GetNominationErrors, ThrowOnError> => (options.client ?? client).get<GetNominationResponses, GetNominationErrors, ThrowOnError>({
+    responseValidator: async (data) => await zGetNominationResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/nominations/{nomination_id}',
+    ...options
+});
+
+/**
+ * Editar notas
+ */
+export const updateNomination = <ThrowOnError extends boolean = false>(options: Options<UpdateNominationData, ThrowOnError>): RequestResult<UpdateNominationResponses, UpdateNominationErrors, ThrowOnError> => (options.client ?? client).patch<UpdateNominationResponses, UpdateNominationErrors, ThrowOnError>({
+    responseValidator: async (data) => await zUpdateNominationResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/nominations/{nomination_id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Enviar postulación
+ */
+export const submitNomination = <ThrowOnError extends boolean = false>(options: Options<SubmitNominationData, ThrowOnError>): RequestResult<SubmitNominationResponses, SubmitNominationErrors, ThrowOnError> => (options.client ?? client).post<SubmitNominationResponses, SubmitNominationErrors, ThrowOnError>({
+    responseValidator: async (data) => await zSubmitNominationResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/nominations/{nomination_id}/submit',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Aprobar postulación
+ */
+export const approveNomination = <ThrowOnError extends boolean = false>(options: Options<ApproveNominationData, ThrowOnError>): RequestResult<ApproveNominationResponses, ApproveNominationErrors, ThrowOnError> => (options.client ?? client).post<ApproveNominationResponses, ApproveNominationErrors, ThrowOnError>({
+    responseValidator: async (data) => await zApproveNominationResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/nominations/{nomination_id}/approve',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Cancelar postulación
+ */
+export const cancelNomination = <ThrowOnError extends boolean = false>(options: Options<CancelNominationData, ThrowOnError>): RequestResult<CancelNominationResponses, CancelNominationErrors, ThrowOnError> => (options.client ?? client).post<CancelNominationResponses, CancelNominationErrors, ThrowOnError>({
+    responseValidator: async (data) => await zCancelNominationResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/nominations/{nomination_id}/cancel',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Validar postulación (todas las reglas, paridad incluida, sin guardar)
+ */
+export const validateNomination = <ThrowOnError extends boolean = false>(options: Options<ValidateNominationData, ThrowOnError>): RequestResult<ValidateNominationResponses, ValidateNominationErrors, ThrowOnError> => (options.client ?? client).get<ValidateNominationResponses, ValidateNominationErrors, ThrowOnError>({
+    responseValidator: async (data) => await zValidateNominationResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/nominations/{nomination_id}/validation',
+    ...options
+});
+
+/**
+ * Historial de estatus de las fórmulas
+ */
+export const getNominationHistory = <ThrowOnError extends boolean = false>(options: Options<GetNominationHistoryData, ThrowOnError>): RequestResult<GetNominationHistoryResponses, GetNominationHistoryErrors, ThrowOnError> => (options.client ?? client).get<GetNominationHistoryResponses, GetNominationHistoryErrors, ThrowOnError>({
+    responseValidator: async (data) => await zGetNominationHistoryResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/nominations/{nomination_id}/history',
+    ...options
+});
+
+/**
+ * Registrar fórmula (propietaria y suplente)
+ */
+export const createFormula = <ThrowOnError extends boolean = false>(options: Options<CreateFormulaData, ThrowOnError>): RequestResult<CreateFormulaResponses, CreateFormulaErrors, ThrowOnError> => (options.client ?? client).post<CreateFormulaResponses, CreateFormulaErrors, ThrowOnError>({
+    responseValidator: async (data) => await zCreateFormulaResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/nominations/{nomination_id}/formulas',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Cambiar integrantes (aspirante)
+ */
+export const updateFormulaMembers = <ThrowOnError extends boolean = false>(options: Options<UpdateFormulaMembersData, ThrowOnError>): RequestResult<UpdateFormulaMembersResponses, UpdateFormulaMembersErrors, ThrowOnError> => (options.client ?? client).patch<UpdateFormulaMembersResponses, UpdateFormulaMembersErrors, ThrowOnError>({
+    responseValidator: async (data) => await zUpdateFormulaMembersResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/formulas/{formula_id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Cambiar estatus de fórmula
+ */
+export const changeFormulaStatus = <ThrowOnError extends boolean = false>(options: Options<ChangeFormulaStatusData, ThrowOnError>): RequestResult<ChangeFormulaStatusResponses, ChangeFormulaStatusErrors, ThrowOnError> => (options.client ?? client).post<ChangeFormulaStatusResponses, ChangeFormulaStatusErrors, ThrowOnError>({
+    responseValidator: async (data) => await zChangeFormulaStatusResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/formulas/{formula_id}/status',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Sustituir fórmula
+ */
+export const substituteFormula = <ThrowOnError extends boolean = false>(options: Options<SubstituteFormulaData, ThrowOnError>): RequestResult<SubstituteFormulaResponses, SubstituteFormulaErrors, ThrowOnError> => (options.client ?? client).post<SubstituteFormulaResponses, SubstituteFormulaErrors, ThrowOnError>({
+    responseValidator: async (data) => await zSubstituteFormulaResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/formulas/{formula_id}/substitute',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
 });

@@ -3,8 +3,8 @@
 import { type InfiniteData, infiniteQueryOptions, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen';
-import { acceptInvitation, activateUser, changePassword, confirmTotp, createRole, deleteRole, disableTotp, disableUser, forgotPassword, getGeoNode, getHealth, getImportRun, getMe, getReadiness, getRole, getUser, getUserScopes, getVectorTile, inspectInvitation, inviteUser, listAuditEntries, listFrameworks, listGeoNodes, listImportIssues, listImportRuns, listMySessions, listPermissions, listRoles, listUsers, listUserSessions, locatePoint, login, logout, type Options, refreshSession, regenerateRecoveryCodes, resendInvitation, resetPassword, resetUserMfa, revokeMyOtherSessions, revokeMySession, revokeUserSessions, searchGeography, setRolePermissions, setupTotp, setUserRoles, setUserScopes, unlockUser, updateRole, updateUser, verifyMfa } from '../sdk.gen';
-import type { AcceptInvitationData, AcceptInvitationError, AcceptInvitationResponse, ActivateUserData, ActivateUserError, ActivateUserResponse, ChangePasswordData, ChangePasswordError, ChangePasswordResponse, ConfirmTotpData, ConfirmTotpError, ConfirmTotpResponse, CreateRoleData, CreateRoleError, CreateRoleResponse, DeleteRoleData, DeleteRoleError, DeleteRoleResponse, DisableTotpData, DisableTotpError, DisableTotpResponse, DisableUserData, DisableUserError, DisableUserResponse, ForgotPasswordData, ForgotPasswordError, GetGeoNodeData, GetGeoNodeError, GetGeoNodeResponse, GetHealthData, GetHealthError, GetHealthResponse, GetImportRunData, GetImportRunError, GetImportRunResponse, GetMeData, GetMeError, GetMeResponse, GetReadinessData, GetReadinessError, GetReadinessResponse, GetRoleData, GetRoleError, GetRoleResponse, GetUserData, GetUserError, GetUserResponse, GetUserScopesData, GetUserScopesError, GetUserScopesResponse, GetVectorTileData, GetVectorTileError, InspectInvitationData, InspectInvitationError, InspectInvitationResponse, InviteUserData, InviteUserError, InviteUserResponse, ListAuditEntriesData, ListAuditEntriesError, ListAuditEntriesResponse, ListFrameworksData, ListFrameworksError, ListFrameworksResponse, ListGeoNodesData, ListGeoNodesError, ListGeoNodesResponse, ListImportIssuesData, ListImportIssuesError, ListImportIssuesResponse, ListImportRunsData, ListImportRunsError, ListImportRunsResponse, ListMySessionsData, ListMySessionsError, ListMySessionsResponse, ListPermissionsData, ListPermissionsError, ListPermissionsResponse, ListRolesData, ListRolesError, ListRolesResponse, ListUsersData, ListUsersError, ListUserSessionsData, ListUserSessionsError, ListUserSessionsResponse, ListUsersResponse, LocatePointData, LocatePointError, LocatePointResponse, LoginData, LoginError, LoginResponse, LogoutData, LogoutError, LogoutResponse, RefreshSessionData, RefreshSessionError, RefreshSessionResponse, RegenerateRecoveryCodesData, RegenerateRecoveryCodesError, RegenerateRecoveryCodesResponse, ResendInvitationData, ResendInvitationError, ResendInvitationResponse, ResetPasswordData, ResetPasswordError, ResetPasswordResponse, ResetUserMfaData, ResetUserMfaError, ResetUserMfaResponse, RevokeMyOtherSessionsData, RevokeMyOtherSessionsError, RevokeMyOtherSessionsResponse, RevokeMySessionData, RevokeMySessionError, RevokeMySessionResponse, RevokeUserSessionsData, RevokeUserSessionsError, RevokeUserSessionsResponse, SearchGeographyData, SearchGeographyError, SearchGeographyResponse, SetRolePermissionsData, SetRolePermissionsError, SetRolePermissionsResponse, SetupTotpData, SetupTotpError, SetupTotpResponse, SetUserRolesData, SetUserRolesError, SetUserRolesResponse, SetUserScopesData, SetUserScopesError, SetUserScopesResponse, UnlockUserData, UnlockUserError, UnlockUserResponse, UpdateRoleData, UpdateRoleError, UpdateRoleResponse, UpdateUserData, UpdateUserError, UpdateUserResponse, VerifyMfaData, VerifyMfaError, VerifyMfaResponse } from '../types.gen';
+import { acceptInvitation, activateUser, addConsent, approveNomination, cancelNomination, changeFormulaStatus, changePassword, configureMunicipalities, configureProcessOffices, configureProcessRules, confirmTotp, createCoalition, createFormula, createNomination, createOfficeType, createParty, createPerson, createProcess, createRole, deletePerson, deleteRole, disableTotp, disableUser, forgotPassword, getGeoNode, getHealth, getImportRun, getMe, getNomination, getNominationHistory, getPerson, getProcess, getReadiness, getRole, getUser, getUserScopes, getVectorTile, inspectInvitation, inviteUser, listAuditEntries, listCoalitions, listConsents, listFrameworks, listGeoNodes, listImportIssues, listImportRuns, listMunicipalitySettings, listMySessions, listNominations, listOfficeTypes, listParties, listPermissions, listProcesses, listProcessOffices, listProcessRules, listRoles, listUsers, listUserSessions, listValidationRules, locatePoint, login, logout, type Options, refreshSession, regenerateRecoveryCodes, resendInvitation, resetPassword, resetUserMfa, revokeMyOtherSessions, revokeMySession, revokeUserSessions, searchGeography, searchPeople, setRolePermissions, setupTotp, setUserRoles, setUserScopes, submitNomination, substituteFormula, unlockUser, updateFormulaMembers, updateNomination, updateParty, updatePerson, updateProcess, updateRole, updateUser, validateNomination, verifyMfa } from '../sdk.gen';
+import type { AcceptInvitationData, AcceptInvitationError, AcceptInvitationResponse, ActivateUserData, ActivateUserError, ActivateUserResponse, AddConsentData, AddConsentError, AddConsentResponse, ApproveNominationData, ApproveNominationError, ApproveNominationResponse, CancelNominationData, CancelNominationError, CancelNominationResponse, ChangeFormulaStatusData, ChangeFormulaStatusError, ChangeFormulaStatusResponse, ChangePasswordData, ChangePasswordError, ChangePasswordResponse, ConfigureMunicipalitiesData, ConfigureMunicipalitiesError, ConfigureMunicipalitiesResponse, ConfigureProcessOfficesData, ConfigureProcessOfficesError, ConfigureProcessOfficesResponse, ConfigureProcessRulesData, ConfigureProcessRulesError, ConfigureProcessRulesResponse, ConfirmTotpData, ConfirmTotpError, ConfirmTotpResponse, CreateCoalitionData, CreateCoalitionError, CreateCoalitionResponse, CreateFormulaData, CreateFormulaError, CreateFormulaResponse, CreateNominationData, CreateNominationError, CreateNominationResponse, CreateOfficeTypeData, CreateOfficeTypeError, CreateOfficeTypeResponse, CreatePartyData, CreatePartyError, CreatePartyResponse, CreatePersonData, CreatePersonError, CreatePersonResponse, CreateProcessData, CreateProcessError, CreateProcessResponse, CreateRoleData, CreateRoleError, CreateRoleResponse, DeletePersonData, DeletePersonError, DeletePersonResponse, DeleteRoleData, DeleteRoleError, DeleteRoleResponse, DisableTotpData, DisableTotpError, DisableTotpResponse, DisableUserData, DisableUserError, DisableUserResponse, ForgotPasswordData, ForgotPasswordError, GetGeoNodeData, GetGeoNodeError, GetGeoNodeResponse, GetHealthData, GetHealthError, GetHealthResponse, GetImportRunData, GetImportRunError, GetImportRunResponse, GetMeData, GetMeError, GetMeResponse, GetNominationData, GetNominationError, GetNominationHistoryData, GetNominationHistoryError, GetNominationHistoryResponse, GetNominationResponse, GetPersonData, GetPersonError, GetPersonResponse, GetProcessData, GetProcessError, GetProcessResponse, GetReadinessData, GetReadinessError, GetReadinessResponse, GetRoleData, GetRoleError, GetRoleResponse, GetUserData, GetUserError, GetUserResponse, GetUserScopesData, GetUserScopesError, GetUserScopesResponse, GetVectorTileData, GetVectorTileError, InspectInvitationData, InspectInvitationError, InspectInvitationResponse, InviteUserData, InviteUserError, InviteUserResponse, ListAuditEntriesData, ListAuditEntriesError, ListAuditEntriesResponse, ListCoalitionsData, ListCoalitionsError, ListCoalitionsResponse, ListConsentsData, ListConsentsError, ListConsentsResponse, ListFrameworksData, ListFrameworksError, ListFrameworksResponse, ListGeoNodesData, ListGeoNodesError, ListGeoNodesResponse, ListImportIssuesData, ListImportIssuesError, ListImportIssuesResponse, ListImportRunsData, ListImportRunsError, ListImportRunsResponse, ListMunicipalitySettingsData, ListMunicipalitySettingsError, ListMunicipalitySettingsResponse, ListMySessionsData, ListMySessionsError, ListMySessionsResponse, ListNominationsData, ListNominationsError, ListNominationsResponse, ListOfficeTypesData, ListOfficeTypesError, ListOfficeTypesResponse, ListPartiesData, ListPartiesError, ListPartiesResponse, ListPermissionsData, ListPermissionsError, ListPermissionsResponse, ListProcessesData, ListProcessesError, ListProcessesResponse, ListProcessOfficesData, ListProcessOfficesError, ListProcessOfficesResponse, ListProcessRulesData, ListProcessRulesError, ListProcessRulesResponse, ListRolesData, ListRolesError, ListRolesResponse, ListUsersData, ListUsersError, ListUserSessionsData, ListUserSessionsError, ListUserSessionsResponse, ListUsersResponse, ListValidationRulesData, ListValidationRulesError, ListValidationRulesResponse, LocatePointData, LocatePointError, LocatePointResponse, LoginData, LoginError, LoginResponse, LogoutData, LogoutError, LogoutResponse, RefreshSessionData, RefreshSessionError, RefreshSessionResponse, RegenerateRecoveryCodesData, RegenerateRecoveryCodesError, RegenerateRecoveryCodesResponse, ResendInvitationData, ResendInvitationError, ResendInvitationResponse, ResetPasswordData, ResetPasswordError, ResetPasswordResponse, ResetUserMfaData, ResetUserMfaError, ResetUserMfaResponse, RevokeMyOtherSessionsData, RevokeMyOtherSessionsError, RevokeMyOtherSessionsResponse, RevokeMySessionData, RevokeMySessionError, RevokeMySessionResponse, RevokeUserSessionsData, RevokeUserSessionsError, RevokeUserSessionsResponse, SearchGeographyData, SearchGeographyError, SearchGeographyResponse, SearchPeopleData, SearchPeopleError, SearchPeopleResponse, SetRolePermissionsData, SetRolePermissionsError, SetRolePermissionsResponse, SetupTotpData, SetupTotpError, SetupTotpResponse, SetUserRolesData, SetUserRolesError, SetUserRolesResponse, SetUserScopesData, SetUserScopesError, SetUserScopesResponse, SubmitNominationData, SubmitNominationError, SubmitNominationResponse, SubstituteFormulaData, SubstituteFormulaError, SubstituteFormulaResponse, UnlockUserData, UnlockUserError, UnlockUserResponse, UpdateFormulaMembersData, UpdateFormulaMembersError, UpdateFormulaMembersResponse, UpdateNominationData, UpdateNominationError, UpdateNominationResponse, UpdatePartyData, UpdatePartyError, UpdatePartyResponse, UpdatePersonData, UpdatePersonError, UpdatePersonResponse, UpdateProcessData, UpdateProcessError, UpdateProcessResponse, UpdateRoleData, UpdateRoleError, UpdateRoleResponse, UpdateUserData, UpdateUserError, UpdateUserResponse, ValidateNominationData, ValidateNominationError, ValidateNominationResponse, VerifyMfaData, VerifyMfaError, VerifyMfaResponse } from '../types.gen';
 
 export type QueryKey<TOptions extends Options> = [
     Pick<TOptions, 'baseUrl' | 'body' | 'headers' | 'path' | 'query'> & {
@@ -1088,3 +1088,725 @@ export const getGeoNodeOptions = (options: Options<GetGeoNodeData>) => queryOpti
     },
     queryKey: getGeoNodeQueryKey(options)
 });
+
+export const searchPeopleQueryKey = (options?: Options<SearchPeopleData>) => createQueryKey('searchPeople', options);
+
+/**
+ * Buscar personas
+ */
+export const searchPeopleOptions = (options?: Options<SearchPeopleData>) => queryOptions<SearchPeopleResponse, SearchPeopleError, SearchPeopleResponse, ReturnType<typeof searchPeopleQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await searchPeople({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: searchPeopleQueryKey(options)
+});
+
+export const searchPeopleInfiniteQueryKey = (options?: Options<SearchPeopleData>): QueryKey<Options<SearchPeopleData>> => createQueryKey('searchPeople', options, true);
+
+/**
+ * Buscar personas
+ */
+export const searchPeopleInfiniteOptions = (options?: Options<SearchPeopleData>) => {
+    const opts = infiniteQueryOptions<SearchPeopleResponse, SearchPeopleError, InfiniteData<SearchPeopleResponse>, QueryKey<Options<SearchPeopleData>>, string | null | Pick<QueryKey<Options<SearchPeopleData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<SearchPeopleData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    cursor: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await searchPeople({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: searchPeopleInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
+
+/**
+ * Registrar persona
+ */
+export const createPersonMutation = (options?: Partial<Options<CreatePersonData>>): UseMutationOptions<CreatePersonResponse, CreatePersonError, Options<CreatePersonData>> => {
+    const mutationOptions: UseMutationOptions<CreatePersonResponse, CreatePersonError, Options<CreatePersonData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createPerson({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Cancelación ARCO (baja con purga diferida)
+ */
+export const deletePersonMutation = (options?: Partial<Options<DeletePersonData>>): UseMutationOptions<DeletePersonResponse, DeletePersonError, Options<DeletePersonData>> => {
+    const mutationOptions: UseMutationOptions<DeletePersonResponse, DeletePersonError, Options<DeletePersonData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await deletePerson({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getPersonQueryKey = (options: Options<GetPersonData>) => createQueryKey('getPerson', options);
+
+/**
+ * Detalle de persona
+ */
+export const getPersonOptions = (options: Options<GetPersonData>) => queryOptions<GetPersonResponse, GetPersonError, GetPersonResponse, ReturnType<typeof getPersonQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getPerson({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getPersonQueryKey(options)
+});
+
+/**
+ * Actualizar persona
+ */
+export const updatePersonMutation = (options?: Partial<Options<UpdatePersonData>>): UseMutationOptions<UpdatePersonResponse, UpdatePersonError, Options<UpdatePersonData>> => {
+    const mutationOptions: UseMutationOptions<UpdatePersonResponse, UpdatePersonError, Options<UpdatePersonData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await updatePerson({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const listConsentsQueryKey = (options: Options<ListConsentsData>) => createQueryKey('listConsents', options);
+
+/**
+ * Consentimientos de privacidad
+ */
+export const listConsentsOptions = (options: Options<ListConsentsData>) => queryOptions<ListConsentsResponse, ListConsentsError, ListConsentsResponse, ReturnType<typeof listConsentsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listConsents({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listConsentsQueryKey(options)
+});
+
+/**
+ * Registrar aceptación del aviso de privacidad
+ */
+export const addConsentMutation = (options?: Partial<Options<AddConsentData>>): UseMutationOptions<AddConsentResponse, AddConsentError, Options<AddConsentData>> => {
+    const mutationOptions: UseMutationOptions<AddConsentResponse, AddConsentError, Options<AddConsentData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await addConsent({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const listPartiesQueryKey = (options?: Options<ListPartiesData>) => createQueryKey('listParties', options);
+
+/**
+ * Partidos políticos
+ */
+export const listPartiesOptions = (options?: Options<ListPartiesData>) => queryOptions<ListPartiesResponse, ListPartiesError, ListPartiesResponse, ReturnType<typeof listPartiesQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listParties({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listPartiesQueryKey(options)
+});
+
+/**
+ * Registrar partido
+ */
+export const createPartyMutation = (options?: Partial<Options<CreatePartyData>>): UseMutationOptions<CreatePartyResponse, CreatePartyError, Options<CreatePartyData>> => {
+    const mutationOptions: UseMutationOptions<CreatePartyResponse, CreatePartyError, Options<CreatePartyData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createParty({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Editar partido
+ */
+export const updatePartyMutation = (options?: Partial<Options<UpdatePartyData>>): UseMutationOptions<UpdatePartyResponse, UpdatePartyError, Options<UpdatePartyData>> => {
+    const mutationOptions: UseMutationOptions<UpdatePartyResponse, UpdatePartyError, Options<UpdatePartyData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await updateParty({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const listOfficeTypesQueryKey = (options?: Options<ListOfficeTypesData>) => createQueryKey('listOfficeTypes', options);
+
+/**
+ * Tipos de cargo
+ */
+export const listOfficeTypesOptions = (options?: Options<ListOfficeTypesData>) => queryOptions<ListOfficeTypesResponse, ListOfficeTypesError, ListOfficeTypesResponse, ReturnType<typeof listOfficeTypesQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listOfficeTypes({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listOfficeTypesQueryKey(options)
+});
+
+/**
+ * Agregar tipo de cargo
+ */
+export const createOfficeTypeMutation = (options?: Partial<Options<CreateOfficeTypeData>>): UseMutationOptions<CreateOfficeTypeResponse, CreateOfficeTypeError, Options<CreateOfficeTypeData>> => {
+    const mutationOptions: UseMutationOptions<CreateOfficeTypeResponse, CreateOfficeTypeError, Options<CreateOfficeTypeData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createOfficeType({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const listValidationRulesQueryKey = (options?: Options<ListValidationRulesData>) => createQueryKey('listValidationRules', options);
+
+/**
+ * Catálogo de reglas de validación
+ */
+export const listValidationRulesOptions = (options?: Options<ListValidationRulesData>) => queryOptions<ListValidationRulesResponse, ListValidationRulesError, ListValidationRulesResponse, ReturnType<typeof listValidationRulesQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listValidationRules({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listValidationRulesQueryKey(options)
+});
+
+export const listProcessesQueryKey = (options?: Options<ListProcessesData>) => createQueryKey('listProcesses', options);
+
+/**
+ * Procesos electorales
+ */
+export const listProcessesOptions = (options?: Options<ListProcessesData>) => queryOptions<ListProcessesResponse, ListProcessesError, ListProcessesResponse, ReturnType<typeof listProcessesQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listProcesses({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listProcessesQueryKey(options)
+});
+
+/**
+ * Crear proceso electoral
+ */
+export const createProcessMutation = (options?: Partial<Options<CreateProcessData>>): UseMutationOptions<CreateProcessResponse, CreateProcessError, Options<CreateProcessData>> => {
+    const mutationOptions: UseMutationOptions<CreateProcessResponse, CreateProcessError, Options<CreateProcessData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createProcess({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getProcessQueryKey = (options: Options<GetProcessData>) => createQueryKey('getProcess', options);
+
+/**
+ * Detalle de proceso
+ */
+export const getProcessOptions = (options: Options<GetProcessData>) => queryOptions<GetProcessResponse, GetProcessError, GetProcessResponse, ReturnType<typeof getProcessQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getProcess({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getProcessQueryKey(options)
+});
+
+/**
+ * Editar proceso
+ */
+export const updateProcessMutation = (options?: Partial<Options<UpdateProcessData>>): UseMutationOptions<UpdateProcessResponse, UpdateProcessError, Options<UpdateProcessData>> => {
+    const mutationOptions: UseMutationOptions<UpdateProcessResponse, UpdateProcessError, Options<UpdateProcessData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await updateProcess({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const listProcessOfficesQueryKey = (options: Options<ListProcessOfficesData>) => createQueryKey('listProcessOffices', options);
+
+/**
+ * Cargos en elección
+ */
+export const listProcessOfficesOptions = (options: Options<ListProcessOfficesData>) => queryOptions<ListProcessOfficesResponse, ListProcessOfficesError, ListProcessOfficesResponse, ReturnType<typeof listProcessOfficesQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listProcessOffices({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listProcessOfficesQueryKey(options)
+});
+
+/**
+ * Habilitar cargos y su composición
+ */
+export const configureProcessOfficesMutation = (options?: Partial<Options<ConfigureProcessOfficesData>>): UseMutationOptions<ConfigureProcessOfficesResponse, ConfigureProcessOfficesError, Options<ConfigureProcessOfficesData>> => {
+    const mutationOptions: UseMutationOptions<ConfigureProcessOfficesResponse, ConfigureProcessOfficesError, Options<ConfigureProcessOfficesData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await configureProcessOffices({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const listMunicipalitySettingsQueryKey = (options: Options<ListMunicipalitySettingsData>) => createQueryKey('listMunicipalitySettings', options);
+
+/**
+ * Integración de ayuntamientos y régimen por municipio
+ */
+export const listMunicipalitySettingsOptions = (options: Options<ListMunicipalitySettingsData>) => queryOptions<ListMunicipalitySettingsResponse, ListMunicipalitySettingsError, ListMunicipalitySettingsResponse, ReturnType<typeof listMunicipalitySettingsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listMunicipalitySettings({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listMunicipalitySettingsQueryKey(options)
+});
+
+/**
+ * Capturar integración de ayuntamientos (carga masiva)
+ */
+export const configureMunicipalitiesMutation = (options?: Partial<Options<ConfigureMunicipalitiesData>>): UseMutationOptions<ConfigureMunicipalitiesResponse, ConfigureMunicipalitiesError, Options<ConfigureMunicipalitiesData>> => {
+    const mutationOptions: UseMutationOptions<ConfigureMunicipalitiesResponse, ConfigureMunicipalitiesError, Options<ConfigureMunicipalitiesData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await configureMunicipalities({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const listProcessRulesQueryKey = (options: Options<ListProcessRulesData>) => createQueryKey('listProcessRules', options);
+
+/**
+ * Reglas del proceso
+ */
+export const listProcessRulesOptions = (options: Options<ListProcessRulesData>) => queryOptions<ListProcessRulesResponse, ListProcessRulesError, ListProcessRulesResponse, ReturnType<typeof listProcessRulesQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listProcessRules({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listProcessRulesQueryKey(options)
+});
+
+/**
+ * Activar y parametrizar reglas
+ */
+export const configureProcessRulesMutation = (options?: Partial<Options<ConfigureProcessRulesData>>): UseMutationOptions<ConfigureProcessRulesResponse, ConfigureProcessRulesError, Options<ConfigureProcessRulesData>> => {
+    const mutationOptions: UseMutationOptions<ConfigureProcessRulesResponse, ConfigureProcessRulesError, Options<ConfigureProcessRulesData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await configureProcessRules({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const listCoalitionsQueryKey = (options: Options<ListCoalitionsData>) => createQueryKey('listCoalitions', options);
+
+/**
+ * Coaliciones del proceso
+ */
+export const listCoalitionsOptions = (options: Options<ListCoalitionsData>) => queryOptions<ListCoalitionsResponse, ListCoalitionsError, ListCoalitionsResponse, ReturnType<typeof listCoalitionsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listCoalitions({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listCoalitionsQueryKey(options)
+});
+
+/**
+ * Registrar coalición o candidatura común
+ */
+export const createCoalitionMutation = (options?: Partial<Options<CreateCoalitionData>>): UseMutationOptions<CreateCoalitionResponse, CreateCoalitionError, Options<CreateCoalitionData>> => {
+    const mutationOptions: UseMutationOptions<CreateCoalitionResponse, CreateCoalitionError, Options<CreateCoalitionData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createCoalition({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const listNominationsQueryKey = (options?: Options<ListNominationsData>) => createQueryKey('listNominations', options);
+
+/**
+ * Postulaciones visibles para el usuario
+ */
+export const listNominationsOptions = (options?: Options<ListNominationsData>) => queryOptions<ListNominationsResponse, ListNominationsError, ListNominationsResponse, ReturnType<typeof listNominationsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listNominations({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listNominationsQueryKey(options)
+});
+
+export const listNominationsInfiniteQueryKey = (options?: Options<ListNominationsData>): QueryKey<Options<ListNominationsData>> => createQueryKey('listNominations', options, true);
+
+/**
+ * Postulaciones visibles para el usuario
+ */
+export const listNominationsInfiniteOptions = (options?: Options<ListNominationsData>) => {
+    const opts = infiniteQueryOptions<ListNominationsResponse, ListNominationsError, InfiniteData<ListNominationsResponse>, QueryKey<Options<ListNominationsData>>, string | null | Pick<QueryKey<Options<ListNominationsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<ListNominationsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    cursor: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await listNominations({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: listNominationsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
+
+/**
+ * Crear postulación
+ */
+export const createNominationMutation = (options?: Partial<Options<CreateNominationData>>): UseMutationOptions<CreateNominationResponse, CreateNominationError, Options<CreateNominationData>> => {
+    const mutationOptions: UseMutationOptions<CreateNominationResponse, CreateNominationError, Options<CreateNominationData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createNomination({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getNominationQueryKey = (options: Options<GetNominationData>) => createQueryKey('getNomination', options);
+
+/**
+ * Detalle de postulación
+ */
+export const getNominationOptions = (options: Options<GetNominationData>) => queryOptions<GetNominationResponse, GetNominationError, GetNominationResponse, ReturnType<typeof getNominationQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getNomination({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getNominationQueryKey(options)
+});
+
+/**
+ * Editar notas
+ */
+export const updateNominationMutation = (options?: Partial<Options<UpdateNominationData>>): UseMutationOptions<UpdateNominationResponse, UpdateNominationError, Options<UpdateNominationData>> => {
+    const mutationOptions: UseMutationOptions<UpdateNominationResponse, UpdateNominationError, Options<UpdateNominationData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await updateNomination({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Enviar postulación
+ */
+export const submitNominationMutation = (options?: Partial<Options<SubmitNominationData>>): UseMutationOptions<SubmitNominationResponse, SubmitNominationError, Options<SubmitNominationData>> => {
+    const mutationOptions: UseMutationOptions<SubmitNominationResponse, SubmitNominationError, Options<SubmitNominationData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await submitNomination({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Aprobar postulación
+ */
+export const approveNominationMutation = (options?: Partial<Options<ApproveNominationData>>): UseMutationOptions<ApproveNominationResponse, ApproveNominationError, Options<ApproveNominationData>> => {
+    const mutationOptions: UseMutationOptions<ApproveNominationResponse, ApproveNominationError, Options<ApproveNominationData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await approveNomination({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Cancelar postulación
+ */
+export const cancelNominationMutation = (options?: Partial<Options<CancelNominationData>>): UseMutationOptions<CancelNominationResponse, CancelNominationError, Options<CancelNominationData>> => {
+    const mutationOptions: UseMutationOptions<CancelNominationResponse, CancelNominationError, Options<CancelNominationData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await cancelNomination({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const validateNominationQueryKey = (options: Options<ValidateNominationData>) => createQueryKey('validateNomination', options);
+
+/**
+ * Validar postulación (todas las reglas, paridad incluida, sin guardar)
+ */
+export const validateNominationOptions = (options: Options<ValidateNominationData>) => queryOptions<ValidateNominationResponse, ValidateNominationError, ValidateNominationResponse, ReturnType<typeof validateNominationQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await validateNomination({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: validateNominationQueryKey(options)
+});
+
+export const getNominationHistoryQueryKey = (options: Options<GetNominationHistoryData>) => createQueryKey('getNominationHistory', options);
+
+/**
+ * Historial de estatus de las fórmulas
+ */
+export const getNominationHistoryOptions = (options: Options<GetNominationHistoryData>) => queryOptions<GetNominationHistoryResponse, GetNominationHistoryError, GetNominationHistoryResponse, ReturnType<typeof getNominationHistoryQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getNominationHistory({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getNominationHistoryQueryKey(options)
+});
+
+/**
+ * Registrar fórmula (propietaria y suplente)
+ */
+export const createFormulaMutation = (options?: Partial<Options<CreateFormulaData>>): UseMutationOptions<CreateFormulaResponse, CreateFormulaError, Options<CreateFormulaData>> => {
+    const mutationOptions: UseMutationOptions<CreateFormulaResponse, CreateFormulaError, Options<CreateFormulaData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createFormula({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Cambiar integrantes (aspirante)
+ */
+export const updateFormulaMembersMutation = (options?: Partial<Options<UpdateFormulaMembersData>>): UseMutationOptions<UpdateFormulaMembersResponse, UpdateFormulaMembersError, Options<UpdateFormulaMembersData>> => {
+    const mutationOptions: UseMutationOptions<UpdateFormulaMembersResponse, UpdateFormulaMembersError, Options<UpdateFormulaMembersData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await updateFormulaMembers({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Cambiar estatus de fórmula
+ */
+export const changeFormulaStatusMutation = (options?: Partial<Options<ChangeFormulaStatusData>>): UseMutationOptions<ChangeFormulaStatusResponse, ChangeFormulaStatusError, Options<ChangeFormulaStatusData>> => {
+    const mutationOptions: UseMutationOptions<ChangeFormulaStatusResponse, ChangeFormulaStatusError, Options<ChangeFormulaStatusData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await changeFormulaStatus({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Sustituir fórmula
+ */
+export const substituteFormulaMutation = (options?: Partial<Options<SubstituteFormulaData>>): UseMutationOptions<SubstituteFormulaResponse, SubstituteFormulaError, Options<SubstituteFormulaData>> => {
+    const mutationOptions: UseMutationOptions<SubstituteFormulaResponse, SubstituteFormulaError, Options<SubstituteFormulaData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await substituteFormula({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
