@@ -31,6 +31,7 @@ jobs:
               - '.github/workflows/ci.yml'
             frontend:
               - 'frontend/**'
+              - 'scripts/e2e.sh'
               - '.github/workflows/ci.yml'
             images:
               - 'backend/**'
@@ -96,15 +97,47 @@ jobs:
         run: pnpm test
       - name: Build
         run: pnpm build
+
+  # Panel end-to-end against the real stack (D-73): PostGIS, Redis, seeded API, built panel.
+  e2e:
+    needs: changes
+    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.frontend == 'true'
+    runs-on: ubuntu-latest
+    env:
+      PAZ_TEST_PG_IMAGE: paz/postgres-postgis:18
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.13.5"
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: frontend/package.json
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+      - run: uv sync --frozen
+        working-directory: backend
+      - run: pnpm install --frozen-lockfile
+        working-directory: frontend
       - name: Install Playwright browser
         run: pnpm exec playwright install --with-deps chromium
-      - name: E2E smoke (Playwright)
-        run: pnpm e2e
+        working-directory: frontend
+      - name: Build PostGIS image
+        run: docker build -t "$PAZ_TEST_PG_IMAGE" infra/db
+      - name: E2E (Playwright, real stack)
+        run: ./scripts/e2e.sh
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: playwright-report
-          path: frontend/playwright-report
+          path: |
+            frontend/playwright-report
+            frontend/test-results
 
   api-contract:
     needs: changes

@@ -1,6 +1,6 @@
 # Cierre de fase D — Personas y candidaturas
 
-**Fecha:** 2026-10-25 · **Rama:** `feat/phase-d-candidacies` · **Estado:** implementada, pendiente de aprobación.
+**Fecha:** 2026-10-25 · **Rama:** `feat/phase-d-candidacies` · **Estado:** aprobada el 2026-10-25 · PR [#4](https://github.com/edgardarbeni/paz-crm/pull/4) (D-71).
 
 ## Criterios de aceptación (PLAN_FASES.md)
 

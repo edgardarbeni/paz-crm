@@ -1,16 +1,34 @@
 import { client } from "@/client/client.gen";
 import type { Problem } from "@/client/types.gen";
+import { createAuthFetch, getSession } from "@/lib/auth/session";
 
 /**
  * Configures the generated API client once at startup. Requests are same-origin in every
  * environment (Caddy in front of API and panel); `credentials: "include"` sends the refresh
- * cookie that arrives in phase B.
+ * cookie. The bearer token comes from the in-memory session.
  */
-export function configureApiClient(baseUrl: string = import.meta.env.VITE_API_BASE_URL ?? "") {
-  client.setConfig({ baseUrl, credentials: "include" });
+export function configureApiClient(
+  baseUrl: string = import.meta.env.VITE_API_BASE_URL ?? "",
+  fetchImpl?: typeof fetch,
+) {
+  client.setConfig({
+    baseUrl,
+    credentials: "include",
+    auth: () => getSession().accessToken ?? undefined,
+    fetch: createAuthFetch(fetchImpl) as typeof fetch,
+  });
 }
 
-export function isProblem(error: unknown): error is Problem {
+export interface RuleViolation {
+  rule: string;
+  severity: "blocking" | "warning";
+  message: string;
+  formula_id: string | null;
+}
+
+export type ProblemWithExtras = Problem & { violations?: RuleViolation[] };
+
+export function isProblem(error: unknown): error is ProblemWithExtras {
   return (
     typeof error === "object" &&
     error !== null &&
@@ -23,6 +41,9 @@ export function isProblem(error: unknown): error is Problem {
 /** Human-readable message for any error thrown by the generated client. */
 export function problemMessage(error: unknown): string {
   if (isProblem(error)) {
+    if (error.errors?.length) {
+      return error.errors.map((e) => `${e.field.replace(/^body\./, "")}: ${e.message}`).join(" · ");
+    }
     return error.detail ?? error.title;
   }
   if (error instanceof Error) {

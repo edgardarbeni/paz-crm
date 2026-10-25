@@ -16,6 +16,8 @@ EXPOSE 5173
 CMD ["pnpm", "dev", "--host", "0.0.0.0"]
 
 FROM base AS build
+ARG VITE_MAP_STYLE_URL=""
+ENV VITE_MAP_STYLE_URL=$VITE_MAP_STYLE_URL
 COPY frontend/ ./
 RUN pnpm build
 

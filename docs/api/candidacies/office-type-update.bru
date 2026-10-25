@@ -1,0 +1,26 @@
+meta {
+  name: Editar tipo de cargo
+  type: http
+  seq: 15
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/office-types/{{officeTypeId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "name": "Presidencia municipal",
+    "sort_order": 10
+  }
+}
+
+docs {
+  Código, niveles, principio y tipo de postulación no se editan (D-76).
+}

@@ -534,6 +534,18 @@ export const zNominationUpdate = z.object({
 });
 
 /**
+ * OfficeTypeUpdate
+ *
+ * Code, levels, principle and kind are fixed once created (nominations depend on them).
+ */
+export const zOfficeTypeUpdate = z.object({
+    name: z.string().min(2).max(200).nullish(),
+    default_positions: z.int().gte(1).lte(500).nullish(),
+    has_substitute: z.boolean().nullish(),
+    sort_order: z.int().nullish()
+});
+
+/**
  * Override
  */
 export const zOverride = z.object({
@@ -1813,6 +1825,17 @@ export const zCreateOfficeTypeBody = zOfficeTypeIn;
  * Successful Response
  */
 export const zCreateOfficeTypeResponse = zOfficeTypeOut;
+
+export const zUpdateOfficeTypeBody = zOfficeTypeUpdate;
+
+export const zUpdateOfficeTypePath = z.object({
+    office_type_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zUpdateOfficeTypeResponse = zOfficeTypeOut;
 
 /**
  * Response Listvalidationrules
