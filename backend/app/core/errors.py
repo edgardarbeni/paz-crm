@@ -45,10 +45,17 @@ class AppError(Exception):
     code: ClassVar[str] = "internal-error"
     title: ClassVar[str] = "Error interno"
 
-    def __init__(self, detail: str | None = None, *, extra: dict[str, Any] | None = None):
+    def __init__(
+        self,
+        detail: str | None = None,
+        *,
+        extra: dict[str, Any] | None = None,
+        headers: dict[str, str] | None = None,
+    ):
         super().__init__(detail or self.title)
         self.detail = detail
         self.extra = extra or {}
+        self.headers = headers
 
 
 class BadRequestError(AppError):
@@ -61,6 +68,28 @@ class NotFoundError(AppError):
     status = HTTPStatus.NOT_FOUND
     code = "not-found"
     title = "Recurso no encontrado"
+
+
+class UnauthorizedError(AppError):
+    status = HTTPStatus.UNAUTHORIZED
+    code = "unauthorized"
+    title = "No autenticado"
+
+    def __init__(self, detail: str | None = None, **kwargs: Any) -> None:
+        kwargs.setdefault("headers", {"WWW-Authenticate": "Bearer"})
+        super().__init__(detail, **kwargs)
+
+
+class ForbiddenError(AppError):
+    status = HTTPStatus.FORBIDDEN
+    code = "forbidden"
+    title = "Acceso denegado"
+
+
+class TooManyRequestsError(AppError):
+    status = HTTPStatus.TOO_MANY_REQUESTS
+    code = "too-many-requests"
+    title = "Demasiadas solicitudes"
 
 
 class ConflictError(AppError):
@@ -108,7 +137,12 @@ async def _app_error_handler(request: Request, exc: Exception) -> JSONResponse:
     if exc.status >= HTTPStatus.INTERNAL_SERVER_ERROR:
         logger.error("app_error", code=exc.code, detail=exc.detail)
     return problem_response(
-        request, status=exc.status, code=exc.code, title=exc.title, detail=exc.detail
+        request,
+        status=exc.status,
+        code=exc.code,
+        title=exc.title,
+        detail=exc.detail,
+        headers=exc.headers,
     )
 
 

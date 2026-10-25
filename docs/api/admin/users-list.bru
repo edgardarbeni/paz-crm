@@ -1,0 +1,27 @@
+meta {
+  name: Listar usuarios
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/v1/users?limit=20&sort=full_name
+  body: none
+  auth: bearer
+}
+
+params:query {
+  limit: 20
+  sort: full_name
+  ~status: active
+  ~q: maria
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+docs {
+  Paginación por cursor: pasar `next_cursor` de la respuesta en `cursor`. Requiere
+  `identity.user.read`.
+}

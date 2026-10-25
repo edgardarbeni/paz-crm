@@ -17,6 +17,7 @@ sed \
   -e "s|^PAZ_DB_APP_PASSWORD=.*|PAZ_DB_APP_PASSWORD=$(rand_pw)|" \
   -e "s|^PAZ_ENCRYPTION_KEYS=.*|PAZ_ENCRYPTION_KEYS=1:$(rand_b64)|" \
   -e "s|^PAZ_BLIND_INDEX_KEY=.*|PAZ_BLIND_INDEX_KEY=$(rand_b64)|" \
+  -e "s|^PAZ_JWT_SECRET=.*|PAZ_JWT_SECRET=$(openssl rand -hex 32)|" \
   .env.example > .env
 
 echo ".env creado. Siguiente paso: docker compose up --build"

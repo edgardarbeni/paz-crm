@@ -64,5 +64,15 @@ class ImportedMixin(SQLModel):
     )
 
 
-class BusinessTable(UUIDPrimaryKeyMixin, TimestampMixin, SoftDeleteMixin):
-    """Base for business tables: UUIDv7 PK + created_at/updated_at/deleted_at."""
+class BusinessTable(SoftDeleteMixin, TimestampMixin, UUIDPrimaryKeyMixin):
+    """Base for business tables: UUIDv7 PK + created_at/updated_at/deleted_at.
+
+    Bases are listed in reverse so columns are emitted as id, created_at, updated_at,
+    deleted_at, then the model's own columns."""
+
+
+def pk(row: UUIDPrimaryKeyMixin) -> uuid.UUID:
+    """The primary key of a persisted (flushed) row; `id` is only None before the flush."""
+    if row.id is None:
+        raise RuntimeError(f"{type(row).__name__} has not been flushed yet")
+    return row.id

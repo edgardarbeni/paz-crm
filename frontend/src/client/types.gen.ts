@@ -5,6 +5,132 @@ export type ClientOptions = {
 };
 
 /**
+ * AuditEntryOut
+ */
+export type AuditEntryOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Chain Seq
+     */
+    chain_seq: number;
+    /**
+     * Occurred At
+     */
+    occurred_at: string;
+    /**
+     * Actor User Id
+     */
+    actor_user_id: string | null;
+    /**
+     * Actor Ip
+     */
+    actor_ip: string | null;
+    /**
+     * User Agent
+     */
+    user_agent: string | null;
+    /**
+     * Request Id
+     */
+    request_id: string | null;
+    /**
+     * Action
+     */
+    action: string;
+    /**
+     * Entity Table
+     */
+    entity_table: string | null;
+    /**
+     * Entity Id
+     */
+    entity_id: string | null;
+    /**
+     * Before
+     */
+    before: {
+        [key: string]: unknown;
+    } | null;
+    /**
+     * After
+     */
+    after: {
+        [key: string]: unknown;
+    } | null;
+};
+
+/**
+ * AuthenticatedResponse
+ */
+export type AuthenticatedResponse = {
+    /**
+     * Status
+     */
+    status?: 'authenticated';
+    /**
+     * Access Token
+     */
+    access_token: string;
+    /**
+     * Token Type
+     */
+    token_type?: 'Bearer';
+    /**
+     * Expires In
+     *
+     * Segundos de vida del access token.
+     */
+    expires_in: number;
+    /**
+     * `mfa_enrollment`: el rol exige 2FA y solo se permite enrolar TOTP.
+     */
+    scope: TokenScope;
+};
+
+/**
+ * CursorPage[AuditEntryOut]
+ */
+export type CursorPageAuditEntryOut = {
+    /**
+     * Items
+     */
+    items: Array<AuditEntryOut>;
+    /**
+     * Next Cursor
+     *
+     * Pasar en `cursor` para obtener la siguiente página.
+     */
+    next_cursor?: string | null;
+    /**
+     * Has More
+     */
+    has_more: boolean;
+};
+
+/**
+ * CursorPage[UserOut]
+ */
+export type CursorPageUserOut = {
+    /**
+     * Items
+     */
+    items: Array<UserOut>;
+    /**
+     * Next Cursor
+     *
+     * Pasar en `cursor` para obtener la siguiente página.
+     */
+    next_cursor?: string | null;
+    /**
+     * Has More
+     */
+    has_more: boolean;
+};
+
+/**
  * FieldViolation
  */
 export type FieldViolation = {
@@ -32,6 +158,227 @@ export type HealthStatus = {
      * Status
      */
     status: 'ok';
+};
+
+/**
+ * InvitationAcceptRequest
+ */
+export type InvitationAcceptRequest = {
+    /**
+     * Token
+     */
+    token: string;
+    /**
+     * Password
+     */
+    password: string;
+    /**
+     * Full Name
+     */
+    full_name?: string | null;
+};
+
+/**
+ * InvitationInfo
+ */
+export type InvitationInfo = {
+    /**
+     * Email
+     */
+    email: string;
+    /**
+     * Full Name
+     */
+    full_name: string;
+    /**
+     * Expires At
+     */
+    expires_at: string;
+};
+
+/**
+ * InvitationTokenRequest
+ */
+export type InvitationTokenRequest = {
+    /**
+     * Token
+     */
+    token: string;
+};
+
+/**
+ * LoginRequest
+ */
+export type LoginRequest = {
+    /**
+     * Email
+     */
+    email: string;
+    /**
+     * Password
+     */
+    password: string;
+    /**
+     * Device Label
+     */
+    device_label?: string | null;
+};
+
+/**
+ * MeResponse
+ */
+export type MeResponse = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Email
+     */
+    email: string;
+    /**
+     * Full Name
+     */
+    full_name: string;
+    status: UserStatus;
+    /**
+     * Roles
+     */
+    roles: Array<RoleSummary>;
+    /**
+     * Permissions
+     */
+    permissions: Array<string>;
+    /**
+     * Grants All
+     */
+    grants_all: boolean;
+    mfa: MfaStatus;
+    /**
+     * Session Id
+     */
+    session_id: string;
+    scope: TokenScope;
+};
+
+/**
+ * MfaRequiredResponse
+ */
+export type MfaRequiredResponse = {
+    /**
+     * Status
+     */
+    status?: 'mfa_required';
+    /**
+     * Mfa Token
+     *
+     * Enviar a /auth/mfa/verify junto con el código TOTP.
+     */
+    mfa_token: string;
+    /**
+     * Expires In
+     */
+    expires_in: number;
+};
+
+/**
+ * MfaStatus
+ */
+export type MfaStatus = {
+    /**
+     * Enabled
+     */
+    enabled: boolean;
+    /**
+     * Required
+     */
+    required: boolean;
+};
+
+/**
+ * MfaVerifyRequest
+ */
+export type MfaVerifyRequest = {
+    /**
+     * Mfa Token
+     */
+    mfa_token: string;
+    /**
+     * Code
+     */
+    code?: string | null;
+    /**
+     * Recovery Code
+     */
+    recovery_code?: string | null;
+    /**
+     * Device Label
+     */
+    device_label?: string | null;
+};
+
+/**
+ * PasswordChangeRequest
+ */
+export type PasswordChangeRequest = {
+    /**
+     * Current Password
+     */
+    current_password: string;
+    /**
+     * New Password
+     */
+    new_password: string;
+};
+
+/**
+ * PasswordForgotRequest
+ */
+export type PasswordForgotRequest = {
+    /**
+     * Email
+     */
+    email: string;
+};
+
+/**
+ * PasswordResetRequest
+ */
+export type PasswordResetRequest = {
+    /**
+     * Token
+     */
+    token: string;
+    /**
+     * New Password
+     */
+    new_password: string;
+};
+
+/**
+ * PermissionOut
+ */
+export type PermissionOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Module
+     */
+    module: string;
+    /**
+     * Action
+     */
+    action: string;
+    /**
+     * Description
+     */
+    description: string;
 };
 
 /**
@@ -92,6 +439,390 @@ export type ReadinessStatus = {
     redis: 'ok';
 };
 
+/**
+ * RecoveryCodesRequest
+ */
+export type RecoveryCodesRequest = {
+    /**
+     * Code
+     */
+    code: string;
+};
+
+/**
+ * RecoveryCodesResponse
+ */
+export type RecoveryCodesResponse = {
+    /**
+     * Recovery Codes
+     */
+    recovery_codes: Array<string>;
+};
+
+/**
+ * RevokedCount
+ */
+export type RevokedCount = {
+    /**
+     * Revoked
+     */
+    revoked: number;
+};
+
+/**
+ * RoleCreateRequest
+ */
+export type RoleCreateRequest = {
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Requires Mfa
+     */
+    requires_mfa?: boolean;
+    /**
+     * Permissions
+     */
+    permissions?: Array<string>;
+};
+
+/**
+ * RoleOut
+ */
+export type RoleOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Description
+     */
+    description: string | null;
+    /**
+     * Requires Mfa
+     */
+    requires_mfa: boolean;
+    /**
+     * Is System
+     */
+    is_system: boolean;
+    /**
+     * Grants All
+     */
+    grants_all: boolean;
+    /**
+     * Permissions
+     */
+    permissions: Array<string>;
+    /**
+     * User Count
+     */
+    user_count: number;
+};
+
+/**
+ * RolePermissionsRequest
+ */
+export type RolePermissionsRequest = {
+    /**
+     * Permissions
+     */
+    permissions: Array<string>;
+};
+
+/**
+ * RoleSummary
+ */
+export type RoleSummary = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Name
+     */
+    name: string;
+};
+
+/**
+ * RoleUpdateRequest
+ */
+export type RoleUpdateRequest = {
+    /**
+     * Name
+     */
+    name?: string | null;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Requires Mfa
+     */
+    requires_mfa?: boolean | null;
+};
+
+/**
+ * SessionOut
+ */
+export type SessionOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Device Label
+     */
+    device_label: string | null;
+    /**
+     * User Agent
+     */
+    user_agent: string | null;
+    /**
+     * Ip Address
+     */
+    ip_address: string | null;
+    /**
+     * Auth Methods
+     */
+    auth_methods: Array<string>;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Last Seen At
+     */
+    last_seen_at: string | null;
+    /**
+     * Expires At
+     */
+    expires_at: string;
+    /**
+     * Current
+     */
+    current?: boolean;
+};
+
+/**
+ * TokenScope
+ */
+export type TokenScope = 'full' | 'mfa_enrollment';
+
+/**
+ * TotpConfirmRequest
+ */
+export type TotpConfirmRequest = {
+    /**
+     * Code
+     */
+    code: string;
+};
+
+/**
+ * TotpConfirmResponse
+ */
+export type TotpConfirmResponse = {
+    /**
+     * Recovery Codes
+     *
+     * Se muestran una sola vez.
+     */
+    recovery_codes: Array<string>;
+    /**
+     * Access Token
+     *
+     * Nuevo access token con alcance completo.
+     */
+    access_token: string;
+    /**
+     * Expires In
+     */
+    expires_in: number;
+};
+
+/**
+ * TotpDisableRequest
+ */
+export type TotpDisableRequest = {
+    /**
+     * Password
+     */
+    password: string;
+    /**
+     * Code
+     */
+    code: string;
+};
+
+/**
+ * TotpSetupResponse
+ */
+export type TotpSetupResponse = {
+    /**
+     * Secret
+     *
+     * Clave para captura manual en la app autenticadora.
+     */
+    secret: string;
+    /**
+     * Otpauth Uri
+     */
+    otpauth_uri: string;
+    /**
+     * Qr Svg
+     *
+     * Código QR como data URI SVG.
+     */
+    qr_svg: string;
+};
+
+/**
+ * UserInviteRequest
+ */
+export type UserInviteRequest = {
+    /**
+     * Email
+     */
+    email: string;
+    /**
+     * Full Name
+     */
+    full_name: string;
+    /**
+     * Role Ids
+     */
+    role_ids?: Array<string>;
+};
+
+/**
+ * UserInvitedResponse
+ */
+export type UserInvitedResponse = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Email
+     */
+    email: string;
+    /**
+     * Full Name
+     */
+    full_name: string;
+    status: UserStatus;
+    /**
+     * Roles
+     */
+    roles: Array<RoleSummary>;
+    /**
+     * Mfa Enabled
+     */
+    mfa_enabled: boolean;
+    /**
+     * Locked Until
+     */
+    locked_until: string | null;
+    /**
+     * Last Login At
+     */
+    last_login_at: string | null;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Invitation Expires At
+     */
+    invitation_expires_at: string;
+};
+
+/**
+ * UserOut
+ */
+export type UserOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Email
+     */
+    email: string;
+    /**
+     * Full Name
+     */
+    full_name: string;
+    status: UserStatus;
+    /**
+     * Roles
+     */
+    roles: Array<RoleSummary>;
+    /**
+     * Mfa Enabled
+     */
+    mfa_enabled: boolean;
+    /**
+     * Locked Until
+     */
+    locked_until: string | null;
+    /**
+     * Last Login At
+     */
+    last_login_at: string | null;
+    /**
+     * Created At
+     */
+    created_at: string;
+};
+
+/**
+ * UserRolesRequest
+ */
+export type UserRolesRequest = {
+    /**
+     * Role Ids
+     */
+    role_ids: Array<string>;
+};
+
+/**
+ * UserStatus
+ */
+export type UserStatus = 'invited' | 'active' | 'disabled';
+
+/**
+ * UserUpdateRequest
+ */
+export type UserUpdateRequest = {
+    /**
+     * Full Name
+     */
+    full_name: string;
+};
+
 export type GetHealthData = {
     body?: never;
     path?: never;
@@ -149,3 +880,1235 @@ export type GetReadinessResponses = {
 };
 
 export type GetReadinessResponse = GetReadinessResponses[keyof GetReadinessResponses];
+
+export type LoginData = {
+    body: LoginRequest;
+    path?: never;
+    query?: never;
+    url: '/api/v1/auth/login';
+};
+
+export type LoginErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type LoginError = LoginErrors[keyof LoginErrors];
+
+export type LoginResponses = {
+    /**
+     * Response Login
+     *
+     * Successful Response
+     */
+    200: ({
+        status: 'authenticated';
+    } & AuthenticatedResponse) | ({
+        status: 'mfa_required';
+    } & MfaRequiredResponse);
+};
+
+export type LoginResponse = LoginResponses[keyof LoginResponses];
+
+export type VerifyMfaData = {
+    body: MfaVerifyRequest;
+    path?: never;
+    query?: never;
+    url: '/api/v1/auth/mfa/verify';
+};
+
+export type VerifyMfaErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type VerifyMfaError = VerifyMfaErrors[keyof VerifyMfaErrors];
+
+export type VerifyMfaResponses = {
+    /**
+     * Successful Response
+     */
+    200: AuthenticatedResponse;
+};
+
+export type VerifyMfaResponse = VerifyMfaResponses[keyof VerifyMfaResponses];
+
+export type RefreshSessionData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/auth/refresh';
+};
+
+export type RefreshSessionErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type RefreshSessionError = RefreshSessionErrors[keyof RefreshSessionErrors];
+
+export type RefreshSessionResponses = {
+    /**
+     * Successful Response
+     */
+    200: AuthenticatedResponse;
+};
+
+export type RefreshSessionResponse = RefreshSessionResponses[keyof RefreshSessionResponses];
+
+export type LogoutData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/auth/logout';
+};
+
+export type LogoutErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type LogoutError = LogoutErrors[keyof LogoutErrors];
+
+export type LogoutResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type LogoutResponse = LogoutResponses[keyof LogoutResponses];
+
+export type GetMeData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/auth/me';
+};
+
+export type GetMeErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type GetMeError = GetMeErrors[keyof GetMeErrors];
+
+export type GetMeResponses = {
+    /**
+     * Successful Response
+     */
+    200: MeResponse;
+};
+
+export type GetMeResponse = GetMeResponses[keyof GetMeResponses];
+
+export type ChangePasswordData = {
+    body: PasswordChangeRequest;
+    path?: never;
+    query?: never;
+    url: '/api/v1/auth/password/change';
+};
+
+export type ChangePasswordErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ChangePasswordError = ChangePasswordErrors[keyof ChangePasswordErrors];
+
+export type ChangePasswordResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type ChangePasswordResponse = ChangePasswordResponses[keyof ChangePasswordResponses];
+
+export type ForgotPasswordData = {
+    body: PasswordForgotRequest;
+    path?: never;
+    query?: never;
+    url: '/api/v1/auth/password/forgot';
+};
+
+export type ForgotPasswordErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ForgotPasswordError = ForgotPasswordErrors[keyof ForgotPasswordErrors];
+
+export type ForgotPasswordResponses = {
+    /**
+     * Successful Response
+     */
+    202: unknown;
+};
+
+export type ResetPasswordData = {
+    body: PasswordResetRequest;
+    path?: never;
+    query?: never;
+    url: '/api/v1/auth/password/reset';
+};
+
+export type ResetPasswordErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ResetPasswordError = ResetPasswordErrors[keyof ResetPasswordErrors];
+
+export type ResetPasswordResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type ResetPasswordResponse = ResetPasswordResponses[keyof ResetPasswordResponses];
+
+export type InspectInvitationData = {
+    body: InvitationTokenRequest;
+    path?: never;
+    query?: never;
+    url: '/api/v1/auth/invitations/inspect';
+};
+
+export type InspectInvitationErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type InspectInvitationError = InspectInvitationErrors[keyof InspectInvitationErrors];
+
+export type InspectInvitationResponses = {
+    /**
+     * Successful Response
+     */
+    200: InvitationInfo;
+};
+
+export type InspectInvitationResponse = InspectInvitationResponses[keyof InspectInvitationResponses];
+
+export type AcceptInvitationData = {
+    body: InvitationAcceptRequest;
+    path?: never;
+    query?: never;
+    url: '/api/v1/auth/invitations/accept';
+};
+
+export type AcceptInvitationErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type AcceptInvitationError = AcceptInvitationErrors[keyof AcceptInvitationErrors];
+
+export type AcceptInvitationResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type AcceptInvitationResponse = AcceptInvitationResponses[keyof AcceptInvitationResponses];
+
+export type SetupTotpData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/auth/mfa/totp/setup';
+};
+
+export type SetupTotpErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type SetupTotpError = SetupTotpErrors[keyof SetupTotpErrors];
+
+export type SetupTotpResponses = {
+    /**
+     * Successful Response
+     */
+    200: TotpSetupResponse;
+};
+
+export type SetupTotpResponse = SetupTotpResponses[keyof SetupTotpResponses];
+
+export type ConfirmTotpData = {
+    body: TotpConfirmRequest;
+    path?: never;
+    query?: never;
+    url: '/api/v1/auth/mfa/totp/confirm';
+};
+
+export type ConfirmTotpErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ConfirmTotpError = ConfirmTotpErrors[keyof ConfirmTotpErrors];
+
+export type ConfirmTotpResponses = {
+    /**
+     * Successful Response
+     */
+    200: TotpConfirmResponse;
+};
+
+export type ConfirmTotpResponse = ConfirmTotpResponses[keyof ConfirmTotpResponses];
+
+export type DisableTotpData = {
+    body: TotpDisableRequest;
+    path?: never;
+    query?: never;
+    url: '/api/v1/auth/mfa/totp/disable';
+};
+
+export type DisableTotpErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type DisableTotpError = DisableTotpErrors[keyof DisableTotpErrors];
+
+export type DisableTotpResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type DisableTotpResponse = DisableTotpResponses[keyof DisableTotpResponses];
+
+export type RegenerateRecoveryCodesData = {
+    body: RecoveryCodesRequest;
+    path?: never;
+    query?: never;
+    url: '/api/v1/auth/mfa/recovery-codes';
+};
+
+export type RegenerateRecoveryCodesErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type RegenerateRecoveryCodesError = RegenerateRecoveryCodesErrors[keyof RegenerateRecoveryCodesErrors];
+
+export type RegenerateRecoveryCodesResponses = {
+    /**
+     * Successful Response
+     */
+    200: RecoveryCodesResponse;
+};
+
+export type RegenerateRecoveryCodesResponse = RegenerateRecoveryCodesResponses[keyof RegenerateRecoveryCodesResponses];
+
+export type ListMySessionsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/auth/sessions';
+};
+
+export type ListMySessionsErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ListMySessionsError = ListMySessionsErrors[keyof ListMySessionsErrors];
+
+export type ListMySessionsResponses = {
+    /**
+     * Response Listmysessions
+     *
+     * Successful Response
+     */
+    200: Array<SessionOut>;
+};
+
+export type ListMySessionsResponse = ListMySessionsResponses[keyof ListMySessionsResponses];
+
+export type RevokeMySessionData = {
+    body?: never;
+    path: {
+        /**
+         * Session Id
+         */
+        session_id: string;
+    };
+    query?: never;
+    url: '/api/v1/auth/sessions/{session_id}';
+};
+
+export type RevokeMySessionErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type RevokeMySessionError = RevokeMySessionErrors[keyof RevokeMySessionErrors];
+
+export type RevokeMySessionResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type RevokeMySessionResponse = RevokeMySessionResponses[keyof RevokeMySessionResponses];
+
+export type RevokeMyOtherSessionsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/auth/sessions/revoke-others';
+};
+
+export type RevokeMyOtherSessionsErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type RevokeMyOtherSessionsError = RevokeMyOtherSessionsErrors[keyof RevokeMyOtherSessionsErrors];
+
+export type RevokeMyOtherSessionsResponses = {
+    /**
+     * Successful Response
+     */
+    200: RevokedCount;
+};
+
+export type RevokeMyOtherSessionsResponse = RevokeMyOtherSessionsResponses[keyof RevokeMyOtherSessionsResponses];
+
+export type ListUsersData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Status
+         */
+        status?: UserStatus | null;
+        /**
+         * Q
+         *
+         * Correo o nombre
+         */
+        q?: string | null;
+        /**
+         * Role Id
+         */
+        role_id?: string | null;
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Cursor
+         */
+        cursor?: string | null;
+        /**
+         * Sort
+         *
+         * Campos separados por coma; prefijo '-' para descendente.
+         */
+        sort?: string | null;
+    };
+    url: '/api/v1/users';
+};
+
+export type ListUsersErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ListUsersError = ListUsersErrors[keyof ListUsersErrors];
+
+export type ListUsersResponses = {
+    /**
+     * Successful Response
+     */
+    200: CursorPageUserOut;
+};
+
+export type ListUsersResponse = ListUsersResponses[keyof ListUsersResponses];
+
+export type InviteUserData = {
+    body: UserInviteRequest;
+    path?: never;
+    query?: never;
+    url: '/api/v1/users';
+};
+
+export type InviteUserErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type InviteUserError = InviteUserErrors[keyof InviteUserErrors];
+
+export type InviteUserResponses = {
+    /**
+     * Successful Response
+     */
+    201: UserInvitedResponse;
+};
+
+export type InviteUserResponse = InviteUserResponses[keyof InviteUserResponses];
+
+export type GetUserData = {
+    body?: never;
+    path: {
+        /**
+         * User Id
+         */
+        user_id: string;
+    };
+    query?: never;
+    url: '/api/v1/users/{user_id}';
+};
+
+export type GetUserErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type GetUserError = GetUserErrors[keyof GetUserErrors];
+
+export type GetUserResponses = {
+    /**
+     * Successful Response
+     */
+    200: UserOut;
+};
+
+export type GetUserResponse = GetUserResponses[keyof GetUserResponses];
+
+export type UpdateUserData = {
+    body: UserUpdateRequest;
+    path: {
+        /**
+         * User Id
+         */
+        user_id: string;
+    };
+    query?: never;
+    url: '/api/v1/users/{user_id}';
+};
+
+export type UpdateUserErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type UpdateUserError = UpdateUserErrors[keyof UpdateUserErrors];
+
+export type UpdateUserResponses = {
+    /**
+     * Successful Response
+     */
+    200: UserOut;
+};
+
+export type UpdateUserResponse = UpdateUserResponses[keyof UpdateUserResponses];
+
+export type DisableUserData = {
+    body?: never;
+    path: {
+        /**
+         * User Id
+         */
+        user_id: string;
+    };
+    query?: never;
+    url: '/api/v1/users/{user_id}/disable';
+};
+
+export type DisableUserErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type DisableUserError = DisableUserErrors[keyof DisableUserErrors];
+
+export type DisableUserResponses = {
+    /**
+     * Successful Response
+     */
+    200: UserOut;
+};
+
+export type DisableUserResponse = DisableUserResponses[keyof DisableUserResponses];
+
+export type ActivateUserData = {
+    body?: never;
+    path: {
+        /**
+         * User Id
+         */
+        user_id: string;
+    };
+    query?: never;
+    url: '/api/v1/users/{user_id}/activate';
+};
+
+export type ActivateUserErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ActivateUserError = ActivateUserErrors[keyof ActivateUserErrors];
+
+export type ActivateUserResponses = {
+    /**
+     * Successful Response
+     */
+    200: UserOut;
+};
+
+export type ActivateUserResponse = ActivateUserResponses[keyof ActivateUserResponses];
+
+export type UnlockUserData = {
+    body?: never;
+    path: {
+        /**
+         * User Id
+         */
+        user_id: string;
+    };
+    query?: never;
+    url: '/api/v1/users/{user_id}/unlock';
+};
+
+export type UnlockUserErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type UnlockUserError = UnlockUserErrors[keyof UnlockUserErrors];
+
+export type UnlockUserResponses = {
+    /**
+     * Successful Response
+     */
+    200: UserOut;
+};
+
+export type UnlockUserResponse = UnlockUserResponses[keyof UnlockUserResponses];
+
+export type SetUserRolesData = {
+    body: UserRolesRequest;
+    path: {
+        /**
+         * User Id
+         */
+        user_id: string;
+    };
+    query?: never;
+    url: '/api/v1/users/{user_id}/roles';
+};
+
+export type SetUserRolesErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type SetUserRolesError = SetUserRolesErrors[keyof SetUserRolesErrors];
+
+export type SetUserRolesResponses = {
+    /**
+     * Successful Response
+     */
+    200: UserOut;
+};
+
+export type SetUserRolesResponse = SetUserRolesResponses[keyof SetUserRolesResponses];
+
+export type ResendInvitationData = {
+    body?: never;
+    path: {
+        /**
+         * User Id
+         */
+        user_id: string;
+    };
+    query?: never;
+    url: '/api/v1/users/{user_id}/invitation';
+};
+
+export type ResendInvitationErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ResendInvitationError = ResendInvitationErrors[keyof ResendInvitationErrors];
+
+export type ResendInvitationResponses = {
+    /**
+     * Successful Response
+     */
+    200: UserInvitedResponse;
+};
+
+export type ResendInvitationResponse = ResendInvitationResponses[keyof ResendInvitationResponses];
+
+export type ResetUserMfaData = {
+    body?: never;
+    path: {
+        /**
+         * User Id
+         */
+        user_id: string;
+    };
+    query?: never;
+    url: '/api/v1/users/{user_id}/mfa/reset';
+};
+
+export type ResetUserMfaErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ResetUserMfaError = ResetUserMfaErrors[keyof ResetUserMfaErrors];
+
+export type ResetUserMfaResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type ResetUserMfaResponse = ResetUserMfaResponses[keyof ResetUserMfaResponses];
+
+export type ListUserSessionsData = {
+    body?: never;
+    path: {
+        /**
+         * User Id
+         */
+        user_id: string;
+    };
+    query?: never;
+    url: '/api/v1/users/{user_id}/sessions';
+};
+
+export type ListUserSessionsErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ListUserSessionsError = ListUserSessionsErrors[keyof ListUserSessionsErrors];
+
+export type ListUserSessionsResponses = {
+    /**
+     * Response Listusersessions
+     *
+     * Successful Response
+     */
+    200: Array<SessionOut>;
+};
+
+export type ListUserSessionsResponse = ListUserSessionsResponses[keyof ListUserSessionsResponses];
+
+export type RevokeUserSessionsData = {
+    body?: never;
+    path: {
+        /**
+         * User Id
+         */
+        user_id: string;
+    };
+    query?: never;
+    url: '/api/v1/users/{user_id}/sessions/revoke';
+};
+
+export type RevokeUserSessionsErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type RevokeUserSessionsError = RevokeUserSessionsErrors[keyof RevokeUserSessionsErrors];
+
+export type RevokeUserSessionsResponses = {
+    /**
+     * Successful Response
+     */
+    200: RevokedCount;
+};
+
+export type RevokeUserSessionsResponse = RevokeUserSessionsResponses[keyof RevokeUserSessionsResponses];
+
+export type ListRolesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/roles';
+};
+
+export type ListRolesErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ListRolesError = ListRolesErrors[keyof ListRolesErrors];
+
+export type ListRolesResponses = {
+    /**
+     * Response Listroles
+     *
+     * Successful Response
+     */
+    200: Array<RoleOut>;
+};
+
+export type ListRolesResponse = ListRolesResponses[keyof ListRolesResponses];
+
+export type CreateRoleData = {
+    body: RoleCreateRequest;
+    path?: never;
+    query?: never;
+    url: '/api/v1/roles';
+};
+
+export type CreateRoleErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type CreateRoleError = CreateRoleErrors[keyof CreateRoleErrors];
+
+export type CreateRoleResponses = {
+    /**
+     * Successful Response
+     */
+    201: RoleOut;
+};
+
+export type CreateRoleResponse = CreateRoleResponses[keyof CreateRoleResponses];
+
+export type DeleteRoleData = {
+    body?: never;
+    path: {
+        /**
+         * Role Id
+         */
+        role_id: string;
+    };
+    query?: never;
+    url: '/api/v1/roles/{role_id}';
+};
+
+export type DeleteRoleErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type DeleteRoleError = DeleteRoleErrors[keyof DeleteRoleErrors];
+
+export type DeleteRoleResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type DeleteRoleResponse = DeleteRoleResponses[keyof DeleteRoleResponses];
+
+export type GetRoleData = {
+    body?: never;
+    path: {
+        /**
+         * Role Id
+         */
+        role_id: string;
+    };
+    query?: never;
+    url: '/api/v1/roles/{role_id}';
+};
+
+export type GetRoleErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type GetRoleError = GetRoleErrors[keyof GetRoleErrors];
+
+export type GetRoleResponses = {
+    /**
+     * Successful Response
+     */
+    200: RoleOut;
+};
+
+export type GetRoleResponse = GetRoleResponses[keyof GetRoleResponses];
+
+export type UpdateRoleData = {
+    body: RoleUpdateRequest;
+    path: {
+        /**
+         * Role Id
+         */
+        role_id: string;
+    };
+    query?: never;
+    url: '/api/v1/roles/{role_id}';
+};
+
+export type UpdateRoleErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type UpdateRoleError = UpdateRoleErrors[keyof UpdateRoleErrors];
+
+export type UpdateRoleResponses = {
+    /**
+     * Successful Response
+     */
+    200: RoleOut;
+};
+
+export type UpdateRoleResponse = UpdateRoleResponses[keyof UpdateRoleResponses];
+
+export type SetRolePermissionsData = {
+    body: RolePermissionsRequest;
+    path: {
+        /**
+         * Role Id
+         */
+        role_id: string;
+    };
+    query?: never;
+    url: '/api/v1/roles/{role_id}/permissions';
+};
+
+export type SetRolePermissionsErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type SetRolePermissionsError = SetRolePermissionsErrors[keyof SetRolePermissionsErrors];
+
+export type SetRolePermissionsResponses = {
+    /**
+     * Successful Response
+     */
+    200: RoleOut;
+};
+
+export type SetRolePermissionsResponse = SetRolePermissionsResponses[keyof SetRolePermissionsResponses];
+
+export type ListPermissionsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/permissions';
+};
+
+export type ListPermissionsErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ListPermissionsError = ListPermissionsErrors[keyof ListPermissionsErrors];
+
+export type ListPermissionsResponses = {
+    /**
+     * Response Listpermissions
+     *
+     * Successful Response
+     */
+    200: Array<PermissionOut>;
+};
+
+export type ListPermissionsResponse = ListPermissionsResponses[keyof ListPermissionsResponses];
+
+export type ListAuditEntriesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Actor User Id
+         */
+        actor_user_id?: string | null;
+        /**
+         * Action
+         */
+        action?: string | null;
+        /**
+         * Entity Table
+         */
+        entity_table?: string | null;
+        /**
+         * Entity Id
+         */
+        entity_id?: string | null;
+        /**
+         * Request Id
+         */
+        request_id?: string | null;
+        /**
+         * Occurred From
+         */
+        occurred_from?: string | null;
+        /**
+         * Occurred To
+         */
+        occurred_to?: string | null;
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Cursor
+         */
+        cursor?: string | null;
+        /**
+         * Sort
+         *
+         * Campos separados por coma; prefijo '-' para descendente.
+         */
+        sort?: string | null;
+    };
+    url: '/api/v1/audit-log';
+};
+
+export type ListAuditEntriesErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ListAuditEntriesError = ListAuditEntriesErrors[keyof ListAuditEntriesErrors];
+
+export type ListAuditEntriesResponses = {
+    /**
+     * Successful Response
+     */
+    200: CursorPageAuditEntryOut;
+};
+
+export type ListAuditEntriesResponse = ListAuditEntriesResponses[keyof ListAuditEntriesResponses];

@@ -1,0 +1,27 @@
+meta {
+  name: 2. Verificar TOTP
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/v1/auth/mfa/verify
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "mfa_token": "{{mfaToken}}",
+    "code": "{{totpCode}}"
+  }
+}
+
+script:post-response {
+  if (res.status === 200) bru.setVar("accessToken", res.body.access_token);
+}
+
+docs {
+  `code` (TOTP de 6 dígitos) o `recovery_code` (uno de los 10 códigos de recuperación, de un
+  solo uso). Un mismo código TOTP no se acepta dos veces.
+}

@@ -4,6 +4,8 @@ Table models are audited by default. Class-level knobs:
 
 - ``__audit__ = False``: skip the model (e.g. bulk-imported geography, D-36).
 - ``__audit_masked__ = frozenset({...})``: attributes stored as ``"***"`` (secrets, hashes).
+- ``__audit_ignore_fields__ = frozenset({...})``: bookkeeping attributes (e.g. ``last_seen_at``);
+  an update that only touches them is not recorded.
 
 Bytes values (ciphertexts, blind indexes) are always masked.
 
@@ -35,6 +37,11 @@ def _is_audited(obj: object) -> bool:
 def _masked(obj: object) -> frozenset[str]:
     masked: frozenset[str] = getattr(type(obj), "__audit_masked__", frozenset())
     return masked
+
+
+def _ignored(obj: object) -> frozenset[str]:
+    ignored: frozenset[str] = getattr(type(obj), "__audit_ignore_fields__", frozenset())
+    return ignored | {"updated_at"}
 
 
 def _entity(obj: object) -> tuple[str, str | None]:
@@ -94,7 +101,7 @@ def _audit_after_flush(session: Session, _: UOWTransaction) -> None:
         if not _is_audited(obj) or not session.is_modified(obj, include_collections=False):
             continue
         before, after = _changes(obj)
-        if not after:
+        if not set(after) - _ignored(obj):
             continue
         restored_or_deleted = "deleted_at" in after
         if restored_or_deleted and after["deleted_at"] is not None:

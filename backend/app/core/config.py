@@ -3,7 +3,7 @@ that injects them). Every variable is documented in the repository's `.env.examp
 
 from enum import StrEnum
 from functools import lru_cache
-from typing import Annotated
+from typing import Annotated, Literal
 
 from pydantic import Field, PostgresDsn, RedisDsn, SecretStr, field_validator
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
@@ -45,6 +45,41 @@ class Settings(BaseSettings):
     # Observability
     otel_exporter_otlp_endpoint: str | None = None
 
+    # Public URL of the panel, used to build links in e-mails (invitations, password reset).
+    public_base_url: str = "https://localhost"
+
+    # Authentication settings: see decisions D-33 to D-35 and D-48.
+    jwt_secret: SecretStr
+    jwt_issuer: str = "pazos"
+    jwt_audience: str = "pazos-api"
+    access_token_ttl_seconds: int = 900
+    mfa_challenge_ttl_seconds: int = 300
+    refresh_token_ttl_seconds: int = 7 * 24 * 3600
+    session_absolute_ttl_seconds: int = 30 * 24 * 3600
+    refresh_cookie_name: str = "paz_refresh"
+    refresh_cookie_secure: bool = True
+    invitation_ttl_seconds: int = 72 * 3600
+    password_reset_ttl_seconds: int = 30 * 60
+    password_min_length: int = 12
+    argon2_time_cost: int = 3
+    argon2_memory_cost_kib: int = 65_536
+    argon2_parallelism: int = 4
+    max_failed_logins: int = 5
+    lockout_seconds: int = 15 * 60
+    login_rate_limit_per_ip: int = 20
+    login_rate_limit_window_seconds: int = 60
+    totp_issuer: str = "PAZOS"
+
+    # E-mail (D-35). "memory" keeps messages in-process (tests); "console" logs them.
+    mail_backend: Literal["smtp", "console", "memory"] = "smtp"
+    smtp_host: str = "localhost"
+    smtp_port: int = 1025
+    smtp_username: str | None = None
+    smtp_password: SecretStr | None = None
+    smtp_starttls: bool = False
+    smtp_use_tls: bool = False
+    mail_from: str = "PAZOS <no-reply@localhost>"
+
     @field_validator("cors_allowed_origins", mode="before")
     @classmethod
     def _split_origins(cls, value: object) -> object:
@@ -58,14 +93,14 @@ class Settings(BaseSettings):
 
     @property
     def async_database_url(self) -> str:
-        return _as_asyncpg(str(self.database_url))
+        return as_asyncpg_url(str(self.database_url))
 
     @property
     def async_migrations_database_url(self) -> str:
-        return _as_asyncpg(str(self.migrations_database_url or self.database_url))
+        return as_asyncpg_url(str(self.migrations_database_url or self.database_url))
 
 
-def _as_asyncpg(url: str) -> str:
+def as_asyncpg_url(url: str) -> str:
     scheme, _, rest = url.partition("://")
     if scheme in {"postgres", "postgresql", "postgresql+psycopg"}:
         return f"postgresql+asyncpg://{rest}"

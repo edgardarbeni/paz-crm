@@ -2,3 +2,5 @@
 
 Each phase adds its module here, e.g. ``import app.modules.identity.models``.
 """
+
+import app.modules.identity.models  # noqa: F401

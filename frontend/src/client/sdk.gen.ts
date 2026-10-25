@@ -2,8 +2,8 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { GetHealthData, GetHealthErrors, GetHealthResponses, GetReadinessData, GetReadinessErrors, GetReadinessResponses } from './types.gen';
-import { zGetHealthResponse, zGetReadinessResponse } from './zod.gen';
+import type { AcceptInvitationData, AcceptInvitationErrors, AcceptInvitationResponses, ActivateUserData, ActivateUserErrors, ActivateUserResponses, ChangePasswordData, ChangePasswordErrors, ChangePasswordResponses, ConfirmTotpData, ConfirmTotpErrors, ConfirmTotpResponses, CreateRoleData, CreateRoleErrors, CreateRoleResponses, DeleteRoleData, DeleteRoleErrors, DeleteRoleResponses, DisableTotpData, DisableTotpErrors, DisableTotpResponses, DisableUserData, DisableUserErrors, DisableUserResponses, ForgotPasswordData, ForgotPasswordErrors, ForgotPasswordResponses, GetHealthData, GetHealthErrors, GetHealthResponses, GetMeData, GetMeErrors, GetMeResponses, GetReadinessData, GetReadinessErrors, GetReadinessResponses, GetRoleData, GetRoleErrors, GetRoleResponses, GetUserData, GetUserErrors, GetUserResponses, InspectInvitationData, InspectInvitationErrors, InspectInvitationResponses, InviteUserData, InviteUserErrors, InviteUserResponses, ListAuditEntriesData, ListAuditEntriesErrors, ListAuditEntriesResponses, ListMySessionsData, ListMySessionsErrors, ListMySessionsResponses, ListPermissionsData, ListPermissionsErrors, ListPermissionsResponses, ListRolesData, ListRolesErrors, ListRolesResponses, ListUsersData, ListUsersErrors, ListUserSessionsData, ListUserSessionsErrors, ListUserSessionsResponses, ListUsersResponses, LoginData, LoginErrors, LoginResponses, LogoutData, LogoutErrors, LogoutResponses, RefreshSessionData, RefreshSessionErrors, RefreshSessionResponses, RegenerateRecoveryCodesData, RegenerateRecoveryCodesErrors, RegenerateRecoveryCodesResponses, ResendInvitationData, ResendInvitationErrors, ResendInvitationResponses, ResetPasswordData, ResetPasswordErrors, ResetPasswordResponses, ResetUserMfaData, ResetUserMfaErrors, ResetUserMfaResponses, RevokeMyOtherSessionsData, RevokeMyOtherSessionsErrors, RevokeMyOtherSessionsResponses, RevokeMySessionData, RevokeMySessionErrors, RevokeMySessionResponses, RevokeUserSessionsData, RevokeUserSessionsErrors, RevokeUserSessionsResponses, SetRolePermissionsData, SetRolePermissionsErrors, SetRolePermissionsResponses, SetupTotpData, SetupTotpErrors, SetupTotpResponses, SetUserRolesData, SetUserRolesErrors, SetUserRolesResponses, UnlockUserData, UnlockUserErrors, UnlockUserResponses, UpdateRoleData, UpdateRoleErrors, UpdateRoleResponses, UpdateUserData, UpdateUserErrors, UpdateUserResponses, VerifyMfaData, VerifyMfaErrors, VerifyMfaResponses } from './types.gen';
+import { zAcceptInvitationResponse, zActivateUserResponse, zChangePasswordResponse, zConfirmTotpResponse, zCreateRoleResponse, zDeleteRoleResponse, zDisableTotpResponse, zDisableUserResponse, zGetHealthResponse, zGetMeResponse, zGetReadinessResponse, zGetRoleResponse, zGetUserResponse, zInspectInvitationResponse, zInviteUserResponse, zListAuditEntriesResponse, zListMySessionsResponse, zListPermissionsResponse, zListRolesResponse, zListUserSessionsResponse, zListUsersResponse, zLoginResponse, zLogoutResponse, zRefreshSessionResponse, zRegenerateRecoveryCodesResponse, zResendInvitationResponse, zResetPasswordResponse, zResetUserMfaResponse, zRevokeMyOtherSessionsResponse, zRevokeMySessionResponse, zRevokeUserSessionsResponse, zSetRolePermissionsResponse, zSetupTotpResponse, zSetUserRolesResponse, zUnlockUserResponse, zUpdateRoleResponse, zUpdateUserResponse, zVerifyMfaResponse } from './zod.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -34,5 +34,431 @@ export const getHealth = <ThrowOnError extends boolean = false>(options?: Option
 export const getReadiness = <ThrowOnError extends boolean = false>(options?: Options<GetReadinessData, ThrowOnError>): RequestResult<GetReadinessResponses, GetReadinessErrors, ThrowOnError> => (options?.client ?? client).get<GetReadinessResponses, GetReadinessErrors, ThrowOnError>({
     responseValidator: async (data) => await zGetReadinessResponse.parseAsync(data),
     url: '/ready',
+    ...options
+});
+
+/**
+ * Iniciar sesión con correo y contraseña
+ */
+export const login = <ThrowOnError extends boolean = false>(options: Options<LoginData, ThrowOnError>): RequestResult<LoginResponses, LoginErrors, ThrowOnError> => (options.client ?? client).post<LoginResponses, LoginErrors, ThrowOnError>({
+    responseValidator: async (data) => await zLoginResponse.parseAsync(data),
+    url: '/api/v1/auth/login',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Completar el inicio de sesión con TOTP
+ */
+export const verifyMfa = <ThrowOnError extends boolean = false>(options: Options<VerifyMfaData, ThrowOnError>): RequestResult<VerifyMfaResponses, VerifyMfaErrors, ThrowOnError> => (options.client ?? client).post<VerifyMfaResponses, VerifyMfaErrors, ThrowOnError>({
+    responseValidator: async (data) => await zVerifyMfaResponse.parseAsync(data),
+    url: '/api/v1/auth/mfa/verify',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Renovar el access token
+ */
+export const refreshSession = <ThrowOnError extends boolean = false>(options?: Options<RefreshSessionData, ThrowOnError>): RequestResult<RefreshSessionResponses, RefreshSessionErrors, ThrowOnError> => (options?.client ?? client).post<RefreshSessionResponses, RefreshSessionErrors, ThrowOnError>({
+    responseValidator: async (data) => await zRefreshSessionResponse.parseAsync(data),
+    url: '/api/v1/auth/refresh',
+    ...options
+});
+
+/**
+ * Cerrar sesión
+ */
+export const logout = <ThrowOnError extends boolean = false>(options?: Options<LogoutData, ThrowOnError>): RequestResult<LogoutResponses, LogoutErrors, ThrowOnError> => (options?.client ?? client).post<LogoutResponses, LogoutErrors, ThrowOnError>({
+    responseValidator: async (data) => await zLogoutResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/auth/logout',
+    ...options
+});
+
+/**
+ * Perfil, roles y permisos del usuario actual
+ */
+export const getMe = <ThrowOnError extends boolean = false>(options?: Options<GetMeData, ThrowOnError>): RequestResult<GetMeResponses, GetMeErrors, ThrowOnError> => (options?.client ?? client).get<GetMeResponses, GetMeErrors, ThrowOnError>({
+    responseValidator: async (data) => await zGetMeResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/auth/me',
+    ...options
+});
+
+/**
+ * Cambiar la contraseña (cierra las demás sesiones)
+ */
+export const changePassword = <ThrowOnError extends boolean = false>(options: Options<ChangePasswordData, ThrowOnError>): RequestResult<ChangePasswordResponses, ChangePasswordErrors, ThrowOnError> => (options.client ?? client).post<ChangePasswordResponses, ChangePasswordErrors, ThrowOnError>({
+    responseValidator: async (data) => await zChangePasswordResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/auth/password/change',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Solicitar enlace para restablecer la contraseña
+ */
+export const forgotPassword = <ThrowOnError extends boolean = false>(options: Options<ForgotPasswordData, ThrowOnError>): RequestResult<ForgotPasswordResponses, ForgotPasswordErrors, ThrowOnError> => (options.client ?? client).post<ForgotPasswordResponses, ForgotPasswordErrors, ThrowOnError>({
+    url: '/api/v1/auth/password/forgot',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Restablecer la contraseña con el enlace recibido
+ */
+export const resetPassword = <ThrowOnError extends boolean = false>(options: Options<ResetPasswordData, ThrowOnError>): RequestResult<ResetPasswordResponses, ResetPasswordErrors, ThrowOnError> => (options.client ?? client).post<ResetPasswordResponses, ResetPasswordErrors, ThrowOnError>({
+    responseValidator: async (data) => await zResetPasswordResponse.parseAsync(data),
+    url: '/api/v1/auth/password/reset',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Validar una invitación
+ */
+export const inspectInvitation = <ThrowOnError extends boolean = false>(options: Options<InspectInvitationData, ThrowOnError>): RequestResult<InspectInvitationResponses, InspectInvitationErrors, ThrowOnError> => (options.client ?? client).post<InspectInvitationResponses, InspectInvitationErrors, ThrowOnError>({
+    responseValidator: async (data) => await zInspectInvitationResponse.parseAsync(data),
+    url: '/api/v1/auth/invitations/inspect',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Aceptar una invitación y definir la contraseña
+ */
+export const acceptInvitation = <ThrowOnError extends boolean = false>(options: Options<AcceptInvitationData, ThrowOnError>): RequestResult<AcceptInvitationResponses, AcceptInvitationErrors, ThrowOnError> => (options.client ?? client).post<AcceptInvitationResponses, AcceptInvitationErrors, ThrowOnError>({
+    responseValidator: async (data) => await zAcceptInvitationResponse.parseAsync(data),
+    url: '/api/v1/auth/invitations/accept',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Iniciar el enrolamiento TOTP
+ */
+export const setupTotp = <ThrowOnError extends boolean = false>(options?: Options<SetupTotpData, ThrowOnError>): RequestResult<SetupTotpResponses, SetupTotpErrors, ThrowOnError> => (options?.client ?? client).post<SetupTotpResponses, SetupTotpErrors, ThrowOnError>({
+    responseValidator: async (data) => await zSetupTotpResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/auth/mfa/totp/setup',
+    ...options
+});
+
+/**
+ * Confirmar el enrolamiento TOTP
+ */
+export const confirmTotp = <ThrowOnError extends boolean = false>(options: Options<ConfirmTotpData, ThrowOnError>): RequestResult<ConfirmTotpResponses, ConfirmTotpErrors, ThrowOnError> => (options.client ?? client).post<ConfirmTotpResponses, ConfirmTotpErrors, ThrowOnError>({
+    responseValidator: async (data) => await zConfirmTotpResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/auth/mfa/totp/confirm',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Desactivar TOTP (solo si el rol no lo exige)
+ */
+export const disableTotp = <ThrowOnError extends boolean = false>(options: Options<DisableTotpData, ThrowOnError>): RequestResult<DisableTotpResponses, DisableTotpErrors, ThrowOnError> => (options.client ?? client).post<DisableTotpResponses, DisableTotpErrors, ThrowOnError>({
+    responseValidator: async (data) => await zDisableTotpResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/auth/mfa/totp/disable',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Generar nuevos códigos de recuperación
+ */
+export const regenerateRecoveryCodes = <ThrowOnError extends boolean = false>(options: Options<RegenerateRecoveryCodesData, ThrowOnError>): RequestResult<RegenerateRecoveryCodesResponses, RegenerateRecoveryCodesErrors, ThrowOnError> => (options.client ?? client).post<RegenerateRecoveryCodesResponses, RegenerateRecoveryCodesErrors, ThrowOnError>({
+    responseValidator: async (data) => await zRegenerateRecoveryCodesResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/auth/mfa/recovery-codes',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Mis sesiones activas
+ */
+export const listMySessions = <ThrowOnError extends boolean = false>(options?: Options<ListMySessionsData, ThrowOnError>): RequestResult<ListMySessionsResponses, ListMySessionsErrors, ThrowOnError> => (options?.client ?? client).get<ListMySessionsResponses, ListMySessionsErrors, ThrowOnError>({
+    responseValidator: async (data) => await zListMySessionsResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/auth/sessions',
+    ...options
+});
+
+/**
+ * Cerrar una de mis sesiones
+ */
+export const revokeMySession = <ThrowOnError extends boolean = false>(options: Options<RevokeMySessionData, ThrowOnError>): RequestResult<RevokeMySessionResponses, RevokeMySessionErrors, ThrowOnError> => (options.client ?? client).delete<RevokeMySessionResponses, RevokeMySessionErrors, ThrowOnError>({
+    responseValidator: async (data) => await zRevokeMySessionResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/auth/sessions/{session_id}',
+    ...options
+});
+
+/**
+ * Cerrar todas mis demás sesiones
+ */
+export const revokeMyOtherSessions = <ThrowOnError extends boolean = false>(options?: Options<RevokeMyOtherSessionsData, ThrowOnError>): RequestResult<RevokeMyOtherSessionsResponses, RevokeMyOtherSessionsErrors, ThrowOnError> => (options?.client ?? client).post<RevokeMyOtherSessionsResponses, RevokeMyOtherSessionsErrors, ThrowOnError>({
+    responseValidator: async (data) => await zRevokeMyOtherSessionsResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/auth/sessions/revoke-others',
+    ...options
+});
+
+/**
+ * Listar usuarios
+ */
+export const listUsers = <ThrowOnError extends boolean = false>(options?: Options<ListUsersData, ThrowOnError>): RequestResult<ListUsersResponses, ListUsersErrors, ThrowOnError> => (options?.client ?? client).get<ListUsersResponses, ListUsersErrors, ThrowOnError>({
+    responseValidator: async (data) => await zListUsersResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/users',
+    ...options
+});
+
+/**
+ * Invitar a un usuario (envía correo)
+ */
+export const inviteUser = <ThrowOnError extends boolean = false>(options: Options<InviteUserData, ThrowOnError>): RequestResult<InviteUserResponses, InviteUserErrors, ThrowOnError> => (options.client ?? client).post<InviteUserResponses, InviteUserErrors, ThrowOnError>({
+    responseValidator: async (data) => await zInviteUserResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/users',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Detalle de un usuario
+ */
+export const getUser = <ThrowOnError extends boolean = false>(options: Options<GetUserData, ThrowOnError>): RequestResult<GetUserResponses, GetUserErrors, ThrowOnError> => (options.client ?? client).get<GetUserResponses, GetUserErrors, ThrowOnError>({
+    responseValidator: async (data) => await zGetUserResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/users/{user_id}',
+    ...options
+});
+
+/**
+ * Editar datos de un usuario
+ */
+export const updateUser = <ThrowOnError extends boolean = false>(options: Options<UpdateUserData, ThrowOnError>): RequestResult<UpdateUserResponses, UpdateUserErrors, ThrowOnError> => (options.client ?? client).patch<UpdateUserResponses, UpdateUserErrors, ThrowOnError>({
+    responseValidator: async (data) => await zUpdateUserResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/users/{user_id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Desactivar (cierra sesiones)
+ */
+export const disableUser = <ThrowOnError extends boolean = false>(options: Options<DisableUserData, ThrowOnError>): RequestResult<DisableUserResponses, DisableUserErrors, ThrowOnError> => (options.client ?? client).post<DisableUserResponses, DisableUserErrors, ThrowOnError>({
+    responseValidator: async (data) => await zDisableUserResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/users/{user_id}/disable',
+    ...options
+});
+
+/**
+ * Reactivar
+ */
+export const activateUser = <ThrowOnError extends boolean = false>(options: Options<ActivateUserData, ThrowOnError>): RequestResult<ActivateUserResponses, ActivateUserErrors, ThrowOnError> => (options.client ?? client).post<ActivateUserResponses, ActivateUserErrors, ThrowOnError>({
+    responseValidator: async (data) => await zActivateUserResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/users/{user_id}/activate',
+    ...options
+});
+
+/**
+ * Desbloquear tras intentos fallidos
+ */
+export const unlockUser = <ThrowOnError extends boolean = false>(options: Options<UnlockUserData, ThrowOnError>): RequestResult<UnlockUserResponses, UnlockUserErrors, ThrowOnError> => (options.client ?? client).post<UnlockUserResponses, UnlockUserErrors, ThrowOnError>({
+    responseValidator: async (data) => await zUnlockUserResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/users/{user_id}/unlock',
+    ...options
+});
+
+/**
+ * Reemplazar los roles
+ */
+export const setUserRoles = <ThrowOnError extends boolean = false>(options: Options<SetUserRolesData, ThrowOnError>): RequestResult<SetUserRolesResponses, SetUserRolesErrors, ThrowOnError> => (options.client ?? client).put<SetUserRolesResponses, SetUserRolesErrors, ThrowOnError>({
+    responseValidator: async (data) => await zSetUserRolesResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/users/{user_id}/roles',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Reenviar la invitación
+ */
+export const resendInvitation = <ThrowOnError extends boolean = false>(options: Options<ResendInvitationData, ThrowOnError>): RequestResult<ResendInvitationResponses, ResendInvitationErrors, ThrowOnError> => (options.client ?? client).post<ResendInvitationResponses, ResendInvitationErrors, ThrowOnError>({
+    responseValidator: async (data) => await zResendInvitationResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/users/{user_id}/invitation',
+    ...options
+});
+
+/**
+ * Restablecer el segundo factor (cierra sus sesiones)
+ */
+export const resetUserMfa = <ThrowOnError extends boolean = false>(options: Options<ResetUserMfaData, ThrowOnError>): RequestResult<ResetUserMfaResponses, ResetUserMfaErrors, ThrowOnError> => (options.client ?? client).post<ResetUserMfaResponses, ResetUserMfaErrors, ThrowOnError>({
+    responseValidator: async (data) => await zResetUserMfaResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/users/{user_id}/mfa/reset',
+    ...options
+});
+
+/**
+ * Sesiones activas
+ */
+export const listUserSessions = <ThrowOnError extends boolean = false>(options: Options<ListUserSessionsData, ThrowOnError>): RequestResult<ListUserSessionsResponses, ListUserSessionsErrors, ThrowOnError> => (options.client ?? client).get<ListUserSessionsResponses, ListUserSessionsErrors, ThrowOnError>({
+    responseValidator: async (data) => await zListUserSessionsResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/users/{user_id}/sessions',
+    ...options
+});
+
+/**
+ * Cerrar todas sus sesiones
+ */
+export const revokeUserSessions = <ThrowOnError extends boolean = false>(options: Options<RevokeUserSessionsData, ThrowOnError>): RequestResult<RevokeUserSessionsResponses, RevokeUserSessionsErrors, ThrowOnError> => (options.client ?? client).post<RevokeUserSessionsResponses, RevokeUserSessionsErrors, ThrowOnError>({
+    responseValidator: async (data) => await zRevokeUserSessionsResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/users/{user_id}/sessions/revoke',
+    ...options
+});
+
+/**
+ * Listar roles
+ */
+export const listRoles = <ThrowOnError extends boolean = false>(options?: Options<ListRolesData, ThrowOnError>): RequestResult<ListRolesResponses, ListRolesErrors, ThrowOnError> => (options?.client ?? client).get<ListRolesResponses, ListRolesErrors, ThrowOnError>({
+    responseValidator: async (data) => await zListRolesResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/roles',
+    ...options
+});
+
+/**
+ * Crear un rol
+ */
+export const createRole = <ThrowOnError extends boolean = false>(options: Options<CreateRoleData, ThrowOnError>): RequestResult<CreateRoleResponses, CreateRoleErrors, ThrowOnError> => (options.client ?? client).post<CreateRoleResponses, CreateRoleErrors, ThrowOnError>({
+    responseValidator: async (data) => await zCreateRoleResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/roles',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Eliminar un rol sin usuarios
+ */
+export const deleteRole = <ThrowOnError extends boolean = false>(options: Options<DeleteRoleData, ThrowOnError>): RequestResult<DeleteRoleResponses, DeleteRoleErrors, ThrowOnError> => (options.client ?? client).delete<DeleteRoleResponses, DeleteRoleErrors, ThrowOnError>({
+    responseValidator: async (data) => await zDeleteRoleResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/roles/{role_id}',
+    ...options
+});
+
+/**
+ * Detalle de un rol
+ */
+export const getRole = <ThrowOnError extends boolean = false>(options: Options<GetRoleData, ThrowOnError>): RequestResult<GetRoleResponses, GetRoleErrors, ThrowOnError> => (options.client ?? client).get<GetRoleResponses, GetRoleErrors, ThrowOnError>({
+    responseValidator: async (data) => await zGetRoleResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/roles/{role_id}',
+    ...options
+});
+
+/**
+ * Editar un rol
+ */
+export const updateRole = <ThrowOnError extends boolean = false>(options: Options<UpdateRoleData, ThrowOnError>): RequestResult<UpdateRoleResponses, UpdateRoleErrors, ThrowOnError> => (options.client ?? client).patch<UpdateRoleResponses, UpdateRoleErrors, ThrowOnError>({
+    responseValidator: async (data) => await zUpdateRoleResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/roles/{role_id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Reemplazar permisos
+ */
+export const setRolePermissions = <ThrowOnError extends boolean = false>(options: Options<SetRolePermissionsData, ThrowOnError>): RequestResult<SetRolePermissionsResponses, SetRolePermissionsErrors, ThrowOnError> => (options.client ?? client).put<SetRolePermissionsResponses, SetRolePermissionsErrors, ThrowOnError>({
+    responseValidator: async (data) => await zSetRolePermissionsResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/roles/{role_id}/permissions',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Catálogo de permisos
+ */
+export const listPermissions = <ThrowOnError extends boolean = false>(options?: Options<ListPermissionsData, ThrowOnError>): RequestResult<ListPermissionsResponses, ListPermissionsErrors, ThrowOnError> => (options?.client ?? client).get<ListPermissionsResponses, ListPermissionsErrors, ThrowOnError>({
+    responseValidator: async (data) => await zListPermissionsResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/permissions',
+    ...options
+});
+
+/**
+ * Consultar la bitácora de auditoría
+ */
+export const listAuditEntries = <ThrowOnError extends boolean = false>(options?: Options<ListAuditEntriesData, ThrowOnError>): RequestResult<ListAuditEntriesResponses, ListAuditEntriesErrors, ThrowOnError> => (options?.client ?? client).get<ListAuditEntriesResponses, ListAuditEntriesErrors, ThrowOnError>({
+    responseValidator: async (data) => await zListAuditEntriesResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/audit-log',
     ...options
 });

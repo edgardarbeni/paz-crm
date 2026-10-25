@@ -299,6 +299,7 @@ erDiagram
         uuid invited_by_user_id FK
         timestamptz expires_at
         timestamptz accepted_at
+        timestamptz revoked_at "D-54"
     }
     password_reset_tokens {
         uuid id PK
@@ -328,6 +329,7 @@ erDiagram
         text device_label
         text user_agent
         inet ip_address
+        text_array auth_methods "RFC 8176: pwd, otp (D-54)"
         timestamptz last_seen_at
         timestamptz expires_at
         timestamptz revoked_at
@@ -349,6 +351,7 @@ erDiagram
         text description
         boolean requires_mfa
         boolean is_system
+        boolean grants_all "superadmin (D-54)"
     }
     permissions {
         uuid id PK

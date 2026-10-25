@@ -24,6 +24,7 @@ from fastapi import Query
 from pydantic import BaseModel, Field
 from sqlalchemy import ColumnElement, Select, and_, or_
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Mapped
 
 from app.core.errors import BadRequestError
 
@@ -41,9 +42,12 @@ class InvalidSortError(BadRequestError):
     title = "Criterio de ordenamiento inválido"
 
 
+SortColumn = ColumnElement[Any] | Mapped[Any]
+
+
 class SortField(NamedTuple):
     key: str
-    column: ColumnElement[Any]
+    column: SortColumn
     descending: bool = False
 
 
@@ -80,8 +84,8 @@ def page_params(
 def parse_sort(
     raw: str | None,
     *,
-    allowed: Mapping[str, ColumnElement[Any]],
-    tiebreaker: ColumnElement[Any],
+    allowed: Mapping[str, SortColumn],
+    tiebreaker: SortColumn,
     default: str | None = None,
 ) -> list[SortField]:
     fields: list[SortField] = []
@@ -99,21 +103,23 @@ def parse_sort(
 
 # --- cursor encoding --------------------------------------------------------------------
 
-_ENCODERS: dict[type, str] = {
-    bool: "b",
-    int: "i",
-    str: "s",
-    uuid.UUID: "u",
-    dt.datetime: "dt",
-    dt.date: "d",
-    decimal.Decimal: "n",
-}
+# Order matters: bool before int (bool is an int), datetime before date (datetime is a date).
+# isinstance (not exact type) because drivers return subclasses, e.g. asyncpg's UUID.
+_ENCODERS: tuple[tuple[type, str], ...] = (
+    (bool, "b"),
+    (int, "i"),
+    (str, "s"),
+    (uuid.UUID, "u"),
+    (dt.datetime, "dt"),
+    (dt.date, "d"),
+    (decimal.Decimal, "n"),
+)
 
 
 def _encode_value(value: Any) -> list[Any]:
     if value is None:
         return ["0", None]
-    tag = _ENCODERS.get(type(value))
+    tag = next((tag for kind, tag in _ENCODERS if isinstance(value, kind)), None)
     if tag is None:
         raise TypeError(f"Unsupported cursor value type: {type(value).__name__}")
     if tag in {"b", "i", "s"}:
@@ -162,16 +168,18 @@ def _after(sort: Sequence[SortField], values: Sequence[Any]) -> ColumnElement[bo
     return or_(*clauses)
 
 
-async def paginate[R](
+async def paginate(
     session: AsyncSession,
-    statement: Select[tuple[R]],
+    statement: Select[Any],
     *,
     sort: Sequence[SortField],
     limit: int,
     cursor: str | None,
-) -> CursorPage[R]:
-    """`statement` must select a single entity or column; the sort keys are appended as extra
-    labeled columns so the next cursor never depends on the item's attribute names."""
+) -> CursorPage[Any]:
+    """With a single selected entity/column, items are those objects; with several columns,
+    items are dicts keyed by column name. Sort keys are appended as extra labeled columns, so
+    the next cursor never depends on the item's attribute names."""
+    width = len(statement.column_descriptions)  # entities count once, not per column
     if cursor:
         statement = statement.where(_after(sort, decode_cursor(cursor, expected_fields=len(sort))))
     order = [field.column.desc() if field.descending else field.column.asc() for field in sort]
@@ -182,5 +190,10 @@ async def paginate[R](
 
     has_more = len(rows) > limit
     rows = rows[:limit]
-    next_cursor = encode_cursor(list(rows[-1][1:])) if has_more and rows else None
-    return CursorPage[R](items=[row[0] for row in rows], next_cursor=next_cursor, has_more=has_more)
+    next_cursor = encode_cursor(list(rows[-1][width:])) if has_more and rows else None
+    items: list[Any] = (
+        [row[0] for row in rows]
+        if width == 1
+        else [dict(zip(row._fields[:width], row[:width], strict=True)) for row in rows]
+    )
+    return CursorPage[Any](items=items, next_cursor=next_cursor, has_more=has_more)

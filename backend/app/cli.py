@@ -88,7 +88,25 @@ def _contract_settings() -> Settings:
         encryption_keys=f"1:{placeholder_key}",
         encryption_active_key_version=1,
         blind_index_key=placeholder_key,
+        jwt_secret="contract-placeholder-secret-not-used-for-signing",  # noqa: S106
     )
+
+
+users_cli = typer.Typer(help="Usuarios.", no_args_is_help=True)
+cli.add_typer(users_cli, name="users")
+
+
+@users_cli.command("create-superadmin")
+def users_create_superadmin(
+    email: Annotated[str, typer.Option(prompt=True, help="Correo del superadministrador.")],
+    full_name: Annotated[str, typer.Option(prompt="Nombre completo")],
+    password: Annotated[str, typer.Option(prompt=True, hide_input=True, confirmation_prompt=True)],
+) -> None:
+    """Crea el primer superadministrador (activo; debe enrolar TOTP en su primer acceso)."""
+    from app.modules.identity.bootstrap import create_superadmin  # noqa: PLC0415
+
+    user_id = asyncio.run(create_superadmin(get_settings(), email, full_name, password))
+    typer.echo(f"Superadministrador creado: {user_id}. Configurará TOTP al iniciar sesión.")
 
 
 @keys_cli.command("generate")
