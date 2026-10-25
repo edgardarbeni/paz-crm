@@ -2,8 +2,8 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { AcceptInvitationData, AcceptInvitationErrors, AcceptInvitationResponses, ActivateUserData, ActivateUserErrors, ActivateUserResponses, ChangePasswordData, ChangePasswordErrors, ChangePasswordResponses, ConfirmTotpData, ConfirmTotpErrors, ConfirmTotpResponses, CreateRoleData, CreateRoleErrors, CreateRoleResponses, DeleteRoleData, DeleteRoleErrors, DeleteRoleResponses, DisableTotpData, DisableTotpErrors, DisableTotpResponses, DisableUserData, DisableUserErrors, DisableUserResponses, ForgotPasswordData, ForgotPasswordErrors, ForgotPasswordResponses, GetHealthData, GetHealthErrors, GetHealthResponses, GetMeData, GetMeErrors, GetMeResponses, GetReadinessData, GetReadinessErrors, GetReadinessResponses, GetRoleData, GetRoleErrors, GetRoleResponses, GetUserData, GetUserErrors, GetUserResponses, InspectInvitationData, InspectInvitationErrors, InspectInvitationResponses, InviteUserData, InviteUserErrors, InviteUserResponses, ListAuditEntriesData, ListAuditEntriesErrors, ListAuditEntriesResponses, ListMySessionsData, ListMySessionsErrors, ListMySessionsResponses, ListPermissionsData, ListPermissionsErrors, ListPermissionsResponses, ListRolesData, ListRolesErrors, ListRolesResponses, ListUsersData, ListUsersErrors, ListUserSessionsData, ListUserSessionsErrors, ListUserSessionsResponses, ListUsersResponses, LoginData, LoginErrors, LoginResponses, LogoutData, LogoutErrors, LogoutResponses, RefreshSessionData, RefreshSessionErrors, RefreshSessionResponses, RegenerateRecoveryCodesData, RegenerateRecoveryCodesErrors, RegenerateRecoveryCodesResponses, ResendInvitationData, ResendInvitationErrors, ResendInvitationResponses, ResetPasswordData, ResetPasswordErrors, ResetPasswordResponses, ResetUserMfaData, ResetUserMfaErrors, ResetUserMfaResponses, RevokeMyOtherSessionsData, RevokeMyOtherSessionsErrors, RevokeMyOtherSessionsResponses, RevokeMySessionData, RevokeMySessionErrors, RevokeMySessionResponses, RevokeUserSessionsData, RevokeUserSessionsErrors, RevokeUserSessionsResponses, SetRolePermissionsData, SetRolePermissionsErrors, SetRolePermissionsResponses, SetupTotpData, SetupTotpErrors, SetupTotpResponses, SetUserRolesData, SetUserRolesErrors, SetUserRolesResponses, UnlockUserData, UnlockUserErrors, UnlockUserResponses, UpdateRoleData, UpdateRoleErrors, UpdateRoleResponses, UpdateUserData, UpdateUserErrors, UpdateUserResponses, VerifyMfaData, VerifyMfaErrors, VerifyMfaResponses } from './types.gen';
-import { zAcceptInvitationResponse, zActivateUserResponse, zChangePasswordResponse, zConfirmTotpResponse, zCreateRoleResponse, zDeleteRoleResponse, zDisableTotpResponse, zDisableUserResponse, zGetHealthResponse, zGetMeResponse, zGetReadinessResponse, zGetRoleResponse, zGetUserResponse, zInspectInvitationResponse, zInviteUserResponse, zListAuditEntriesResponse, zListMySessionsResponse, zListPermissionsResponse, zListRolesResponse, zListUserSessionsResponse, zListUsersResponse, zLoginResponse, zLogoutResponse, zRefreshSessionResponse, zRegenerateRecoveryCodesResponse, zResendInvitationResponse, zResetPasswordResponse, zResetUserMfaResponse, zRevokeMyOtherSessionsResponse, zRevokeMySessionResponse, zRevokeUserSessionsResponse, zSetRolePermissionsResponse, zSetupTotpResponse, zSetUserRolesResponse, zUnlockUserResponse, zUpdateRoleResponse, zUpdateUserResponse, zVerifyMfaResponse } from './zod.gen';
+import type { AcceptInvitationData, AcceptInvitationErrors, AcceptInvitationResponses, ActivateUserData, ActivateUserErrors, ActivateUserResponses, ChangePasswordData, ChangePasswordErrors, ChangePasswordResponses, ConfirmTotpData, ConfirmTotpErrors, ConfirmTotpResponses, CreateRoleData, CreateRoleErrors, CreateRoleResponses, DeleteRoleData, DeleteRoleErrors, DeleteRoleResponses, DisableTotpData, DisableTotpErrors, DisableTotpResponses, DisableUserData, DisableUserErrors, DisableUserResponses, ForgotPasswordData, ForgotPasswordErrors, ForgotPasswordResponses, GetGeoNodeData, GetGeoNodeErrors, GetGeoNodeResponses, GetHealthData, GetHealthErrors, GetHealthResponses, GetImportRunData, GetImportRunErrors, GetImportRunResponses, GetMeData, GetMeErrors, GetMeResponses, GetReadinessData, GetReadinessErrors, GetReadinessResponses, GetRoleData, GetRoleErrors, GetRoleResponses, GetUserData, GetUserErrors, GetUserResponses, GetUserScopesData, GetUserScopesErrors, GetUserScopesResponses, GetVectorTileData, GetVectorTileErrors, GetVectorTileResponses, InspectInvitationData, InspectInvitationErrors, InspectInvitationResponses, InviteUserData, InviteUserErrors, InviteUserResponses, ListAuditEntriesData, ListAuditEntriesErrors, ListAuditEntriesResponses, ListFrameworksData, ListFrameworksErrors, ListFrameworksResponses, ListGeoNodesData, ListGeoNodesErrors, ListGeoNodesResponses, ListImportIssuesData, ListImportIssuesErrors, ListImportIssuesResponses, ListImportRunsData, ListImportRunsErrors, ListImportRunsResponses, ListMySessionsData, ListMySessionsErrors, ListMySessionsResponses, ListPermissionsData, ListPermissionsErrors, ListPermissionsResponses, ListRolesData, ListRolesErrors, ListRolesResponses, ListUsersData, ListUsersErrors, ListUserSessionsData, ListUserSessionsErrors, ListUserSessionsResponses, ListUsersResponses, LocatePointData, LocatePointErrors, LocatePointResponses, LoginData, LoginErrors, LoginResponses, LogoutData, LogoutErrors, LogoutResponses, RefreshSessionData, RefreshSessionErrors, RefreshSessionResponses, RegenerateRecoveryCodesData, RegenerateRecoveryCodesErrors, RegenerateRecoveryCodesResponses, ResendInvitationData, ResendInvitationErrors, ResendInvitationResponses, ResetPasswordData, ResetPasswordErrors, ResetPasswordResponses, ResetUserMfaData, ResetUserMfaErrors, ResetUserMfaResponses, RevokeMyOtherSessionsData, RevokeMyOtherSessionsErrors, RevokeMyOtherSessionsResponses, RevokeMySessionData, RevokeMySessionErrors, RevokeMySessionResponses, RevokeUserSessionsData, RevokeUserSessionsErrors, RevokeUserSessionsResponses, SearchGeographyData, SearchGeographyErrors, SearchGeographyResponses, SetRolePermissionsData, SetRolePermissionsErrors, SetRolePermissionsResponses, SetupTotpData, SetupTotpErrors, SetupTotpResponses, SetUserRolesData, SetUserRolesErrors, SetUserRolesResponses, SetUserScopesData, SetUserScopesErrors, SetUserScopesResponses, UnlockUserData, UnlockUserErrors, UnlockUserResponses, UpdateRoleData, UpdateRoleErrors, UpdateRoleResponses, UpdateUserData, UpdateUserErrors, UpdateUserResponses, VerifyMfaData, VerifyMfaErrors, VerifyMfaResponses } from './types.gen';
+import { zAcceptInvitationResponse, zActivateUserResponse, zChangePasswordResponse, zConfirmTotpResponse, zCreateRoleResponse, zDeleteRoleResponse, zDisableTotpResponse, zDisableUserResponse, zGetGeoNodeResponse, zGetHealthResponse, zGetImportRunResponse, zGetMeResponse, zGetReadinessResponse, zGetRoleResponse, zGetUserResponse, zGetUserScopesResponse, zInspectInvitationResponse, zInviteUserResponse, zListAuditEntriesResponse, zListFrameworksResponse, zListGeoNodesResponse, zListImportIssuesResponse, zListImportRunsResponse, zListMySessionsResponse, zListPermissionsResponse, zListRolesResponse, zListUserSessionsResponse, zListUsersResponse, zLocatePointResponse, zLoginResponse, zLogoutResponse, zRefreshSessionResponse, zRegenerateRecoveryCodesResponse, zResendInvitationResponse, zResetPasswordResponse, zResetUserMfaResponse, zRevokeMyOtherSessionsResponse, zRevokeMySessionResponse, zRevokeUserSessionsResponse, zSearchGeographyResponse, zSetRolePermissionsResponse, zSetupTotpResponse, zSetUserRolesResponse, zSetUserScopesResponse, zUnlockUserResponse, zUpdateRoleResponse, zUpdateUserResponse, zVerifyMfaResponse } from './zod.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -372,6 +372,30 @@ export const revokeUserSessions = <ThrowOnError extends boolean = false>(options
 });
 
 /**
+ * Alcance geográfico
+ */
+export const getUserScopes = <ThrowOnError extends boolean = false>(options: Options<GetUserScopesData, ThrowOnError>): RequestResult<GetUserScopesResponses, GetUserScopesErrors, ThrowOnError> => (options.client ?? client).get<GetUserScopesResponses, GetUserScopesErrors, ThrowOnError>({
+    responseValidator: async (data) => await zGetUserScopesResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/users/{user_id}/scopes',
+    ...options
+});
+
+/**
+ * Reemplazar el alcance geográfico (no puede exceder el propio)
+ */
+export const setUserScopes = <ThrowOnError extends boolean = false>(options: Options<SetUserScopesData, ThrowOnError>): RequestResult<SetUserScopesResponses, SetUserScopesErrors, ThrowOnError> => (options.client ?? client).put<SetUserScopesResponses, SetUserScopesErrors, ThrowOnError>({
+    responseValidator: async (data) => await zSetUserScopesResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/users/{user_id}/scopes',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
  * Listar roles
  */
 export const listRoles = <ThrowOnError extends boolean = false>(options?: Options<ListRolesData, ThrowOnError>): RequestResult<ListRolesResponses, ListRolesErrors, ThrowOnError> => (options?.client ?? client).get<ListRolesResponses, ListRolesErrors, ThrowOnError>({
@@ -460,5 +484,94 @@ export const listAuditEntries = <ThrowOnError extends boolean = false>(options?:
     responseValidator: async (data) => await zListAuditEntriesResponse.parseAsync(data),
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/v1/audit-log',
+    ...options
+});
+
+/**
+ * Marcos geográficos
+ */
+export const listFrameworks = <ThrowOnError extends boolean = false>(options?: Options<ListFrameworksData, ThrowOnError>): RequestResult<ListFrameworksResponses, ListFrameworksErrors, ThrowOnError> => (options?.client ?? client).get<ListFrameworksResponses, ListFrameworksErrors, ThrowOnError>({
+    responseValidator: async (data) => await zListFrameworksResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/geography/frameworks',
+    ...options
+});
+
+/**
+ * Buscar por clave INE o por nombre
+ */
+export const searchGeography = <ThrowOnError extends boolean = false>(options: Options<SearchGeographyData, ThrowOnError>): RequestResult<SearchGeographyResponses, SearchGeographyErrors, ThrowOnError> => (options.client ?? client).get<SearchGeographyResponses, SearchGeographyErrors, ThrowOnError>({
+    responseValidator: async (data) => await zSearchGeographyResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/geography/search',
+    ...options
+});
+
+/**
+ * ¿A qué sección pertenece una coordenada? (y sus ancestros)
+ */
+export const locatePoint = <ThrowOnError extends boolean = false>(options: Options<LocatePointData, ThrowOnError>): RequestResult<LocatePointResponses, LocatePointErrors, ThrowOnError> => (options.client ?? client).get<LocatePointResponses, LocatePointErrors, ThrowOnError>({
+    responseValidator: async (data) => await zLocatePointResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/geography/locate',
+    ...options
+});
+
+/**
+ * Tesela vectorial (MVT) por capa
+ */
+export const getVectorTile = <ThrowOnError extends boolean = false>(options: Options<GetVectorTileData, ThrowOnError>): RequestResult<GetVectorTileResponses, GetVectorTileErrors, ThrowOnError> => (options.client ?? client).get<GetVectorTileResponses, GetVectorTileErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/geography/tiles/{layer}/{z}/{x}/{y}.mvt',
+    ...options
+});
+
+/**
+ * Corridas de importación
+ */
+export const listImportRuns = <ThrowOnError extends boolean = false>(options?: Options<ListImportRunsData, ThrowOnError>): RequestResult<ListImportRunsResponses, ListImportRunsErrors, ThrowOnError> => (options?.client ?? client).get<ListImportRunsResponses, ListImportRunsErrors, ThrowOnError>({
+    responseValidator: async (data) => await zListImportRunsResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/geography/import-runs',
+    ...options
+});
+
+/**
+ * Detalle de una corrida
+ */
+export const getImportRun = <ThrowOnError extends boolean = false>(options: Options<GetImportRunData, ThrowOnError>): RequestResult<GetImportRunResponses, GetImportRunErrors, ThrowOnError> => (options.client ?? client).get<GetImportRunResponses, GetImportRunErrors, ThrowOnError>({
+    responseValidator: async (data) => await zGetImportRunResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/geography/import-runs/{run_id}',
+    ...options
+});
+
+/**
+ * Errores y advertencias
+ */
+export const listImportIssues = <ThrowOnError extends boolean = false>(options: Options<ListImportIssuesData, ThrowOnError>): RequestResult<ListImportIssuesResponses, ListImportIssuesErrors, ThrowOnError> => (options.client ?? client).get<ListImportIssuesResponses, ListImportIssuesErrors, ThrowOnError>({
+    responseValidator: async (data) => await zListImportIssuesResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/geography/import-runs/{run_id}/issues',
+    ...options
+});
+
+/**
+ * Listar nodos de un nivel
+ */
+export const listGeoNodes = <ThrowOnError extends boolean = false>(options: Options<ListGeoNodesData, ThrowOnError>): RequestResult<ListGeoNodesResponses, ListGeoNodesErrors, ThrowOnError> => (options.client ?? client).get<ListGeoNodesResponses, ListGeoNodesErrors, ThrowOnError>({
+    responseValidator: async (data) => await zListGeoNodesResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/geography/{level}',
+    ...options
+});
+
+/**
+ * Detalle de un nodo
+ */
+export const getGeoNode = <ThrowOnError extends boolean = false>(options: Options<GetGeoNodeData, ThrowOnError>): RequestResult<GetGeoNodeResponses, GetGeoNodeErrors, ThrowOnError> => (options.client ?? client).get<GetGeoNodeResponses, GetGeoNodeErrors, ThrowOnError>({
+    responseValidator: async (data) => await zGetGeoNodeResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/geography/{level}/{node_id}',
     ...options
 });

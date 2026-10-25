@@ -1,4 +1,4 @@
-"""/users, /roles, /permissions — administration (RBAC; geographic scope in phase C)."""
+"""/users, /roles, /permissions — administration (RBAC + geographic scope, D-33/D-34)."""
 
 import uuid
 from typing import Annotated
@@ -21,6 +21,8 @@ from app.modules.identity.schemas import (
     RoleOut,
     RolePermissionsRequest,
     RoleUpdateRequest,
+    ScopeOut,
+    ScopesRequest,
     SessionOut,
     UserInvitedResponse,
     UserInviteRequest,
@@ -28,8 +30,9 @@ from app.modules.identity.schemas import (
     UserRolesRequest,
     UserUpdateRequest,
 )
-from app.modules.identity.services import admin, credentials, mfa, sessions
+from app.modules.identity.services import admin, credentials, mfa, scopes, sessions
 from app.modules.identity.services.access import utcnow
+from app.modules.identity.services.scopes import ensure_within_scope
 
 users_router = APIRouter(prefix="/users", tags=["users"])
 roles_router = APIRouter(tags=["roles"])
@@ -41,6 +44,7 @@ UserDisabler = Annotated[CurrentUser, permission(Perm.USER_DISABLE)]
 RoleAssigner = Annotated[CurrentUser, permission(Perm.USER_ASSIGN_ROLES)]
 MfaResetter = Annotated[CurrentUser, permission(Perm.USER_RESET_MFA)]
 SessionRevoker = Annotated[CurrentUser, permission(Perm.USER_REVOKE_SESSIONS)]
+ScopeAssigner = Annotated[CurrentUser, permission(Perm.USER_ASSIGN_SCOPES)]
 RoleReader = Annotated[CurrentUser, permission(Perm.ROLE_READ)]
 RoleCreator = Annotated[CurrentUser, permission(Perm.ROLE_CREATE)]
 RoleEditor = Annotated[CurrentUser, permission(Perm.ROLE_UPDATE)]
@@ -58,7 +62,7 @@ def _user_out(view: admin.UserView) -> UserOut:
 @users_router.get("", operation_id="listUsers", summary="Listar usuarios")
 async def list_users(
     db: SessionDep,
-    _: UserReader,
+    actor: UserReader,
     params: Annotated[PageParams, Depends(page_params)],
     status_filter: Annotated[UserStatus | None, Query(alias="status")] = None,
     q: Annotated[
@@ -66,7 +70,9 @@ async def list_users(
     ] = None,
     role_id: uuid.UUID | None = None,
 ) -> CursorPage[UserOut]:
-    page = await admin.list_users(db, params, status=status_filter, search=q, role_id=role_id)
+    page = await admin.list_users(
+        db, params, status=status_filter, search=q, role_id=role_id, geo=actor.geo
+    )
     return CursorPage[UserOut](
         items=[_user_out(view) for view in page.items],
         next_cursor=page.next_cursor,
@@ -105,8 +111,10 @@ async def invite_user(
 
 
 @users_router.get("/{user_id}", operation_id="getUser", summary="Detalle de un usuario")
-async def get_user(user_id: uuid.UUID, db: SessionDep, _: UserReader) -> UserOut:
-    return _user_out(await admin.user_view(db, user_id))
+async def get_user(user_id: uuid.UUID, db: SessionDep, actor: UserReader) -> UserOut:
+    view = await admin.user_view(db, user_id)
+    await ensure_within_scope(db, actor.geo, user_id=user_id)
+    return _user_out(view)
 
 
 @users_router.patch("/{user_id}", operation_id="updateUser", summary="Editar datos de un usuario")
@@ -114,7 +122,9 @@ async def update_user(
     user_id: uuid.UUID, body: UserUpdateRequest, db: SessionDep, actor: UserEditor
 ) -> UserOut:
     return _user_out(
-        await admin.update_user(db, actor=actor.access, user_id=user_id, full_name=body.full_name)
+        await admin.update_user(
+            db, actor=actor.access, user_id=user_id, full_name=body.full_name, geo=actor.geo
+        )
     )
 
 
@@ -123,20 +133,26 @@ async def update_user(
 )
 async def disable_user(user_id: uuid.UUID, db: SessionDep, actor: UserDisabler) -> UserOut:
     return _user_out(
-        await admin.disable_user(db, actor_id=actor.id, actor=actor.access, user_id=user_id)
+        await admin.disable_user(
+            db, actor_id=actor.id, actor=actor.access, user_id=user_id, geo=actor.geo
+        )
     )
 
 
 @users_router.post("/{user_id}/activate", operation_id="activateUser", summary="Reactivar")
 async def activate_user(user_id: uuid.UUID, db: SessionDep, actor: UserDisabler) -> UserOut:
-    return _user_out(await admin.activate_user(db, actor=actor.access, user_id=user_id))
+    return _user_out(
+        await admin.activate_user(db, actor=actor.access, user_id=user_id, geo=actor.geo)
+    )
 
 
 @users_router.post(
     "/{user_id}/unlock", operation_id="unlockUser", summary="Desbloquear tras intentos fallidos"
 )
 async def unlock_user(user_id: uuid.UUID, db: SessionDep, actor: UserDisabler) -> UserOut:
-    return _user_out(await admin.unlock_user(db, actor=actor.access, user_id=user_id))
+    return _user_out(
+        await admin.unlock_user(db, actor=actor.access, user_id=user_id, geo=actor.geo)
+    )
 
 
 @users_router.put("/{user_id}/roles", operation_id="setUserRoles", summary="Reemplazar los roles")
@@ -145,7 +161,12 @@ async def set_user_roles(
 ) -> UserOut:
     return _user_out(
         await admin.set_user_roles(
-            db, actor_id=actor.id, actor=actor.access, user_id=user_id, role_ids=body.role_ids
+            db,
+            actor_id=actor.id,
+            actor=actor.access,
+            user_id=user_id,
+            role_ids=body.role_ids,
+            geo=actor.geo,
         )
     )
 
@@ -160,7 +181,7 @@ async def resend_invitation(
     services: ServicesDep,
     actor: UserCreator,
 ) -> UserInvitedResponse:
-    await admin.ensure_can_manage(db, actor.access, user_id)
+    await admin.ensure_can_manage(db, actor.access, user_id, actor.geo)
     _, invitation, email = await credentials.resend_invitation(
         db, services, actor_id=actor.id, user_id=user_id
     )
@@ -180,7 +201,7 @@ async def resend_invitation(
 async def reset_user_mfa(user_id: uuid.UUID, db: SessionDep, actor: MfaResetter) -> None:
     if user_id == actor.id:
         raise ConflictError("No puedes restablecer tu propio segundo factor desde aquí.")
-    await admin.ensure_can_manage(db, actor.access, user_id)
+    await admin.ensure_can_manage(db, actor.access, user_id, actor.geo)
     await mfa.admin_reset_mfa(db, target_id=user_id)
 
 
@@ -188,9 +209,10 @@ async def reset_user_mfa(user_id: uuid.UUID, db: SessionDep, actor: MfaResetter)
     "/{user_id}/sessions", operation_id="listUserSessions", summary="Sesiones activas"
 )
 async def list_user_sessions(
-    user_id: uuid.UUID, db: SessionDep, _: SessionRevoker
+    user_id: uuid.UUID, db: SessionDep, actor: SessionRevoker
 ) -> list[SessionOut]:
     await admin.user_view(db, user_id)  # 404 if missing
+    await ensure_within_scope(db, actor.geo, user_id=user_id)
     return [SessionOut.model_validate(s) for s in await repo.active_sessions(db, user_id, utcnow())]
 
 
@@ -202,10 +224,36 @@ async def list_user_sessions(
 async def revoke_user_sessions(
     user_id: uuid.UUID, db: SessionDep, actor: SessionRevoker
 ) -> RevokedCount:
-    await admin.ensure_can_manage(db, actor.access, user_id)
+    await admin.ensure_can_manage(db, actor.access, user_id, actor.geo)
     count = await sessions.revoke_user_sessions(db, user_id, reason="revoked_by_admin")
     await db.commit()
     return RevokedCount(revoked=count)
+
+
+@users_router.get("/{user_id}/scopes", operation_id="getUserScopes", summary="Alcance geográfico")
+async def get_user_scopes(user_id: uuid.UUID, db: SessionDep, actor: UserReader) -> list[ScopeOut]:
+    await admin.user_view(db, user_id)
+    await ensure_within_scope(db, actor.geo, user_id=user_id)
+    return [ScopeOut.from_model(scope) for scope in await scopes.scopes_of(db, user_id)]
+
+
+@users_router.put(
+    "/{user_id}/scopes",
+    operation_id="setUserScopes",
+    summary="Reemplazar el alcance geográfico (no puede exceder el propio)",
+)
+async def set_user_scopes(
+    user_id: uuid.UUID, body: ScopesRequest, db: SessionDep, actor: ScopeAssigner
+) -> list[ScopeOut]:
+    await admin.ensure_can_manage(db, actor.access, user_id, actor.geo)
+    created = await scopes.set_scopes(
+        db,
+        actor=actor.geo,
+        user_id=user_id,
+        scopes=[(item.level, item.node_id) for item in body.scopes],
+    )
+    await db.commit()
+    return [ScopeOut.from_model(scope) for scope in created]
 
 
 # --- roles & permissions -------------------------------------------------------------------

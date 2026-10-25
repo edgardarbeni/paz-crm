@@ -1,0 +1,25 @@
+meta {
+  name: ¿Qué sección es esta coordenada?
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/v1/geography/locate?lat=21.8818&lon=-102.2916
+  body: none
+  auth: bearer
+}
+
+params:query {
+  lat: 21.8818
+  lon: -102.2916
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+docs {
+  Devuelve sección, municipio, DF, DL, estado y circunscripción (p95 < 1 ms en Aguascalientes).
+  404 si la coordenada no cae en ninguna sección; 403 si está fuera del alcance del usuario.
+}

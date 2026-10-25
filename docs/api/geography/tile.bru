@@ -1,0 +1,20 @@
+meta {
+  name: Tesela vectorial (MVT)
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/api/v1/geography/tiles/sections/11/442/896.mvt
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+docs {
+  Capas: states, federal_districts, local_districts, municipalities, sections (z ≥ 9),
+  neighborhoods (z ≥ 12), blocks (z ≥ 14). Respuesta application/vnd.mapbox-vector-tile.
+}

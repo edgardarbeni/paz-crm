@@ -5,6 +5,18 @@ export type ClientOptions = {
 };
 
 /**
+ * Ancestors
+ */
+export type Ancestors = {
+    section: NodeRef;
+    municipality: NodeRef;
+    federal_district: NodeRef;
+    local_district: NodeRef;
+    state: NodeRef;
+    electoral_region: NodeRef | null;
+};
+
+/**
  * AuditEntryOut
  */
 export type AuditEntryOut = {
@@ -111,6 +123,66 @@ export type CursorPageAuditEntryOut = {
 };
 
 /**
+ * CursorPage[GeoNodeOut]
+ */
+export type CursorPageGeoNodeOut = {
+    /**
+     * Items
+     */
+    items: Array<GeoNodeOut>;
+    /**
+     * Next Cursor
+     *
+     * Pasar en `cursor` para obtener la siguiente página.
+     */
+    next_cursor?: string | null;
+    /**
+     * Has More
+     */
+    has_more: boolean;
+};
+
+/**
+ * CursorPage[ImportIssueOut]
+ */
+export type CursorPageImportIssueOut = {
+    /**
+     * Items
+     */
+    items: Array<ImportIssueOut>;
+    /**
+     * Next Cursor
+     *
+     * Pasar en `cursor` para obtener la siguiente página.
+     */
+    next_cursor?: string | null;
+    /**
+     * Has More
+     */
+    has_more: boolean;
+};
+
+/**
+ * CursorPage[ImportRunOut]
+ */
+export type CursorPageImportRunOut = {
+    /**
+     * Items
+     */
+    items: Array<ImportRunOut>;
+    /**
+     * Next Cursor
+     *
+     * Pasar en `cursor` para obtener la siguiente página.
+     */
+    next_cursor?: string | null;
+    /**
+     * Has More
+     */
+    has_more: boolean;
+};
+
+/**
  * CursorPage[UserOut]
  */
 export type CursorPageUserOut = {
@@ -151,6 +223,163 @@ export type FieldViolation = {
 };
 
 /**
+ * FrameworkOut
+ */
+export type FrameworkOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Cutoff Date
+     */
+    cutoff_date: string | null;
+    /**
+     * Source Agreement
+     */
+    source_agreement: string | null;
+    /**
+     * Is Active
+     */
+    is_active: boolean;
+    /**
+     * Activated At
+     */
+    activated_at: string | null;
+};
+
+/**
+ * GeoNodeDetail
+ */
+export type GeoNodeDetail = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Level
+     */
+    level: 'electoral_region' | 'state' | 'federal_district' | 'local_district' | 'municipality' | 'section' | 'locality' | 'neighborhood';
+    /**
+     * Code
+     *
+     * Clave del nivel (número de sección, municipio, etc.).
+     */
+    code: string;
+    /**
+     * Key
+     *
+     * Clave INE legible: 01-0338, 01-005, C2…
+     */
+    key: string;
+    /**
+     * Name
+     */
+    name?: string | null;
+    /**
+     * State Code
+     */
+    state_code?: number | null;
+    /**
+     * Electoral Region Id
+     */
+    electoral_region_id?: string | null;
+    /**
+     * State Id
+     */
+    state_id?: string | null;
+    /**
+     * Municipality Id
+     */
+    municipality_id?: string | null;
+    /**
+     * Federal District Id
+     */
+    federal_district_id?: string | null;
+    /**
+     * Local District Id
+     */
+    local_district_id?: string | null;
+    /**
+     * Geometry
+     *
+     * GeoJSON simplificado.
+     */
+    geometry?: {
+        [key: string]: unknown;
+    } | null;
+    /**
+     * Bbox
+     *
+     * [oeste, sur, este, norte]
+     */
+    bbox?: Array<number> | null;
+    ancestors?: Ancestors | null;
+    /**
+     * Block Count
+     */
+    block_count?: number | null;
+};
+
+/**
+ * GeoNodeOut
+ */
+export type GeoNodeOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Level
+     */
+    level: 'electoral_region' | 'state' | 'federal_district' | 'local_district' | 'municipality' | 'section' | 'locality' | 'neighborhood';
+    /**
+     * Code
+     *
+     * Clave del nivel (número de sección, municipio, etc.).
+     */
+    code: string;
+    /**
+     * Key
+     *
+     * Clave INE legible: 01-0338, 01-005, C2…
+     */
+    key: string;
+    /**
+     * Name
+     */
+    name?: string | null;
+    /**
+     * State Code
+     */
+    state_code?: number | null;
+    /**
+     * Electoral Region Id
+     */
+    electoral_region_id?: string | null;
+    /**
+     * State Id
+     */
+    state_id?: string | null;
+    /**
+     * Municipality Id
+     */
+    municipality_id?: string | null;
+    /**
+     * Federal District Id
+     */
+    federal_district_id?: string | null;
+    /**
+     * Local District Id
+     */
+    local_district_id?: string | null;
+};
+
+/**
  * HealthStatus
  */
 export type HealthStatus = {
@@ -158,6 +387,118 @@ export type HealthStatus = {
      * Status
      */
     status: 'ok';
+};
+
+/**
+ * ImportIssueOut
+ */
+export type ImportIssueOut = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Layer
+     */
+    layer: string;
+    /**
+     * Source Fid
+     */
+    source_fid: number | null;
+    /**
+     * Natural Key
+     */
+    natural_key: {
+        [key: string]: unknown;
+    } | null;
+    /**
+     * Severity
+     */
+    severity: string;
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Message
+     */
+    message: string;
+};
+
+/**
+ * ImportRunOut
+ */
+export type ImportRunOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Framework Id
+     */
+    framework_id: string;
+    /**
+     * State Code
+     */
+    state_code: number | null;
+    /**
+     * Source Uri
+     */
+    source_uri: string;
+    /**
+     * File Sha256
+     */
+    file_sha256: string | null;
+    /**
+     * Source Srid
+     */
+    source_srid: number | null;
+    /**
+     * Layers Loaded
+     */
+    layers_loaded: Array<string>;
+    /**
+     * Layers Missing
+     */
+    layers_missing: Array<string>;
+    /**
+     * Dry Run
+     */
+    dry_run: boolean;
+    /**
+     * Status
+     */
+    status: string;
+    /**
+     * Counts
+     */
+    counts: {
+        [key: string]: unknown;
+    };
+    /**
+     * Warning Count
+     */
+    warning_count: number;
+    /**
+     * Error Count
+     */
+    error_count: number;
+    /**
+     * Message
+     */
+    message: string | null;
+    /**
+     * Started At
+     */
+    started_at: string;
+    /**
+     * Finished At
+     */
+    finished_at: string | null;
+    /**
+     * Triggered By
+     */
+    triggered_by: string | null;
 };
 
 /**
@@ -259,6 +600,16 @@ export type MeResponse = {
      */
     session_id: string;
     scope: TokenScope;
+    /**
+     * Geo Unrestricted
+     *
+     * Ve todo el país (superadmin o alcance nacional).
+     */
+    geo_unrestricted: boolean;
+    /**
+     * Geo Scopes
+     */
+    geo_scopes: Array<ScopeOut>;
 };
 
 /**
@@ -315,6 +666,24 @@ export type MfaVerifyRequest = {
      * Device Label
      */
     device_label?: string | null;
+};
+
+/**
+ * NodeRef
+ */
+export type NodeRef = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Key
+     */
+    key: string;
+    /**
+     * Name
+     */
+    name?: string | null;
 };
 
 /**
@@ -581,6 +950,49 @@ export type RoleUpdateRequest = {
      * Requires Mfa
      */
     requires_mfa?: boolean | null;
+};
+
+/**
+ * ScopeIn
+ */
+export type ScopeIn = {
+    level: ScopeLevel;
+    /**
+     * Node Id
+     *
+     * Vacío para `national`.
+     */
+    node_id?: string | null;
+};
+
+/**
+ * ScopeLevel
+ */
+export type ScopeLevel = 'national' | 'electoral_region' | 'state' | 'federal_district' | 'local_district' | 'municipality' | 'section';
+
+/**
+ * ScopeOut
+ */
+export type ScopeOut = {
+    /**
+     * Id
+     */
+    id: string;
+    level: ScopeLevel;
+    /**
+     * Node Id
+     */
+    node_id: string | null;
+};
+
+/**
+ * ScopesRequest
+ */
+export type ScopesRequest = {
+    /**
+     * Scopes
+     */
+    scopes: Array<ScopeIn>;
 };
 
 /**
@@ -1814,6 +2226,78 @@ export type RevokeUserSessionsResponses = {
 
 export type RevokeUserSessionsResponse = RevokeUserSessionsResponses[keyof RevokeUserSessionsResponses];
 
+export type GetUserScopesData = {
+    body?: never;
+    path: {
+        /**
+         * User Id
+         */
+        user_id: string;
+    };
+    query?: never;
+    url: '/api/v1/users/{user_id}/scopes';
+};
+
+export type GetUserScopesErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type GetUserScopesError = GetUserScopesErrors[keyof GetUserScopesErrors];
+
+export type GetUserScopesResponses = {
+    /**
+     * Response Getuserscopes
+     *
+     * Successful Response
+     */
+    200: Array<ScopeOut>;
+};
+
+export type GetUserScopesResponse = GetUserScopesResponses[keyof GetUserScopesResponses];
+
+export type SetUserScopesData = {
+    body: ScopesRequest;
+    path: {
+        /**
+         * User Id
+         */
+        user_id: string;
+    };
+    query?: never;
+    url: '/api/v1/users/{user_id}/scopes';
+};
+
+export type SetUserScopesErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type SetUserScopesError = SetUserScopesErrors[keyof SetUserScopesErrors];
+
+export type SetUserScopesResponses = {
+    /**
+     * Response Setuserscopes
+     *
+     * Successful Response
+     */
+    200: Array<ScopeOut>;
+};
+
+export type SetUserScopesResponse = SetUserScopesResponses[keyof SetUserScopesResponses];
+
 export type ListRolesData = {
     body?: never;
     path?: never;
@@ -2112,3 +2596,419 @@ export type ListAuditEntriesResponses = {
 };
 
 export type ListAuditEntriesResponse = ListAuditEntriesResponses[keyof ListAuditEntriesResponses];
+
+export type ListFrameworksData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/geography/frameworks';
+};
+
+export type ListFrameworksErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ListFrameworksError = ListFrameworksErrors[keyof ListFrameworksErrors];
+
+export type ListFrameworksResponses = {
+    /**
+     * Response Listframeworks
+     *
+     * Successful Response
+     */
+    200: Array<FrameworkOut>;
+};
+
+export type ListFrameworksResponse = ListFrameworksResponses[keyof ListFrameworksResponses];
+
+export type SearchGeographyData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Q
+         */
+        q: string;
+        /**
+         * Level
+         */
+        level?: Array<'electoral_region' | 'state' | 'federal_district' | 'local_district' | 'municipality' | 'section' | 'locality' | 'neighborhood'> | null;
+        /**
+         * Limit
+         */
+        limit?: number;
+    };
+    url: '/api/v1/geography/search';
+};
+
+export type SearchGeographyErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type SearchGeographyError = SearchGeographyErrors[keyof SearchGeographyErrors];
+
+export type SearchGeographyResponses = {
+    /**
+     * Response Searchgeography
+     *
+     * Successful Response
+     */
+    200: Array<GeoNodeOut>;
+};
+
+export type SearchGeographyResponse = SearchGeographyResponses[keyof SearchGeographyResponses];
+
+export type LocatePointData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Lat
+         */
+        lat: number;
+        /**
+         * Lon
+         */
+        lon: number;
+    };
+    url: '/api/v1/geography/locate';
+};
+
+export type LocatePointErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type LocatePointError = LocatePointErrors[keyof LocatePointErrors];
+
+export type LocatePointResponses = {
+    /**
+     * Successful Response
+     */
+    200: Ancestors;
+};
+
+export type LocatePointResponse = LocatePointResponses[keyof LocatePointResponses];
+
+export type GetVectorTileData = {
+    body?: never;
+    path: {
+        /**
+         * Layer
+         */
+        layer: string;
+        /**
+         * Z
+         */
+        z: number;
+        /**
+         * X
+         */
+        x: number;
+        /**
+         * Y
+         */
+        y: number;
+    };
+    query?: never;
+    url: '/api/v1/geography/tiles/{layer}/{z}/{x}/{y}.mvt';
+};
+
+export type GetVectorTileErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type GetVectorTileError = GetVectorTileErrors[keyof GetVectorTileErrors];
+
+export type GetVectorTileResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type ListImportRunsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * State Code
+         */
+        state_code?: number | null;
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Cursor
+         */
+        cursor?: string | null;
+        /**
+         * Sort
+         *
+         * Campos separados por coma; prefijo '-' para descendente.
+         */
+        sort?: string | null;
+    };
+    url: '/api/v1/geography/import-runs';
+};
+
+export type ListImportRunsErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ListImportRunsError = ListImportRunsErrors[keyof ListImportRunsErrors];
+
+export type ListImportRunsResponses = {
+    /**
+     * Successful Response
+     */
+    200: CursorPageImportRunOut;
+};
+
+export type ListImportRunsResponse = ListImportRunsResponses[keyof ListImportRunsResponses];
+
+export type GetImportRunData = {
+    body?: never;
+    path: {
+        /**
+         * Run Id
+         */
+        run_id: string;
+    };
+    query?: never;
+    url: '/api/v1/geography/import-runs/{run_id}';
+};
+
+export type GetImportRunErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type GetImportRunError = GetImportRunErrors[keyof GetImportRunErrors];
+
+export type GetImportRunResponses = {
+    /**
+     * Successful Response
+     */
+    200: ImportRunOut;
+};
+
+export type GetImportRunResponse = GetImportRunResponses[keyof GetImportRunResponses];
+
+export type ListImportIssuesData = {
+    body?: never;
+    path: {
+        /**
+         * Run Id
+         */
+        run_id: string;
+    };
+    query?: {
+        /**
+         * Severity
+         */
+        severity?: string | null;
+        /**
+         * Code
+         */
+        code?: string | null;
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Cursor
+         */
+        cursor?: string | null;
+        /**
+         * Sort
+         *
+         * Campos separados por coma; prefijo '-' para descendente.
+         */
+        sort?: string | null;
+    };
+    url: '/api/v1/geography/import-runs/{run_id}/issues';
+};
+
+export type ListImportIssuesErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ListImportIssuesError = ListImportIssuesErrors[keyof ListImportIssuesErrors];
+
+export type ListImportIssuesResponses = {
+    /**
+     * Successful Response
+     */
+    200: CursorPageImportIssueOut;
+};
+
+export type ListImportIssuesResponse = ListImportIssuesResponses[keyof ListImportIssuesResponses];
+
+export type ListGeoNodesData = {
+    body?: never;
+    path: {
+        /**
+         * Level
+         */
+        level: 'electoral_region' | 'state' | 'federal_district' | 'local_district' | 'municipality' | 'section' | 'locality' | 'neighborhood';
+    };
+    query?: {
+        /**
+         * Q
+         *
+         * Nombre
+         */
+        q?: string | null;
+        /**
+         * Electoral Region Id
+         */
+        electoral_region_id?: string | null;
+        /**
+         * State Id
+         */
+        state_id?: string | null;
+        /**
+         * Municipality Id
+         */
+        municipality_id?: string | null;
+        /**
+         * Federal District Id
+         */
+        federal_district_id?: string | null;
+        /**
+         * Local District Id
+         */
+        local_district_id?: string | null;
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Cursor
+         */
+        cursor?: string | null;
+        /**
+         * Sort
+         *
+         * Campos separados por coma; prefijo '-' para descendente.
+         */
+        sort?: string | null;
+    };
+    url: '/api/v1/geography/{level}';
+};
+
+export type ListGeoNodesErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ListGeoNodesError = ListGeoNodesErrors[keyof ListGeoNodesErrors];
+
+export type ListGeoNodesResponses = {
+    /**
+     * Successful Response
+     */
+    200: CursorPageGeoNodeOut;
+};
+
+export type ListGeoNodesResponse = ListGeoNodesResponses[keyof ListGeoNodesResponses];
+
+export type GetGeoNodeData = {
+    body?: never;
+    path: {
+        /**
+         * Level
+         */
+        level: 'electoral_region' | 'state' | 'federal_district' | 'local_district' | 'municipality' | 'section' | 'locality' | 'neighborhood';
+        /**
+         * Node Id
+         */
+        node_id: string;
+    };
+    query?: {
+        /**
+         * Geometry
+         *
+         * Incluir GeoJSON simplificado.
+         */
+        geometry?: boolean;
+    };
+    url: '/api/v1/geography/{level}/{node_id}';
+};
+
+export type GetGeoNodeErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type GetGeoNodeError = GetGeoNodeErrors[keyof GetGeoNodeErrors];
+
+export type GetGeoNodeResponses = {
+    /**
+     * Successful Response
+     */
+    200: GeoNodeDetail;
+};
+
+export type GetGeoNodeResponse = GetGeoNodeResponses[keyof GetGeoNodeResponses];

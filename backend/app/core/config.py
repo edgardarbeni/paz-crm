@@ -70,6 +70,14 @@ class Settings(BaseSettings):
     login_rate_limit_window_seconds: int = 60
     totp_issuer: str = "PAZOS"
 
+    # Geography (D-09, D-19, D-57)
+    geo_neighborhood_min_ratio: float = 0.05
+    geo_neighborhood_min_area_m2: float = 500.0
+    geo_section_subdivide_vertices: int = 128
+    geo_tile_cache_seconds: int = 3600
+    ine_api_base_url: str = "https://cartografia.ine.mx/sige8/api"
+    ine_storage_base_url: str = "https://storage.googleapis.com/mapoteca/"
+
     # E-mail (D-35). "memory" keeps messages in-process (tests); "console" logs them.
     mail_backend: Literal["smtp", "console", "memory"] = "smtp"
     smtp_host: str = "localhost"

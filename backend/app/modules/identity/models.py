@@ -19,7 +19,7 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import CITEXT, INET
 from sqlmodel import Field, SQLModel
 
-from app.core.db.base import BusinessTable, TimestampMixin
+from app.core.db.base import BusinessTable, TimestampMixin, UUIDPrimaryKeyMixin
 
 SCHEMA = "identity"
 TZ = DateTime(timezone=True)
@@ -200,16 +200,79 @@ class RefreshToken(BusinessTable, table=True):
     revoked_at: datetime | None = Field(default=None, sa_type=TZ)
 
 
-ALL_TABLES: tuple[type[SQLModel], ...] = (
-    User,
-    Role,
-    Permission,
-    RolePermission,
-    UserRole,
-    UserInvitation,
-    PasswordResetToken,
-    TotpCredential,
-    RecoveryCode,
-    UserSession,
-    RefreshToken,
-)
+# --- geographic scope (D-34) -------------------------------------------------------------------
+
+
+class ScopeLevel(StrEnum):
+    NATIONAL = "national"
+    ELECTORAL_REGION = "electoral_region"
+    STATE = "state"
+    FEDERAL_DISTRICT = "federal_district"
+    LOCAL_DISTRICT = "local_district"
+    MUNICIPALITY = "municipality"
+    SECTION = "section"
+
+
+SCOPE_COLUMNS: dict[ScopeLevel, str] = {
+    ScopeLevel.ELECTORAL_REGION: "electoral_region_id",
+    ScopeLevel.STATE: "state_id",
+    ScopeLevel.FEDERAL_DISTRICT: "federal_district_id",
+    ScopeLevel.LOCAL_DISTRICT: "local_district_id",
+    ScopeLevel.MUNICIPALITY: "municipality_id",
+    ScopeLevel.SECTION: "section_id",
+}
+
+
+def _scope_check() -> CheckConstraint:
+    """Exactly the column of `scope_level` is set (none for national)."""
+    clauses = [
+        f"(scope_level = '{level.value}' AND num_nonnulls({', '.join(SCOPE_COLUMNS.values())}) = 1"
+        f" AND {column} IS NOT NULL)"
+        for level, column in SCOPE_COLUMNS.items()
+    ]
+    clauses.append(
+        f"(scope_level = 'national' AND num_nonnulls({', '.join(SCOPE_COLUMNS.values())}) = 0)"
+    )
+    return CheckConstraint(" OR ".join(clauses), name="level_matches_node")
+
+
+def _geo_fk(table: str) -> Any:
+    return Field(
+        default=None, foreign_key=f"geography.{table}.id", ondelete="RESTRICT", nullable=True
+    )
+
+
+class UserScope(UUIDPrimaryKeyMixin, TimestampMixin, table=True):
+    """A geographic node a user is limited to. One FK column per level (no polymorphic FK)."""
+
+    __tablename__ = "user_scopes"
+    __table_args__ = (
+        _check_in("scope_level", ScopeLevel, "scope_level"),
+        _scope_check(),
+        {"schema": SCHEMA},
+    )
+
+    user_id: uuid.UUID = _fk("users")
+    scope_level: ScopeLevel = Field(sa_type=Text)
+    electoral_region_id: uuid.UUID | None = _geo_fk("electoral_regions")
+    state_id: uuid.UUID | None = _geo_fk("states")
+    federal_district_id: uuid.UUID | None = _geo_fk("federal_districts")
+    local_district_id: uuid.UUID | None = _geo_fk("local_districts")
+    municipality_id: uuid.UUID | None = _geo_fk("municipalities")
+    section_id: uuid.UUID | None = _geo_fk("sections")
+
+
+class UserScopeSection(SQLModel, table=True):
+    """Derived: the sections a (non-national) scope resolves to. Rebuilt on scope changes and
+    framework activation; queries filter with EXISTS against it (D-34)."""
+
+    __tablename__ = "user_scope_sections"
+    __table_args__: ClassVar[dict[str, Any]] = {"schema": SCHEMA}
+    __audit__: ClassVar[bool] = False
+
+    user_id: uuid.UUID = Field(
+        foreign_key=f"{SCHEMA}.users.id", ondelete="CASCADE", primary_key=True
+    )
+    section_id: uuid.UUID = Field(
+        foreign_key="geography.sections.id", ondelete="CASCADE", primary_key=True, index=True
+    )

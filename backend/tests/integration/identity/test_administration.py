@@ -6,7 +6,7 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncEngine
 
 from app.modules.identity.permissions import PERMISSIONS, SYSTEM_ROLES
-from tests.integration.identity.conftest import Account, UserFactory, bearer, login, token_for
+from tests.integration.conftest import Account, UserFactory, bearer, login, token_for
 
 
 async def _role_ids(client: AsyncClient, headers: dict[str, str]) -> dict[str, str]:

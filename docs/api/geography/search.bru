@@ -1,0 +1,27 @@
+meta {
+  name: Buscar por clave o nombre
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/v1/geography/search?q=01-0338
+  body: none
+  auth: bearer
+}
+
+params:query {
+  q: 01-0338
+  ~level: section
+  ~limit: 20
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+docs {
+  Claves flexibles (D-19): `01-0338`, `1 338`, `010338` (sección), `01005` (municipio),
+  `1-2` (municipio, DF o DL 2 del estado 1). Texto: nombre sin acentos ni mayúsculas
+  (municipios, localidades, colonias, estados). Siempre limitado al alcance del usuario.
+}

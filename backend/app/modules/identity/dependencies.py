@@ -22,6 +22,7 @@ from app.modules.identity.container import ServicesDep
 from app.modules.identity.models import User, UserSession, UserStatus
 from app.modules.identity.security.tokens import TokenScope
 from app.modules.identity.services.access import Access, load_access, utcnow
+from app.modules.identity.services.scopes import GeoScope, resolve_scope
 
 _bearer = HTTPBearer(auto_error=False, description="Access token (JWT) de /auth/login.")
 
@@ -35,6 +36,7 @@ class CurrentUser:
     scope: TokenScope
     auth_methods: tuple[str, ...]
     access: Access
+    geo: GeoScope
 
     def has(self, permission: str) -> bool:
         return self.access.has(permission)
@@ -76,6 +78,7 @@ async def _authenticate(
         raise UnauthorizedError("Sesión no válida.")
     bind_actor(user.id)
     assert user.id is not None  # noqa: S101
+    access = await load_access(db, user.id)
     current = CurrentUser(
         id=user.id,
         email=user.email,
@@ -83,7 +86,8 @@ async def _authenticate(
         session_id=claims.session_id,
         scope=claims.scope,
         auth_methods=claims.auth_methods,
-        access=await load_access(db, user.id),
+        access=access,
+        geo=await resolve_scope(db, user.id, access),
     )
     request.state.current_user = current
     return current

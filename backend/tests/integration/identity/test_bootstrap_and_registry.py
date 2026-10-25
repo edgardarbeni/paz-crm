@@ -7,7 +7,7 @@ from app.core.config import Settings
 from app.core.errors import ConflictError
 from app.modules.identity.bootstrap import create_superadmin
 from app.modules.identity.permissions import PERMISSIONS, SYSTEM_ROLES
-from tests.integration.identity.conftest import PASSWORD
+from tests.integration.conftest import PASSWORD
 
 
 async def test_migrations_seed_the_registry(owner_engine: AsyncEngine) -> None:

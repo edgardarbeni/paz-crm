@@ -1,0 +1,20 @@
+meta {
+  name: Corridas de importación
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/api/v1/geography/import-runs
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+docs {
+  Cada corrida (incluidas las simulaciones) con conteos por tabla y su reporte de errores y
+  advertencias en /import-runs/{id}/issues. Requiere `geography.import.read`.
+}

@@ -12,7 +12,7 @@ posteriores, padrón, defensa del voto, jurídico, atención social, encuestas y
 | [`docs/fases/`](docs/fases/) | Cierre de cada fase: entregables, suposiciones, deuda y riesgos |
 | [`docs/api/`](docs/api/) | Colección de ejemplos de la API (Bruno) |
 
-**Estado:** fase A aprobada · fase B (identidad) implementada, pendiente de aprobación.
+**Estado:** fases A y B aprobadas · fase C (geografía) implementada, pendiente de aprobación.
 
 ## Estructura
 
@@ -56,6 +56,18 @@ docker compose exec api paz users create-superadmin
 
 Después invita usuarios desde la API (`POST /api/v1/users`); los correos llegan a Mailpit.
 
+**Geografía.** Carga Aguascalientes (descarga del INE e importación):
+
+```bash
+./scripts/seed-dev-geo.sh          # o: ./scripts/seed-dev-geo.sh 6  (Colima)
+```
+
+Para el país completo, desde una carpeta local con las 32 carpetas de la BGD:
+
+```bash
+./scripts/import-national.sh /ruta/a/paz-maps
+```
+
 ## Backend
 
 ```bash
@@ -84,6 +96,10 @@ uv run paz --help                    # CLI de operación
   - El access token (JWT, 15 min) va en `Authorization: Bearer`. El refresh token es rotativo y va en la cookie `paz_refresh` (httpOnly, Secure, SameSite=Strict); reusarlo cierra la sesión.
   - TOTP es obligatorio para los roles con `requires_mfa`.
   - Para proteger una ruta: `user: Annotated[CurrentUser, permission(Perm.X)]`. Los permisos nuevos se declaran en el registro y se siembran por migración (D-52).
+- **Geografía (fase C).**
+  - Importador: `paz geo download --state N` baja la BGD y los catálogos del INE con su manifiesto. `paz geo import <carpeta|7z> --state N [--catalogs DIR] [--dry-run]` hace el upsert por llave natural sin cambiar IDs; lo que desaparece del origen queda inactivo. Cada corrida guarda su reporte en `geography.import_runs` y `import_issues`.
+  - Para activar un marco nuevo: `paz geo activate --framework NOMBRE`, que remapea los alcances de los usuarios.
+  - API en `/api/v1/geography`: niveles, búsqueda por clave o nombre, `locate`, `tiles/{capa}/{z}/{x}/{y}.mvt` e importaciones. Todo queda limitado por el alcance del usuario (`PUT /api/v1/users/{id}/scopes`, D-34).
 - **Errores.** Siempre RFC 9457 (`application/problem+json`): `type` es `urn:pazos:problem:<code>`
   e incluye `request_id`.
 - **Paginación.** Por cursor (`app.core.pagination`): `limit` ≤ 200, `cursor` opaco y `sort`
