@@ -87,7 +87,7 @@ function CredentialsStep({ onDone }: { onDone: (result: LoginResponse) => void }
           )}
         </form.AppField>
         <form.AppForm>
-          <form.SubmitButton>Entrar</form.SubmitButton>
+          <form.SubmitButton className="h-10">Entrar</form.SubmitButton>
         </form.AppForm>
         <Link
           to="/forgot-password"
@@ -157,7 +157,7 @@ function MfaStep({
           )}
         </form.AppField>
         <form.AppForm>
-          <form.SubmitButton>Verificar</form.SubmitButton>
+          <form.SubmitButton className="h-10">Verificar</form.SubmitButton>
         </form.AppForm>
         <div className="flex justify-between text-sm">
           <Button type="button" variant="link" className="px-0" onClick={onBack}>

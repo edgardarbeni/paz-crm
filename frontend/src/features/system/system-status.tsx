@@ -10,7 +10,7 @@ export function SystemStatus() {
   const readiness = useQuery({ ...getReadinessOptions(), refetchInterval: 30_000 });
 
   return (
-    <Card className="max-w-md">
+    <Card>
       <CardHeader>
         <CardTitle>Estado del sistema</CardTitle>
         <CardDescription>Disponibilidad de la API y sus dependencias.</CardDescription>

@@ -181,7 +181,7 @@ export function MunicipalitiesTab({
               return (
                 <tr
                   key={row.municipality_id}
-                  className={row.dirty ? "border-t bg-amber-50" : "border-t"}
+                  className={row.dirty ? "border-t bg-brand-soft" : "border-t"}
                 >
                   <th scope="row" className="px-3 py-1.5 text-left font-normal">
                     <span className="font-mono text-xs text-muted-foreground">{row.key}</span>{" "}

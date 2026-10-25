@@ -207,7 +207,7 @@ settings:
 importers:
   .:
     dependencies:
-      "@fontsource-variable/geist":
+      "@fontsource-variable/montserrat":
         specifier: ^5.3.0
         version: 5.3.0
       "@tanstack/react-form":
@@ -781,10 +781,10 @@ packages:
         integrity: sha512-HpCo8tmWzLVad5s2d19EhAz5zqrrQ6s69qd6moPMQvkOuSwDT1YgRfWSVuc4ennqrgv3OHppiOGMQ7oC13yIww==,
       }
 
-  "@fontsource-variable/geist@5.3.0":
+  "@fontsource-variable/montserrat@5.3.0":
     resolution:
       {
-        integrity: sha512-j0m+vLQuG5XAYoHtGCVu0spvlGreR3EzpECUVzkFmI1mTVnAO38l/NEPDCFgZ177JxzYJCLSmTQibIiYPilGrA==,
+        integrity: sha512-7PaZoxaxrWLAyrhO46v65An9LhUhfkTExWLhfbywYZCnZEgg/W1rEHnlNmZKjNZ3nJTVYyicqxlJt10z/26yTA==,
       }
 
   "@hey-api/codegen-core@0.9.1":
@@ -6090,7 +6090,7 @@ snapshots:
 
   "@floating-ui/utils@0.2.12": {}
 
-  "@fontsource-variable/geist@5.3.0": {}
+  "@fontsource-variable/montserrat@5.3.0": {}
 
   "@hey-api/codegen-core@0.9.1":
     dependencies:
