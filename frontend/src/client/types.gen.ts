@@ -1390,6 +1390,30 @@ export type OfficeTypeOut = {
 };
 
 /**
+ * OfficeTypeUpdate
+ *
+ * Code, levels, principle and kind are fixed once created (nominations depend on them).
+ */
+export type OfficeTypeUpdate = {
+    /**
+     * Name
+     */
+    name?: string | null;
+    /**
+     * Default Positions
+     */
+    default_positions?: number | null;
+    /**
+     * Has Substitute
+     */
+    has_substitute?: boolean | null;
+    /**
+     * Sort Order
+     */
+    sort_order?: number | null;
+};
+
+/**
  * Override
  */
 export type Override = {
@@ -4753,6 +4777,40 @@ export type CreateOfficeTypeResponses = {
 };
 
 export type CreateOfficeTypeResponse = CreateOfficeTypeResponses[keyof CreateOfficeTypeResponses];
+
+export type UpdateOfficeTypeData = {
+    body: OfficeTypeUpdate;
+    path: {
+        /**
+         * Office Type Id
+         */
+        office_type_id: string;
+    };
+    query?: never;
+    url: '/api/v1/office-types/{office_type_id}';
+};
+
+export type UpdateOfficeTypeErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type UpdateOfficeTypeError = UpdateOfficeTypeErrors[keyof UpdateOfficeTypeErrors];
+
+export type UpdateOfficeTypeResponses = {
+    /**
+     * Successful Response
+     */
+    200: OfficeTypeOut;
+};
+
+export type UpdateOfficeTypeResponse = UpdateOfficeTypeResponses[keyof UpdateOfficeTypeResponses];
 
 export type ListValidationRulesData = {
     body?: never;

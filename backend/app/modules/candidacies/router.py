@@ -26,6 +26,7 @@ from app.modules.candidacies.schemas import (
     NominationUpdate,
     OfficeTypeIn,
     OfficeTypeOut,
+    OfficeTypeUpdate,
     PartyIn,
     PartyOut,
     ProcessIn,
@@ -104,6 +105,17 @@ async def create_office_type(
     db: SessionDep, _: CatalogManager, body: OfficeTypeIn
 ) -> OfficeTypeOut:
     return OfficeTypeOut.model_validate(await service.create_office_type(db, body))
+
+
+@router.patch(
+    "/office-types/{office_type_id}",
+    operation_id="updateOfficeType",
+    summary="Editar tipo de cargo",
+)
+async def update_office_type(
+    db: SessionDep, _: CatalogManager, office_type_id: uuid.UUID, body: OfficeTypeUpdate
+) -> OfficeTypeOut:
+    return OfficeTypeOut.model_validate(await service.update_office_type(db, office_type_id, body))
 
 
 @router.get(

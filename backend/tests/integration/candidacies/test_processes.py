@@ -242,5 +242,17 @@ async def test_office_types_are_data(
     process_id = await create_local_process(client, root, geo)
     offices = (await client.get(f"{API}/processes/{process_id}/offices", headers=root)).json()
     assert "presidencia_comunidad" in {o["office_code"] for o in offices}
+    office_id = created.json()["id"]
+    renamed = await client.patch(
+        f"{API}/office-types/{office_id}",
+        headers=root,
+        json={"name": "Presidencia de comunidad (junta)", "default_positions": 3},
+    )
+    assert renamed.status_code == 200, renamed.text
+    assert renamed.json()["name"] == "Presidencia de comunidad (junta)"
+    assert renamed.json()["code"] == "presidencia_comunidad"
+    assert (
+        await client.patch(f"{API}/office-types/{office_id}", headers=viewer, json={"name": "X"})
+    ).status_code == 403
     rules = (await client.get(f"{API}/validation-rules", headers=viewer)).json()
     assert len(rules) == 4

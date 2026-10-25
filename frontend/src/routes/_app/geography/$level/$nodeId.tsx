@@ -1,0 +1,132 @@
+import { useQuery } from "@tanstack/react-query";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { getGeoNodeOptions } from "@/client/@tanstack/react-query.gen";
+import { PageHeader } from "@/components/page-header";
+import { ProblemAlert } from "@/components/problem-alert";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { GeoName, type GeoNodeLevel } from "@/features/candidacies/geo-name";
+import { GeoMap, type LayerId } from "@/features/geography/geo-map";
+import { GEO_LEVEL_LABELS } from "@/lib/labels";
+
+export const Route = createFileRoute("/_app/geography/$level/$nodeId")({ component: NodePage });
+
+/** What each level contains (explorer links filtered by this node). */
+const CHILDREN: Record<string, { level: string; filter: string }[]> = {
+  electoral_region: [{ level: "state", filter: "electoral_region_id" }],
+  state: [
+    { level: "municipality", filter: "state_id" },
+    { level: "federal_district", filter: "state_id" },
+    { level: "local_district", filter: "state_id" },
+    { level: "section", filter: "state_id" },
+  ],
+  municipality: [
+    { level: "section", filter: "municipality_id" },
+    { level: "locality", filter: "municipality_id" },
+    { level: "neighborhood", filter: "municipality_id" },
+  ],
+  federal_district: [{ level: "section", filter: "federal_district_id" }],
+  local_district: [{ level: "section", filter: "local_district_id" }],
+};
+
+const MAP_LAYERS: Record<string, LayerId[]> = {
+  electoral_region: ["states"],
+  state: ["states", "municipalities"],
+  municipality: ["municipalities", "sections"],
+  federal_district: ["federal_districts", "sections"],
+  local_district: ["local_districts", "sections"],
+  section: ["sections", "blocks"],
+  locality: ["sections"],
+  neighborhood: ["neighborhoods", "sections"],
+};
+
+function NodePage() {
+  const { level, nodeId } = Route.useParams();
+  const node = useQuery(
+    getGeoNodeOptions({
+      path: { level: level as GeoNodeLevel, node_id: nodeId },
+      query: { geometry: true },
+    }),
+  );
+  if (node.isError) return <ProblemAlert error={node.error} />;
+  const n = node.data;
+  if (!n) return <p className="text-muted-foreground">Cargando…</p>;
+  // Sections carry full ancestors; other levels expose their parents' ids.
+  const parents: [string, string | null | undefined][] = n.ancestors
+    ? Object.entries(n.ancestors)
+        .filter(([key, ref]) => ref && key !== level)
+        .map(([key, ref]) => [key, (ref as { id: string }).id])
+    : [
+        ["municipality", n.municipality_id],
+        ["local_district", n.local_district_id],
+        ["federal_district", n.federal_district_id],
+        ["state", n.state_id],
+        ["electoral_region", n.electoral_region_id],
+      ];
+  const ancestors = parents.filter(
+    (entry): entry is [string, string] => !!entry[1] && entry[0] !== level,
+  );
+  return (
+    <section>
+      <PageHeader
+        title={n.name ? `${n.key} · ${n.name}` : n.key}
+        description={`${GEO_LEVEL_LABELS[n.level]}${n.block_count != null ? ` · ${n.block_count.toLocaleString("es-MX")} manzanas` : ""}`}
+      />
+      <div className="grid gap-6 lg:grid-cols-[1fr_20rem]">
+        <GeoMap visible={MAP_LAYERS[level] ?? ["states"]} highlight={n.geometry} bbox={n.bbox} />
+        <div className="space-y-4">
+          {ancestors.length ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>
+                  <h2>Pertenece a</h2>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <dl className="space-y-2 text-sm">
+                  {ancestors.map(([key, id]) => (
+                    <div key={key}>
+                      <dt className="text-xs text-muted-foreground">{GEO_LEVEL_LABELS[key]}</dt>
+                      <dd>
+                        <Link
+                          to="/geography/$level/$nodeId"
+                          params={{ level: key, nodeId: id }}
+                          className="underline-offset-4 hover:underline"
+                        >
+                          <GeoName level={key} id={id} />
+                        </Link>
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              </CardContent>
+            </Card>
+          ) : null}
+          {CHILDREN[level]?.length ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>
+                  <h2>Contiene</h2>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-1 text-sm">
+                  {CHILDREN[level]?.map((child) => (
+                    <li key={child.level}>
+                      <Link
+                        to="/geography"
+                        search={{ level: child.level as never, [child.filter]: nodeId }}
+                        className="underline-offset-4 hover:underline"
+                      >
+                        {GEO_LEVEL_LABELS[child.level]}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          ) : null}
+        </div>
+      </div>
+    </section>
+  );
+}

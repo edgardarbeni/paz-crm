@@ -55,6 +55,15 @@ class OfficeTypeIn(Schema):
     sort_order: int = 100
 
 
+class OfficeTypeUpdate(Schema):
+    """Code, levels, principle and kind are fixed once created (nominations depend on them)."""
+
+    name: Text200 | None = None
+    default_positions: Annotated[int | None, Field(ge=1, le=500)] = None
+    has_substitute: bool | None = None
+    sort_order: int | None = None
+
+
 class OfficeTypeOut(OfficeTypeIn):
     id: uuid.UUID
 

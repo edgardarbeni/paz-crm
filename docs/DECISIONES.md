@@ -370,6 +370,36 @@ No hay integración con RENAPO.
 
 **D-70 · Cargos y partidos como datos.** `POST /office-types` agrega cargos sin migración; los procesos nuevos los incluyen deshabilitados. Partidos y coaliciones se administran por API. Se siembra solo PAZ (`is_own_party`); los rivales llegan después (respuesta 26).
 
+**D-71 · Fase D aprobada.** El usuario aprobó la fase D el 2026-10-25; PR #4 fusionado a `main`.
+
+**D-72 · Mapa base del visor: OpenFreeMap, configurable.** El usuario eligió OpenFreeMap: teselas vectoriales de OpenStreetMap, sin llave ni costo.
+- Se cambia con `VITE_MAP_STYLE_URL`, que se lee al construir el panel. La CSP de producción admite el origen indicado en `PAZ_MAP_TILES_ORIGIN`.
+- **Qué sale a terceros:** el navegador pide a OpenFreeMap la zona que se está viendo. No viaja ningún dato del partido; las capas electorales salen de la API con el token del usuario.
+- **Worker de MapLibre:** se empaqueta con Vite (`?worker&url` y `worker.format = "es"`), porque MapLibre busca su worker junto a su propio módulo y el bundler lo mueve.
+
+**D-73 · E2E del panel contra el stack real.** Elección del usuario.
+- **Script:** `scripts/e2e.sh` corre igual en local y en CI. Levanta PostGIS y Redis desechables, aplica las migraciones, corre la semilla (`backend/tests/e2e/seed.py`), arranca la API y prueba el build de producción del panel con Playwright.
+- **Semilla:** geografía sintética, proceso configurado, personas y postulaciones. Crea un usuario por escenario con secreto TOTP conocido, porque el anti-replay de TOTP y la rotación del refresh token impiden reutilizar una sesión entre tests. Los tests corren en serie.
+- **CI:** el job `e2e` reemplaza al Playwright que corría dentro del job `frontend`, y este queda con Biome, `tsc`, Vitest y build.
+
+**D-74 · Sesión del panel.**
+- **Tokens:** el access token se guarda solo en memoria (`lib/auth/session.ts`) y el refresh token sigue en cookie httpOnly (D-48). Al recargar, la guarda del layout autenticado renueva con la cookie.
+- **401:** el `fetch` del cliente generado renueva una sola vez, con un único refresh en vuelo compartido por las peticiones concurrentes (dos refresh en paralelo parecerían reuso y cerrarían la sesión), y repite la petición. Si la renovación falla, manda al login conservando la ruta.
+- **Redirección tras el login:** solo acepta rutas internas, para no abrir redirecciones a otros sitios.
+- **Enrolamiento:** los tokens con alcance `mfa_enrollment` solo llegan a `/enroll-mfa`.
+
+**D-75 · Convenciones del panel.**
+- **Formularios:** TanStack Form (`createFormHook`) validado con los esquemas Zod generados del OpenAPI. Los campos vacíos se convierten en `null` antes de validar y enviar, y los mensajes salen en español (`z.locales.es`).
+- **Selects nativos** para catálogos cortos: son accesibles y permiten buscar tecleando.
+- **Autocompletado asíncrono** (Radix Popover + cmdk) para personas y geografía: se abre con la primera tecla, Enter elige y Supr limpia.
+- **Tablas:** TanStack Table v9 con orden y paginación del lado del servidor. Para que "Anterior" funcione con cursores que solo avanzan, se guarda una pila de cursores.
+- **Atajos:** `Ctrl+K`, `/`, `N`, `↑ ↓ Enter` y `Ctrl+Enter`. Las teclas sueltas se ignoran mientras se escribe en un campo.
+- **Excepciones a reglas:** un 409 `rule-violation` abre un diálogo para quien tiene `candidacies.rule.override`. Pide el motivo y reintenta con `override`.
+- **Lo que se muestra:** el panel oculta lo que el usuario no puede hacer; el backend es quien decide.
+- **Tema:** solo tema claro por ahora.
+
+**D-76 · Edición de cargos.** `PATCH /office-types/{id}` cambia nombre, posiciones por defecto, suplencia y orden. El código, los niveles, el principio y el tipo de postulación quedan fijos al crearse, porque las postulaciones dependen de ellos.
+
 ---
 
 ## Suposiciones vigentes

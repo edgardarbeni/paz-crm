@@ -9,50 +9,648 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppRouteImport } from './routes/_app'
+import { Route as AcceptInvitationRouteImport } from './routes/accept-invitation'
+import { Route as EnrollMfaRouteImport } from './routes/enroll-mfa'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as AppIndexRouteImport } from './routes/_app/index'
+import { Route as AppAccountRouteImport } from './routes/_app/account'
+import { Route as AppAuditRouteImport } from './routes/_app/audit'
+import { Route as AppOfficeTypesRouteImport } from './routes/_app/office-types'
+import { Route as AppPartiesRouteImport } from './routes/_app/parties'
+import { Route as AppGeographyIndexRouteImport } from './routes/_app/geography/index'
+import { Route as AppGeographyLocateRouteImport } from './routes/_app/geography/locate'
+import { Route as AppGeographyMapRouteImport } from './routes/_app/geography/map'
+import { Route as AppNominationsIndexRouteImport } from './routes/_app/nominations/index'
+import { Route as AppNominationsNominationIdRouteImport } from './routes/_app/nominations/$nominationId'
+import { Route as AppNominationsNewRouteImport } from './routes/_app/nominations/new'
+import { Route as AppPeopleIndexRouteImport } from './routes/_app/people/index'
+import { Route as AppPeoplePersonIdRouteImport } from './routes/_app/people/$personId'
+import { Route as AppPeopleNewRouteImport } from './routes/_app/people/new'
+import { Route as AppProcessesIndexRouteImport } from './routes/_app/processes/index'
+import { Route as AppProcessesProcessIdRouteImport } from './routes/_app/processes/$processId'
+import { Route as AppRolesIndexRouteImport } from './routes/_app/roles/index'
+import { Route as AppRolesRoleIdRouteImport } from './routes/_app/roles/$roleId'
+import { Route as AppUsersIndexRouteImport } from './routes/_app/users/index'
+import { Route as AppUsersUserIdRouteImport } from './routes/_app/users/$userId'
+import { Route as AppGeographyLevelNodeIdRouteImport } from './routes/_app/geography/$level/$nodeId'
+import { Route as AppGeographyImportsIndexRouteImport } from './routes/_app/geography/imports/index'
+import { Route as AppGeographyImportsRunIdRouteImport } from './routes/_app/geography/imports/$runId'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AcceptInvitationRoute = AcceptInvitationRouteImport.update({
+  id: '/accept-invitation',
+  path: '/accept-invitation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnrollMfaRoute = EnrollMfaRouteImport.update({
+  id: '/enroll-mfa',
+  path: '/enroll-mfa',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAccountRoute = AppAccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAuditRoute = AppAuditRouteImport.update({
+  id: '/audit',
+  path: '/audit',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppOfficeTypesRoute = AppOfficeTypesRouteImport.update({
+  id: '/office-types',
+  path: '/office-types',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPartiesRoute = AppPartiesRouteImport.update({
+  id: '/parties',
+  path: '/parties',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppGeographyIndexRoute = AppGeographyIndexRouteImport.update({
+  id: '/geography/',
+  path: '/geography/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppGeographyLocateRoute = AppGeographyLocateRouteImport.update({
+  id: '/geography/locate',
+  path: '/geography/locate',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppGeographyMapRoute = AppGeographyMapRouteImport.update({
+  id: '/geography/map',
+  path: '/geography/map',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppNominationsIndexRoute = AppNominationsIndexRouteImport.update({
+  id: '/nominations/',
+  path: '/nominations/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppNominationsNominationIdRoute =
+  AppNominationsNominationIdRouteImport.update({
+    id: '/nominations/$nominationId',
+    path: '/nominations/$nominationId',
+    getParentRoute: () => AppRoute,
+  } as any)
+const AppNominationsNewRoute = AppNominationsNewRouteImport.update({
+  id: '/nominations/new',
+  path: '/nominations/new',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPeopleIndexRoute = AppPeopleIndexRouteImport.update({
+  id: '/people/',
+  path: '/people/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPeoplePersonIdRoute = AppPeoplePersonIdRouteImport.update({
+  id: '/people/$personId',
+  path: '/people/$personId',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPeopleNewRoute = AppPeopleNewRouteImport.update({
+  id: '/people/new',
+  path: '/people/new',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppProcessesIndexRoute = AppProcessesIndexRouteImport.update({
+  id: '/processes/',
+  path: '/processes/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppProcessesProcessIdRoute = AppProcessesProcessIdRouteImport.update({
+  id: '/processes/$processId',
+  path: '/processes/$processId',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppRolesIndexRoute = AppRolesIndexRouteImport.update({
+  id: '/roles/',
+  path: '/roles/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppRolesRoleIdRoute = AppRolesRoleIdRouteImport.update({
+  id: '/roles/$roleId',
+  path: '/roles/$roleId',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppUsersIndexRoute = AppUsersIndexRouteImport.update({
+  id: '/users/',
+  path: '/users/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppUsersUserIdRoute = AppUsersUserIdRouteImport.update({
+  id: '/users/$userId',
+  path: '/users/$userId',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppGeographyLevelNodeIdRoute = AppGeographyLevelNodeIdRouteImport.update({
+  id: '/geography/$level/$nodeId',
+  path: '/geography/$level/$nodeId',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppGeographyImportsIndexRoute =
+  AppGeographyImportsIndexRouteImport.update({
+    id: '/geography/imports/',
+    path: '/geography/imports/',
+    getParentRoute: () => AppRoute,
+  } as any)
+const AppGeographyImportsRunIdRoute =
+  AppGeographyImportsRunIdRouteImport.update({
+    id: '/geography/imports/$runId',
+    path: '/geography/imports/$runId',
+    getParentRoute: () => AppRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/': typeof AppIndexRoute
+  '/accept-invitation': typeof AcceptInvitationRoute
+  '/enroll-mfa': typeof EnrollMfaRoute
+  '/forgot-password': typeof ForgotPasswordRoute
+  '/login': typeof LoginRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/account': typeof AppAccountRoute
+  '/audit': typeof AppAuditRoute
+  '/office-types': typeof AppOfficeTypesRoute
+  '/parties': typeof AppPartiesRoute
+  '/geography/locate': typeof AppGeographyLocateRoute
+  '/geography/map': typeof AppGeographyMapRoute
+  '/nominations/$nominationId': typeof AppNominationsNominationIdRoute
+  '/nominations/new': typeof AppNominationsNewRoute
+  '/people/$personId': typeof AppPeoplePersonIdRoute
+  '/people/new': typeof AppPeopleNewRoute
+  '/processes/$processId': typeof AppProcessesProcessIdRoute
+  '/roles/$roleId': typeof AppRolesRoleIdRoute
+  '/users/$userId': typeof AppUsersUserIdRoute
+  '/geography/': typeof AppGeographyIndexRoute
+  '/nominations/': typeof AppNominationsIndexRoute
+  '/people/': typeof AppPeopleIndexRoute
+  '/processes/': typeof AppProcessesIndexRoute
+  '/roles/': typeof AppRolesIndexRoute
+  '/users/': typeof AppUsersIndexRoute
+  '/geography/$level/$nodeId': typeof AppGeographyLevelNodeIdRoute
+  '/geography/imports/$runId': typeof AppGeographyImportsRunIdRoute
+  '/geography/imports/': typeof AppGeographyImportsIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
+  '/accept-invitation': typeof AcceptInvitationRoute
+  '/enroll-mfa': typeof EnrollMfaRoute
+  '/forgot-password': typeof ForgotPasswordRoute
+  '/login': typeof LoginRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/account': typeof AppAccountRoute
+  '/audit': typeof AppAuditRoute
+  '/office-types': typeof AppOfficeTypesRoute
+  '/parties': typeof AppPartiesRoute
+  '/': typeof AppIndexRoute
+  '/geography/locate': typeof AppGeographyLocateRoute
+  '/geography/map': typeof AppGeographyMapRoute
+  '/nominations/$nominationId': typeof AppNominationsNominationIdRoute
+  '/nominations/new': typeof AppNominationsNewRoute
+  '/people/$personId': typeof AppPeoplePersonIdRoute
+  '/people/new': typeof AppPeopleNewRoute
+  '/processes/$processId': typeof AppProcessesProcessIdRoute
+  '/roles/$roleId': typeof AppRolesRoleIdRoute
+  '/users/$userId': typeof AppUsersUserIdRoute
+  '/geography': typeof AppGeographyIndexRoute
+  '/nominations': typeof AppNominationsIndexRoute
+  '/people': typeof AppPeopleIndexRoute
+  '/processes': typeof AppProcessesIndexRoute
+  '/roles': typeof AppRolesIndexRoute
+  '/users': typeof AppUsersIndexRoute
+  '/geography/$level/$nodeId': typeof AppGeographyLevelNodeIdRoute
+  '/geography/imports/$runId': typeof AppGeographyImportsRunIdRoute
+  '/geography/imports': typeof AppGeographyImportsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
+  '/_app': typeof AppRouteWithChildren
+  '/accept-invitation': typeof AcceptInvitationRoute
+  '/enroll-mfa': typeof EnrollMfaRoute
+  '/forgot-password': typeof ForgotPasswordRoute
+  '/login': typeof LoginRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/_app/account': typeof AppAccountRoute
+  '/_app/audit': typeof AppAuditRoute
+  '/_app/office-types': typeof AppOfficeTypesRoute
+  '/_app/parties': typeof AppPartiesRoute
+  '/_app/': typeof AppIndexRoute
+  '/_app/geography/locate': typeof AppGeographyLocateRoute
+  '/_app/geography/map': typeof AppGeographyMapRoute
+  '/_app/nominations/$nominationId': typeof AppNominationsNominationIdRoute
+  '/_app/nominations/new': typeof AppNominationsNewRoute
+  '/_app/people/$personId': typeof AppPeoplePersonIdRoute
+  '/_app/people/new': typeof AppPeopleNewRoute
+  '/_app/processes/$processId': typeof AppProcessesProcessIdRoute
+  '/_app/roles/$roleId': typeof AppRolesRoleIdRoute
+  '/_app/users/$userId': typeof AppUsersUserIdRoute
+  '/_app/geography/': typeof AppGeographyIndexRoute
+  '/_app/nominations/': typeof AppNominationsIndexRoute
+  '/_app/people/': typeof AppPeopleIndexRoute
+  '/_app/processes/': typeof AppProcessesIndexRoute
+  '/_app/roles/': typeof AppRolesIndexRoute
+  '/_app/users/': typeof AppUsersIndexRoute
+  '/_app/geography/$level/$nodeId': typeof AppGeographyLevelNodeIdRoute
+  '/_app/geography/imports/$runId': typeof AppGeographyImportsRunIdRoute
+  '/_app/geography/imports/': typeof AppGeographyImportsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/accept-invitation'
+    | '/enroll-mfa'
+    | '/forgot-password'
+    | '/login'
+    | '/reset-password'
+    | '/account'
+    | '/audit'
+    | '/office-types'
+    | '/parties'
+    | '/geography/locate'
+    | '/geography/map'
+    | '/nominations/$nominationId'
+    | '/nominations/new'
+    | '/people/$personId'
+    | '/people/new'
+    | '/processes/$processId'
+    | '/roles/$roleId'
+    | '/users/$userId'
+    | '/geography/'
+    | '/nominations/'
+    | '/people/'
+    | '/processes/'
+    | '/roles/'
+    | '/users/'
+    | '/geography/$level/$nodeId'
+    | '/geography/imports/$runId'
+    | '/geography/imports/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/accept-invitation'
+    | '/enroll-mfa'
+    | '/forgot-password'
+    | '/login'
+    | '/reset-password'
+    | '/account'
+    | '/audit'
+    | '/office-types'
+    | '/parties'
+    | '/'
+    | '/geography/locate'
+    | '/geography/map'
+    | '/nominations/$nominationId'
+    | '/nominations/new'
+    | '/people/$personId'
+    | '/people/new'
+    | '/processes/$processId'
+    | '/roles/$roleId'
+    | '/users/$userId'
+    | '/geography'
+    | '/nominations'
+    | '/people'
+    | '/processes'
+    | '/roles'
+    | '/users'
+    | '/geography/$level/$nodeId'
+    | '/geography/imports/$runId'
+    | '/geography/imports'
+  id:
+    | '__root__'
+    | '/_app'
+    | '/accept-invitation'
+    | '/enroll-mfa'
+    | '/forgot-password'
+    | '/login'
+    | '/reset-password'
+    | '/_app/account'
+    | '/_app/audit'
+    | '/_app/office-types'
+    | '/_app/parties'
+    | '/_app/'
+    | '/_app/geography/locate'
+    | '/_app/geography/map'
+    | '/_app/nominations/$nominationId'
+    | '/_app/nominations/new'
+    | '/_app/people/$personId'
+    | '/_app/people/new'
+    | '/_app/processes/$processId'
+    | '/_app/roles/$roleId'
+    | '/_app/users/$userId'
+    | '/_app/geography/'
+    | '/_app/nominations/'
+    | '/_app/people/'
+    | '/_app/processes/'
+    | '/_app/roles/'
+    | '/_app/users/'
+    | '/_app/geography/$level/$nodeId'
+    | '/_app/geography/imports/$runId'
+    | '/_app/geography/imports/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRouteWithChildren
+  AcceptInvitationRoute: typeof AcceptInvitationRoute
+  EnrollMfaRoute: typeof EnrollMfaRoute
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
+  LoginRoute: typeof LoginRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/accept-invitation': {
+      id: '/accept-invitation'
+      path: '/accept-invitation'
+      fullPath: '/accept-invitation'
+      preLoaderRoute: typeof AcceptInvitationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/enroll-mfa': {
+      id: '/enroll-mfa'
+      path: '/enroll-mfa'
+      fullPath: '/enroll-mfa'
+      preLoaderRoute: typeof EnrollMfaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_app/': {
+      id: '/_app/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/account': {
+      id: '/_app/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AppAccountRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/audit': {
+      id: '/_app/audit'
+      path: '/audit'
+      fullPath: '/audit'
+      preLoaderRoute: typeof AppAuditRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/office-types': {
+      id: '/_app/office-types'
+      path: '/office-types'
+      fullPath: '/office-types'
+      preLoaderRoute: typeof AppOfficeTypesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/parties': {
+      id: '/_app/parties'
+      path: '/parties'
+      fullPath: '/parties'
+      preLoaderRoute: typeof AppPartiesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/geography/': {
+      id: '/_app/geography/'
+      path: '/geography'
+      fullPath: '/geography/'
+      preLoaderRoute: typeof AppGeographyIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/geography/locate': {
+      id: '/_app/geography/locate'
+      path: '/geography/locate'
+      fullPath: '/geography/locate'
+      preLoaderRoute: typeof AppGeographyLocateRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/geography/map': {
+      id: '/_app/geography/map'
+      path: '/geography/map'
+      fullPath: '/geography/map'
+      preLoaderRoute: typeof AppGeographyMapRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/nominations/': {
+      id: '/_app/nominations/'
+      path: '/nominations'
+      fullPath: '/nominations/'
+      preLoaderRoute: typeof AppNominationsIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/nominations/$nominationId': {
+      id: '/_app/nominations/$nominationId'
+      path: '/nominations/$nominationId'
+      fullPath: '/nominations/$nominationId'
+      preLoaderRoute: typeof AppNominationsNominationIdRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/nominations/new': {
+      id: '/_app/nominations/new'
+      path: '/nominations/new'
+      fullPath: '/nominations/new'
+      preLoaderRoute: typeof AppNominationsNewRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/people/': {
+      id: '/_app/people/'
+      path: '/people'
+      fullPath: '/people/'
+      preLoaderRoute: typeof AppPeopleIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/people/$personId': {
+      id: '/_app/people/$personId'
+      path: '/people/$personId'
+      fullPath: '/people/$personId'
+      preLoaderRoute: typeof AppPeoplePersonIdRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/people/new': {
+      id: '/_app/people/new'
+      path: '/people/new'
+      fullPath: '/people/new'
+      preLoaderRoute: typeof AppPeopleNewRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/processes/': {
+      id: '/_app/processes/'
+      path: '/processes'
+      fullPath: '/processes/'
+      preLoaderRoute: typeof AppProcessesIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/processes/$processId': {
+      id: '/_app/processes/$processId'
+      path: '/processes/$processId'
+      fullPath: '/processes/$processId'
+      preLoaderRoute: typeof AppProcessesProcessIdRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/roles/': {
+      id: '/_app/roles/'
+      path: '/roles'
+      fullPath: '/roles/'
+      preLoaderRoute: typeof AppRolesIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/roles/$roleId': {
+      id: '/_app/roles/$roleId'
+      path: '/roles/$roleId'
+      fullPath: '/roles/$roleId'
+      preLoaderRoute: typeof AppRolesRoleIdRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/users/': {
+      id: '/_app/users/'
+      path: '/users'
+      fullPath: '/users/'
+      preLoaderRoute: typeof AppUsersIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/users/$userId': {
+      id: '/_app/users/$userId'
+      path: '/users/$userId'
+      fullPath: '/users/$userId'
+      preLoaderRoute: typeof AppUsersUserIdRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/geography/$level/$nodeId': {
+      id: '/_app/geography/$level/$nodeId'
+      path: '/geography/$level/$nodeId'
+      fullPath: '/geography/$level/$nodeId'
+      preLoaderRoute: typeof AppGeographyLevelNodeIdRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/geography/imports/': {
+      id: '/_app/geography/imports/'
+      path: '/geography/imports'
+      fullPath: '/geography/imports/'
+      preLoaderRoute: typeof AppGeographyImportsIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/geography/imports/$runId': {
+      id: '/_app/geography/imports/$runId'
+      path: '/geography/imports/$runId'
+      fullPath: '/geography/imports/$runId'
+      preLoaderRoute: typeof AppGeographyImportsRunIdRouteImport
+      parentRoute: typeof AppRoute
     }
   }
 }
 
+interface AppRouteChildren {
+  AppAccountRoute: typeof AppAccountRoute
+  AppAuditRoute: typeof AppAuditRoute
+  AppOfficeTypesRoute: typeof AppOfficeTypesRoute
+  AppPartiesRoute: typeof AppPartiesRoute
+  AppIndexRoute: typeof AppIndexRoute
+  AppGeographyLocateRoute: typeof AppGeographyLocateRoute
+  AppGeographyMapRoute: typeof AppGeographyMapRoute
+  AppNominationsNominationIdRoute: typeof AppNominationsNominationIdRoute
+  AppNominationsNewRoute: typeof AppNominationsNewRoute
+  AppPeoplePersonIdRoute: typeof AppPeoplePersonIdRoute
+  AppPeopleNewRoute: typeof AppPeopleNewRoute
+  AppProcessesProcessIdRoute: typeof AppProcessesProcessIdRoute
+  AppRolesRoleIdRoute: typeof AppRolesRoleIdRoute
+  AppUsersUserIdRoute: typeof AppUsersUserIdRoute
+  AppGeographyIndexRoute: typeof AppGeographyIndexRoute
+  AppNominationsIndexRoute: typeof AppNominationsIndexRoute
+  AppPeopleIndexRoute: typeof AppPeopleIndexRoute
+  AppProcessesIndexRoute: typeof AppProcessesIndexRoute
+  AppRolesIndexRoute: typeof AppRolesIndexRoute
+  AppUsersIndexRoute: typeof AppUsersIndexRoute
+  AppGeographyLevelNodeIdRoute: typeof AppGeographyLevelNodeIdRoute
+  AppGeographyImportsRunIdRoute: typeof AppGeographyImportsRunIdRoute
+  AppGeographyImportsIndexRoute: typeof AppGeographyImportsIndexRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppAccountRoute: AppAccountRoute,
+  AppAuditRoute: AppAuditRoute,
+  AppOfficeTypesRoute: AppOfficeTypesRoute,
+  AppPartiesRoute: AppPartiesRoute,
+  AppIndexRoute: AppIndexRoute,
+  AppGeographyLocateRoute: AppGeographyLocateRoute,
+  AppGeographyMapRoute: AppGeographyMapRoute,
+  AppNominationsNominationIdRoute: AppNominationsNominationIdRoute,
+  AppNominationsNewRoute: AppNominationsNewRoute,
+  AppPeoplePersonIdRoute: AppPeoplePersonIdRoute,
+  AppPeopleNewRoute: AppPeopleNewRoute,
+  AppProcessesProcessIdRoute: AppProcessesProcessIdRoute,
+  AppRolesRoleIdRoute: AppRolesRoleIdRoute,
+  AppUsersUserIdRoute: AppUsersUserIdRoute,
+  AppGeographyIndexRoute: AppGeographyIndexRoute,
+  AppNominationsIndexRoute: AppNominationsIndexRoute,
+  AppPeopleIndexRoute: AppPeopleIndexRoute,
+  AppProcessesIndexRoute: AppProcessesIndexRoute,
+  AppRolesIndexRoute: AppRolesIndexRoute,
+  AppUsersIndexRoute: AppUsersIndexRoute,
+  AppGeographyLevelNodeIdRoute: AppGeographyLevelNodeIdRoute,
+  AppGeographyImportsRunIdRoute: AppGeographyImportsRunIdRoute,
+  AppGeographyImportsIndexRoute: AppGeographyImportsIndexRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+  AppRoute: AppRouteWithChildren,
+  AcceptInvitationRoute: AcceptInvitationRoute,
+  EnrollMfaRoute: EnrollMfaRoute,
+  ForgotPasswordRoute: ForgotPasswordRoute,
+  LoginRoute: LoginRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

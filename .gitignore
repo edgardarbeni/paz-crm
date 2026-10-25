@@ -27,5 +27,5 @@ test-results/
 !.env.example
 
 # Datos geográficos descargados (nunca en git, D-20)
-data/
+/data/
 *.7z

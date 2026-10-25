@@ -29,6 +29,7 @@ from app.modules.candidacies.schemas import (
     CoalitionIn,
     MunicipalitySettingIn,
     OfficeTypeIn,
+    OfficeTypeUpdate,
     PartyIn,
     ProcessIn,
     ProcessOfficeIn,
@@ -98,6 +99,16 @@ async def create_office_type(db: AsyncSession, body: OfficeTypeIn) -> OfficeType
         raise ConflictError("Ya existe un cargo con ese código.")
     office = OfficeType(**body.model_dump())
     db.add(office)
+    await db.commit()
+    return office
+
+
+async def update_office_type(
+    db: AsyncSession, office_type_id: uuid.UUID, body: OfficeTypeUpdate
+) -> OfficeType:
+    office: OfficeType = await _get(db, OfficeType, office_type_id, "Cargo")
+    for key, value in body.model_dump(exclude_unset=True).items():
+        setattr(office, key, value)
     await db.commit()
     return office
 

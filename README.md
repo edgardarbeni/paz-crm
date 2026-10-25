@@ -12,7 +12,7 @@ posteriores, padrón, defensa del voto, jurídico, atención social, encuestas y
 | [`docs/fases/`](docs/fases/) | Cierre de cada fase: entregables, suposiciones, deuda y riesgos |
 | [`docs/api/`](docs/api/) | Colección de ejemplos de la API (Bruno) |
 
-**Estado:** fases A, B y C aprobadas · fase D (personas y candidaturas) implementada, pendiente de aprobación.
+**Estado:** fases A a D aprobadas · fase E (panel de administración) implementada, pendiente de aprobación.
 
 ## Estructura
 
@@ -123,8 +123,32 @@ pnpm dev            # http://localhost:5173 (proxy de /api a localhost:8000)
 pnpm lint           # Biome
 pnpm typecheck
 pnpm test           # Vitest + Testing Library
-pnpm e2e            # Playwright contra el build de producción
 ```
+
+**E2E (Playwright contra el stack real, D-73).** Desde la raíz:
+
+```bash
+./scripts/e2e.sh                 # levanta PostGIS + Redis + API sembrada y corre Playwright
+./scripts/e2e.sh -g "sustitución" # argumentos extra van a Playwright
+```
+
+El script usa una base desechable con la geografía sintética de los tests
+(`backend/tests/e2e/seed.py`) y un usuario por escenario, porque TOTP no acepta reusar un código.
+
+### El panel
+
+- **Sesión (D-74):** el access token vive solo en memoria y el refresh token en la cookie
+  httpOnly. Al recargar, la sesión se restaura con la cookie. Ante un 401 el cliente renueva una
+  sola vez y repite la petición. Quien aún debe enrolar TOTP va a `/enroll-mfa`.
+- **Navegación por permisos:** el menú solo muestra lo que el rol permite; el backend vuelve a
+  verificar todo.
+- **Teclado primero:** `Ctrl+K` para ir a cualquier pantalla, `/` para buscar, `N` para crear
+  en las listas, `↑ ↓ Enter` en las tablas, `Ctrl+Enter` para guardar. En el editor de
+  postulaciones el cursor pasa sola a la siguiente posición tras guardar.
+- **Formularios (D-75):** TanStack Form con los esquemas Zod generados y mensajes en español; la
+  CURP se valida en línea con la misma regla que el backend.
+- **Mapa (D-72):** MapLibre con las teselas MVT de la API sobre OpenFreeMap. Para cambiar de
+  proveedor se usan `VITE_MAP_STYLE_URL` y `PAZ_MAP_TILES_ORIGIN` (CSP de producción).
 
 ### Contrato de API y cliente generado
 
@@ -145,7 +169,8 @@ El CI falla si `frontend/openapi.json` o el cliente generado están desactualiza
 | Job | Qué corre |
 |---|---|
 | backend | ruff, mypy y pytest con cobertura ≥ 85 % sobre PostGIS real |
-| frontend | Biome, `tsc`, Vitest, build y Playwright |
+| frontend | Biome, `tsc`, Vitest y build |
+| e2e | `scripts/e2e.sh`: Playwright contra PostGIS, Redis y la API sembrada |
 | api-contract | Regenera el contrato y el cliente, y falla si hay diferencias |
 | images | Build de las imágenes de producción de API, panel y PostGIS (sin push) |
 
