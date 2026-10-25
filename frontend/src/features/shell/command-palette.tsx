@@ -1,5 +1,4 @@
 import { useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
 import {
   Command,
   CommandDialog,
@@ -13,8 +12,15 @@ import type { NavSection } from "@/features/shell/nav";
 import { useHotkey } from "@/hooks/use-hotkey";
 
 /** Ctrl/⌘+K: jump to any screen by name. */
-export function CommandPalette({ sections }: { sections: NavSection[] }) {
-  const [open, setOpen] = useState(false);
+export function CommandPalette({
+  sections,
+  open,
+  onOpenChange: setOpen,
+}: {
+  sections: NavSection[];
+  open: boolean;
+  onOpenChange: (open: boolean | ((value: boolean) => boolean)) => void;
+}) {
   const navigate = useNavigate();
   useHotkey("mod+k", () => setOpen((value) => !value));
   return (

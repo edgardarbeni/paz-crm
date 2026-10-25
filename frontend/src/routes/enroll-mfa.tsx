@@ -108,7 +108,7 @@ function EnrollMfaPage() {
             )}
           </form.AppField>
           <form.AppForm>
-            <form.SubmitButton>Activar</form.SubmitButton>
+            <form.SubmitButton className="h-10">Activar</form.SubmitButton>
           </form.AppForm>
         </form>
       </div>

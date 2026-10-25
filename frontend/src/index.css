@@ -1,13 +1,20 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "@fontsource-variable/geist";
+@import "@fontsource-variable/montserrat";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --font-heading: var(--font-sans);
-  --font-sans: "Geist Variable", sans-serif;
+  --font-sans: "Montserrat Variable", ui-sans-serif, system-ui, sans-serif;
+  --color-brand: var(--brand);
+  --color-brand-strong: var(--brand-strong);
+  --color-brand-soft: var(--brand-soft);
+  --shadow-brand:
+    0 1px 2px oklch(0.4 0.142 320.8 / 0.06), 0 8px 24px -12px oklch(0.4 0.142 320.8 / 0.22);
+  --shadow-brand-lg:
+    0 2px 4px oklch(0.4 0.142 320.8 / 0.06), 0 18px 40px -16px oklch(0.4 0.142 320.8 / 0.35);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -49,48 +56,55 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  /* Identity: PAZ purple #682575 and white (D-78). Neutrals carry a hint of the brand hue. */
+  --brand: oklch(0.4 0.142 320.8);
+  --brand-strong: oklch(0.316 0.113 320.6);
+  --brand-soft: oklch(0.955 0.02 320);
+  --background: oklch(0.985 0.004 320);
+  --foreground: oklch(0.24 0.04 320);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  --card-foreground: oklch(0.24 0.04 320);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.24 0.04 320);
+  --primary: oklch(0.4 0.142 320.8);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.955 0.02 320);
+  --secondary-foreground: oklch(0.316 0.113 320.6);
+  --muted: oklch(0.966 0.008 320);
+  --muted-foreground: oklch(0.5 0.03 320);
+  --accent: oklch(0.945 0.026 320);
+  --accent-foreground: oklch(0.316 0.113 320.6);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --border: oklch(0.915 0.014 320);
+  --input: oklch(0.89 0.018 320);
+  --ring: oklch(0.55 0.15 320.8);
+  --chart-1: oklch(0.4 0.142 320.8);
+  --chart-2: oklch(0.55 0.15 320.8);
+  --chart-3: oklch(0.7 0.11 320.8);
+  --chart-4: oklch(0.82 0.06 320.8);
+  --chart-5: oklch(0.316 0.113 320.6);
+  --radius: 0.75rem;
+  --sidebar: oklch(0.4 0.142 320.8);
+  --sidebar-foreground: oklch(1 0 0);
+  --sidebar-primary: oklch(1 0 0);
+  --sidebar-primary-foreground: oklch(0.4 0.142 320.8);
+  --sidebar-accent: oklch(1 0 0 / 14%);
+  --sidebar-accent-foreground: oklch(1 0 0);
+  --sidebar-border: oklch(1 0 0 / 14%);
+  --sidebar-ring: oklch(1 0 0 / 60%);
 }
 
 .dark {
+  --brand: oklch(0.72 0.12 320.8);
+  --brand-strong: oklch(0.82 0.08 320.8);
+  --brand-soft: oklch(0.3 0.06 320);
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
+  --primary: oklch(0.72 0.12 320.8);
   --primary-foreground: oklch(0.205 0 0);
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
@@ -109,7 +123,7 @@
   --chart-5: oklch(0.269 0 0);
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary: oklch(0.72 0.12 320.8);
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.269 0 0);
   --sidebar-accent-foreground: oklch(0.985 0 0);
@@ -125,6 +139,23 @@
     @apply bg-background text-foreground;
   }
   html {
-    @apply font-sans;
+    @apply font-sans antialiased;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply tracking-tight;
+  }
+  ::selection {
+    @apply bg-primary/20;
+  }
+}
+
+@layer components {
+  /* Purple panel used by the sidebar, the login aside and the home banner. */
+  .bg-brand-gradient {
+    background:
+      radial-gradient(120% 80% at 0% 0%, oklch(0.5 0.16 320.8 / 0.55), transparent 60%),
+      linear-gradient(160deg, var(--brand) 0%, var(--brand-strong) 100%);
   }
 }

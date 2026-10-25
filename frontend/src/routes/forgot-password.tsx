@@ -53,7 +53,7 @@ function ForgotPasswordPage() {
           )}
         </form.AppField>
         <form.AppForm>
-          <form.SubmitButton>Enviar enlace</form.SubmitButton>
+          <form.SubmitButton className="h-10">Enviar enlace</form.SubmitButton>
         </form.AppForm>
         <Link to="/login" className="text-center text-sm text-muted-foreground hover:underline">
           Volver

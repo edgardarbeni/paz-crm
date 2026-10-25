@@ -147,6 +147,8 @@ El script usa una base desechable con la geografía sintética de los tests
   postulaciones el cursor pasa sola a la siguiente posición tras guardar.
 - **Formularios (D-75):** TanStack Form con los esquemas Zod generados y mensajes en español; la
   CURP se valida en línea con la misma regla que el backend.
+- **Identidad visual (D-78):** morado PAZ `#682575` y blanco con Montserrat autoalojada; los
+  tokens de color están en `frontend/src/index.css` y el logotipo en `components/brand/logo.tsx`.
 - **Mapa (D-72):** MapLibre con las teselas MVT de la API sobre OpenFreeMap. Para cambiar de
   proveedor se usan `VITE_MAP_STYLE_URL` y `PAZ_MAP_TILES_ORIGIN` (CSP de producción).
 

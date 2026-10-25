@@ -83,10 +83,10 @@ export function DataTable<T extends RowData>({
 
   return (
     <div className="space-y-2">
-      <div className="overflow-x-auto rounded-lg border">
+      <div className="overflow-x-auto rounded-2xl border bg-card shadow-brand">
         <table className="w-full text-sm">
           <caption className="sr-only">{caption}</caption>
-          <thead className="bg-muted/50 text-left">
+          <thead className="bg-secondary/60 text-left">
             {table.getHeaderGroups().map((group) => (
               <tr key={group.id}>
                 {group.headers.map((header) => {
@@ -97,13 +97,13 @@ export function DataTable<T extends RowData>({
                     <th
                       key={header.id}
                       scope="col"
-                      className="px-3 py-2 font-medium text-muted-foreground"
+                      className="px-3 py-2.5 text-xs font-bold tracking-wide text-muted-foreground uppercase"
                       aria-sort={active ? (descending ? "descending" : "ascending") : undefined}
                     >
                       {column.sortKey && onSortChange ? (
                         <button
                           type="button"
-                          className="inline-flex items-center gap-1 hover:text-foreground"
+                          className="inline-flex items-center gap-1 tracking-wide uppercase hover:text-foreground"
                           onClick={() =>
                             onSortChange(
                               active && !descending ? `-${column.sortKey}` : `${column.sortKey}`,
@@ -156,8 +156,8 @@ export function DataTable<T extends RowData>({
                   onKeyDown={(event) => moveFocus(event, row.original)}
                   onClick={onActivate ? () => onActivate(row.original) : undefined}
                   className={cn(
-                    "border-t outline-none focus-visible:bg-accent",
-                    onActivate && "cursor-pointer hover:bg-muted/50",
+                    "border-t transition-colors outline-none focus-visible:bg-accent focus-visible:shadow-[inset_3px_0_0_var(--primary)]",
+                    onActivate && "cursor-pointer hover:bg-brand-soft/70",
                   )}
                 >
                   {row.getAllCells().map((cell) => (

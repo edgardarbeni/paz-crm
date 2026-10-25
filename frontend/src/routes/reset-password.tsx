@@ -68,7 +68,7 @@ function ResetPasswordPage() {
             )}
           </form.AppField>
           <form.AppForm>
-            <form.SubmitButton>Guardar</form.SubmitButton>
+            <form.SubmitButton className="h-10">Guardar</form.SubmitButton>
           </form.AppForm>
         </form>
       )}

@@ -100,7 +100,7 @@ function InvitationForm({ token, info }: { token: string; info: InvitationInfo }
           )}
         </form.AppField>
         <form.AppForm>
-          <form.SubmitButton>Activar cuenta</form.SubmitButton>
+          <form.SubmitButton className="h-10">Activar cuenta</form.SubmitButton>
         </form.AppForm>
       </form>
     </AuthCard>
