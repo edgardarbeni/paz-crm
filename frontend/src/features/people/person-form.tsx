@@ -13,7 +13,7 @@ import { Perm } from "@/lib/auth/permissions";
 import { useCan } from "@/lib/auth/use-me";
 import { blanksToNull } from "@/lib/forms";
 import { options, SEX_LABELS } from "@/lib/labels";
-import { type GeoSearchLevel, searchGeoItems } from "@/lib/search";
+import { GEO_SEARCH_HINTS, type GeoSearchLevel, searchGeoItems } from "@/lib/search";
 
 const CONTACT_TYPES = { mobile: "Celular", landline: "Teléfono fijo", email: "Correo" };
 type GeoKey = "state" | "municipality" | "section" | "locality" | "neighborhood";
@@ -383,12 +383,18 @@ export function PersonForm({
                   <FieldShell key={key} id={`address-${key}`} label={label}>
                     <AsyncCombobox
                       id={`address-${key}`}
-                      label={`${label} (clave o nombre)`}
+                      label={label}
                       value={geo[key]}
                       onChange={(item) => setGeo((g) => ({ ...g, [key]: item }))}
-                      queryKey={["geo-search", key]}
-                      search={(term) => searchGeoItems(term, [key as GeoSearchLevel])}
+                      // Once the state is chosen, the other levels only search inside it.
+                      queryKey={["geo-search", key, key === "state" ? null : geo.state?.id]}
+                      search={(term) =>
+                        searchGeoItems(term, [key as GeoSearchLevel], {
+                          stateId: key === "state" ? null : geo.state?.id,
+                        })
+                      }
                       minChars={key === "state" || key === "section" ? 1 : 2}
+                      placeholder={GEO_SEARCH_HINTS[key]}
                     />
                   </FieldShell>
                 ))}

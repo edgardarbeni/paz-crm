@@ -13,7 +13,7 @@ import { ProblemAlert } from "@/components/problem-alert";
 import { Button } from "@/components/ui/button";
 import { GeoName } from "@/features/candidacies/geo-name";
 import { GEO_LEVEL_LABELS } from "@/lib/labels";
-import { type GeoSearchLevel, searchGeoItems } from "@/lib/search";
+import { GEO_SEARCH_HINTS, type GeoSearchLevel, searchGeoItems } from "@/lib/search";
 
 const SCOPE_LEVELS: ScopeLevel[] = [
   "national",
@@ -100,6 +100,7 @@ export function ScopesEditor({ userId, editable }: { userId: string; editable: b
               queryKey={["geo-search", level]}
               search={(term) => searchGeoItems(term, [level as GeoSearchLevel])}
               minChars={1}
+              placeholder={GEO_SEARCH_HINTS[level]}
               className="min-w-64 flex-1"
             />
           ) : null}

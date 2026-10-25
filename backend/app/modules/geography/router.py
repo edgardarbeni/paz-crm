@@ -43,15 +43,32 @@ async def list_frameworks(db: SessionDep, _: GeoReader) -> list[FrameworkOut]:
     return [FrameworkOut.model_validate(row) for row in rows.scalars()]
 
 
-@router.get("/search", operation_id="searchGeography", summary="Buscar por clave INE o por nombre")
+@router.get(
+    "/search",
+    operation_id="searchGeography",
+    summary="Buscar por clave INE, número o nombre, con el estado",
+)
 async def search(
     db: SessionDep,
     user: GeoReader,
-    q: Annotated[str, Query(min_length=1, max_length=100, examples=["01-0338", "Calvillo"])],
+    q: Annotated[
+        str,
+        Query(min_length=1, max_length=100, examples=["01-0338", "338 Aguascalientes", "Calvillo"]),
+    ],
     level: Annotated[list[Level] | None, Query()] = None,
     limit: Annotated[int, Query(ge=1, le=50)] = 20,
+    state_id: Annotated[
+        uuid.UUID | None, Query(description="Limita los resultados a un estado.")
+    ] = None,
 ) -> list[GeoNodeOut]:
-    rows = await service.search(db, user.geo, q, levels=list(level) if level else None, limit=limit)
+    rows = await service.search(
+        db,
+        user.geo,
+        q,
+        levels=list(level) if level else None,
+        limit=limit,
+        state_id=state_id,
+    )
     return [GeoNodeOut.model_validate(row) for row in rows]
 
 
@@ -178,7 +195,14 @@ async def list_nodes(
     db: SessionDep,
     user: GeoReader,
     params: Annotated[PageParams, Depends(page_params)],
-    q: Annotated[str | None, Query(min_length=2, max_length=100, description="Nombre")] = None,
+    q: Annotated[
+        str | None,
+        Query(
+            min_length=1,
+            max_length=100,
+            description="Número (clave del nivel) o nombre; en distritos y secciones, el estado.",
+        ),
+    ] = None,
     electoral_region_id: uuid.UUID | None = None,
     state_id: uuid.UUID | None = None,
     municipality_id: uuid.UUID | None = None,

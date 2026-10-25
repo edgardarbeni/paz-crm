@@ -27,6 +27,10 @@ class GeoNodeOut(Schema):
     key: str = Field(description="Clave INE legible: 01-0338, 01-005, C2…", examples=["01-0338"])
     name: str | None = None
     state_code: int | None = None
+    state_name: str | None = Field(default=None, description="Nombre del estado al que pertenece.")
+    municipality_name: str | None = Field(
+        default=None, description="Municipio (secciones, localidades y colonias)."
+    )
     electoral_region_id: uuid.UUID | None = None
     state_id: uuid.UUID | None = None
     municipality_id: uuid.UUID | None = None

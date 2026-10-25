@@ -220,6 +220,8 @@ export const zGeoNodeOut = z.object({
     key: z.string(),
     name: z.string().nullish(),
     state_code: z.int().nullish(),
+    state_name: z.string().nullish(),
+    municipality_name: z.string().nullish(),
     electoral_region_id: z.uuid().nullish(),
     state_id: z.uuid().nullish(),
     municipality_id: z.uuid().nullish(),
@@ -458,6 +460,8 @@ export const zGeoNodeDetail = z.object({
     key: z.string(),
     name: z.string().nullish(),
     state_code: z.int().nullish(),
+    state_name: z.string().nullish(),
+    municipality_name: z.string().nullish(),
     electoral_region_id: z.uuid().nullish(),
     state_id: z.uuid().nullish(),
     municipality_id: z.uuid().nullish(),
@@ -1597,7 +1601,8 @@ export const zSearchGeographyQuery = z.object({
         'locality',
         'neighborhood'
     ])).nullish(),
-    limit: z.int().gte(1).lte(50).optional().default(20)
+    limit: z.int().gte(1).lte(50).optional().default(20),
+    state_id: z.uuid().nullish()
 });
 
 /**
@@ -1676,7 +1681,7 @@ export const zListGeoNodesPath = z.object({
 });
 
 export const zListGeoNodesQuery = z.object({
-    q: z.string().min(2).max(100).nullish(),
+    q: z.string().min(1).max(100).nullish(),
     electoral_region_id: z.uuid().nullish(),
     state_id: z.uuid().nullish(),
     municipality_id: z.uuid().nullish(),

@@ -40,6 +40,8 @@ export const Route = createFileRoute("/_app/geography/")({
   component: ExplorerPage,
 });
 
+const NAMED = new Set(["state", "municipality", "locality", "neighborhood"]);
+
 const PARENT_FILTERS = [
   ["electoral_region_id", "electoral_region"],
   ["state_id", "state"],
@@ -73,9 +75,17 @@ function ExplorerPage() {
           {
             id: "state",
             header: "Estado",
-            cell: ({ row }: { row: { original: GeoNodeOut } }) => (
-              <GeoName level="state" id={row.original.state_id} />
-            ),
+            cell: ({ row }: { row: { original: GeoNodeOut } }) => row.original.state_name ?? "—",
+          } as Column<GeoNodeOut>,
+        ]
+      : []),
+    ...(level === "section" || level === "locality" || level === "neighborhood"
+      ? [
+          {
+            id: "municipality",
+            header: "Municipio",
+            cell: ({ row }: { row: { original: GeoNodeOut } }) =>
+              row.original.municipality_name ?? "—",
           } as Column<GeoNodeOut>,
         ]
       : []),
@@ -104,7 +114,11 @@ function ExplorerPage() {
         <SearchInput
           value={term}
           onChange={setTerm}
-          label={`Buscar ${(GEO_LEVEL_LABELS[level] ?? "").toLowerCase()} por clave o nombre`}
+          label={
+            NAMED.has(level)
+              ? `Buscar ${(GEO_LEVEL_LABELS[level] ?? "").toLowerCase()} por número o nombre`
+              : `Buscar ${(GEO_LEVEL_LABELS[level] ?? "").toLowerCase()} por número o estado`
+          }
         />
         {activeParents.map(([key, parentLevel]) => (
           <button

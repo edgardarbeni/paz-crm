@@ -23,7 +23,7 @@ import { Perm } from "@/lib/auth/permissions";
 import { useCan } from "@/lib/auth/use-me";
 import { blanksToNull, formSchema } from "@/lib/forms";
 import { ELECTION_LEVEL, formatDate, options, PROCESS_STATUS } from "@/lib/labels";
-import { searchGeoItems } from "@/lib/search";
+import { GEO_SEARCH_HINTS, searchGeoItems } from "@/lib/search";
 
 export const Route = createFileRoute("/_app/processes/")({ component: ProcessesPage });
 
@@ -172,6 +172,7 @@ function ProcessDialog({ onClose }: { onClose: () => void }) {
                   queryKey={["geo-search", "state"]}
                   search={(term) => searchGeoItems(term, ["state"])}
                   minChars={1}
+                  placeholder={GEO_SEARCH_HINTS.state}
                 />
               </FieldShell>
             ) : null

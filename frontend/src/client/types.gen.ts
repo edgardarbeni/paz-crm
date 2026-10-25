@@ -682,6 +682,18 @@ export type GeoNodeDetail = {
      */
     state_code?: number | null;
     /**
+     * State Name
+     *
+     * Nombre del estado al que pertenece.
+     */
+    state_name?: string | null;
+    /**
+     * Municipality Name
+     *
+     * Municipio (secciones, localidades y colonias).
+     */
+    municipality_name?: string | null;
+    /**
      * Electoral Region Id
      */
     electoral_region_id?: string | null;
@@ -754,6 +766,18 @@ export type GeoNodeOut = {
      * State Code
      */
     state_code?: number | null;
+    /**
+     * State Name
+     *
+     * Nombre del estado al que pertenece.
+     */
+    state_name?: string | null;
+    /**
+     * Municipality Name
+     *
+     * Municipio (secciones, localidades y colonias).
+     */
+    municipality_name?: string | null;
     /**
      * Electoral Region Id
      */
@@ -3986,6 +4010,12 @@ export type SearchGeographyData = {
          * Limit
          */
         limit?: number;
+        /**
+         * State Id
+         *
+         * Limita los resultados a un estado.
+         */
+        state_id?: string | null;
     };
     url: '/api/v1/geography/search';
 };
@@ -4247,7 +4277,7 @@ export type ListGeoNodesData = {
         /**
          * Q
          *
-         * Nombre
+         * Número (clave del nivel) o nombre; en distritos y secciones, el estado.
          */
         q?: string | null;
         /**
