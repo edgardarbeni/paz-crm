@@ -1,13 +1,13 @@
 # Cierre de fase A — Infraestructura base, core y CI
 
-**Fecha:** 2026-10-24 · **Rama:** `feat/phase-a-foundation` · **Estado:** implementada, pendiente de aprobación.
+**Fecha:** 2026-10-24 · **Rama:** `feat/phase-a-foundation` · **Estado:** aprobada el 2026-10-24 · PR [#1](https://github.com/edgardarbeni/paz-crm/pull/1).
 
 ## Criterios de aceptación (PLAN_FASES.md)
 
 | Criterio | Resultado | Evidencia |
 |---|---|---|
 | `docker compose up` levanta todo y `/ready` responde 200 | ✅ | `https://localhost/ready` → `{"status":"ok","database":"ok","redis":"ok"}` a través de Caddy; migraciones en `0002`; `paz audit verify-chain` OK dentro del contenedor |
-| CI verde | ⚠️ Verificado localmente; falta la primera ejecución en GitHub | Todos los pasos del workflow corren en local; `actionlint` sin observaciones |
+| CI verde | ✅ | [Ejecución 40145453886](https://github.com/edgardarbeni/paz-crm/actions/runs/40145453886) en el PR #1: changes, backend, frontend, api-contract e images en verde |
 | Tests de core: Problem Details | ✅ | `tests/unit/test_app_errors_and_headers.py` |
 | Tests de core: cifrado y rotación de llave | ✅ | `tests/unit/test_crypto.py` (incluye manipulación, contexto equivocado y llave retirada) |
 | Tests de core: cadena de auditoría y detección de alteraciones | ✅ | `tests/integration/test_audit_log.py` (fila editada, filas borradas en medio y al final, 10 escritores concurrentes, permisos del rol app, inmutabilidad para el dueño) |
@@ -60,4 +60,4 @@
 | ~~R-1~~ | ~~Disponibilidad de PostGIS para PG18 en servicios administrados~~ | **Resuelto.** La [lista oficial de extensiones de DigitalOcean](https://docs.digitalocean.com/products/databases/postgresql/details/supported-extensions/) incluye `postgis` en PostgreSQL 18 (Standard Edition) y [AWS RDS](https://aws.amazon.com/about-aws/whats-new/2026/05/amazon-rds-postgresql/) ofrece PG 18.4 + PostGIS 3.6.3. Al crear el clúster en DO hay que elegir **Standard Edition** y comprobar `CREATE EXTENSION postgis` |
 | R-2 | El bloqueo de `audit.chain_head` serializa todas las escrituras auditadas | Medir en las pruebas de carga de C/D. Alternativas: cadenas por partición o encolar las entradas |
 | R-3 | Paquetes en versiones muy recientes (SQLAlchemy 2.1, FastAPI 0.162, Vite 8, Vitest 5, React Table 9) con APIs que pueden diferir de la documentación conocida | El lockfile fija las versiones; los tests y `filterwarnings=error` detectan deprecaciones |
-| R-4 | El CI no se ha ejecutado aún en GitHub | Primer push de la rama |
+| ~~R-4~~ | ~~El CI no se ha ejecutado aún en GitHub~~ | **Resuelto:** primera ejecución en verde en el PR #1 |

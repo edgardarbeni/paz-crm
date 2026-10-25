@@ -12,7 +12,7 @@ posteriores, padrón, defensa del voto, jurídico, atención social, encuestas y
 | [`docs/fases/`](docs/fases/) | Cierre de cada fase: entregables, suposiciones, deuda y riesgos |
 | [`docs/api/`](docs/api/) | Colección de ejemplos de la API (Bruno) |
 
-**Estado:** fase A (infraestructura base, core y CI) implementada, pendiente de aprobación.
+**Estado:** fase A (infraestructura base, core y CI) aprobada. Siguiente: fase B (identidad).
 
 ## Estructura
 
