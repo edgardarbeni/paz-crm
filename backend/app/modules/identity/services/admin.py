@@ -20,6 +20,11 @@ from app.modules.identity.services.access import (
     load_access,
     utcnow,
 )
+from app.modules.identity.services.scopes import (
+    GeoScope,
+    ensure_within_scope,
+    manageable_users_filter,
+)
 from app.modules.identity.services.sessions import revoke_user_sessions
 
 # --- read models -------------------------------------------------------------------------
@@ -74,8 +79,12 @@ async def list_users(
     status: UserStatus | None,
     search: str | None,
     role_id: uuid.UUID | None,
+    geo: GeoScope | None = None,
 ) -> CursorPage[UserView]:
     statement = select(User).where(repo.alive(User))
+    scoped = manageable_users_filter(geo, col(User.id)) if geo else None
+    if scoped is not None:
+        statement = statement.where(scoped)
     if status is not None:
         statement = statement.where(col(User.status) == status)
     if search:
@@ -113,16 +122,26 @@ async def _locked_user(db: AsyncSession, user_id: uuid.UUID) -> User:
     return user
 
 
-async def ensure_can_manage(db: AsyncSession, actor: Access, target_id: uuid.UUID) -> None:
-    """Only a superadmin may act on a superadmin account."""
+async def ensure_can_manage(
+    db: AsyncSession, actor: Access, target_id: uuid.UUID, geo: GeoScope | None = None
+) -> None:
+    """Only a superadmin may act on a superadmin account, and only on users inside the actor's
+    geographic scope (D-33, D-34)."""
     if not actor.grants_all and (await load_access(db, target_id)).grants_all:
         raise ForbiddenError("Solo un superadministrador puede gestionar esta cuenta.")
+    if geo is not None:
+        await ensure_within_scope(db, geo, user_id=target_id)
 
 
 async def update_user(
-    db: AsyncSession, *, actor: Access, user_id: uuid.UUID, full_name: str
+    db: AsyncSession,
+    *,
+    actor: Access,
+    user_id: uuid.UUID,
+    full_name: str,
+    geo: GeoScope | None = None,
 ) -> UserView:
-    await ensure_can_manage(db, actor, user_id)
+    await ensure_can_manage(db, actor, user_id, geo)
     user = await _locked_user(db, user_id)
     user.full_name = full_name
     await db.commit()
@@ -130,11 +149,16 @@ async def update_user(
 
 
 async def disable_user(
-    db: AsyncSession, *, actor_id: uuid.UUID, actor: Access, user_id: uuid.UUID
+    db: AsyncSession,
+    *,
+    actor_id: uuid.UUID,
+    actor: Access,
+    user_id: uuid.UUID,
+    geo: GeoScope | None = None,
 ) -> UserView:
     if user_id == actor_id:
         raise ConflictError("No puedes desactivar tu propia cuenta.")
-    await ensure_can_manage(db, actor, user_id)
+    await ensure_can_manage(db, actor, user_id, geo)
     user = await _locked_user(db, user_id)
     if (await load_access(db, user_id)).grants_all and await repo.count_active_superadmins(
         db, excluding=user_id
@@ -146,8 +170,10 @@ async def disable_user(
     return await user_view(db, user_id)
 
 
-async def activate_user(db: AsyncSession, *, actor: Access, user_id: uuid.UUID) -> UserView:
-    await ensure_can_manage(db, actor, user_id)
+async def activate_user(
+    db: AsyncSession, *, actor: Access, user_id: uuid.UUID, geo: GeoScope | None = None
+) -> UserView:
+    await ensure_can_manage(db, actor, user_id, geo)
     user = await _locked_user(db, user_id)
     if user.status != UserStatus.DISABLED:
         raise ConflictError("Solo se pueden reactivar cuentas desactivadas.")
@@ -156,8 +182,10 @@ async def activate_user(db: AsyncSession, *, actor: Access, user_id: uuid.UUID) 
     return await user_view(db, user_id)
 
 
-async def unlock_user(db: AsyncSession, *, actor: Access, user_id: uuid.UUID) -> UserView:
-    await ensure_can_manage(db, actor, user_id)
+async def unlock_user(
+    db: AsyncSession, *, actor: Access, user_id: uuid.UUID, geo: GeoScope | None = None
+) -> UserView:
+    await ensure_can_manage(db, actor, user_id, geo)
     user = await _locked_user(db, user_id)
     user.locked_until = None
     user.failed_login_count = 0
@@ -172,8 +200,9 @@ async def set_user_roles(
     actor: Access,
     user_id: uuid.UUID,
     role_ids: list[uuid.UUID],
+    geo: GeoScope | None = None,
 ) -> UserView:
-    await ensure_can_manage(db, actor, user_id)
+    await ensure_can_manage(db, actor, user_id, geo)
     await _locked_user(db, user_id)
     wanted = await repo.roles_by_ids(db, role_ids)
     if len(wanted) != len(set(role_ids)):

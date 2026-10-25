@@ -1,6 +1,6 @@
 # Cierre de fase B — Identidad
 
-**Fecha:** 2026-10-24 · **Rama:** `feat/phase-b-identity` · **Estado:** implementada, pendiente de aprobación.
+**Fecha:** 2026-10-24 · **Rama:** `feat/phase-b-identity` · **Estado:** aprobada el 2026-10-24 · PR [#2](https://github.com/edgardarbeni/paz-crm/pull/2) (D-56).
 
 ## Criterios de aceptación (PLAN_FASES.md)
 

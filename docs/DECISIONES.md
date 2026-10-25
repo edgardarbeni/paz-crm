@@ -269,11 +269,62 @@ No hay integración con RENAPO.
 - **Correo:** el backend puede ser `smtp`, `console` o `memory`. Los correos salen en segundo plano después del commit. Los enlaces apuntan a rutas del panel que se construyen en la fase E (`/aceptar-invitacion`, `/restablecer-contrasena`).
 - **Primer superadmin:** se crea con `paz users create-superadmin` y debe enrolar TOTP en su primer acceso.
 
+**D-56 · Fase B aprobada.** El usuario aprobó la fase B el 2026-10-24; PR #2 fusionado a `main`.
+
+## 9. Fase C — geografía
+
+**D-57 · Relación colonia ↔ sección desde el catálogo del INE (reemplaza D-09).**
+- El Catálogo de Colonias del INE (corte ene-2026) publica la relación oficial colonia–sección con el mismo `ID` que la BGD. Verificado en Aguascalientes: 2,189 pares, 1,265 colonias, 100 % de coincidencia por `ID`, nombre y `CONTROL`.
+- **Fuente principal:** el catálogo (`source = 'ine_catalog'`).
+- **Cálculo espacial:** sirve para tres cosas:
+  - el % y el área de traslape de cada par;
+  - agregar pares para colonias que el catálogo no cubra (`source = 'computed'`, con el umbral de D-09);
+  - reportar en el importador los pares del catálogo sin intersección geométrica.
+
+**D-58 · Verificaciones sobre la llave de colonia (actualiza D-10) y fuentes del importador.**
+- **Llave de colonia:** en la BGD dic-2025, `COLONIA.ID` y `CONTROL` son únicos por estado y coinciden con el catálogo. En cambio, `(municipio, nombre, CP)` tiene 18 duplicados en Aguascalientes, así que **no sirve como llave**. Se usa `(estado, ID)`. La estabilidad del `ID` entre cortes sigue sin verificarse, porque solo hay un corte disponible; el importador reporta las colonias cuyo `ID` cambia de nombre o municipio.
+- **Carpetas locales:** las de `paz-maps/` son **idénticas byte por byte** a la BGD oficial dic-2025 (verificado en las 9 capas del MVP de Aguascalientes).
+- **Fuentes que acepta el importador:** una carpeta de shapefiles o el 7z oficial. Los catálogos tabulares (Secciones, Manzanas, Localidades con Sección, Colonias) se descargan del INE con `paz geo download`.
+
+**D-59 · Mapeos de códigos verificados (amplía D-15).**
+- `COLONIA.CLASIFICAC` → tipo de colonia del catálogo. En Aguascalientes: 1 COLONIA, 2 FRACCIONAMIENTO, 3 UNIDAD HABITACIONAL, 4 CONJUNTO HABITACIONAL, 6 RANCHO, 7 BARRIO, 8 EJIDO, 13 CONDOMINIO, 17 FRACCION, 18 GRANJA, 24 RINCONADA, 26 SECTOR, 31 ZONA INDUSTRIAL, 32 ZONA MILITAR, 35 LOCALIDAD.
+- Localidades: las 46 de tipo 2 tienen polígono, pero no punto, y concentran las manzanas.
+
+**D-60 · Ajustes de implementación de la geografía (sobre `MODELO_DATOS.md` §1).**
+- **Importaciones:**
+  - `import_errors` se llama `import_issues`, porque guarda errores y advertencias.
+  - `import_runs.counts` (jsonb por tabla) reemplaza las columnas de conteo.
+  - `triggered_by` es texto: hoy las importaciones se lanzan por CLI (D-42).
+- **Relación colonia–sección:** `neighborhood_sections.source` reemplaza a `match_method` (D-57).
+- **Particiones de manzanas:** la función `geography.ensure_block_partition(framework_id)` crea una partición por marco al importar. Alembic las ignora (`env.py`).
+- **Upserts:** distinguen insertado de actualizado con `RETURNING old.id IS NULL` (PostgreSQL 18), que funciona también sobre la tabla particionada.
+- **Desactivación:** solo se marcan inactivos registros de capas que cargaron sin errores. Si una capa trae errores, se omite la desactivación y se avisa con `deactivation_skipped`, para que un archivo dañado nunca desactive datos válidos.
+- **Alcance vacío:** un usuario sin alcance no ve geografía (denegación por defecto), y un alcance `national` equivale a sin restricción. Los usuarios sin alcance sí son administrables por cualquier admin con el permiso, para poder configurarlos.
+
+**D-61 · Hallazgos de la carga real de Aguascalientes.**
+- `LOCALIDAD.tipo` 2 = URBANO(A), verificado con el catálogo; esto cierra el pendiente de D-15.
+- Del catálogo de colonias del INE:
+  - 323 de los 2,189 pares oficiales tienen menos de 5 % de traslape geométrico (el cálculo por umbral los habría descartado);
+  - 23 pares relacionan colonias con secciones que geométricamente no tocan (`catalog_pair_without_overlap`).
+- En Aguascalientes no hubo geometrías inválidas, manzanas fuera de su sección ni distritos inconsistentes. El importador los detecta igual; los tests lo prueban con la BGD sintética.
+
+**D-62 · Los códigos de colonia no son confiables a nivel nacional (corrige D-59).**
+- **El error:** D-59 generalizó a partir de Aguascalientes, donde `CLASIFICAC` corresponde 1:1 al tipo de colonia. La carga nacional lo desmiente. En la Ciudad de México el código 3 aparece con 11 textos distintos en el catálogo del INE (UNIDAD HABITACIONAL 533, COLONIA 35, RESIDENCIAL 11…), y estados distintos asignan textos distintos al mismo código. Además, el importador sobrescribía la descripción con la de cada estado, y eso dejaba descripciones incorrectas.
+- **Descripciones de código:** solo se aceptan mientras toda la evidencia coincide, a nivel nacional. Si un estado se contradice a sí mismo, o contradice lo que fijó otro estado, el código queda con `description_conflict = true` y sin descripción, y no se vuelve a llenar en automático. Esta regla aplica a todos los catálogos de códigos.
+- **Tipo de colonia:** se guarda el **texto oficial del catálogo por colonia** en `neighborhoods.type_label`. Es la fuente correcta registro por registro, independiente del código.
+- **Lección:** los mapeos de códigos se validan contra el país completo antes de darlos por buenos (se agrega a riesgos).
+
+**D-63 · Operación de la geografía.**
+- Cada corrida de importación registra tiempos por etapa (`counts.timings_s`).
+- Después de reconstruir los alcances en bloque se ejecuta `ANALYZE identity.user_scope_sections` (visto en el benchmark nacional: sin estadísticas, una tesela acotada tardó 207 ms en lugar de 5.6 ms).
+- `scripts/import-national.sh` carga los 32 estados desde una carpeta local.
+- `scripts/benchmark_geo.py` mide la API de punta a punta.
+
 ---
 
 ## Suposiciones vigentes
 
-- El ID de origen de colonia en la BGD es estable entre cortes (D-10, por verificar).
+- El ID de origen de colonia en la BGD es estable entre cortes (D-10/D-58: único y consistente con el catálogo dentro del corte; la estabilidad entre cortes queda por verificar).
 - El umbral por defecto colonia ↔ sección es 5 % del área de la colonia o 500 m² (D-09).
 - No se precargan reglas electorales por estado (regidurías, sindicatura, régimen municipal, paridad); todo es configuración (D-24 a D-28).
 - La primera minoría del Senado se infiere de la posición 1 de la lista estatal; el cálculo de resultados queda fuera del MVP.

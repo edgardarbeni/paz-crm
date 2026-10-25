@@ -3,8 +3,8 @@
 import { type InfiniteData, infiniteQueryOptions, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen';
-import { acceptInvitation, activateUser, changePassword, confirmTotp, createRole, deleteRole, disableTotp, disableUser, forgotPassword, getHealth, getMe, getReadiness, getRole, getUser, inspectInvitation, inviteUser, listAuditEntries, listMySessions, listPermissions, listRoles, listUsers, listUserSessions, login, logout, type Options, refreshSession, regenerateRecoveryCodes, resendInvitation, resetPassword, resetUserMfa, revokeMyOtherSessions, revokeMySession, revokeUserSessions, setRolePermissions, setupTotp, setUserRoles, unlockUser, updateRole, updateUser, verifyMfa } from '../sdk.gen';
-import type { AcceptInvitationData, AcceptInvitationError, AcceptInvitationResponse, ActivateUserData, ActivateUserError, ActivateUserResponse, ChangePasswordData, ChangePasswordError, ChangePasswordResponse, ConfirmTotpData, ConfirmTotpError, ConfirmTotpResponse, CreateRoleData, CreateRoleError, CreateRoleResponse, DeleteRoleData, DeleteRoleError, DeleteRoleResponse, DisableTotpData, DisableTotpError, DisableTotpResponse, DisableUserData, DisableUserError, DisableUserResponse, ForgotPasswordData, ForgotPasswordError, GetHealthData, GetHealthError, GetHealthResponse, GetMeData, GetMeError, GetMeResponse, GetReadinessData, GetReadinessError, GetReadinessResponse, GetRoleData, GetRoleError, GetRoleResponse, GetUserData, GetUserError, GetUserResponse, InspectInvitationData, InspectInvitationError, InspectInvitationResponse, InviteUserData, InviteUserError, InviteUserResponse, ListAuditEntriesData, ListAuditEntriesError, ListAuditEntriesResponse, ListMySessionsData, ListMySessionsError, ListMySessionsResponse, ListPermissionsData, ListPermissionsError, ListPermissionsResponse, ListRolesData, ListRolesError, ListRolesResponse, ListUsersData, ListUsersError, ListUserSessionsData, ListUserSessionsError, ListUserSessionsResponse, ListUsersResponse, LoginData, LoginError, LoginResponse, LogoutData, LogoutError, LogoutResponse, RefreshSessionData, RefreshSessionError, RefreshSessionResponse, RegenerateRecoveryCodesData, RegenerateRecoveryCodesError, RegenerateRecoveryCodesResponse, ResendInvitationData, ResendInvitationError, ResendInvitationResponse, ResetPasswordData, ResetPasswordError, ResetPasswordResponse, ResetUserMfaData, ResetUserMfaError, ResetUserMfaResponse, RevokeMyOtherSessionsData, RevokeMyOtherSessionsError, RevokeMyOtherSessionsResponse, RevokeMySessionData, RevokeMySessionError, RevokeMySessionResponse, RevokeUserSessionsData, RevokeUserSessionsError, RevokeUserSessionsResponse, SetRolePermissionsData, SetRolePermissionsError, SetRolePermissionsResponse, SetupTotpData, SetupTotpError, SetupTotpResponse, SetUserRolesData, SetUserRolesError, SetUserRolesResponse, UnlockUserData, UnlockUserError, UnlockUserResponse, UpdateRoleData, UpdateRoleError, UpdateRoleResponse, UpdateUserData, UpdateUserError, UpdateUserResponse, VerifyMfaData, VerifyMfaError, VerifyMfaResponse } from '../types.gen';
+import { acceptInvitation, activateUser, changePassword, confirmTotp, createRole, deleteRole, disableTotp, disableUser, forgotPassword, getGeoNode, getHealth, getImportRun, getMe, getReadiness, getRole, getUser, getUserScopes, getVectorTile, inspectInvitation, inviteUser, listAuditEntries, listFrameworks, listGeoNodes, listImportIssues, listImportRuns, listMySessions, listPermissions, listRoles, listUsers, listUserSessions, locatePoint, login, logout, type Options, refreshSession, regenerateRecoveryCodes, resendInvitation, resetPassword, resetUserMfa, revokeMyOtherSessions, revokeMySession, revokeUserSessions, searchGeography, setRolePermissions, setupTotp, setUserRoles, setUserScopes, unlockUser, updateRole, updateUser, verifyMfa } from '../sdk.gen';
+import type { AcceptInvitationData, AcceptInvitationError, AcceptInvitationResponse, ActivateUserData, ActivateUserError, ActivateUserResponse, ChangePasswordData, ChangePasswordError, ChangePasswordResponse, ConfirmTotpData, ConfirmTotpError, ConfirmTotpResponse, CreateRoleData, CreateRoleError, CreateRoleResponse, DeleteRoleData, DeleteRoleError, DeleteRoleResponse, DisableTotpData, DisableTotpError, DisableTotpResponse, DisableUserData, DisableUserError, DisableUserResponse, ForgotPasswordData, ForgotPasswordError, GetGeoNodeData, GetGeoNodeError, GetGeoNodeResponse, GetHealthData, GetHealthError, GetHealthResponse, GetImportRunData, GetImportRunError, GetImportRunResponse, GetMeData, GetMeError, GetMeResponse, GetReadinessData, GetReadinessError, GetReadinessResponse, GetRoleData, GetRoleError, GetRoleResponse, GetUserData, GetUserError, GetUserResponse, GetUserScopesData, GetUserScopesError, GetUserScopesResponse, GetVectorTileData, GetVectorTileError, InspectInvitationData, InspectInvitationError, InspectInvitationResponse, InviteUserData, InviteUserError, InviteUserResponse, ListAuditEntriesData, ListAuditEntriesError, ListAuditEntriesResponse, ListFrameworksData, ListFrameworksError, ListFrameworksResponse, ListGeoNodesData, ListGeoNodesError, ListGeoNodesResponse, ListImportIssuesData, ListImportIssuesError, ListImportIssuesResponse, ListImportRunsData, ListImportRunsError, ListImportRunsResponse, ListMySessionsData, ListMySessionsError, ListMySessionsResponse, ListPermissionsData, ListPermissionsError, ListPermissionsResponse, ListRolesData, ListRolesError, ListRolesResponse, ListUsersData, ListUsersError, ListUserSessionsData, ListUserSessionsError, ListUserSessionsResponse, ListUsersResponse, LocatePointData, LocatePointError, LocatePointResponse, LoginData, LoginError, LoginResponse, LogoutData, LogoutError, LogoutResponse, RefreshSessionData, RefreshSessionError, RefreshSessionResponse, RegenerateRecoveryCodesData, RegenerateRecoveryCodesError, RegenerateRecoveryCodesResponse, ResendInvitationData, ResendInvitationError, ResendInvitationResponse, ResetPasswordData, ResetPasswordError, ResetPasswordResponse, ResetUserMfaData, ResetUserMfaError, ResetUserMfaResponse, RevokeMyOtherSessionsData, RevokeMyOtherSessionsError, RevokeMyOtherSessionsResponse, RevokeMySessionData, RevokeMySessionError, RevokeMySessionResponse, RevokeUserSessionsData, RevokeUserSessionsError, RevokeUserSessionsResponse, SearchGeographyData, SearchGeographyError, SearchGeographyResponse, SetRolePermissionsData, SetRolePermissionsError, SetRolePermissionsResponse, SetupTotpData, SetupTotpError, SetupTotpResponse, SetUserRolesData, SetUserRolesError, SetUserRolesResponse, SetUserScopesData, SetUserScopesError, SetUserScopesResponse, UnlockUserData, UnlockUserError, UnlockUserResponse, UpdateRoleData, UpdateRoleError, UpdateRoleResponse, UpdateUserData, UpdateUserError, UpdateUserResponse, VerifyMfaData, VerifyMfaError, VerifyMfaResponse } from '../types.gen';
 
 export type QueryKey<TOptions extends Options> = [
     Pick<TOptions, 'baseUrl' | 'body' | 'headers' | 'path' | 'query'> & {
@@ -632,6 +632,41 @@ export const revokeUserSessionsMutation = (options?: Partial<Options<RevokeUserS
     return mutationOptions;
 };
 
+export const getUserScopesQueryKey = (options: Options<GetUserScopesData>) => createQueryKey('getUserScopes', options);
+
+/**
+ * Alcance geográfico
+ */
+export const getUserScopesOptions = (options: Options<GetUserScopesData>) => queryOptions<GetUserScopesResponse, GetUserScopesError, GetUserScopesResponse, ReturnType<typeof getUserScopesQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getUserScopes({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getUserScopesQueryKey(options)
+});
+
+/**
+ * Reemplazar el alcance geográfico (no puede exceder el propio)
+ */
+export const setUserScopesMutation = (options?: Partial<Options<SetUserScopesData>>): UseMutationOptions<SetUserScopesResponse, SetUserScopesError, Options<SetUserScopesData>> => {
+    const mutationOptions: UseMutationOptions<SetUserScopesResponse, SetUserScopesError, Options<SetUserScopesData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await setUserScopes({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
 export const listRolesQueryKey = (options?: Options<ListRolesData>) => createQueryKey('listRoles', options);
 
 /**
@@ -801,3 +836,255 @@ export const listAuditEntriesInfiniteOptions = (options?: Options<ListAuditEntri
     });
     return opts as Omit<typeof opts, 'initialData'>;
 };
+
+export const listFrameworksQueryKey = (options?: Options<ListFrameworksData>) => createQueryKey('listFrameworks', options);
+
+/**
+ * Marcos geográficos
+ */
+export const listFrameworksOptions = (options?: Options<ListFrameworksData>) => queryOptions<ListFrameworksResponse, ListFrameworksError, ListFrameworksResponse, ReturnType<typeof listFrameworksQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listFrameworks({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listFrameworksQueryKey(options)
+});
+
+export const searchGeographyQueryKey = (options: Options<SearchGeographyData>) => createQueryKey('searchGeography', options);
+
+/**
+ * Buscar por clave INE o por nombre
+ */
+export const searchGeographyOptions = (options: Options<SearchGeographyData>) => queryOptions<SearchGeographyResponse, SearchGeographyError, SearchGeographyResponse, ReturnType<typeof searchGeographyQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await searchGeography({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: searchGeographyQueryKey(options)
+});
+
+export const locatePointQueryKey = (options: Options<LocatePointData>) => createQueryKey('locatePoint', options);
+
+/**
+ * ¿A qué sección pertenece una coordenada? (y sus ancestros)
+ */
+export const locatePointOptions = (options: Options<LocatePointData>) => queryOptions<LocatePointResponse, LocatePointError, LocatePointResponse, ReturnType<typeof locatePointQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await locatePoint({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: locatePointQueryKey(options)
+});
+
+export const getVectorTileQueryKey = (options: Options<GetVectorTileData>) => createQueryKey('getVectorTile', options);
+
+/**
+ * Tesela vectorial (MVT) por capa
+ */
+export const getVectorTileOptions = (options: Options<GetVectorTileData>) => queryOptions<unknown, GetVectorTileError, unknown, ReturnType<typeof getVectorTileQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getVectorTile({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getVectorTileQueryKey(options)
+});
+
+export const listImportRunsQueryKey = (options?: Options<ListImportRunsData>) => createQueryKey('listImportRuns', options);
+
+/**
+ * Corridas de importación
+ */
+export const listImportRunsOptions = (options?: Options<ListImportRunsData>) => queryOptions<ListImportRunsResponse, ListImportRunsError, ListImportRunsResponse, ReturnType<typeof listImportRunsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listImportRuns({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listImportRunsQueryKey(options)
+});
+
+export const listImportRunsInfiniteQueryKey = (options?: Options<ListImportRunsData>): QueryKey<Options<ListImportRunsData>> => createQueryKey('listImportRuns', options, true);
+
+/**
+ * Corridas de importación
+ */
+export const listImportRunsInfiniteOptions = (options?: Options<ListImportRunsData>) => {
+    const opts = infiniteQueryOptions<ListImportRunsResponse, ListImportRunsError, InfiniteData<ListImportRunsResponse>, QueryKey<Options<ListImportRunsData>>, string | null | Pick<QueryKey<Options<ListImportRunsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<ListImportRunsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    cursor: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await listImportRuns({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: listImportRunsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
+
+export const getImportRunQueryKey = (options: Options<GetImportRunData>) => createQueryKey('getImportRun', options);
+
+/**
+ * Detalle de una corrida
+ */
+export const getImportRunOptions = (options: Options<GetImportRunData>) => queryOptions<GetImportRunResponse, GetImportRunError, GetImportRunResponse, ReturnType<typeof getImportRunQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getImportRun({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getImportRunQueryKey(options)
+});
+
+export const listImportIssuesQueryKey = (options: Options<ListImportIssuesData>) => createQueryKey('listImportIssues', options);
+
+/**
+ * Errores y advertencias
+ */
+export const listImportIssuesOptions = (options: Options<ListImportIssuesData>) => queryOptions<ListImportIssuesResponse, ListImportIssuesError, ListImportIssuesResponse, ReturnType<typeof listImportIssuesQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listImportIssues({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listImportIssuesQueryKey(options)
+});
+
+export const listImportIssuesInfiniteQueryKey = (options: Options<ListImportIssuesData>): QueryKey<Options<ListImportIssuesData>> => createQueryKey('listImportIssues', options, true);
+
+/**
+ * Errores y advertencias
+ */
+export const listImportIssuesInfiniteOptions = (options: Options<ListImportIssuesData>) => {
+    const opts = infiniteQueryOptions<ListImportIssuesResponse, ListImportIssuesError, InfiniteData<ListImportIssuesResponse>, QueryKey<Options<ListImportIssuesData>>, string | null | Pick<QueryKey<Options<ListImportIssuesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<ListImportIssuesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    cursor: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await listImportIssues({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: listImportIssuesInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
+
+export const listGeoNodesQueryKey = (options: Options<ListGeoNodesData>) => createQueryKey('listGeoNodes', options);
+
+/**
+ * Listar nodos de un nivel
+ */
+export const listGeoNodesOptions = (options: Options<ListGeoNodesData>) => queryOptions<ListGeoNodesResponse, ListGeoNodesError, ListGeoNodesResponse, ReturnType<typeof listGeoNodesQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listGeoNodes({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listGeoNodesQueryKey(options)
+});
+
+export const listGeoNodesInfiniteQueryKey = (options: Options<ListGeoNodesData>): QueryKey<Options<ListGeoNodesData>> => createQueryKey('listGeoNodes', options, true);
+
+/**
+ * Listar nodos de un nivel
+ */
+export const listGeoNodesInfiniteOptions = (options: Options<ListGeoNodesData>) => {
+    const opts = infiniteQueryOptions<ListGeoNodesResponse, ListGeoNodesError, InfiniteData<ListGeoNodesResponse>, QueryKey<Options<ListGeoNodesData>>, string | null | Pick<QueryKey<Options<ListGeoNodesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<ListGeoNodesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    cursor: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await listGeoNodes({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: listGeoNodesInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
+
+export const getGeoNodeQueryKey = (options: Options<GetGeoNodeData>) => createQueryKey('getGeoNode', options);
+
+/**
+ * Detalle de un nodo
+ */
+export const getGeoNodeOptions = (options: Options<GetGeoNodeData>) => queryOptions<GetGeoNodeResponse, GetGeoNodeError, GetGeoNodeResponse, ReturnType<typeof getGeoNodeQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getGeoNode({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getGeoNodeQueryKey(options)
+});

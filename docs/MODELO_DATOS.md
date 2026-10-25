@@ -60,7 +60,7 @@ Los `UNIQUE` de tablas de negocio son índices parciales `WHERE deleted_at IS NU
 ```mermaid
 erDiagram
     geographic_frameworks ||--o{ import_runs : "registra"
-    import_runs ||--o{ import_errors : "reporta"
+    import_runs ||--o{ import_issues : "reporta"
     geographic_frameworks ||--o{ electoral_regions : "contiene"
     electoral_regions ||--o{ states : "agrupa"
     states ||--o{ municipalities : "contiene"
@@ -94,35 +94,32 @@ erDiagram
     import_runs {
         uuid id PK
         uuid framework_id FK
-        text source_kind "bgd_shapefile | ine_catalog"
-        smallint state_code "NULL si es nacional"
-        text source_uri
-        char64 file_sha256 "idempotencia"
+        text source_kind "bgd_shapefile"
+        smallint state_code
+        text source_uri "carpeta o .7z"
+        char64 file_sha256 "huella de las capas"
         int source_srid "32611..32616"
         text_array layers_loaded
         text_array layers_missing
         boolean dry_run
-        text status "pending | running | succeeded | failed"
-        int inserted_count
-        int updated_count
-        int unchanged_count
-        int deactivated_count
+        text status "running | succeeded | failed"
+        jsonb counts "por tabla: inserted, updated, unchanged, deactivated (D-60)"
         int warning_count
         int error_count
+        text message
         timestamptz started_at
         timestamptz finished_at
-        uuid triggered_by_user_id FK "identity.users"
+        text triggered_by "CLI / usuario (D-60)"
     }
-    import_errors {
+    import_issues {
         bigint id PK
         uuid import_run_id FK
         text layer "SECCION, MANZANA..."
         int source_fid
         jsonb natural_key
         text severity "error | warning"
-        text code "missing_parent, invalid_geom, outside_parent..."
+        text code "missing_parent, geometry_repaired, outside_section..."
         text message
-        jsonb raw_record
     }
     electoral_regions {
         uuid id PK
@@ -227,7 +224,7 @@ erDiagram
         uuid section_id PK
         numeric overlap_ratio "0-1 del area de la colonia"
         numeric overlap_area_m2
-        text match_method "polygon_intersection | point_in_polygon"
+        text source "ine_catalog | computed (D-57)"
     }
     section_types {
         smallint code PK

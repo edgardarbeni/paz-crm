@@ -18,7 +18,10 @@ class Perm(StrEnum):
     ROLE_UPDATE = "identity.role.update"
     ROLE_DELETE = "identity.role.delete"
     PERMISSION_READ = "identity.permission.read"
+    USER_ASSIGN_SCOPES = "identity.user.assign_scopes"
     AUDIT_READ = "audit.log.read"
+    GEOGRAPHY_READ = "geography.node.read"
+    GEOGRAPHY_IMPORT_READ = "geography.import.read"
 
 
 PERMISSIONS: frozenset[str] = frozenset(Perm)

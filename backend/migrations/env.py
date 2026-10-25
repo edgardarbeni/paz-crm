@@ -3,6 +3,7 @@
 
 import asyncio
 import os
+import re
 from typing import Any
 
 from alembic import context
@@ -25,11 +26,19 @@ def include_name(name: str | None, type_: str, _: dict[str, Any]) -> bool:
     return True
 
 
+# Runtime partitions (one per framework, D-14) and their indexes are not part of the models.
+_RUNTIME_PARTITION = re.compile(r"^blocks_[0-9a-f]{32}")
+
+
 def include_object(
     obj: Any, name: str | None, type_: str, reflected: bool, compare_to: Any
 ) -> bool:
-    schema = getattr(obj, "schema", None)
-    return schema not in _UNMANAGED_SCHEMAS
+    table = obj if type_ == "table" else getattr(obj, "table", None)
+    schema = getattr(table, "schema", None) or getattr(obj, "schema", None)
+    if schema in _UNMANAGED_SCHEMAS:
+        return False
+    table_name = getattr(table, "name", "") or ""
+    return not (reflected and _RUNTIME_PARTITION.match(table_name))
 
 
 def migrations_url() -> str:

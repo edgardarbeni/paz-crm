@@ -39,10 +39,111 @@ export const zFieldViolation = z.object({
 });
 
 /**
+ * FrameworkOut
+ */
+export const zFrameworkOut = z.object({
+    id: z.uuid(),
+    name: z.string(),
+    cutoff_date: z.iso.date().nullable(),
+    source_agreement: z.string().nullable(),
+    is_active: z.boolean(),
+    activated_at: z.iso.datetime().nullable()
+});
+
+/**
+ * GeoNodeOut
+ */
+export const zGeoNodeOut = z.object({
+    id: z.uuid(),
+    level: z.enum([
+        'electoral_region',
+        'state',
+        'federal_district',
+        'local_district',
+        'municipality',
+        'section',
+        'locality',
+        'neighborhood'
+    ]),
+    code: z.string(),
+    key: z.string(),
+    name: z.string().nullish(),
+    state_code: z.int().nullish(),
+    electoral_region_id: z.uuid().nullish(),
+    state_id: z.uuid().nullish(),
+    municipality_id: z.uuid().nullish(),
+    federal_district_id: z.uuid().nullish(),
+    local_district_id: z.uuid().nullish()
+});
+
+/**
+ * CursorPage[GeoNodeOut]
+ */
+export const zCursorPageGeoNodeOut = z.object({
+    items: z.array(zGeoNodeOut),
+    next_cursor: z.string().nullish(),
+    has_more: z.boolean()
+});
+
+/**
  * HealthStatus
  */
 export const zHealthStatus = z.object({
     status: z.literal('ok')
+});
+
+/**
+ * ImportIssueOut
+ */
+export const zImportIssueOut = z.object({
+    id: z.int(),
+    layer: z.string(),
+    source_fid: z.int().nullable(),
+    natural_key: z.record(z.string(), z.unknown()).nullable(),
+    severity: z.string(),
+    code: z.string(),
+    message: z.string()
+});
+
+/**
+ * CursorPage[ImportIssueOut]
+ */
+export const zCursorPageImportIssueOut = z.object({
+    items: z.array(zImportIssueOut),
+    next_cursor: z.string().nullish(),
+    has_more: z.boolean()
+});
+
+/**
+ * ImportRunOut
+ */
+export const zImportRunOut = z.object({
+    id: z.uuid(),
+    framework_id: z.uuid(),
+    state_code: z.int().nullable(),
+    source_uri: z.string(),
+    file_sha256: z.string().nullable(),
+    source_srid: z.int().nullable(),
+    layers_loaded: z.array(z.string()),
+    layers_missing: z.array(z.string()),
+    dry_run: z.boolean(),
+    status: z.string(),
+    counts: z.record(z.string(), z.unknown()),
+    warning_count: z.int(),
+    error_count: z.int(),
+    message: z.string().nullable(),
+    started_at: z.iso.datetime(),
+    finished_at: z.iso.datetime().nullable(),
+    triggered_by: z.string().nullable()
+});
+
+/**
+ * CursorPage[ImportRunOut]
+ */
+export const zCursorPageImportRunOut = z.object({
+    items: z.array(zImportRunOut),
+    next_cursor: z.string().nullish(),
+    has_more: z.boolean()
 });
 
 /**
@@ -104,6 +205,57 @@ export const zMfaVerifyRequest = z.object({
     code: z.string().min(6).max(8).nullish(),
     recovery_code: z.string().max(32).nullish(),
     device_label: z.string().max(200).nullish()
+});
+
+/**
+ * NodeRef
+ */
+export const zNodeRef = z.object({
+    id: z.uuid(),
+    key: z.string(),
+    name: z.string().nullish()
+});
+
+/**
+ * Ancestors
+ */
+export const zAncestors = z.object({
+    section: zNodeRef,
+    municipality: zNodeRef,
+    federal_district: zNodeRef,
+    local_district: zNodeRef,
+    state: zNodeRef,
+    electoral_region: zNodeRef.nullable()
+});
+
+/**
+ * GeoNodeDetail
+ */
+export const zGeoNodeDetail = z.object({
+    id: z.uuid(),
+    level: z.enum([
+        'electoral_region',
+        'state',
+        'federal_district',
+        'local_district',
+        'municipality',
+        'section',
+        'locality',
+        'neighborhood'
+    ]),
+    code: z.string(),
+    key: z.string(),
+    name: z.string().nullish(),
+    state_code: z.int().nullish(),
+    electoral_region_id: z.uuid().nullish(),
+    state_id: z.uuid().nullish(),
+    municipality_id: z.uuid().nullish(),
+    federal_district_id: z.uuid().nullish(),
+    local_district_id: z.uuid().nullish(),
+    geometry: z.record(z.string(), z.unknown()).nullish(),
+    bbox: z.array(z.number()).nullish(),
+    ancestors: zAncestors.nullish(),
+    block_count: z.int().nullish()
 });
 
 /**
@@ -238,6 +390,43 @@ export const zRoleUpdateRequest = z.object({
 });
 
 /**
+ * ScopeLevel
+ */
+export const zScopeLevel = z.enum([
+    'national',
+    'electoral_region',
+    'state',
+    'federal_district',
+    'local_district',
+    'municipality',
+    'section'
+]);
+
+/**
+ * ScopeIn
+ */
+export const zScopeIn = z.object({
+    level: zScopeLevel,
+    node_id: z.uuid().nullish()
+});
+
+/**
+ * ScopeOut
+ */
+export const zScopeOut = z.object({
+    id: z.uuid(),
+    level: zScopeLevel,
+    node_id: z.uuid().nullable()
+});
+
+/**
+ * ScopesRequest
+ */
+export const zScopesRequest = z.object({
+    scopes: z.array(zScopeIn).max(50)
+});
+
+/**
  * SessionOut
  */
 export const zSessionOut = z.object({
@@ -339,7 +528,9 @@ export const zMeResponse = z.object({
     grants_all: z.boolean(),
     mfa: zMfaStatus,
     session_id: z.uuid(),
-    scope: zTokenScope
+    scope: zTokenScope,
+    geo_unrestricted: z.boolean(),
+    geo_scopes: z.array(zScopeOut)
 });
 
 /**
@@ -627,6 +818,30 @@ export const zRevokeUserSessionsPath = z.object({
  */
 export const zRevokeUserSessionsResponse = zRevokedCount;
 
+export const zGetUserScopesPath = z.object({
+    user_id: z.uuid()
+});
+
+/**
+ * Response Getuserscopes
+ *
+ * Successful Response
+ */
+export const zGetUserScopesResponse = z.array(zScopeOut);
+
+export const zSetUserScopesBody = zScopesRequest;
+
+export const zSetUserScopesPath = z.object({
+    user_id: z.uuid()
+});
+
+/**
+ * Response Setuserscopes
+ *
+ * Successful Response
+ */
+export const zSetUserScopesResponse = z.array(zScopeOut);
+
 /**
  * Response Listroles
  *
@@ -705,3 +920,140 @@ export const zListAuditEntriesQuery = z.object({
  * Successful Response
  */
 export const zListAuditEntriesResponse = zCursorPageAuditEntryOut;
+
+/**
+ * Response Listframeworks
+ *
+ * Successful Response
+ */
+export const zListFrameworksResponse = z.array(zFrameworkOut);
+
+export const zSearchGeographyQuery = z.object({
+    q: z.string().min(1).max(100),
+    level: z.array(z.enum([
+        'electoral_region',
+        'state',
+        'federal_district',
+        'local_district',
+        'municipality',
+        'section',
+        'locality',
+        'neighborhood'
+    ])).nullish(),
+    limit: z.int().gte(1).lte(50).optional().default(20)
+});
+
+/**
+ * Response Searchgeography
+ *
+ * Successful Response
+ */
+export const zSearchGeographyResponse = z.array(zGeoNodeOut);
+
+export const zLocatePointQuery = z.object({
+    lat: z.number().gte(-90).lte(90),
+    lon: z.number().gte(-180).lte(180)
+});
+
+/**
+ * Successful Response
+ */
+export const zLocatePointResponse = zAncestors;
+
+export const zGetVectorTilePath = z.object({
+    layer: z.string().regex(/^[a-z_]+$/),
+    z: z.int(),
+    x: z.int(),
+    y: z.int()
+});
+
+export const zListImportRunsQuery = z.object({
+    state_code: z.int().gte(1).lte(32).nullish(),
+    limit: z.int().gte(1).lte(200).optional().default(50),
+    cursor: z.string().max(1024).nullish(),
+    sort: z.string().max(200).nullish()
+});
+
+/**
+ * Successful Response
+ */
+export const zListImportRunsResponse = zCursorPageImportRunOut;
+
+export const zGetImportRunPath = z.object({
+    run_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zGetImportRunResponse = zImportRunOut;
+
+export const zListImportIssuesPath = z.object({
+    run_id: z.uuid()
+});
+
+export const zListImportIssuesQuery = z.object({
+    severity: z.string().regex(/^(error|warning)$/).nullish(),
+    code: z.string().max(50).nullish(),
+    limit: z.int().gte(1).lte(200).optional().default(50),
+    cursor: z.string().max(1024).nullish(),
+    sort: z.string().max(200).nullish()
+});
+
+/**
+ * Successful Response
+ */
+export const zListImportIssuesResponse = zCursorPageImportIssueOut;
+
+export const zListGeoNodesPath = z.object({
+    level: z.enum([
+        'electoral_region',
+        'state',
+        'federal_district',
+        'local_district',
+        'municipality',
+        'section',
+        'locality',
+        'neighborhood'
+    ])
+});
+
+export const zListGeoNodesQuery = z.object({
+    q: z.string().min(2).max(100).nullish(),
+    electoral_region_id: z.uuid().nullish(),
+    state_id: z.uuid().nullish(),
+    municipality_id: z.uuid().nullish(),
+    federal_district_id: z.uuid().nullish(),
+    local_district_id: z.uuid().nullish(),
+    limit: z.int().gte(1).lte(200).optional().default(50),
+    cursor: z.string().max(1024).nullish(),
+    sort: z.string().max(200).nullish()
+});
+
+/**
+ * Successful Response
+ */
+export const zListGeoNodesResponse = zCursorPageGeoNodeOut;
+
+export const zGetGeoNodePath = z.object({
+    level: z.enum([
+        'electoral_region',
+        'state',
+        'federal_district',
+        'local_district',
+        'municipality',
+        'section',
+        'locality',
+        'neighborhood'
+    ]),
+    node_id: z.uuid()
+});
+
+export const zGetGeoNodeQuery = z.object({
+    geometry: z.boolean().optional().default(false)
+});
+
+/**
+ * Successful Response
+ */
+export const zGetGeoNodeResponse = zGeoNodeDetail;

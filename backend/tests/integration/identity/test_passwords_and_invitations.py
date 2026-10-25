@@ -6,7 +6,7 @@ from httpx import AsyncClient
 
 from app.core.mail import MemoryMailer
 from app.modules.identity.models import UserStatus
-from tests.integration.identity.conftest import PASSWORD, UserFactory, bearer, login, token_for
+from tests.integration.conftest import PASSWORD, UserFactory, bearer, login, token_for
 
 NEW_PASSWORD = "otra-frase-larga-y-segura-2026"
 

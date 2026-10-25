@@ -4,7 +4,7 @@ from httpx import AsyncClient
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncEngine
 
-from tests.integration.identity.conftest import PASSWORD, UserFactory, bearer, login
+from tests.integration.conftest import PASSWORD, UserFactory, bearer, login
 
 REFRESH = "/api/v1/auth/refresh"
 

@@ -5,7 +5,7 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncEngine
 
 from app.modules.identity.models import UserStatus
-from tests.integration.identity.conftest import PASSWORD, UserFactory, bearer, login
+from tests.integration.conftest import PASSWORD, UserFactory, bearer, login
 
 LOGIN = "/api/v1/auth/login"
 GENERIC = "Credenciales inválidas o cuenta bloqueada temporalmente."

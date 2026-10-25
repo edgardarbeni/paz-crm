@@ -1,0 +1,29 @@
+meta {
+  name: Listar nodos de un nivel
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/v1/geography/section?limit=50
+  body: none
+  auth: bearer
+}
+
+params:query {
+  limit: 50
+  ~municipality_id: 
+  ~federal_district_id: 
+  ~sort: code
+  ~cursor: 
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+docs {
+  Niveles: electoral_region, state, federal_district, local_district, municipality, section,
+  locality, neighborhood. Filtros por padre (state_id, municipality_id, federal_district_id,
+  local_district_id), `q` por nombre y paginación por cursor.
+}

@@ -33,6 +33,7 @@ from app.modules.identity.schemas import (
     RecoveryCodesResponse,
     RevokedCount,
     RoleSummary,
+    ScopeOut,
     SessionOut,
     TotpConfirmRequest,
     TotpConfirmResponse,
@@ -43,6 +44,7 @@ from app.modules.identity.services import auth as auth_service
 from app.modules.identity.services import credentials, mfa, sessions
 from app.modules.identity.services.access import utcnow
 from app.modules.identity.services.auth import MfaChallenge
+from app.modules.identity.services.scopes import scopes_of
 from app.modules.identity.services.sessions import InvalidRefreshError, IssuedSession
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -170,6 +172,8 @@ async def me(user: AnyScopeUserDep, db: SessionDep) -> MeResponse:
         ),
         session_id=user.session_id,
         scope=user.scope,
+        geo_unrestricted=user.geo.unrestricted,
+        geo_scopes=[ScopeOut.from_model(s) for s in await scopes_of(db, user.id)],
     )
 
 

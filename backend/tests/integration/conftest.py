@@ -1,4 +1,5 @@
-"""Identity test fixtures: clean tables and Redis per test, plus helpers to create users."""
+"""Integration fixtures shared by modules: clean identity tables and Redis per test, users,
+login helpers."""
 
 import uuid
 from collections.abc import Awaitable, Callable
@@ -22,6 +23,8 @@ from app.modules.identity.services.auth import TOTP_CONTEXT
 
 PASSWORD = "correcto-caballo-bateria-grapa"
 IDENTITY_TABLES = (
+    "user_scope_sections",
+    "user_scopes",
     "refresh_tokens",
     "user_sessions",
     "recovery_codes",

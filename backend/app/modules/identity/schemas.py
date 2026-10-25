@@ -7,7 +7,7 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, BeforeValidator, ConfigDict, EmailStr, Field, StringConstraints
 
-from app.modules.identity.models import UserStatus
+from app.modules.identity.models import SCOPE_COLUMNS, ScopeLevel, UserScope, UserStatus
 from app.modules.identity.security.tokens import TokenScope
 
 Password = Annotated[str, Field(min_length=1, max_length=256)]
@@ -70,6 +70,28 @@ class RoleSummary(Schema):
     name: str
 
 
+class ScopeIn(Schema):
+    level: ScopeLevel
+    node_id: uuid.UUID | None = Field(default=None, description="Vacío para `national`.")
+
+
+class ScopesRequest(Schema):
+    scopes: list[ScopeIn] = Field(max_length=50)
+
+
+class ScopeOut(Schema):
+    id: uuid.UUID
+    level: ScopeLevel
+    node_id: uuid.UUID | None
+
+    @classmethod
+    def from_model(cls, scope: UserScope) -> "ScopeOut":
+        level = ScopeLevel(scope.scope_level)
+        node = getattr(scope, SCOPE_COLUMNS[level]) if level in SCOPE_COLUMNS else None
+        assert scope.id is not None  # noqa: S101
+        return cls(id=scope.id, level=level, node_id=node)
+
+
 class MfaStatus(Schema):
     enabled: bool
     required: bool
@@ -86,6 +108,8 @@ class MeResponse(Schema):
     mfa: MfaStatus
     session_id: uuid.UUID
     scope: TokenScope
+    geo_unrestricted: bool = Field(description="Ve todo el país (superadmin o alcance nacional).")
+    geo_scopes: list[ScopeOut]
 
 
 class PasswordChangeRequest(Schema):

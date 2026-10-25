@@ -1,0 +1,15 @@
+meta {
+  name: Detalle de un nodo con geometría
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/v1/geography/section/{{nodeId}}?geometry=true
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
