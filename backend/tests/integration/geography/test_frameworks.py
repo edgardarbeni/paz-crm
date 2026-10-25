@@ -68,6 +68,72 @@ async def test_activation_remaps_scopes(
     assert active == [{"name": "Marco B"}]
 
 
+async def test_activation_remaps_person_addresses(
+    run_import: Importer, owner_engine: AsyncEngine
+) -> None:
+    await run_import(framework="Marco A")
+    await run_import(framework="Marco B", drop_section=108)
+
+    def node(table: str, where: str) -> str:
+        return (
+            f"(SELECT x.id FROM geography.{table} x JOIN geography.geographic_frameworks f "
+            f"ON f.id = x.framework_id WHERE f.name = 'Marco A' AND {where} LIMIT 1)"
+        )
+
+    async with owner_engine.begin() as connection:
+        for section in (101, 108):
+            person = (
+                await connection.execute(
+                    text(
+                        "INSERT INTO people.persons (given_names, paternal_surname) "
+                        "VALUES ('Remapeo', :s) RETURNING id"
+                    ),
+                    {"s": str(section)},
+                )
+            ).scalar_one()
+            await connection.execute(
+                text(
+                    "INSERT INTO people.person_addresses (person_id, address_type, state_id, "
+                    "municipality_id, section_id, locality_id, neighborhood_id, is_primary) "
+                    f"SELECT :p, 'home', {node('states', 'true')}, s.municipality_id, s.id, "
+                    f"{node('localities', 'x.municipality_id = s.municipality_id')}, "
+                    f"{node('neighborhoods', 'x.municipality_id = s.municipality_id')}, true "
+                    f"FROM geography.sections s WHERE s.id = {node('sections', f'x.section_number = {section}')}"
+                ),
+                {"p": person},
+            )
+
+    async with owner_engine.begin() as connection:
+        report = await activate_framework(connection, name="Marco B")
+    assert report.addresses_remapped["section_id"] == 1
+    assert report.addresses_cleared["section_id"] == 1  # 108 is gone in Marco B
+    assert report.addresses_remapped["municipality_id"] == 2
+    assert report.addresses_remapped["state_id"] == 2
+    assert report.addresses_remapped["locality_id"] + report.addresses_cleared["locality_id"] == 2
+
+    stale = await scalar(
+        owner_engine,
+        "SELECT count(*) FROM people.person_addresses pa JOIN geography.geographic_frameworks f "
+        "ON f.name = 'Marco A' WHERE f.id IN ("
+        "(SELECT framework_id FROM geography.states WHERE id = pa.state_id), "
+        "(SELECT framework_id FROM geography.municipalities WHERE id = pa.municipality_id), "
+        "(SELECT framework_id FROM geography.sections WHERE id = pa.section_id), "
+        "(SELECT framework_id FROM geography.localities WHERE id = pa.locality_id), "
+        "(SELECT framework_id FROM geography.neighborhoods WHERE id = pa.neighborhood_id))",
+    )
+    assert stale == 0
+    sections = await rows(
+        owner_engine,
+        "SELECT p.paternal_surname, s.section_number FROM people.person_addresses pa "
+        "JOIN people.persons p ON p.id = pa.person_id "
+        "LEFT JOIN geography.sections s ON s.id = pa.section_id ORDER BY 1",
+    )
+    assert sections == [
+        {"paternal_surname": "101", "section_number": 101},
+        {"paternal_surname": "108", "section_number": None},
+    ]
+
+
 async def test_activation_guards(run_import: Importer, owner_engine: AsyncEngine) -> None:
     await run_import(framework="Marco A")
     async with owner_engine.begin() as connection:

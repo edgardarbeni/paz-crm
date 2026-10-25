@@ -1,0 +1,15 @@
+meta {
+  name: Detalle de persona
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/v1/people/{{personId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}

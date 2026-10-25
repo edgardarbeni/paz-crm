@@ -1,0 +1,21 @@
+meta {
+  name: Postulaciones
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{baseUrl}}/api/v1/nominations
+  body: none
+  auth: bearer
+}
+
+params:query {
+  ~process_id: {{processId}}
+  ~status: draft
+  ~limit: 50
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}

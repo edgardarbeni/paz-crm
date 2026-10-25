@@ -5,6 +5,114 @@ export type ClientOptions = {
 };
 
 /**
+ * AddressIn
+ */
+export type AddressIn = {
+    /**
+     * Address Type
+     */
+    address_type?: 'home' | 'work' | 'other';
+    /**
+     * Street
+     */
+    street?: string | null;
+    /**
+     * Exterior Number
+     */
+    exterior_number?: string | null;
+    /**
+     * Interior Number
+     */
+    interior_number?: string | null;
+    /**
+     * References
+     */
+    references?: string | null;
+    /**
+     * Postal Code
+     */
+    postal_code?: string | null;
+    /**
+     * State Id
+     */
+    state_id?: string | null;
+    /**
+     * Municipality Id
+     */
+    municipality_id?: string | null;
+    /**
+     * Section Id
+     */
+    section_id?: string | null;
+    /**
+     * Locality Id
+     */
+    locality_id?: string | null;
+    /**
+     * Neighborhood Id
+     */
+    neighborhood_id?: string | null;
+};
+
+/**
+ * AddressOut
+ */
+export type AddressOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Address Type
+     */
+    address_type: string;
+    /**
+     * Street
+     */
+    street?: string | null;
+    /**
+     * Exterior Number
+     */
+    exterior_number?: string | null;
+    /**
+     * Interior Number
+     */
+    interior_number?: string | null;
+    /**
+     * References
+     */
+    references?: string | null;
+    /**
+     * Postal Code
+     */
+    postal_code: string | null;
+    /**
+     * State Id
+     */
+    state_id: string | null;
+    /**
+     * Municipality Id
+     */
+    municipality_id: string | null;
+    /**
+     * Section Id
+     */
+    section_id: string | null;
+    /**
+     * Locality Id
+     */
+    locality_id: string | null;
+    /**
+     * Neighborhood Id
+     */
+    neighborhood_id: string | null;
+    /**
+     * Is Primary
+     */
+    is_primary: boolean;
+};
+
+/**
  * Ancestors
  */
 export type Ancestors = {
@@ -103,6 +211,131 @@ export type AuthenticatedResponse = {
 };
 
 /**
+ * CoalitionIn
+ */
+export type CoalitionIn = {
+    /**
+     * Name
+     */
+    name: string;
+    coalition_kind?: CoalitionKind;
+    /**
+     * Party Ids
+     */
+    party_ids: Array<string>;
+};
+
+/**
+ * CoalitionKind
+ */
+export type CoalitionKind = 'coalition' | 'common_candidacy';
+
+/**
+ * CoalitionOut
+ */
+export type CoalitionOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Name
+     */
+    name: string;
+    coalition_kind: CoalitionKind;
+    /**
+     * Party Ids
+     */
+    party_ids: Array<string>;
+};
+
+/**
+ * ConsentIn
+ */
+export type ConsentIn = {
+    /**
+     * Notice Version
+     */
+    notice_version: string;
+    /**
+     * Channel
+     */
+    channel: 'panel' | 'paper' | 'web';
+    /**
+     * Evidence Uri
+     */
+    evidence_uri?: string | null;
+};
+
+/**
+ * ConsentOut
+ */
+export type ConsentOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Notice Version
+     */
+    notice_version: string;
+    /**
+     * Channel
+     */
+    channel: string;
+    /**
+     * Evidence Uri
+     */
+    evidence_uri: string | null;
+    /**
+     * Accepted At
+     */
+    accepted_at: string;
+};
+
+/**
+ * ContactIn
+ */
+export type ContactIn = {
+    /**
+     * Contact Type
+     */
+    contact_type: 'mobile' | 'landline' | 'email';
+    /**
+     * Value
+     */
+    value: string;
+    /**
+     * Is Primary
+     */
+    is_primary?: boolean;
+};
+
+/**
+ * ContactOut
+ */
+export type ContactOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Contact Type
+     */
+    contact_type: string;
+    /**
+     * Value
+     *
+     * Enmascarado sin el permiso people.person.read_sensitive.
+     */
+    value: string;
+    /**
+     * Is Primary
+     */
+    is_primary: boolean;
+};
+
+/**
  * CursorPage[AuditEntryOut]
  */
 export type CursorPageAuditEntryOut = {
@@ -183,6 +416,46 @@ export type CursorPageImportRunOut = {
 };
 
 /**
+ * CursorPage[NominationSummary]
+ */
+export type CursorPageNominationSummary = {
+    /**
+     * Items
+     */
+    items: Array<NominationSummary>;
+    /**
+     * Next Cursor
+     *
+     * Pasar en `cursor` para obtener la siguiente página.
+     */
+    next_cursor?: string | null;
+    /**
+     * Has More
+     */
+    has_more: boolean;
+};
+
+/**
+ * CursorPage[PersonSummary]
+ */
+export type CursorPagePersonSummary = {
+    /**
+     * Items
+     */
+    items: Array<PersonSummary>;
+    /**
+     * Next Cursor
+     *
+     * Pasar en `cursor` para obtener la siguiente página.
+     */
+    next_cursor?: string | null;
+    /**
+     * Has More
+     */
+    has_more: boolean;
+};
+
+/**
  * CursorPage[UserOut]
  */
 export type CursorPageUserOut = {
@@ -203,6 +476,26 @@ export type CursorPageUserOut = {
 };
 
 /**
+ * DeletionOut
+ */
+export type DeletionOut = {
+    /**
+     * Purge After
+     */
+    purge_after: string;
+};
+
+/**
+ * ElectionLevel
+ */
+export type ElectionLevel = 'federal' | 'local';
+
+/**
+ * ElectionRegime
+ */
+export type ElectionRegime = 'party_based' | 'normative_system';
+
+/**
  * FieldViolation
  */
 export type FieldViolation = {
@@ -220,6 +513,110 @@ export type FieldViolation = {
      * Code
      */
     code: string;
+};
+
+/**
+ * FormulaIn
+ */
+export type FormulaIn = {
+    /**
+     * Office Type Id
+     */
+    office_type_id: string;
+    /**
+     * Position
+     */
+    position: number;
+    /**
+     * Owner Person Id
+     */
+    owner_person_id: string;
+    /**
+     * Substitute Person Id
+     *
+     * Obligatoria salvo en cargos sin suplencia.
+     */
+    substitute_person_id?: string | null;
+    /**
+     * Origin Party Id
+     */
+    origin_party_id?: string | null;
+    override?: Override | null;
+};
+
+/**
+ * FormulaMembersUpdate
+ */
+export type FormulaMembersUpdate = {
+    /**
+     * Owner Person Id
+     */
+    owner_person_id?: string | null;
+    /**
+     * Substitute Person Id
+     */
+    substitute_person_id?: string | null;
+    /**
+     * Origin Party Id
+     */
+    origin_party_id?: string | null;
+    override?: Override | null;
+};
+
+/**
+ * FormulaOut
+ */
+export type FormulaOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Office Type Id
+     */
+    office_type_id: string;
+    /**
+     * Office Code
+     */
+    office_code: string;
+    /**
+     * Position
+     */
+    position: number;
+    status: FormulaStatus;
+    /**
+     * Origin Party Id
+     */
+    origin_party_id: string | null;
+    /**
+     * Replaces Formula Id
+     */
+    replaces_formula_id: string | null;
+    /**
+     * Substitution Reason
+     */
+    substitution_reason: string | null;
+    owner: MemberOut | null;
+    substitute: MemberOut | null;
+};
+
+/**
+ * FormulaStatus
+ */
+export type FormulaStatus = 'aspirant' | 'registered' | 'approved' | 'substituted' | 'cancelled';
+
+/**
+ * FormulaStatusIn
+ */
+export type FormulaStatusIn = {
+    /**
+     * To Status
+     */
+    to_status: 'registered' | 'approved' | 'cancelled';
+    /**
+     * Reason
+     */
+    reason?: string | null;
 };
 
 /**
@@ -378,6 +775,11 @@ export type GeoNodeOut = {
      */
     local_district_id?: string | null;
 };
+
+/**
+ * GeographicLevel
+ */
+export type GeographicLevel = 'national' | 'electoral_region' | 'state' | 'federal_district' | 'local_district' | 'municipality';
 
 /**
  * HealthStatus
@@ -613,6 +1015,24 @@ export type MeResponse = {
 };
 
 /**
+ * MemberOut
+ */
+export type MemberOut = {
+    /**
+     * Person Id
+     */
+    person_id: string;
+    /**
+     * Full Name
+     */
+    full_name: string;
+    /**
+     * Sex
+     */
+    sex: string | null;
+};
+
+/**
  * MfaRequiredResponse
  */
 export type MfaRequiredResponse = {
@@ -669,6 +1089,56 @@ export type MfaVerifyRequest = {
 };
 
 /**
+ * MunicipalitySettingIn
+ */
+export type MunicipalitySettingIn = {
+    /**
+     * Municipality Id
+     */
+    municipality_id: string;
+    election_regime?: ElectionRegime;
+    /**
+     * Mr Councilor Count
+     */
+    mr_councilor_count?: number;
+    /**
+     * Rp Councilor Count
+     */
+    rp_councilor_count?: number;
+    /**
+     * Syndic Count
+     */
+    syndic_count?: number;
+};
+
+/**
+ * MunicipalitySettingOut
+ */
+export type MunicipalitySettingOut = {
+    /**
+     * Municipality Id
+     */
+    municipality_id: string;
+    election_regime?: ElectionRegime;
+    /**
+     * Mr Councilor Count
+     */
+    mr_councilor_count?: number;
+    /**
+     * Rp Councilor Count
+     */
+    rp_councilor_count?: number;
+    /**
+     * Syndic Count
+     */
+    syndic_count?: number;
+    /**
+     * Id
+     */
+    id: string;
+};
+
+/**
  * NodeRef
  */
 export type NodeRef = {
@@ -684,6 +1154,311 @@ export type NodeRef = {
      * Name
      */
     name?: string | null;
+};
+
+/**
+ * NominationAction
+ */
+export type NominationAction = {
+    /**
+     * Reason
+     */
+    reason?: string | null;
+    override?: Override | null;
+};
+
+/**
+ * NominationIn
+ */
+export type NominationIn = {
+    /**
+     * Process Id
+     */
+    process_id: string;
+    /**
+     * Office Type Id
+     */
+    office_type_id: string;
+    /**
+     * Node Id
+     *
+     * Nodo del nivel geográfico del cargo; vacío para cargos nacionales.
+     */
+    node_id?: string | null;
+    /**
+     * Party Id
+     */
+    party_id?: string | null;
+    /**
+     * Coalition Id
+     */
+    coalition_id?: string | null;
+    /**
+     * Notes
+     */
+    notes?: string | null;
+};
+
+/**
+ * NominationKind
+ */
+export type NominationKind = 'single' | 'list' | 'slate' | 'member';
+
+/**
+ * NominationOut
+ */
+export type NominationOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Process Id
+     */
+    process_id: string;
+    /**
+     * Office Type Id
+     */
+    office_type_id: string;
+    /**
+     * Office Code
+     */
+    office_code: string;
+    geographic_level: GeographicLevel;
+    /**
+     * Node Id
+     */
+    node_id: string | null;
+    /**
+     * Party Id
+     */
+    party_id: string | null;
+    /**
+     * Coalition Id
+     */
+    coalition_id: string | null;
+    status: NominationStatus;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Notes
+     */
+    notes: string | null;
+    /**
+     * Editable
+     *
+     * False: el usuario solo puede consultarla (alcance parcial).
+     */
+    editable: boolean;
+    /**
+     * Complete
+     */
+    complete: boolean;
+    /**
+     * Slots
+     */
+    slots: Array<SlotOut>;
+    /**
+     * Formulas
+     */
+    formulas: Array<FormulaOut>;
+    /**
+     * Warnings
+     */
+    warnings?: Array<ViolationOut>;
+};
+
+/**
+ * NominationStatus
+ */
+export type NominationStatus = 'draft' | 'submitted' | 'approved' | 'cancelled';
+
+/**
+ * NominationSummary
+ */
+export type NominationSummary = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Process Id
+     */
+    process_id: string;
+    /**
+     * Office Type Id
+     */
+    office_type_id: string;
+    /**
+     * Office Code
+     */
+    office_code: string;
+    geographic_level: GeographicLevel;
+    /**
+     * Node Id
+     */
+    node_id: string | null;
+    /**
+     * Party Id
+     */
+    party_id: string | null;
+    /**
+     * Coalition Id
+     */
+    coalition_id: string | null;
+    status: NominationStatus;
+    /**
+     * Created At
+     */
+    created_at: string;
+};
+
+/**
+ * NominationUpdate
+ */
+export type NominationUpdate = {
+    /**
+     * Notes
+     */
+    notes?: string | null;
+};
+
+/**
+ * OfficeTypeIn
+ */
+export type OfficeTypeIn = {
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Name
+     */
+    name: string;
+    election_level: ElectionLevel;
+    geographic_level: GeographicLevel;
+    principle: Principle;
+    nomination_kind: NominationKind;
+    /**
+     * Default Positions
+     */
+    default_positions?: number | null;
+    /**
+     * Has Substitute
+     */
+    has_substitute?: boolean;
+    /**
+     * Sort Order
+     */
+    sort_order?: number;
+};
+
+/**
+ * OfficeTypeOut
+ */
+export type OfficeTypeOut = {
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Name
+     */
+    name: string;
+    election_level: ElectionLevel;
+    geographic_level: GeographicLevel;
+    principle: Principle;
+    nomination_kind: NominationKind;
+    /**
+     * Default Positions
+     */
+    default_positions?: number | null;
+    /**
+     * Has Substitute
+     */
+    has_substitute?: boolean;
+    /**
+     * Sort Order
+     */
+    sort_order?: number;
+    /**
+     * Id
+     */
+    id: string;
+};
+
+/**
+ * Override
+ */
+export type Override = {
+    /**
+     * Rules
+     *
+     * Reglas que se aceptan violar.
+     */
+    rules: Array<string>;
+    /**
+     * Reason
+     */
+    reason: string;
+};
+
+/**
+ * PartyIn
+ */
+export type PartyIn = {
+    /**
+     * Acronym
+     */
+    acronym: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Is Own Party
+     */
+    is_own_party?: boolean;
+    /**
+     * Color Hex
+     */
+    color_hex?: string | null;
+    /**
+     * Logo Uri
+     */
+    logo_uri?: string | null;
+};
+
+/**
+ * PartyOut
+ */
+export type PartyOut = {
+    /**
+     * Acronym
+     */
+    acronym: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Is Own Party
+     */
+    is_own_party?: boolean;
+    /**
+     * Color Hex
+     */
+    color_hex?: string | null;
+    /**
+     * Logo Uri
+     */
+    logo_uri?: string | null;
+    /**
+     * Id
+     */
+    id: string;
 };
 
 /**
@@ -751,6 +1526,191 @@ export type PermissionOut = {
 };
 
 /**
+ * PersonCreate
+ */
+export type PersonCreate = {
+    /**
+     * Given Names
+     */
+    given_names: string;
+    /**
+     * Paternal Surname
+     */
+    paternal_surname: string;
+    /**
+     * Maternal Surname
+     */
+    maternal_surname?: string | null;
+    /**
+     * Birth Date
+     */
+    birth_date?: string | null;
+    /**
+     * Sex
+     */
+    sex?: 'H' | 'M' | 'X' | null;
+    /**
+     * Birth Entity
+     */
+    birth_entity?: string | null;
+    /**
+     * Curp
+     */
+    curp?: string | null;
+    /**
+     * Accept Curp Incoherence
+     *
+     * Forzar el registro aunque la CURP no coincida con los datos (requiere permiso).
+     */
+    accept_curp_incoherence?: boolean;
+    /**
+     * Contacts
+     */
+    contacts?: Array<ContactIn>;
+    address?: AddressIn | null;
+};
+
+/**
+ * PersonOut
+ */
+export type PersonOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Full Name
+     */
+    full_name: string;
+    /**
+     * Sex
+     */
+    sex: string | null;
+    /**
+     * Birth Date
+     */
+    birth_date: string | null;
+    /**
+     * Curp
+     *
+     * Enmascarada sin el permiso people.person.read_sensitive.
+     */
+    curp: string | null;
+    /**
+     * Given Names
+     */
+    given_names: string;
+    /**
+     * Paternal Surname
+     */
+    paternal_surname: string;
+    /**
+     * Maternal Surname
+     */
+    maternal_surname: string | null;
+    /**
+     * Birth Entity
+     */
+    birth_entity: string | null;
+    /**
+     * Curp Coherence Overridden
+     */
+    curp_coherence_overridden: boolean;
+    /**
+     * Contacts
+     */
+    contacts: Array<ContactOut>;
+    /**
+     * Addresses
+     */
+    addresses: Array<AddressOut>;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Warnings
+     */
+    warnings?: Array<string>;
+};
+
+/**
+ * PersonSummary
+ */
+export type PersonSummary = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Full Name
+     */
+    full_name: string;
+    /**
+     * Sex
+     */
+    sex: string | null;
+    /**
+     * Birth Date
+     */
+    birth_date: string | null;
+    /**
+     * Curp
+     *
+     * Enmascarada sin el permiso people.person.read_sensitive.
+     */
+    curp: string | null;
+};
+
+/**
+ * PersonUpdate
+ */
+export type PersonUpdate = {
+    /**
+     * Given Names
+     */
+    given_names?: string | null;
+    /**
+     * Paternal Surname
+     */
+    paternal_surname?: string | null;
+    /**
+     * Maternal Surname
+     */
+    maternal_surname?: string | null;
+    /**
+     * Birth Date
+     */
+    birth_date?: string | null;
+    /**
+     * Sex
+     */
+    sex?: 'H' | 'M' | 'X' | null;
+    /**
+     * Birth Entity
+     */
+    birth_entity?: string | null;
+    /**
+     * Curp
+     */
+    curp?: string | null;
+    /**
+     * Accept Curp Incoherence
+     */
+    accept_curp_incoherence?: boolean;
+    /**
+     * Contacts
+     */
+    contacts?: Array<ContactIn> | null;
+    address?: AddressIn | null;
+};
+
+/**
+ * Principle
+ */
+export type Principle = 'mr' | 'rp';
+
+/**
  * Problem
  *
  * RFC 9457 problem document. `code` and `request_id` are extension members.
@@ -788,6 +1748,216 @@ export type Problem = {
      * Errors
      */
     errors?: Array<FieldViolation> | null;
+};
+
+/**
+ * ProcessIn
+ */
+export type ProcessIn = {
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Election Year
+     */
+    election_year: number;
+    process_type?: ProcessType;
+    election_level: ElectionLevel;
+    /**
+     * State Id
+     *
+     * Obligatorio en procesos locales.
+     */
+    state_id?: string | null;
+    /**
+     * Election Date
+     */
+    election_date?: string | null;
+};
+
+/**
+ * ProcessOfficeIn
+ */
+export type ProcessOfficeIn = {
+    /**
+     * Office Type Id
+     */
+    office_type_id: string;
+    /**
+     * Is Enabled
+     */
+    is_enabled: boolean;
+    /**
+     * Positions
+     */
+    positions?: number | null;
+    /**
+     * Slate Parent Office Type Id
+     */
+    slate_parent_office_type_id?: string | null;
+    rp_method?: RpMethod | null;
+    /**
+     * Rp Method Params
+     */
+    rp_method_params?: {
+        [key: string]: unknown;
+    };
+};
+
+/**
+ * ProcessOfficeOut
+ */
+export type ProcessOfficeOut = {
+    /**
+     * Office Type Id
+     */
+    office_type_id: string;
+    /**
+     * Is Enabled
+     */
+    is_enabled: boolean;
+    /**
+     * Positions
+     */
+    positions?: number | null;
+    /**
+     * Slate Parent Office Type Id
+     */
+    slate_parent_office_type_id?: string | null;
+    rp_method?: RpMethod | null;
+    /**
+     * Rp Method Params
+     */
+    rp_method_params?: {
+        [key: string]: unknown;
+    };
+    /**
+     * Office Code
+     */
+    office_code: string;
+    /**
+     * Office Name
+     */
+    office_name: string;
+};
+
+/**
+ * ProcessOut
+ */
+export type ProcessOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Election Year
+     */
+    election_year: number;
+    process_type: ProcessType;
+    election_level: ElectionLevel;
+    /**
+     * State Id
+     */
+    state_id: string | null;
+    /**
+     * Framework Id
+     */
+    framework_id: string;
+    /**
+     * Election Date
+     */
+    election_date: string | null;
+    status: ProcessStatus;
+};
+
+/**
+ * ProcessRuleIn
+ */
+export type ProcessRuleIn = {
+    /**
+     * Rule Code
+     */
+    rule_code: string;
+    /**
+     * Office Type Id
+     */
+    office_type_id?: string | null;
+    /**
+     * Is Enabled
+     */
+    is_enabled: boolean;
+    severity?: Severity;
+    /**
+     * Params
+     */
+    params?: {
+        [key: string]: unknown;
+    };
+};
+
+/**
+ * ProcessRuleOut
+ */
+export type ProcessRuleOut = {
+    /**
+     * Rule Code
+     */
+    rule_code: string;
+    /**
+     * Office Type Id
+     */
+    office_type_id?: string | null;
+    /**
+     * Is Enabled
+     */
+    is_enabled: boolean;
+    severity?: Severity;
+    /**
+     * Params
+     */
+    params?: {
+        [key: string]: unknown;
+    };
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Effective Params
+     */
+    effective_params: {
+        [key: string]: unknown;
+    };
+};
+
+/**
+ * ProcessStatus
+ */
+export type ProcessStatus = 'draft' | 'active' | 'closed';
+
+/**
+ * ProcessType
+ */
+export type ProcessType = 'ordinary' | 'extraordinary';
+
+/**
+ * ProcessUpdate
+ */
+export type ProcessUpdate = {
+    /**
+     * Name
+     */
+    name?: string | null;
+    /**
+     * Election Date
+     */
+    election_date?: string | null;
+    status?: ProcessStatus | null;
 };
 
 /**
@@ -953,6 +2123,11 @@ export type RoleUpdateRequest = {
 };
 
 /**
+ * RpMethod
+ */
+export type RpMethod = 'closed_list' | 'best_loser' | 'mixed';
+
+/**
  * ScopeIn
  */
 export type ScopeIn = {
@@ -1035,6 +2210,102 @@ export type SessionOut = {
      * Current
      */
     current?: boolean;
+};
+
+/**
+ * Severity
+ */
+export type Severity = 'blocking' | 'warning';
+
+/**
+ * SlotOut
+ */
+export type SlotOut = {
+    /**
+     * Office Type Id
+     */
+    office_type_id: string;
+    /**
+     * Office Code
+     */
+    office_code: string;
+    /**
+     * Office Name
+     */
+    office_name: string;
+    /**
+     * Expected
+     */
+    expected: number;
+    /**
+     * Filled
+     */
+    filled: number;
+    /**
+     * Missing Positions
+     */
+    missing_positions: Array<number>;
+};
+
+/**
+ * StatusHistoryOut
+ */
+export type StatusHistoryOut = {
+    /**
+     * Formula Id
+     */
+    formula_id: string;
+    /**
+     * Office Code
+     */
+    office_code: string;
+    /**
+     * Position
+     */
+    position: number;
+    /**
+     * From Status
+     */
+    from_status: string | null;
+    /**
+     * To Status
+     */
+    to_status: string;
+    /**
+     * Reason
+     */
+    reason: string | null;
+    /**
+     * Changed By User Id
+     */
+    changed_by_user_id: string | null;
+    /**
+     * Changed At
+     */
+    changed_at: string;
+};
+
+/**
+ * SubstitutionIn
+ */
+export type SubstitutionIn = {
+    /**
+     * Owner Person Id
+     *
+     * Vacío: conserva a la propietaria.
+     */
+    owner_person_id?: string | null;
+    /**
+     * Substitute Person Id
+     *
+     * Vacío: conserva a la suplente.
+     */
+    substitute_person_id?: string | null;
+    /**
+     * Reason
+     */
+    reason: string;
+    override?: Override | null;
 };
 
 /**
@@ -1233,6 +2504,53 @@ export type UserUpdateRequest = {
      * Full Name
      */
     full_name: string;
+};
+
+/**
+ * ValidationRuleOut
+ */
+export type ValidationRuleOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Description
+     */
+    description: string;
+    /**
+     * Default Params
+     */
+    default_params: {
+        [key: string]: unknown;
+    };
+};
+
+/**
+ * ViolationOut
+ */
+export type ViolationOut = {
+    /**
+     * Rule
+     */
+    rule: string;
+    severity: Severity;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Formula Id
+     */
+    formula_id?: string | null;
 };
 
 export type GetHealthData = {
@@ -3012,3 +4330,1389 @@ export type GetGeoNodeResponses = {
 };
 
 export type GetGeoNodeResponse = GetGeoNodeResponses[keyof GetGeoNodeResponses];
+
+export type SearchPeopleData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Q
+         *
+         * Nombre o apellidos.
+         */
+        q?: string | null;
+        /**
+         * Curp
+         */
+        curp?: string | null;
+        /**
+         * Phone
+         */
+        phone?: string | null;
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Cursor
+         */
+        cursor?: string | null;
+        /**
+         * Sort
+         *
+         * Campos separados por coma; prefijo '-' para descendente.
+         */
+        sort?: string | null;
+    };
+    url: '/api/v1/people';
+};
+
+export type SearchPeopleErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type SearchPeopleError = SearchPeopleErrors[keyof SearchPeopleErrors];
+
+export type SearchPeopleResponses = {
+    /**
+     * Successful Response
+     */
+    200: CursorPagePersonSummary;
+};
+
+export type SearchPeopleResponse = SearchPeopleResponses[keyof SearchPeopleResponses];
+
+export type CreatePersonData = {
+    body: PersonCreate;
+    path?: never;
+    query?: never;
+    url: '/api/v1/people';
+};
+
+export type CreatePersonErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type CreatePersonError = CreatePersonErrors[keyof CreatePersonErrors];
+
+export type CreatePersonResponses = {
+    /**
+     * Successful Response
+     */
+    201: PersonOut;
+};
+
+export type CreatePersonResponse = CreatePersonResponses[keyof CreatePersonResponses];
+
+export type DeletePersonData = {
+    body?: never;
+    path: {
+        /**
+         * Person Id
+         *
+         * Id de la persona.
+         */
+        person_id: string;
+    };
+    query?: never;
+    url: '/api/v1/people/{person_id}';
+};
+
+export type DeletePersonErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type DeletePersonError = DeletePersonErrors[keyof DeletePersonErrors];
+
+export type DeletePersonResponses = {
+    /**
+     * Successful Response
+     */
+    200: DeletionOut;
+};
+
+export type DeletePersonResponse = DeletePersonResponses[keyof DeletePersonResponses];
+
+export type GetPersonData = {
+    body?: never;
+    path: {
+        /**
+         * Person Id
+         *
+         * Id de la persona.
+         */
+        person_id: string;
+    };
+    query?: never;
+    url: '/api/v1/people/{person_id}';
+};
+
+export type GetPersonErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type GetPersonError = GetPersonErrors[keyof GetPersonErrors];
+
+export type GetPersonResponses = {
+    /**
+     * Successful Response
+     */
+    200: PersonOut;
+};
+
+export type GetPersonResponse = GetPersonResponses[keyof GetPersonResponses];
+
+export type UpdatePersonData = {
+    body: PersonUpdate;
+    path: {
+        /**
+         * Person Id
+         *
+         * Id de la persona.
+         */
+        person_id: string;
+    };
+    query?: never;
+    url: '/api/v1/people/{person_id}';
+};
+
+export type UpdatePersonErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type UpdatePersonError = UpdatePersonErrors[keyof UpdatePersonErrors];
+
+export type UpdatePersonResponses = {
+    /**
+     * Successful Response
+     */
+    200: PersonOut;
+};
+
+export type UpdatePersonResponse = UpdatePersonResponses[keyof UpdatePersonResponses];
+
+export type ListConsentsData = {
+    body?: never;
+    path: {
+        /**
+         * Person Id
+         *
+         * Id de la persona.
+         */
+        person_id: string;
+    };
+    query?: never;
+    url: '/api/v1/people/{person_id}/consents';
+};
+
+export type ListConsentsErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ListConsentsError = ListConsentsErrors[keyof ListConsentsErrors];
+
+export type ListConsentsResponses = {
+    /**
+     * Response Listconsents
+     *
+     * Successful Response
+     */
+    200: Array<ConsentOut>;
+};
+
+export type ListConsentsResponse = ListConsentsResponses[keyof ListConsentsResponses];
+
+export type AddConsentData = {
+    body: ConsentIn;
+    path: {
+        /**
+         * Person Id
+         *
+         * Id de la persona.
+         */
+        person_id: string;
+    };
+    query?: never;
+    url: '/api/v1/people/{person_id}/consents';
+};
+
+export type AddConsentErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type AddConsentError = AddConsentErrors[keyof AddConsentErrors];
+
+export type AddConsentResponses = {
+    /**
+     * Successful Response
+     */
+    201: ConsentOut;
+};
+
+export type AddConsentResponse = AddConsentResponses[keyof AddConsentResponses];
+
+export type ListPartiesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/parties';
+};
+
+export type ListPartiesErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ListPartiesError = ListPartiesErrors[keyof ListPartiesErrors];
+
+export type ListPartiesResponses = {
+    /**
+     * Response Listparties
+     *
+     * Successful Response
+     */
+    200: Array<PartyOut>;
+};
+
+export type ListPartiesResponse = ListPartiesResponses[keyof ListPartiesResponses];
+
+export type CreatePartyData = {
+    body: PartyIn;
+    path?: never;
+    query?: never;
+    url: '/api/v1/parties';
+};
+
+export type CreatePartyErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type CreatePartyError = CreatePartyErrors[keyof CreatePartyErrors];
+
+export type CreatePartyResponses = {
+    /**
+     * Successful Response
+     */
+    201: PartyOut;
+};
+
+export type CreatePartyResponse = CreatePartyResponses[keyof CreatePartyResponses];
+
+export type UpdatePartyData = {
+    body: PartyIn;
+    path: {
+        /**
+         * Party Id
+         */
+        party_id: string;
+    };
+    query?: never;
+    url: '/api/v1/parties/{party_id}';
+};
+
+export type UpdatePartyErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type UpdatePartyError = UpdatePartyErrors[keyof UpdatePartyErrors];
+
+export type UpdatePartyResponses = {
+    /**
+     * Successful Response
+     */
+    200: PartyOut;
+};
+
+export type UpdatePartyResponse = UpdatePartyResponses[keyof UpdatePartyResponses];
+
+export type ListOfficeTypesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/office-types';
+};
+
+export type ListOfficeTypesErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ListOfficeTypesError = ListOfficeTypesErrors[keyof ListOfficeTypesErrors];
+
+export type ListOfficeTypesResponses = {
+    /**
+     * Response Listofficetypes
+     *
+     * Successful Response
+     */
+    200: Array<OfficeTypeOut>;
+};
+
+export type ListOfficeTypesResponse = ListOfficeTypesResponses[keyof ListOfficeTypesResponses];
+
+export type CreateOfficeTypeData = {
+    body: OfficeTypeIn;
+    path?: never;
+    query?: never;
+    url: '/api/v1/office-types';
+};
+
+export type CreateOfficeTypeErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type CreateOfficeTypeError = CreateOfficeTypeErrors[keyof CreateOfficeTypeErrors];
+
+export type CreateOfficeTypeResponses = {
+    /**
+     * Successful Response
+     */
+    201: OfficeTypeOut;
+};
+
+export type CreateOfficeTypeResponse = CreateOfficeTypeResponses[keyof CreateOfficeTypeResponses];
+
+export type ListValidationRulesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/validation-rules';
+};
+
+export type ListValidationRulesErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ListValidationRulesError = ListValidationRulesErrors[keyof ListValidationRulesErrors];
+
+export type ListValidationRulesResponses = {
+    /**
+     * Response Listvalidationrules
+     *
+     * Successful Response
+     */
+    200: Array<ValidationRuleOut>;
+};
+
+export type ListValidationRulesResponse = ListValidationRulesResponses[keyof ListValidationRulesResponses];
+
+export type ListProcessesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/processes';
+};
+
+export type ListProcessesErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ListProcessesError = ListProcessesErrors[keyof ListProcessesErrors];
+
+export type ListProcessesResponses = {
+    /**
+     * Response Listprocesses
+     *
+     * Successful Response
+     */
+    200: Array<ProcessOut>;
+};
+
+export type ListProcessesResponse = ListProcessesResponses[keyof ListProcessesResponses];
+
+export type CreateProcessData = {
+    body: ProcessIn;
+    path?: never;
+    query?: never;
+    url: '/api/v1/processes';
+};
+
+export type CreateProcessErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type CreateProcessError = CreateProcessErrors[keyof CreateProcessErrors];
+
+export type CreateProcessResponses = {
+    /**
+     * Successful Response
+     */
+    201: ProcessOut;
+};
+
+export type CreateProcessResponse = CreateProcessResponses[keyof CreateProcessResponses];
+
+export type GetProcessData = {
+    body?: never;
+    path: {
+        /**
+         * Process Id
+         *
+         * Id del proceso electoral.
+         */
+        process_id: string;
+    };
+    query?: never;
+    url: '/api/v1/processes/{process_id}';
+};
+
+export type GetProcessErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type GetProcessError = GetProcessErrors[keyof GetProcessErrors];
+
+export type GetProcessResponses = {
+    /**
+     * Successful Response
+     */
+    200: ProcessOut;
+};
+
+export type GetProcessResponse = GetProcessResponses[keyof GetProcessResponses];
+
+export type UpdateProcessData = {
+    body: ProcessUpdate;
+    path: {
+        /**
+         * Process Id
+         *
+         * Id del proceso electoral.
+         */
+        process_id: string;
+    };
+    query?: never;
+    url: '/api/v1/processes/{process_id}';
+};
+
+export type UpdateProcessErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type UpdateProcessError = UpdateProcessErrors[keyof UpdateProcessErrors];
+
+export type UpdateProcessResponses = {
+    /**
+     * Successful Response
+     */
+    200: ProcessOut;
+};
+
+export type UpdateProcessResponse = UpdateProcessResponses[keyof UpdateProcessResponses];
+
+export type ListProcessOfficesData = {
+    body?: never;
+    path: {
+        /**
+         * Process Id
+         *
+         * Id del proceso electoral.
+         */
+        process_id: string;
+    };
+    query?: never;
+    url: '/api/v1/processes/{process_id}/offices';
+};
+
+export type ListProcessOfficesErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ListProcessOfficesError = ListProcessOfficesErrors[keyof ListProcessOfficesErrors];
+
+export type ListProcessOfficesResponses = {
+    /**
+     * Response Listprocessoffices
+     *
+     * Successful Response
+     */
+    200: Array<ProcessOfficeOut>;
+};
+
+export type ListProcessOfficesResponse = ListProcessOfficesResponses[keyof ListProcessOfficesResponses];
+
+export type ConfigureProcessOfficesData = {
+    /**
+     * Body
+     */
+    body: Array<ProcessOfficeIn>;
+    path: {
+        /**
+         * Process Id
+         *
+         * Id del proceso electoral.
+         */
+        process_id: string;
+    };
+    query?: never;
+    url: '/api/v1/processes/{process_id}/offices';
+};
+
+export type ConfigureProcessOfficesErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ConfigureProcessOfficesError = ConfigureProcessOfficesErrors[keyof ConfigureProcessOfficesErrors];
+
+export type ConfigureProcessOfficesResponses = {
+    /**
+     * Response Configureprocessoffices
+     *
+     * Successful Response
+     */
+    200: Array<ProcessOfficeOut>;
+};
+
+export type ConfigureProcessOfficesResponse = ConfigureProcessOfficesResponses[keyof ConfigureProcessOfficesResponses];
+
+export type ListMunicipalitySettingsData = {
+    body?: never;
+    path: {
+        /**
+         * Process Id
+         *
+         * Id del proceso electoral.
+         */
+        process_id: string;
+    };
+    query?: never;
+    url: '/api/v1/processes/{process_id}/municipalities';
+};
+
+export type ListMunicipalitySettingsErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ListMunicipalitySettingsError = ListMunicipalitySettingsErrors[keyof ListMunicipalitySettingsErrors];
+
+export type ListMunicipalitySettingsResponses = {
+    /**
+     * Response Listmunicipalitysettings
+     *
+     * Successful Response
+     */
+    200: Array<MunicipalitySettingOut>;
+};
+
+export type ListMunicipalitySettingsResponse = ListMunicipalitySettingsResponses[keyof ListMunicipalitySettingsResponses];
+
+export type ConfigureMunicipalitiesData = {
+    /**
+     * Body
+     */
+    body: Array<MunicipalitySettingIn>;
+    path: {
+        /**
+         * Process Id
+         *
+         * Id del proceso electoral.
+         */
+        process_id: string;
+    };
+    query?: never;
+    url: '/api/v1/processes/{process_id}/municipalities';
+};
+
+export type ConfigureMunicipalitiesErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ConfigureMunicipalitiesError = ConfigureMunicipalitiesErrors[keyof ConfigureMunicipalitiesErrors];
+
+export type ConfigureMunicipalitiesResponses = {
+    /**
+     * Response Configuremunicipalities
+     *
+     * Successful Response
+     */
+    200: Array<MunicipalitySettingOut>;
+};
+
+export type ConfigureMunicipalitiesResponse = ConfigureMunicipalitiesResponses[keyof ConfigureMunicipalitiesResponses];
+
+export type ListProcessRulesData = {
+    body?: never;
+    path: {
+        /**
+         * Process Id
+         *
+         * Id del proceso electoral.
+         */
+        process_id: string;
+    };
+    query?: never;
+    url: '/api/v1/processes/{process_id}/rules';
+};
+
+export type ListProcessRulesErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ListProcessRulesError = ListProcessRulesErrors[keyof ListProcessRulesErrors];
+
+export type ListProcessRulesResponses = {
+    /**
+     * Response Listprocessrules
+     *
+     * Successful Response
+     */
+    200: Array<ProcessRuleOut>;
+};
+
+export type ListProcessRulesResponse = ListProcessRulesResponses[keyof ListProcessRulesResponses];
+
+export type ConfigureProcessRulesData = {
+    /**
+     * Body
+     */
+    body: Array<ProcessRuleIn>;
+    path: {
+        /**
+         * Process Id
+         *
+         * Id del proceso electoral.
+         */
+        process_id: string;
+    };
+    query?: never;
+    url: '/api/v1/processes/{process_id}/rules';
+};
+
+export type ConfigureProcessRulesErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ConfigureProcessRulesError = ConfigureProcessRulesErrors[keyof ConfigureProcessRulesErrors];
+
+export type ConfigureProcessRulesResponses = {
+    /**
+     * Response Configureprocessrules
+     *
+     * Successful Response
+     */
+    200: Array<ProcessRuleOut>;
+};
+
+export type ConfigureProcessRulesResponse = ConfigureProcessRulesResponses[keyof ConfigureProcessRulesResponses];
+
+export type ListCoalitionsData = {
+    body?: never;
+    path: {
+        /**
+         * Process Id
+         *
+         * Id del proceso electoral.
+         */
+        process_id: string;
+    };
+    query?: never;
+    url: '/api/v1/processes/{process_id}/coalitions';
+};
+
+export type ListCoalitionsErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ListCoalitionsError = ListCoalitionsErrors[keyof ListCoalitionsErrors];
+
+export type ListCoalitionsResponses = {
+    /**
+     * Response Listcoalitions
+     *
+     * Successful Response
+     */
+    200: Array<CoalitionOut>;
+};
+
+export type ListCoalitionsResponse = ListCoalitionsResponses[keyof ListCoalitionsResponses];
+
+export type CreateCoalitionData = {
+    body: CoalitionIn;
+    path: {
+        /**
+         * Process Id
+         *
+         * Id del proceso electoral.
+         */
+        process_id: string;
+    };
+    query?: never;
+    url: '/api/v1/processes/{process_id}/coalitions';
+};
+
+export type CreateCoalitionErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type CreateCoalitionError = CreateCoalitionErrors[keyof CreateCoalitionErrors];
+
+export type CreateCoalitionResponses = {
+    /**
+     * Successful Response
+     */
+    201: CoalitionOut;
+};
+
+export type CreateCoalitionResponse = CreateCoalitionResponses[keyof CreateCoalitionResponses];
+
+export type ListNominationsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Process Id
+         */
+        process_id?: string | null;
+        /**
+         * Office Type Id
+         */
+        office_type_id?: string | null;
+        /**
+         * Status
+         */
+        status?: NominationStatus | null;
+        /**
+         * Party Id
+         */
+        party_id?: string | null;
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Cursor
+         */
+        cursor?: string | null;
+        /**
+         * Sort
+         *
+         * Campos separados por coma; prefijo '-' para descendente.
+         */
+        sort?: string | null;
+    };
+    url: '/api/v1/nominations';
+};
+
+export type ListNominationsErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ListNominationsError = ListNominationsErrors[keyof ListNominationsErrors];
+
+export type ListNominationsResponses = {
+    /**
+     * Successful Response
+     */
+    200: CursorPageNominationSummary;
+};
+
+export type ListNominationsResponse = ListNominationsResponses[keyof ListNominationsResponses];
+
+export type CreateNominationData = {
+    body: NominationIn;
+    path?: never;
+    query?: never;
+    url: '/api/v1/nominations';
+};
+
+export type CreateNominationErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type CreateNominationError = CreateNominationErrors[keyof CreateNominationErrors];
+
+export type CreateNominationResponses = {
+    /**
+     * Successful Response
+     */
+    201: NominationOut;
+};
+
+export type CreateNominationResponse = CreateNominationResponses[keyof CreateNominationResponses];
+
+export type GetNominationData = {
+    body?: never;
+    path: {
+        /**
+         * Nomination Id
+         *
+         * Id de la postulación.
+         */
+        nomination_id: string;
+    };
+    query?: never;
+    url: '/api/v1/nominations/{nomination_id}';
+};
+
+export type GetNominationErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type GetNominationError = GetNominationErrors[keyof GetNominationErrors];
+
+export type GetNominationResponses = {
+    /**
+     * Successful Response
+     */
+    200: NominationOut;
+};
+
+export type GetNominationResponse = GetNominationResponses[keyof GetNominationResponses];
+
+export type UpdateNominationData = {
+    body: NominationUpdate;
+    path: {
+        /**
+         * Nomination Id
+         *
+         * Id de la postulación.
+         */
+        nomination_id: string;
+    };
+    query?: never;
+    url: '/api/v1/nominations/{nomination_id}';
+};
+
+export type UpdateNominationErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type UpdateNominationError = UpdateNominationErrors[keyof UpdateNominationErrors];
+
+export type UpdateNominationResponses = {
+    /**
+     * Successful Response
+     */
+    200: NominationOut;
+};
+
+export type UpdateNominationResponse = UpdateNominationResponses[keyof UpdateNominationResponses];
+
+export type SubmitNominationData = {
+    body: NominationAction;
+    path: {
+        /**
+         * Nomination Id
+         *
+         * Id de la postulación.
+         */
+        nomination_id: string;
+    };
+    query?: never;
+    url: '/api/v1/nominations/{nomination_id}/submit';
+};
+
+export type SubmitNominationErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type SubmitNominationError = SubmitNominationErrors[keyof SubmitNominationErrors];
+
+export type SubmitNominationResponses = {
+    /**
+     * Successful Response
+     */
+    200: NominationOut;
+};
+
+export type SubmitNominationResponse = SubmitNominationResponses[keyof SubmitNominationResponses];
+
+export type ApproveNominationData = {
+    body: NominationAction;
+    path: {
+        /**
+         * Nomination Id
+         *
+         * Id de la postulación.
+         */
+        nomination_id: string;
+    };
+    query?: never;
+    url: '/api/v1/nominations/{nomination_id}/approve';
+};
+
+export type ApproveNominationErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ApproveNominationError = ApproveNominationErrors[keyof ApproveNominationErrors];
+
+export type ApproveNominationResponses = {
+    /**
+     * Successful Response
+     */
+    200: NominationOut;
+};
+
+export type ApproveNominationResponse = ApproveNominationResponses[keyof ApproveNominationResponses];
+
+export type CancelNominationData = {
+    body: NominationAction;
+    path: {
+        /**
+         * Nomination Id
+         *
+         * Id de la postulación.
+         */
+        nomination_id: string;
+    };
+    query?: never;
+    url: '/api/v1/nominations/{nomination_id}/cancel';
+};
+
+export type CancelNominationErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type CancelNominationError = CancelNominationErrors[keyof CancelNominationErrors];
+
+export type CancelNominationResponses = {
+    /**
+     * Successful Response
+     */
+    200: NominationOut;
+};
+
+export type CancelNominationResponse = CancelNominationResponses[keyof CancelNominationResponses];
+
+export type ValidateNominationData = {
+    body?: never;
+    path: {
+        /**
+         * Nomination Id
+         *
+         * Id de la postulación.
+         */
+        nomination_id: string;
+    };
+    query?: never;
+    url: '/api/v1/nominations/{nomination_id}/validation';
+};
+
+export type ValidateNominationErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ValidateNominationError = ValidateNominationErrors[keyof ValidateNominationErrors];
+
+export type ValidateNominationResponses = {
+    /**
+     * Response Validatenomination
+     *
+     * Successful Response
+     */
+    200: Array<ViolationOut>;
+};
+
+export type ValidateNominationResponse = ValidateNominationResponses[keyof ValidateNominationResponses];
+
+export type GetNominationHistoryData = {
+    body?: never;
+    path: {
+        /**
+         * Nomination Id
+         *
+         * Id de la postulación.
+         */
+        nomination_id: string;
+    };
+    query?: never;
+    url: '/api/v1/nominations/{nomination_id}/history';
+};
+
+export type GetNominationHistoryErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type GetNominationHistoryError = GetNominationHistoryErrors[keyof GetNominationHistoryErrors];
+
+export type GetNominationHistoryResponses = {
+    /**
+     * Response Getnominationhistory
+     *
+     * Successful Response
+     */
+    200: Array<StatusHistoryOut>;
+};
+
+export type GetNominationHistoryResponse = GetNominationHistoryResponses[keyof GetNominationHistoryResponses];
+
+export type CreateFormulaData = {
+    body: FormulaIn;
+    path: {
+        /**
+         * Nomination Id
+         *
+         * Id de la postulación.
+         */
+        nomination_id: string;
+    };
+    query?: never;
+    url: '/api/v1/nominations/{nomination_id}/formulas';
+};
+
+export type CreateFormulaErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type CreateFormulaError = CreateFormulaErrors[keyof CreateFormulaErrors];
+
+export type CreateFormulaResponses = {
+    /**
+     * Successful Response
+     */
+    201: NominationOut;
+};
+
+export type CreateFormulaResponse = CreateFormulaResponses[keyof CreateFormulaResponses];
+
+export type UpdateFormulaMembersData = {
+    body: FormulaMembersUpdate;
+    path: {
+        /**
+         * Formula Id
+         *
+         * Id de la fórmula.
+         */
+        formula_id: string;
+    };
+    query?: never;
+    url: '/api/v1/formulas/{formula_id}';
+};
+
+export type UpdateFormulaMembersErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type UpdateFormulaMembersError = UpdateFormulaMembersErrors[keyof UpdateFormulaMembersErrors];
+
+export type UpdateFormulaMembersResponses = {
+    /**
+     * Successful Response
+     */
+    200: NominationOut;
+};
+
+export type UpdateFormulaMembersResponse = UpdateFormulaMembersResponses[keyof UpdateFormulaMembersResponses];
+
+export type ChangeFormulaStatusData = {
+    body: FormulaStatusIn;
+    path: {
+        /**
+         * Formula Id
+         *
+         * Id de la fórmula.
+         */
+        formula_id: string;
+    };
+    query?: never;
+    url: '/api/v1/formulas/{formula_id}/status';
+};
+
+export type ChangeFormulaStatusErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ChangeFormulaStatusError = ChangeFormulaStatusErrors[keyof ChangeFormulaStatusErrors];
+
+export type ChangeFormulaStatusResponses = {
+    /**
+     * Successful Response
+     */
+    200: NominationOut;
+};
+
+export type ChangeFormulaStatusResponse = ChangeFormulaStatusResponses[keyof ChangeFormulaStatusResponses];
+
+export type SubstituteFormulaData = {
+    body: SubstitutionIn;
+    path: {
+        /**
+         * Formula Id
+         *
+         * Id de la fórmula.
+         */
+        formula_id: string;
+    };
+    query?: never;
+    url: '/api/v1/formulas/{formula_id}/substitute';
+};
+
+export type SubstituteFormulaErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type SubstituteFormulaError = SubstituteFormulaErrors[keyof SubstituteFormulaErrors];
+
+export type SubstituteFormulaResponses = {
+    /**
+     * Successful Response
+     */
+    200: NominationOut;
+};
+
+export type SubstituteFormulaResponse = SubstituteFormulaResponses[keyof SubstituteFormulaResponses];

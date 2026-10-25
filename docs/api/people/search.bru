@@ -1,0 +1,27 @@
+meta {
+  name: Buscar personas
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/v1/people
+  body: none
+  auth: bearer
+}
+
+params:query {
+  q: garcia
+  ~curp: 
+  ~phone: 
+  ~limit: 50
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+docs {
+  Búsqueda sin acentos por nombre, o exacta por CURP o teléfono (blind index).
+  CURP y contactos salen enmascarados sin people.person.read_sensitive (D-66).
+}

@@ -1,0 +1,39 @@
+meta {
+  name: Habilitar cargos
+  type: http
+  seq: 3
+}
+
+put {
+  url: {{baseUrl}}/api/v1/processes/{{processId}}/offices
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  [
+    {
+      "office_type_id": "{{officeTypeId}}",
+      "is_enabled": true
+    },
+    {
+      "office_type_id": "{{syndicOfficeTypeId}}",
+      "is_enabled": true,
+      "slate_parent_office_type_id": "{{officeTypeId}}"
+    },
+    {
+      "office_type_id": "{{rpOfficeTypeId}}",
+      "is_enabled": true,
+      "positions": 12,
+      "rp_method": "closed_list"
+    }
+  ]
+}
+
+docs {
+  slate_parent_office_type_id integra un cargo a una planilla. rp_method: closed_list | best_loser | mixed (D-21).
+}

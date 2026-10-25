@@ -1,0 +1,26 @@
+meta {
+  name: Registrar coalición
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/api/v1/processes/{{processId}}/coalitions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "name": "Coalición ejemplo",
+    "coalition_kind": "coalition",
+    "party_ids": [
+      "{{partyId}}",
+      "{{otherPartyId}}"
+    ]
+  }
+}

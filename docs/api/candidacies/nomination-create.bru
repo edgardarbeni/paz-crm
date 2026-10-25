@@ -1,0 +1,29 @@
+meta {
+  name: Crear postulación
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}/api/v1/nominations
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "process_id": "{{processId}}",
+    "office_type_id": "{{officeTypeId}}",
+    "node_id": "{{nodeId}}",
+    "party_id": "{{partyId}}"
+  }
+}
+
+docs {
+  node_id es el nodo del nivel geográfico del cargo (vacío en cargos nacionales). La respuesta
+  trae los slots esperados, la completitud y si el usuario puede editarla (D-34).
+}

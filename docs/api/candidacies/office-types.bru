@@ -1,0 +1,15 @@
+meta {
+  name: Tipos de cargo
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/v1/office-types
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}

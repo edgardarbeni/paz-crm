@@ -1,0 +1,31 @@
+meta {
+  name: Integración de ayuntamientos
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/api/v1/processes/{{processId}}/municipalities
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  [
+    {
+      "municipality_id": "{{nodeId}}",
+      "election_regime": "party_based",
+      "mr_councilor_count": 7,
+      "rp_councilor_count": 4,
+      "syndic_count": 1
+    }
+  ]
+}
+
+docs {
+  Carga masiva (upsert). Los números se capturan según la ley local; el sistema no los asume (D-24..D-26).
+}

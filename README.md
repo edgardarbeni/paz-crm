@@ -12,7 +12,7 @@ posteriores, padrón, defensa del voto, jurídico, atención social, encuestas y
 | [`docs/fases/`](docs/fases/) | Cierre de cada fase: entregables, suposiciones, deuda y riesgos |
 | [`docs/api/`](docs/api/) | Colección de ejemplos de la API (Bruno) |
 
-**Estado:** fases A y B aprobadas · fase C (geografía) implementada, pendiente de aprobación.
+**Estado:** fases A, B y C aprobadas · fase D (personas y candidaturas) implementada, pendiente de aprobación.
 
 ## Estructura
 
@@ -100,6 +100,15 @@ uv run paz --help                    # CLI de operación
   - Importador: `paz geo download --state N` baja la BGD y los catálogos del INE con su manifiesto. `paz geo import <carpeta|7z> --state N [--catalogs DIR] [--dry-run]` hace el upsert por llave natural sin cambiar IDs; lo que desaparece del origen queda inactivo. Cada corrida guarda su reporte en `geography.import_runs` y `import_issues`.
   - Para activar un marco nuevo: `paz geo activate --framework NOMBRE`, que remapea los alcances de los usuarios.
   - API en `/api/v1/geography`: niveles, búsqueda por clave o nombre, `locate`, `tiles/{capa}/{z}/{x}/{y}.mvt` e importaciones. Todo queda limitado por el alcance del usuario (`PUT /api/v1/users/{id}/scopes`, D-34).
+- **Personas (fase D).**
+  - API en `/api/v1/people`: búsqueda por nombre sin acentos, CURP o teléfono; alta con CURP validada (estructura, dígito verificador y coherencia, D-30); contactos y domicilio cifrados; consentimientos; baja ARCO.
+  - CURP, contactos y calle salen enmascarados sin `people.person.read_sensitive` (D-66).
+  - `paz people purge` anonimiza a las personas cuya retención venció (D-69); se programa con cron.
+- **Candidaturas (fase D).**
+  - Catálogos: `/api/v1/parties`, `/office-types` (cargos nuevos sin migración) y `/validation-rules`.
+  - Procesos: `/api/v1/processes` con `offices`, `municipalities`, `rules` y `coalitions`. Al crearse, todo queda deshabilitado y solo la regla "persona no duplicada" está activa (D-23, D-28).
+  - Postulaciones y fórmulas: `/api/v1/nominations` y `/api/v1/formulas`, con validación, envío, aprobación, cancelación, cambios de estatus, sustitución e historial (D-67, D-68).
+  - Las reglas bloqueantes devuelven 409 `rule-violation` con `violations`; se aceptan con `override` y el permiso `candidacies.rule.override`.
 - **Errores.** Siempre RFC 9457 (`application/problem+json`): `type` es `urn:pazos:problem:<code>`
   e incluye `request_id`.
 - **Paginación.** Por cursor (`app.core.pagination`): `limit` ≤ 200, `cursor` opaco y `sort`

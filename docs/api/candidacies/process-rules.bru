@@ -1,0 +1,38 @@
+meta {
+  name: Configurar reglas
+  type: http
+  seq: 5
+}
+
+put {
+  url: {{baseUrl}}/api/v1/processes/{{processId}}/rules
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  [
+    {
+      "rule_code": "gender_parity",
+      "is_enabled": true,
+      "severity": "blocking",
+      "params": {
+        "min_female_ratio": 0.5
+      }
+    },
+    {
+      "rule_code": "list_alternation",
+      "is_enabled": true,
+      "severity": "warning",
+      "office_type_id": "{{rpOfficeTypeId}}"
+    }
+  ]
+}
+
+docs {
+  Una fila por cargo prevalece sobre la del proceso (D-67).
+}

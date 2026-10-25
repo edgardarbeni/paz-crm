@@ -20,10 +20,12 @@ from app.core.middleware import (
 from app.core.redis import build_redis
 from app.core.telemetry import configure_telemetry
 from app.modules.audit import router as audit_router
+from app.modules.candidacies import router as candidacies_router
 from app.modules.geography import router as geography_router
 from app.modules.identity.container import build_identity_services
 from app.modules.identity.routers import admin as identity_admin
 from app.modules.identity.routers import auth as identity_auth
+from app.modules.people import router as people_router
 
 API_PREFIX = "/api/v1"
 
@@ -36,6 +38,8 @@ def build_api_router() -> APIRouter:
     router.include_router(identity_admin.roles_router)
     router.include_router(audit_router.router)
     router.include_router(geography_router.router)
+    router.include_router(people_router.router)
+    router.include_router(candidacies_router.router)
     return router
 
 

@@ -1,0 +1,19 @@
+meta {
+  name: Enviar postulación
+  type: http
+  seq: 13
+}
+
+post {
+  url: {{baseUrl}}/api/v1/nominations/{{nominationId}}/submit
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {}
+}

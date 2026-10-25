@@ -320,6 +320,56 @@ No hay integración con RENAPO.
 - `scripts/import-national.sh` carga los 32 estados desde una carpeta local.
 - `scripts/benchmark_geo.py` mide la API de punta a punta.
 
+**D-64 · Fase C aprobada.** El usuario aprobó la fase C el 2026-10-25; PR #3 fusionado a `main`.
+
+**D-65 · Ajustes de implementación de personas y candidaturas (sobre `MODELO_DATOS.md` §3 y §4).**
+- **Entidad de nacimiento:** `persons.birth_entity` guarda el código de dos letras de la CURP (`AS`…`ZS`, `NE` = nacido en el extranjero) en lugar de `birth_state_code` numérico; así se compara directo con la CURP.
+- **Parámetros de reglas:** `validation_rules.default_params` (jsonb con los valores por defecto) reemplaza `params_schema`. El parámetro efectivo es `default_params || params`; un parámetro desconocido se rechaza con 400.
+- **`nomination_kind = member`:** distingue los cargos que solo existen dentro de una planilla (regidurías, concejalías) de los que pueden ir solos o en planilla (sindicatura).
+- **`rule_overrides`:** lleva `nomination_id` y `formula_id` opcional (la paridad es de la postulación, no de una fórmula), más `details` con el mensaje aceptado.
+- **`nominations.notes`:** notas libres.
+- **Vista `candidacies.nomination_sections`:** secciones que cubre cada postulación según su nivel (UNION ALL por nivel). Es la base de las reglas de lectura y edición por alcance (D-34).
+- **Conflictos de reglas:** un 409 `urn:pazos:problem:rule-violation` incluye el miembro de extensión `violations` (regla, severidad, mensaje, fórmula), según RFC 9457 §3.2.
+
+**D-66 · Personas: visibilidad, enmascarado y permisos.**
+- **Visibilidad con alcance limitado (suposición):** una persona es visible si su domicilio principal está en el alcance, si integra una postulación visible para el usuario, o si aún no tiene domicilio (para poder capturarla). No se puede registrar un domicilio fuera del alcance.
+- **Enmascarado:** CURP (`GOME******MASRRN07`), contactos (`******4567`, `m***@dominio`) y calle/números solo se ven completos con `people.person.read_sensitive`. La geografía del domicilio siempre se ve (D-31).
+- **CURP incoherente:** forzar el registro con `accept_curp_incoherence` requiere `people.person.read_sensitive` (suposición: no se creó un permiso aparte). La persona queda marcada con `curp_coherence_overridden` y la respuesta trae las advertencias.
+- **Permisos por rol** (migración 0008):
+  - admin: personas completo, más candidaturas: lectura, catálogos y procesos;
+  - coordinador: personas (sin borrar), lectura, captura, aprobación y excepciones de reglas;
+  - capturista: personas (leer y escribir), lectura y captura de candidaturas;
+  - consulta: lectura de personas y candidaturas.
+- **Búsqueda:** por nombre sin acentos (índice de trigramas sobre `f_unaccent(lower(search_name))`), por CURP o por teléfono exactos vía blind index.
+
+**D-67 · Motor de reglas: cuándo bloquea y qué se acepta.**
+- **Configuración:** una fila por cargo prevalece sobre la del proceso, incluso para apagar una regla en un solo cargo. Al crear un proceso solo queda activa `unique_person_in_process`, bloqueante (D-28).
+- **Ediciones de fórmulas:** se juzgan por lo que **introducen**. Se compara la evaluación antes y después del cambio, y solo bloquean las violaciones nuevas. Así una regla activada a mitad del proceso no congela la captura, pero sí se exige al enviar.
+- **Excepciones:** requieren `candidacies.rule.override`, un motivo y que `override.rules` cubra todas las reglas violadas. Se registra una fila por violación aceptada, por ejemplo las dos fórmulas que comparten persona. Una violación aceptada ya no se reporta como pendiente.
+- **Paridad (`gender_parity`):** solo al enviar o aprobar, y en la validación en seco (`GET /nominations/{id}/validation`). Cuenta a las propietarias de la posición 1 del cargo principal entre las postulaciones enviadas o aprobadas del mismo cargo en el proceso, más la evaluada. **Suposición:** cuenta como mujer el sexo `M`; `X` no suma a la cuota. Hay que confirmarlo según la ley de cada estado.
+- **Alternancia:** compara el sexo de las propietarias en posiciones consecutivas del mismo cargo.
+- **Suplente del mismo sexo:** parámetro `allow_male_owner_female_substitute`, para las legislaciones que permiten propietario hombre con suplente mujer.
+
+**D-68 · Ciclo de vida de postulaciones y fórmulas.**
+- **Fórmulas:** se agregan y editan solo mientras la postulación es borrador y la fórmula está en `aspirant`. Después solo cambian por transición o sustitución.
+- **Transiciones:** `aspirant → registered` (captura), `registered → approved` (requiere `nomination.approve`) y `→ cancelled` con motivo (requiere `nomination.approve` salvo en `aspirant`).
+- **Sustitución (D-29):** requiere `nomination.approve`; debe cambiar al menos a una persona. La fórmula nueva hereda la posición y el estatus de la reemplazada (suposición) y queda ligada por `replaces_formula_id`. Ambas quedan en el historial.
+- **Postulación:**
+  - **enviar:** exige todas las posiciones esperadas y aplica todas las reglas, incluida la paridad;
+  - **aprobar:** requiere `nomination.approve`;
+  - **cancelar:** cancela sus fórmulas vigentes y libera la geografía para otra postulación.
+- **Creación:**
+  - el cargo debe estar habilitado y no ser miembro de planilla en ese proceso;
+  - el nodo debe ser del nivel del cargo y pertenecer al marco del proceso y, si es local, a su estado;
+  - un municipio con `normative_system` no admite postulaciones de partido (409);
+  - RP con `best_loser` espera 0 posiciones (D-21).
+- **Proceso cerrado:** todo queda de solo lectura (409).
+- **Alcance:** las postulaciones nacionales solo las crea y edita un usuario con alcance nacional; con alcance parcial son de solo lectura.
+
+**D-69 · Baja de personas (ARCO) — suposición a confirmar.** `DELETE /people/{id}` hace soft-delete y fija `purge_after = hoy + 30 días`. `paz people purge`, programable con cron, anonimiza después: borra contactos, domicilios y consentimientos, y deja el nombre como `[eliminado]` y sin CURP. La fila se conserva para no romper el historial de candidaturas. No se puede dar de baja a quien integra una fórmula vigente. **El plazo de 30 días es una suposición** (`PURGE_RETENTION_DAYS`), pendiente de la política de privacidad del partido.
+
+**D-70 · Cargos y partidos como datos.** `POST /office-types` agrega cargos sin migración; los procesos nuevos los incluyen deshabilitados. Partidos y coaliciones se administran por API. Se siembra solo PAZ (`is_own_party`); los rivales llegan después (respuesta 26).
+
 ---
 
 ## Suposiciones vigentes
@@ -328,6 +378,11 @@ No hay integración con RENAPO.
 - El umbral por defecto colonia ↔ sección es 5 % del área de la colonia o 500 m² (D-09).
 - No se precargan reglas electorales por estado (regidurías, sindicatura, régimen municipal, paridad); todo es configuración (D-24 a D-28).
 - La primera minoría del Senado se infiere de la posición 1 de la lista estatal; el cálculo de resultados queda fuera del MVP.
+- Personas visibles con alcance limitado: domicilio en el alcance, postulación visible o sin domicilio aún (D-66).
+- Forzar una CURP incoherente usa el permiso `people.person.read_sensitive` (D-66).
+- Paridad: cuenta como mujer el sexo `M`; `X` no suma a la cuota (D-67).
+- Una fórmula sustituta hereda el estatus de la reemplazada (D-68).
+- Retención de 30 días antes de anonimizar a una persona dada de baja (D-69).
 
 ## Riesgos abiertos
 

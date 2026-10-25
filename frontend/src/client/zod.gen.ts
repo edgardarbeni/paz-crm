@@ -3,6 +3,46 @@
 import * as z from 'zod';
 
 /**
+ * AddressIn
+ */
+export const zAddressIn = z.object({
+    address_type: z.enum([
+        'home',
+        'work',
+        'other'
+    ]).optional().default('home'),
+    street: z.string().max(200).nullish(),
+    exterior_number: z.string().max(30).nullish(),
+    interior_number: z.string().max(30).nullish(),
+    references: z.string().max(300).nullish(),
+    postal_code: z.string().regex(/^\d{5}$/).nullish(),
+    state_id: z.uuid().nullish(),
+    municipality_id: z.uuid().nullish(),
+    section_id: z.uuid().nullish(),
+    locality_id: z.uuid().nullish(),
+    neighborhood_id: z.uuid().nullish()
+});
+
+/**
+ * AddressOut
+ */
+export const zAddressOut = z.object({
+    id: z.uuid(),
+    address_type: z.string(),
+    street: z.string().nullish(),
+    exterior_number: z.string().nullish(),
+    interior_number: z.string().nullish(),
+    references: z.string().nullish(),
+    postal_code: z.string().nullable(),
+    state_id: z.uuid().nullable(),
+    municipality_id: z.uuid().nullable(),
+    section_id: z.uuid().nullable(),
+    locality_id: z.uuid().nullable(),
+    neighborhood_id: z.uuid().nullable(),
+    is_primary: z.boolean()
+});
+
+/**
  * AuditEntryOut
  */
 export const zAuditEntryOut = z.object({
@@ -21,6 +61,77 @@ export const zAuditEntryOut = z.object({
 });
 
 /**
+ * CoalitionKind
+ */
+export const zCoalitionKind = z.enum(['coalition', 'common_candidacy']);
+
+/**
+ * CoalitionIn
+ */
+export const zCoalitionIn = z.object({
+    name: z.string().min(2).max(200),
+    coalition_kind: zCoalitionKind.optional().default('coalition'),
+    party_ids: z.array(z.uuid()).min(2).max(20)
+});
+
+/**
+ * CoalitionOut
+ */
+export const zCoalitionOut = z.object({
+    id: z.uuid(),
+    name: z.string(),
+    coalition_kind: zCoalitionKind,
+    party_ids: z.array(z.uuid())
+});
+
+/**
+ * ConsentIn
+ */
+export const zConsentIn = z.object({
+    notice_version: z.string().min(1).max(50),
+    channel: z.enum([
+        'panel',
+        'paper',
+        'web'
+    ]),
+    evidence_uri: z.string().max(500).nullish()
+});
+
+/**
+ * ConsentOut
+ */
+export const zConsentOut = z.object({
+    id: z.uuid(),
+    notice_version: z.string(),
+    channel: z.string(),
+    evidence_uri: z.string().nullable(),
+    accepted_at: z.iso.datetime()
+});
+
+/**
+ * ContactIn
+ */
+export const zContactIn = z.object({
+    contact_type: z.enum([
+        'mobile',
+        'landline',
+        'email'
+    ]),
+    value: z.string().min(5).max(150),
+    is_primary: z.boolean().optional().default(false)
+});
+
+/**
+ * ContactOut
+ */
+export const zContactOut = z.object({
+    id: z.uuid(),
+    contact_type: z.string(),
+    value: z.string(),
+    is_primary: z.boolean()
+});
+
+/**
  * CursorPage[AuditEntryOut]
  */
 export const zCursorPageAuditEntryOut = z.object({
@@ -30,12 +141,52 @@ export const zCursorPageAuditEntryOut = z.object({
 });
 
 /**
+ * DeletionOut
+ */
+export const zDeletionOut = z.object({
+    purge_after: z.string()
+});
+
+/**
+ * ElectionLevel
+ */
+export const zElectionLevel = z.enum(['federal', 'local']);
+
+/**
+ * ElectionRegime
+ */
+export const zElectionRegime = z.enum(['party_based', 'normative_system']);
+
+/**
  * FieldViolation
  */
 export const zFieldViolation = z.object({
     field: z.string(),
     message: z.string(),
     code: z.string()
+});
+
+/**
+ * FormulaStatus
+ */
+export const zFormulaStatus = z.enum([
+    'aspirant',
+    'registered',
+    'approved',
+    'substituted',
+    'cancelled'
+]);
+
+/**
+ * FormulaStatusIn
+ */
+export const zFormulaStatusIn = z.object({
+    to_status: z.enum([
+        'registered',
+        'approved',
+        'cancelled'
+    ]),
+    reason: z.string().min(5).max(500).nullish()
 });
 
 /**
@@ -84,6 +235,18 @@ export const zCursorPageGeoNodeOut = z.object({
     next_cursor: z.string().nullish(),
     has_more: z.boolean()
 });
+
+/**
+ * GeographicLevel
+ */
+export const zGeographicLevel = z.enum([
+    'national',
+    'electoral_region',
+    'state',
+    'federal_district',
+    'local_district',
+    'municipality'
+]);
 
 /**
  * HealthStatus
@@ -181,6 +344,31 @@ export const zLoginRequest = z.object({
 });
 
 /**
+ * MemberOut
+ */
+export const zMemberOut = z.object({
+    person_id: z.uuid(),
+    full_name: z.string(),
+    sex: z.string().nullable()
+});
+
+/**
+ * FormulaOut
+ */
+export const zFormulaOut = z.object({
+    id: z.uuid(),
+    office_type_id: z.uuid(),
+    office_code: z.string(),
+    position: z.int(),
+    status: zFormulaStatus,
+    origin_party_id: z.uuid().nullable(),
+    replaces_formula_id: z.uuid().nullable(),
+    substitution_reason: z.string().nullable(),
+    owner: zMemberOut.nullable(),
+    substitute: zMemberOut.nullable()
+});
+
+/**
  * MfaRequiredResponse
  */
 export const zMfaRequiredResponse = z.object({
@@ -205,6 +393,29 @@ export const zMfaVerifyRequest = z.object({
     code: z.string().min(6).max(8).nullish(),
     recovery_code: z.string().max(32).nullish(),
     device_label: z.string().max(200).nullish()
+});
+
+/**
+ * MunicipalitySettingIn
+ */
+export const zMunicipalitySettingIn = z.object({
+    municipality_id: z.uuid(),
+    election_regime: zElectionRegime.optional().default('party_based'),
+    mr_councilor_count: z.int().gte(0).lte(100).optional().default(0),
+    rp_councilor_count: z.int().gte(0).lte(100).optional().default(0),
+    syndic_count: z.int().gte(0).lte(10).optional().default(0)
+});
+
+/**
+ * MunicipalitySettingOut
+ */
+export const zMunicipalitySettingOut = z.object({
+    municipality_id: z.uuid(),
+    election_regime: zElectionRegime.optional().default('party_based'),
+    mr_councilor_count: z.int().gte(0).lte(100).optional().default(0),
+    rp_councilor_count: z.int().gte(0).lte(100).optional().default(0),
+    syndic_count: z.int().gte(0).lte(10).optional().default(0),
+    id: z.uuid()
 });
 
 /**
@@ -259,6 +470,131 @@ export const zGeoNodeDetail = z.object({
 });
 
 /**
+ * NominationIn
+ */
+export const zNominationIn = z.object({
+    process_id: z.uuid(),
+    office_type_id: z.uuid(),
+    node_id: z.uuid().nullish(),
+    party_id: z.uuid().nullish(),
+    coalition_id: z.uuid().nullish(),
+    notes: z.string().max(2000).nullish()
+});
+
+/**
+ * NominationKind
+ */
+export const zNominationKind = z.enum([
+    'single',
+    'list',
+    'slate',
+    'member'
+]);
+
+/**
+ * NominationStatus
+ */
+export const zNominationStatus = z.enum([
+    'draft',
+    'submitted',
+    'approved',
+    'cancelled'
+]);
+
+/**
+ * NominationSummary
+ */
+export const zNominationSummary = z.object({
+    id: z.uuid(),
+    process_id: z.uuid(),
+    office_type_id: z.uuid(),
+    office_code: z.string(),
+    geographic_level: zGeographicLevel,
+    node_id: z.uuid().nullable(),
+    party_id: z.uuid().nullable(),
+    coalition_id: z.uuid().nullable(),
+    status: zNominationStatus,
+    created_at: z.iso.datetime()
+});
+
+/**
+ * CursorPage[NominationSummary]
+ */
+export const zCursorPageNominationSummary = z.object({
+    items: z.array(zNominationSummary),
+    next_cursor: z.string().nullish(),
+    has_more: z.boolean()
+});
+
+/**
+ * NominationUpdate
+ */
+export const zNominationUpdate = z.object({
+    notes: z.string().max(2000).nullish()
+});
+
+/**
+ * Override
+ */
+export const zOverride = z.object({
+    rules: z.array(z.string().regex(/^[a-z][a-z0-9_]{1,49}$/)).min(1).max(10),
+    reason: z.string().min(5).max(500)
+});
+
+/**
+ * FormulaIn
+ */
+export const zFormulaIn = z.object({
+    office_type_id: z.uuid(),
+    position: z.int().gte(1).lte(500),
+    owner_person_id: z.uuid(),
+    substitute_person_id: z.uuid().nullish(),
+    origin_party_id: z.uuid().nullish(),
+    override: zOverride.nullish()
+});
+
+/**
+ * FormulaMembersUpdate
+ */
+export const zFormulaMembersUpdate = z.object({
+    owner_person_id: z.uuid().nullish(),
+    substitute_person_id: z.uuid().nullish(),
+    origin_party_id: z.uuid().nullish(),
+    override: zOverride.nullish()
+});
+
+/**
+ * NominationAction
+ */
+export const zNominationAction = z.object({
+    reason: z.string().min(5).max(500).nullish(),
+    override: zOverride.nullish()
+});
+
+/**
+ * PartyIn
+ */
+export const zPartyIn = z.object({
+    acronym: z.string().min(1).max(20),
+    name: z.string().min(1).max(150),
+    is_own_party: z.boolean().optional().default(false),
+    color_hex: z.string().regex(/^#[0-9A-Fa-f]{6}$/).nullish(),
+    logo_uri: z.string().max(500).nullish()
+});
+
+/**
+ * PartyOut
+ */
+export const zPartyOut = z.object({
+    acronym: z.string().min(1).max(20),
+    name: z.string().min(1).max(150),
+    is_own_party: z.boolean().optional().default(false),
+    color_hex: z.string().regex(/^#[0-9A-Fa-f]{6}$/).nullish(),
+    logo_uri: z.string().max(500).nullish(),
+    id: z.uuid()
+});
+
+/**
  * PasswordChangeRequest
  */
 export const zPasswordChangeRequest = z.object({
@@ -293,6 +629,122 @@ export const zPermissionOut = z.object({
 });
 
 /**
+ * PersonCreate
+ */
+export const zPersonCreate = z.object({
+    given_names: z.string().min(1).max(120),
+    paternal_surname: z.string().min(1).max(80),
+    maternal_surname: z.string().min(1).max(80).nullish(),
+    birth_date: z.iso.date().nullish(),
+    sex: z.enum([
+        'H',
+        'M',
+        'X'
+    ]).nullish(),
+    birth_entity: z.string().regex(/^[A-Z]{2}$/).nullish(),
+    curp: z.string().min(18).max(22).nullish(),
+    accept_curp_incoherence: z.boolean().optional().default(false),
+    contacts: z.array(zContactIn).max(10).optional(),
+    address: zAddressIn.nullish()
+});
+
+/**
+ * PersonOut
+ */
+export const zPersonOut = z.object({
+    id: z.uuid(),
+    full_name: z.string(),
+    sex: z.string().nullable(),
+    birth_date: z.iso.date().nullable(),
+    curp: z.string().nullable(),
+    given_names: z.string(),
+    paternal_surname: z.string(),
+    maternal_surname: z.string().nullable(),
+    birth_entity: z.string().nullable(),
+    curp_coherence_overridden: z.boolean(),
+    contacts: z.array(zContactOut),
+    addresses: z.array(zAddressOut),
+    created_at: z.iso.datetime(),
+    warnings: z.array(z.string()).optional()
+});
+
+/**
+ * PersonSummary
+ */
+export const zPersonSummary = z.object({
+    id: z.uuid(),
+    full_name: z.string(),
+    sex: z.string().nullable(),
+    birth_date: z.iso.date().nullable(),
+    curp: z.string().nullable()
+});
+
+/**
+ * CursorPage[PersonSummary]
+ */
+export const zCursorPagePersonSummary = z.object({
+    items: z.array(zPersonSummary),
+    next_cursor: z.string().nullish(),
+    has_more: z.boolean()
+});
+
+/**
+ * PersonUpdate
+ */
+export const zPersonUpdate = z.object({
+    given_names: z.string().min(1).max(120).nullish(),
+    paternal_surname: z.string().min(1).max(80).nullish(),
+    maternal_surname: z.string().min(1).max(80).nullish(),
+    birth_date: z.iso.date().nullish(),
+    sex: z.enum([
+        'H',
+        'M',
+        'X'
+    ]).nullish(),
+    birth_entity: z.string().regex(/^[A-Z]{2}$/).nullish(),
+    curp: z.string().min(18).max(22).nullish(),
+    accept_curp_incoherence: z.boolean().optional().default(false),
+    contacts: z.array(zContactIn).max(10).nullish(),
+    address: zAddressIn.nullish()
+});
+
+/**
+ * Principle
+ */
+export const zPrinciple = z.enum(['mr', 'rp']);
+
+/**
+ * OfficeTypeIn
+ */
+export const zOfficeTypeIn = z.object({
+    code: z.string().regex(/^[a-z][a-z0-9_]{1,49}$/),
+    name: z.string().min(2).max(200),
+    election_level: zElectionLevel,
+    geographic_level: zGeographicLevel,
+    principle: zPrinciple,
+    nomination_kind: zNominationKind,
+    default_positions: z.int().gte(1).lte(500).nullish(),
+    has_substitute: z.boolean().optional().default(true),
+    sort_order: z.int().optional().default(100)
+});
+
+/**
+ * OfficeTypeOut
+ */
+export const zOfficeTypeOut = z.object({
+    code: z.string().regex(/^[a-z][a-z0-9_]{1,49}$/),
+    name: z.string().min(2).max(200),
+    election_level: zElectionLevel,
+    geographic_level: zGeographicLevel,
+    principle: zPrinciple,
+    nomination_kind: zNominationKind,
+    default_positions: z.int().gte(1).lte(500).nullish(),
+    has_substitute: z.boolean().optional().default(true),
+    sort_order: z.int().optional().default(100),
+    id: z.uuid()
+});
+
+/**
  * Problem
  *
  * RFC 9457 problem document. `code` and `request_id` are extension members.
@@ -306,6 +758,56 @@ export const zProblem = z.object({
     code: z.string(),
     request_id: z.string().nullish(),
     errors: z.array(zFieldViolation).nullish()
+});
+
+/**
+ * ProcessStatus
+ */
+export const zProcessStatus = z.enum([
+    'draft',
+    'active',
+    'closed'
+]);
+
+/**
+ * ProcessType
+ */
+export const zProcessType = z.enum(['ordinary', 'extraordinary']);
+
+/**
+ * ProcessIn
+ */
+export const zProcessIn = z.object({
+    name: z.string().min(2).max(200),
+    election_year: z.int().gte(2000).lte(2100),
+    process_type: zProcessType.optional().default('ordinary'),
+    election_level: zElectionLevel,
+    state_id: z.uuid().nullish(),
+    election_date: z.iso.date().nullish()
+});
+
+/**
+ * ProcessOut
+ */
+export const zProcessOut = z.object({
+    id: z.uuid(),
+    name: z.string(),
+    election_year: z.int(),
+    process_type: zProcessType,
+    election_level: zElectionLevel,
+    state_id: z.uuid().nullable(),
+    framework_id: z.uuid(),
+    election_date: z.iso.date().nullable(),
+    status: zProcessStatus
+});
+
+/**
+ * ProcessUpdate
+ */
+export const zProcessUpdate = z.object({
+    name: z.string().min(2).max(200).nullish(),
+    election_date: z.iso.date().nullish(),
+    status: zProcessStatus.nullish()
 });
 
 /**
@@ -390,6 +892,41 @@ export const zRoleUpdateRequest = z.object({
 });
 
 /**
+ * RpMethod
+ */
+export const zRpMethod = z.enum([
+    'closed_list',
+    'best_loser',
+    'mixed'
+]);
+
+/**
+ * ProcessOfficeIn
+ */
+export const zProcessOfficeIn = z.object({
+    office_type_id: z.uuid(),
+    is_enabled: z.boolean(),
+    positions: z.int().gte(1).lte(500).nullish(),
+    slate_parent_office_type_id: z.uuid().nullish(),
+    rp_method: zRpMethod.nullish(),
+    rp_method_params: z.record(z.string(), z.unknown()).optional()
+});
+
+/**
+ * ProcessOfficeOut
+ */
+export const zProcessOfficeOut = z.object({
+    office_type_id: z.uuid(),
+    is_enabled: z.boolean(),
+    positions: z.int().gte(1).lte(500).nullish(),
+    slate_parent_office_type_id: z.uuid().nullish(),
+    rp_method: zRpMethod.nullish(),
+    rp_method_params: z.record(z.string(), z.unknown()).optional(),
+    office_code: z.string(),
+    office_name: z.string()
+});
+
+/**
  * ScopeLevel
  */
 export const zScopeLevel = z.enum([
@@ -439,6 +976,71 @@ export const zSessionOut = z.object({
     last_seen_at: z.iso.datetime().nullable(),
     expires_at: z.iso.datetime(),
     current: z.boolean().optional().default(false)
+});
+
+/**
+ * Severity
+ */
+export const zSeverity = z.enum(['blocking', 'warning']);
+
+/**
+ * ProcessRuleIn
+ */
+export const zProcessRuleIn = z.object({
+    rule_code: z.string().regex(/^[a-z][a-z0-9_]{1,49}$/),
+    office_type_id: z.uuid().nullish(),
+    is_enabled: z.boolean(),
+    severity: zSeverity.optional().default('blocking'),
+    params: z.record(z.string(), z.unknown()).optional()
+});
+
+/**
+ * ProcessRuleOut
+ */
+export const zProcessRuleOut = z.object({
+    rule_code: z.string().regex(/^[a-z][a-z0-9_]{1,49}$/),
+    office_type_id: z.uuid().nullish(),
+    is_enabled: z.boolean(),
+    severity: zSeverity.optional().default('blocking'),
+    params: z.record(z.string(), z.unknown()).optional(),
+    id: z.uuid(),
+    effective_params: z.record(z.string(), z.unknown())
+});
+
+/**
+ * SlotOut
+ */
+export const zSlotOut = z.object({
+    office_type_id: z.uuid(),
+    office_code: z.string(),
+    office_name: z.string(),
+    expected: z.int(),
+    filled: z.int(),
+    missing_positions: z.array(z.int())
+});
+
+/**
+ * StatusHistoryOut
+ */
+export const zStatusHistoryOut = z.object({
+    formula_id: z.uuid(),
+    office_code: z.string(),
+    position: z.int(),
+    from_status: z.string().nullable(),
+    to_status: z.string(),
+    reason: z.string().nullable(),
+    changed_by_user_id: z.uuid().nullable(),
+    changed_at: z.iso.datetime()
+});
+
+/**
+ * SubstitutionIn
+ */
+export const zSubstitutionIn = z.object({
+    owner_person_id: z.uuid().nullish(),
+    substitute_person_id: z.uuid().nullish(),
+    reason: z.string().min(5).max(500),
+    override: zOverride.nullish()
 });
 
 /**
@@ -578,6 +1180,49 @@ export const zCursorPageUserOut = z.object({
  */
 export const zUserUpdateRequest = z.object({
     full_name: z.string().min(2).max(200)
+});
+
+/**
+ * ValidationRuleOut
+ */
+export const zValidationRuleOut = z.object({
+    id: z.uuid(),
+    code: z.string(),
+    name: z.string(),
+    description: z.string(),
+    default_params: z.record(z.string(), z.unknown())
+});
+
+/**
+ * ViolationOut
+ */
+export const zViolationOut = z.object({
+    rule: z.string(),
+    severity: zSeverity,
+    message: z.string(),
+    formula_id: z.uuid().nullish()
+});
+
+/**
+ * NominationOut
+ */
+export const zNominationOut = z.object({
+    id: z.uuid(),
+    process_id: z.uuid(),
+    office_type_id: z.uuid(),
+    office_code: z.string(),
+    geographic_level: zGeographicLevel,
+    node_id: z.uuid().nullable(),
+    party_id: z.uuid().nullable(),
+    coalition_id: z.uuid().nullable(),
+    status: zNominationStatus,
+    created_at: z.iso.datetime(),
+    notes: z.string().nullable(),
+    editable: z.boolean(),
+    complete: z.boolean(),
+    slots: z.array(zSlotOut),
+    formulas: z.array(zFormulaOut),
+    warnings: z.array(zViolationOut).optional()
 });
 
 /**
@@ -1057,3 +1702,399 @@ export const zGetGeoNodeQuery = z.object({
  * Successful Response
  */
 export const zGetGeoNodeResponse = zGeoNodeDetail;
+
+export const zSearchPeopleQuery = z.object({
+    q: z.string().min(2).max(100).nullish(),
+    curp: z.string().length(18).nullish(),
+    phone: z.string().min(10).max(20).nullish(),
+    limit: z.int().gte(1).lte(200).optional().default(50),
+    cursor: z.string().max(1024).nullish(),
+    sort: z.string().max(200).nullish()
+});
+
+/**
+ * Successful Response
+ */
+export const zSearchPeopleResponse = zCursorPagePersonSummary;
+
+export const zCreatePersonBody = zPersonCreate;
+
+/**
+ * Successful Response
+ */
+export const zCreatePersonResponse = zPersonOut;
+
+export const zDeletePersonPath = z.object({
+    person_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zDeletePersonResponse = zDeletionOut;
+
+export const zGetPersonPath = z.object({
+    person_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zGetPersonResponse = zPersonOut;
+
+export const zUpdatePersonBody = zPersonUpdate;
+
+export const zUpdatePersonPath = z.object({
+    person_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zUpdatePersonResponse = zPersonOut;
+
+export const zListConsentsPath = z.object({
+    person_id: z.uuid()
+});
+
+/**
+ * Response Listconsents
+ *
+ * Successful Response
+ */
+export const zListConsentsResponse = z.array(zConsentOut);
+
+export const zAddConsentBody = zConsentIn;
+
+export const zAddConsentPath = z.object({
+    person_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zAddConsentResponse = zConsentOut;
+
+/**
+ * Response Listparties
+ *
+ * Successful Response
+ */
+export const zListPartiesResponse = z.array(zPartyOut);
+
+export const zCreatePartyBody = zPartyIn;
+
+/**
+ * Successful Response
+ */
+export const zCreatePartyResponse = zPartyOut;
+
+export const zUpdatePartyBody = zPartyIn;
+
+export const zUpdatePartyPath = z.object({
+    party_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zUpdatePartyResponse = zPartyOut;
+
+/**
+ * Response Listofficetypes
+ *
+ * Successful Response
+ */
+export const zListOfficeTypesResponse = z.array(zOfficeTypeOut);
+
+export const zCreateOfficeTypeBody = zOfficeTypeIn;
+
+/**
+ * Successful Response
+ */
+export const zCreateOfficeTypeResponse = zOfficeTypeOut;
+
+/**
+ * Response Listvalidationrules
+ *
+ * Successful Response
+ */
+export const zListValidationRulesResponse = z.array(zValidationRuleOut);
+
+/**
+ * Response Listprocesses
+ *
+ * Successful Response
+ */
+export const zListProcessesResponse = z.array(zProcessOut);
+
+export const zCreateProcessBody = zProcessIn;
+
+/**
+ * Successful Response
+ */
+export const zCreateProcessResponse = zProcessOut;
+
+export const zGetProcessPath = z.object({
+    process_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zGetProcessResponse = zProcessOut;
+
+export const zUpdateProcessBody = zProcessUpdate;
+
+export const zUpdateProcessPath = z.object({
+    process_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zUpdateProcessResponse = zProcessOut;
+
+export const zListProcessOfficesPath = z.object({
+    process_id: z.uuid()
+});
+
+/**
+ * Response Listprocessoffices
+ *
+ * Successful Response
+ */
+export const zListProcessOfficesResponse = z.array(zProcessOfficeOut);
+
+/**
+ * Body
+ */
+export const zConfigureProcessOfficesBody = z.array(zProcessOfficeIn);
+
+export const zConfigureProcessOfficesPath = z.object({
+    process_id: z.uuid()
+});
+
+/**
+ * Response Configureprocessoffices
+ *
+ * Successful Response
+ */
+export const zConfigureProcessOfficesResponse = z.array(zProcessOfficeOut);
+
+export const zListMunicipalitySettingsPath = z.object({
+    process_id: z.uuid()
+});
+
+/**
+ * Response Listmunicipalitysettings
+ *
+ * Successful Response
+ */
+export const zListMunicipalitySettingsResponse = z.array(zMunicipalitySettingOut);
+
+/**
+ * Body
+ */
+export const zConfigureMunicipalitiesBody = z.array(zMunicipalitySettingIn);
+
+export const zConfigureMunicipalitiesPath = z.object({
+    process_id: z.uuid()
+});
+
+/**
+ * Response Configuremunicipalities
+ *
+ * Successful Response
+ */
+export const zConfigureMunicipalitiesResponse = z.array(zMunicipalitySettingOut);
+
+export const zListProcessRulesPath = z.object({
+    process_id: z.uuid()
+});
+
+/**
+ * Response Listprocessrules
+ *
+ * Successful Response
+ */
+export const zListProcessRulesResponse = z.array(zProcessRuleOut);
+
+/**
+ * Body
+ */
+export const zConfigureProcessRulesBody = z.array(zProcessRuleIn);
+
+export const zConfigureProcessRulesPath = z.object({
+    process_id: z.uuid()
+});
+
+/**
+ * Response Configureprocessrules
+ *
+ * Successful Response
+ */
+export const zConfigureProcessRulesResponse = z.array(zProcessRuleOut);
+
+export const zListCoalitionsPath = z.object({
+    process_id: z.uuid()
+});
+
+/**
+ * Response Listcoalitions
+ *
+ * Successful Response
+ */
+export const zListCoalitionsResponse = z.array(zCoalitionOut);
+
+export const zCreateCoalitionBody = zCoalitionIn;
+
+export const zCreateCoalitionPath = z.object({
+    process_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zCreateCoalitionResponse = zCoalitionOut;
+
+export const zListNominationsQuery = z.object({
+    process_id: z.uuid().nullish(),
+    office_type_id: z.uuid().nullish(),
+    status: zNominationStatus.nullish(),
+    party_id: z.uuid().nullish(),
+    limit: z.int().gte(1).lte(200).optional().default(50),
+    cursor: z.string().max(1024).nullish(),
+    sort: z.string().max(200).nullish()
+});
+
+/**
+ * Successful Response
+ */
+export const zListNominationsResponse = zCursorPageNominationSummary;
+
+export const zCreateNominationBody = zNominationIn;
+
+/**
+ * Successful Response
+ */
+export const zCreateNominationResponse = zNominationOut;
+
+export const zGetNominationPath = z.object({
+    nomination_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zGetNominationResponse = zNominationOut;
+
+export const zUpdateNominationBody = zNominationUpdate;
+
+export const zUpdateNominationPath = z.object({
+    nomination_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zUpdateNominationResponse = zNominationOut;
+
+export const zSubmitNominationBody = zNominationAction;
+
+export const zSubmitNominationPath = z.object({
+    nomination_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zSubmitNominationResponse = zNominationOut;
+
+export const zApproveNominationBody = zNominationAction;
+
+export const zApproveNominationPath = z.object({
+    nomination_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zApproveNominationResponse = zNominationOut;
+
+export const zCancelNominationBody = zNominationAction;
+
+export const zCancelNominationPath = z.object({
+    nomination_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zCancelNominationResponse = zNominationOut;
+
+export const zValidateNominationPath = z.object({
+    nomination_id: z.uuid()
+});
+
+/**
+ * Response Validatenomination
+ *
+ * Successful Response
+ */
+export const zValidateNominationResponse = z.array(zViolationOut);
+
+export const zGetNominationHistoryPath = z.object({
+    nomination_id: z.uuid()
+});
+
+/**
+ * Response Getnominationhistory
+ *
+ * Successful Response
+ */
+export const zGetNominationHistoryResponse = z.array(zStatusHistoryOut);
+
+export const zCreateFormulaBody = zFormulaIn;
+
+export const zCreateFormulaPath = z.object({
+    nomination_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zCreateFormulaResponse = zNominationOut;
+
+export const zUpdateFormulaMembersBody = zFormulaMembersUpdate;
+
+export const zUpdateFormulaMembersPath = z.object({
+    formula_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zUpdateFormulaMembersResponse = zNominationOut;
+
+export const zChangeFormulaStatusBody = zFormulaStatusIn;
+
+export const zChangeFormulaStatusPath = z.object({
+    formula_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zChangeFormulaStatusResponse = zNominationOut;
+
+export const zSubstituteFormulaBody = zSubstitutionIn;
+
+export const zSubstituteFormulaPath = z.object({
+    formula_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zSubstituteFormulaResponse = zNominationOut;

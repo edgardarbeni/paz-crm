@@ -113,6 +113,7 @@ def problem_response(
     detail: str | None = None,
     errors: list[FieldViolation] | None = None,
     headers: dict[str, str] | None = None,
+    extra: dict[str, Any] | None = None,
 ) -> JSONResponse:
     problem = Problem(
         type=f"{PROBLEM_TYPE_PREFIX}{code}",
@@ -124,8 +125,9 @@ def problem_response(
         request_id=get_context().request_id,
         errors=errors,
     )
+    # Extension members (RFC 9457 §3.2), e.g. the rule violations of a candidacy conflict.
     return JSONResponse(
-        problem.model_dump(exclude_none=True),
+        {**problem.model_dump(exclude_none=True), **(extra or {})},
         status_code=status,
         media_type=PROBLEM_CONTENT_TYPE,
         headers=headers,
@@ -143,6 +145,7 @@ async def _app_error_handler(request: Request, exc: Exception) -> JSONResponse:
         title=exc.title,
         detail=exc.detail,
         headers=exc.headers,
+        extra=exc.extra,
     )
 
 

@@ -3,7 +3,8 @@
 Activating a framework moves every user scope to the equivalent node of the new framework by
 natural key (state code + municipality / district / section number, region number). Scopes
 whose node no longer exists are removed and reported. `user_scope_sections` is rebuilt.
-Personal addresses (phase D) will be remapped here too.
+The geography of personal addresses is remapped the same way; nodes without an equivalent are
+cleared (the address itself is kept) and reported.
 """
 
 import uuid
@@ -40,6 +41,47 @@ _REMAP: dict[str, tuple[str, str]] = {
 }
 
 
+_STATE_JOIN = (
+    "JOIN geography.states os ON os.id = o.state_id JOIN geography.states ns ON ns.id = n.state_id"
+)
+
+
+def _mapping_sql(table: str, natural_key: str) -> str:
+    state_join = "" if table in {"states", "electoral_regions"} else _STATE_JOIN
+    return (
+        f"SELECT o.id AS old_id, n.id AS new_id FROM geography.{table} o "
+        f"JOIN geography.{table} n ON n.framework_id = :new AND n.is_active "
+        f"{state_join} WHERE {natural_key}"
+    )
+
+
+# person_addresses column → (geography table, old→new mapping query)
+_ADDRESS_REMAP: dict[str, tuple[str, str]] = {
+    **{
+        column: (table, _mapping_sql(table, key))
+        for column, (table, key) in _REMAP.items()
+        if column in {"state_id", "municipality_id", "section_id"}
+    },
+    "locality_id": (
+        "localities",
+        "SELECT o.id AS old_id, n.id AS new_id FROM geography.localities o "
+        "JOIN geography.municipalities om ON om.id = o.municipality_id "
+        "JOIN geography.states os ON os.id = om.state_id "
+        "JOIN geography.localities n ON n.framework_id = :new AND n.is_active "
+        "JOIN geography.municipalities nm ON nm.id = n.municipality_id "
+        "JOIN geography.states ns ON ns.id = nm.state_id "
+        "WHERE n.locality_code = o.locality_code AND nm.municipality_code = om.municipality_code "
+        "AND ns.state_code = os.state_code",
+    ),
+    "neighborhood_id": (
+        "neighborhoods",
+        _mapping_sql(
+            "neighborhoods", "n.source_key = o.source_key AND ns.state_code = os.state_code"
+        ),
+    ),
+}
+
+
 @dataclass
 class ActivationReport:
     framework_id: uuid.UUID
@@ -47,6 +89,8 @@ class ActivationReport:
     remapped: dict[str, int] = field(default_factory=dict)
     removed: dict[str, int] = field(default_factory=dict)
     users_rebuilt: int = 0
+    addresses_remapped: dict[str, int] = field(default_factory=dict)
+    addresses_cleared: dict[str, int] = field(default_factory=dict)
 
 
 async def activate_framework(connection: AsyncConnection, *, name: str) -> ActivationReport:
@@ -82,24 +126,11 @@ async def activate_framework(connection: AsyncConnection, *, name: str) -> Activ
     report = ActivationReport(framework_id=new.id, previous_framework_id=previous)
 
     for column, (table, natural_key) in _REMAP.items():
-        state_join = (
-            ""
-            if table in {"states", "electoral_regions"}
-            else "JOIN geography.states os ON os.id = o.state_id JOIN geography.states ns ON ns.id = n.state_id"
-        )
         remapped = await connection.execute(
             text(
-                f"""
-                UPDATE identity.user_scopes us SET {column} = mapping.new_id, updated_at = now()
-                FROM (
-                  SELECT o.id AS old_id, n.id AS new_id
-                  FROM geography.{table} o
-                  JOIN geography.{table} n ON n.framework_id = :new AND n.is_active
-                  {state_join}
-                  WHERE {natural_key}
-                ) mapping
-                WHERE us.{column} = mapping.old_id
-                """
+                f"UPDATE identity.user_scopes us SET {column} = mapping.new_id, updated_at = now() "
+                f"FROM ({_mapping_sql(table, natural_key)}) mapping "
+                f"WHERE us.{column} = mapping.old_id"
             ),
             {"new": new.id},
         )
@@ -112,6 +143,8 @@ async def activate_framework(connection: AsyncConnection, *, name: str) -> Activ
             {"new": new.id},
         )
         report.removed[column] = removed.rowcount
+
+    await _remap_addresses(connection, new.id, report)
 
     await connection.execute(
         text(
@@ -139,6 +172,30 @@ async def activate_framework(connection: AsyncConnection, *, name: str) -> Activ
             "previous_framework_id": str(previous) if previous else None,
             "remapped": report.remapped,
             "removed": report.removed,
+            "addresses_remapped": report.addresses_remapped,
+            "addresses_cleared": report.addresses_cleared,
         },
     )
     return report
+
+
+async def _remap_addresses(
+    connection: AsyncConnection, new_id: uuid.UUID, report: ActivationReport
+) -> None:
+    for column, (table, mapping) in _ADDRESS_REMAP.items():
+        remapped = await connection.execute(
+            text(
+                f"UPDATE people.person_addresses pa SET {column} = mapping.new_id, "
+                f"updated_at = now() FROM ({mapping}) mapping WHERE pa.{column} = mapping.old_id"
+            ),
+            {"new": new_id},
+        )
+        report.addresses_remapped[column] = remapped.rowcount
+        cleared = await connection.execute(
+            text(
+                f"UPDATE people.person_addresses pa SET {column} = NULL, updated_at = now() "
+                f"FROM geography.{table} o WHERE pa.{column} = o.id AND o.framework_id <> :new"
+            ),
+            {"new": new_id},
+        )
+        report.addresses_cleared[column] = cleared.rowcount

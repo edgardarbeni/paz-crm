@@ -1,0 +1,30 @@
+meta {
+  name: Registrar fórmula
+  type: http
+  seq: 9
+}
+
+post {
+  url: {{baseUrl}}/api/v1/nominations/{{nominationId}}/formulas
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "office_type_id": "{{officeTypeId}}",
+    "position": 1,
+    "owner_person_id": "{{personId}}",
+    "substitute_person_id": "{{substitutePersonId}}"
+  }
+}
+
+docs {
+  Si viola reglas bloqueantes: 409 rule-violation con `violations`. Para aceptarlas (permiso
+  candidacies.rule.override) agrega:
+  "override": {"rules": ["unique_person_in_process"], "reason": "Acuerdo de la comisión"}
+}

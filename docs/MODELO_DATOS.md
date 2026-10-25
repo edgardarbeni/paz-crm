@@ -408,7 +408,7 @@ erDiagram
         text search_name "generada: unaccent lower, GIN trgm"
         date birth_date
         text sex "H | M | X"
-        smallint birth_state_code "1-32, 87 nacido en el extranjero"
+        text birth_entity "codigo CURP: AS..ZS, NE extranjero (D-65)"
         bytea curp_ciphertext
         bytea curp_hash UK "HMAC blind index"
         boolean curp_coherence_overridden
@@ -478,7 +478,8 @@ erDiagram
     parties ||--o{ formulas : "origen partidario"
     formulas ||--|{ formula_members : "propietario y suplente"
     formulas ||--o{ formula_status_history : "historial"
-    formulas ||--o{ rule_overrides : "excepciones"
+    nominations ||--o{ rule_overrides : "excepciones"
+    formulas ||--o{ rule_overrides : "excepciones por formula"
     validation_rules ||--o{ rule_overrides : "forzada"
 
     electoral_processes {
@@ -499,7 +500,7 @@ erDiagram
         text election_level "federal | local"
         text geographic_level "municipality | local_district | federal_district | state | electoral_region | national"
         text principle "mr | rp"
-        text nomination_kind "single | slate | list"
+        text nomination_kind "single | slate | list | member"
         smallint default_positions
         boolean has_substitute "default true"
         smallint sort_order
@@ -528,7 +529,7 @@ erDiagram
         text code UK "gender_parity, list_alternation, substitute_same_sex, unique_person_in_process"
         text name
         text description
-        jsonb params_schema
+        jsonb default_params "D-65"
     }
     process_validation_rules {
         uuid id PK
@@ -570,6 +571,7 @@ erDiagram
         uuid party_id FK "uno de party o coalition"
         uuid coalition_id FK
         text status "draft | submitted | approved | cancelled"
+        text notes
     }
     formulas {
         uuid id PK
@@ -599,10 +601,12 @@ erDiagram
     }
     rule_overrides {
         uuid id PK
-        uuid formula_id FK
+        uuid nomination_id FK
+        uuid formula_id FK "NULL en reglas de la postulacion (paridad)"
         uuid validation_rule_id FK
         uuid overridden_by_user_id FK
         text reason
+        jsonb details
     }
 ```
 
@@ -629,6 +633,7 @@ Cada **postulación** (`nominations`) tiene una geografía y un postulante (part
 - **Posición única:** `UNIQUE (nomination_id, office_type_id, position) WHERE status NOT IN ('substituted','cancelled') AND deleted_at IS NULL`. Así, la sustitución (D-29) crea una fórmula nueva en la misma posición sin violar la unicidad.
 - **Validaciones:** las reglas del motor (D-28) se evalúan en el servicio. "Persona no duplicada en el proceso" se apoya en el índice `formula_members (process_id, person_id)`, no en un `UNIQUE`, porque la regla es configurable.
 - **Marco geográfico:** las FKs geográficas de la postulación pertenecen al `framework_id` del proceso; el servicio lo valida.
+- **Vista `nomination_sections`:** `(nomination_id, section_id)` con las secciones que cubre cada postulación; con ella se decide lectura (traslape) y edición (contención) por alcance (D-34, D-65).
 
 ---
 

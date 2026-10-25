@@ -1,0 +1,25 @@
+meta {
+  name: Cambiar estatus de fórmula
+  type: http
+  seq: 10
+}
+
+post {
+  url: {{baseUrl}}/api/v1/formulas/{{formulaId}}/status
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "to_status": "registered"
+  }
+}
+
+docs {
+  aspirant → registered → approved; cancelled con motivo (D-68).
+}
