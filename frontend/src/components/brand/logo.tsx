@@ -3,7 +3,7 @@ import type * as React from "react";
 // From the official artwork in docs/brand; paths use currentColor so the logo follows the text color.
 const WORDMARK = (
   <>
-    <g transform="matrix(1,0,0,1,-41.758348,-286.420487)">
+    <g transform="matrix(1,0,0,1,14.292638,-180.011263)">
       <g transform="matrix(1,0,0,1,872.939337,591.755503)">
         <g transform="matrix(0.36174,0,0,0.36174,-2.890463,-239.74912)">
           <g transform="matrix(2.764416,0,0,2.764416,-2405.17665,-973.091923)">
@@ -105,7 +105,7 @@ export function PazosLogo({
   ...props
 }: React.ComponentProps<"svg"> & { title?: string }) {
   return (
-    <svg viewBox="0 0 1438 332" role="img" aria-label={title} {...props}>
+    <svg viewBox="56.05 106.41 1438 332" role="img" aria-label={title} {...props}>
       {WORDMARK}
     </svg>
   );
