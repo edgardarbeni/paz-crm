@@ -105,7 +105,9 @@ export function DataTable<T extends RowData>({
                           type="button"
                           className="inline-flex items-center gap-1 hover:text-foreground"
                           onClick={() =>
-                            onSortChange(active && !descending ? `-${column.sortKey}` : `${column.sortKey}`)
+                            onSortChange(
+                              active && !descending ? `-${column.sortKey}` : `${column.sortKey}`,
+                            )
                           }
                         >
                           {content}
@@ -138,7 +140,10 @@ export function DataTable<T extends RowData>({
               ))
             ) : table.getRowModel().rows.length === 0 ? (
               <tr className="border-t">
-                <td colSpan={columns.length} className="px-3 py-6 text-center text-muted-foreground">
+                <td
+                  colSpan={columns.length}
+                  className="px-3 py-6 text-center text-muted-foreground"
+                >
                   {empty}
                 </td>
               </tr>
