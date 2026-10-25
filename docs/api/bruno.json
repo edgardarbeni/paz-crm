@@ -1,0 +1,6 @@
+{
+  "version": "1",
+  "name": "PAZOS API",
+  "type": "collection",
+  "ignore": ["node_modules", ".git"]
+}

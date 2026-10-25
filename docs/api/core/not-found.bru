@@ -1,0 +1,26 @@
+meta {
+  name: Error de ejemplo (404 Problem Details)
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/v1/no-existe
+  body: none
+  auth: none
+}
+
+headers {
+  X-Request-ID: bruno-example-0001
+}
+
+assert {
+  res.status: eq 404
+  res.headers["content-type"]: eq application/problem+json
+  res.body.request_id: eq bruno-example-0001
+}
+
+docs {
+  Todos los errores usan RFC 9457. El X-Request-ID enviado (8–64 caracteres
+  [A-Za-z0-9._-]) se propaga a la respuesta, a los logs y a la bitácora.
+}

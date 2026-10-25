@@ -1,0 +1,14 @@
+# Development reverse proxy: https://localhost with Caddy's local CA.
+# Trust the CA once with:  docker compose exec caddy caddy trust  (or accept the browser warning)
+localhost {
+	encode zstd gzip
+
+	@backend path /api/* /health /ready /docs /docs/* /redoc /openapi.json
+	handle @backend {
+		reverse_proxy api:8000
+	}
+
+	handle {
+		reverse_proxy frontend:5173
+	}
+}

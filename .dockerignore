@@ -1,0 +1,15 @@
+**/node_modules
+**/.venv
+**/dist
+**/coverage
+**/test-results
+**/playwright-report
+**/.mypy_cache
+**/.ruff_cache
+**/.pytest_cache
+**/__pycache__
+.git
+.env
+.env.*
+!.env.example
+data
