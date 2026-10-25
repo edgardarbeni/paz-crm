@@ -1,19 +1,20 @@
 meta {
-  name: Buscar por clave o nombre
+  name: Buscar por clave, número o nombre con el estado
   type: http
   seq: 1
 }
 
 get {
-  url: {{baseUrl}}/api/v1/geography/search?q=01-0338
+  url: {{baseUrl}}/api/v1/geography/search?q=338 aguascalientes&level=section
   body: none
   auth: bearer
 }
 
 params:query {
-  q: 01-0338
-  ~level: section
+  q: 338 aguascalientes
+  level: section
   ~limit: 20
+  ~state_id: 
 }
 
 auth:bearer {
@@ -21,7 +22,20 @@ auth:bearer {
 }
 
 docs {
-  Claves flexibles (D-19): `01-0338`, `1 338`, `010338` (sección), `01005` (municipio),
-  `1-2` (municipio, DF o DL 2 del estado 1). Texto: nombre sin acentos ni mayúsculas
-  (municipios, localidades, colonias, estados). Siempre limitado al alcance del usuario.
+  Búsqueda de los selectores geográficos (D-19, D-79). Siempre limitada al alcance del usuario.
+
+  - Claves INE: `01-0338`, `1 338`, `010338` (sección), `01005` (municipio), `1-2`.
+  - Número sin el prefijo del estado: `338` (todas las secciones 338 del país).
+  - Número + estado, en cualquier orden y con palabras de nivel opcionales:
+    `338 aguascalientes`, `sección 338 de aguascalientes`, `distrito 3 jalisco`, `df 3 jalisco`.
+    `df`/`federal` y `dl`/`local` acotan el nivel; `distrito` busca en ambos.
+  - Nombre + estado: `centro jalisco` (colonias Centro de Jalisco), `calvillo aguascalientes`.
+  - Solo el estado: `jalisco` encuentra el estado y, para los niveles pedidos en `level`,
+    lo que contiene (p. ej. sus distritos).
+  - Nombre sin acentos ni mayúsculas: municipios, localidades, colonias y estados.
+
+  El estado se reconoce por su nombre completo o por el inicio de una de sus palabras
+  (`agua`, `prueba`); `mexico` es solo el Estado de México y `ciudad de mexico` la CDMX.
+  `state_id` limita todo a un estado ya elegido (domicilios).
+  Cada resultado trae `state_name` y, en secciones, localidades y colonias, `municipality_name`.
 }

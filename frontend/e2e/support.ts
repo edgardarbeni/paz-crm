@@ -54,15 +54,21 @@ export async function login(page: Page, user: keyof Seed["users"]) {
   }
 }
 
-/** Pick a person in an autocomplete by typing part of the name (keyboard only). */
-export async function pickWithKeyboard(page: Page, comboboxName: string | RegExp, text: string) {
+/** Pick in an autocomplete by typing (keyboard only); `expected` is the option's text when it
+ * differs from what is typed (e.g. "uno prueba" → "MUNICIPIO UNO · ESTADO DE PRUEBA"). */
+export async function pickWithKeyboard(
+  page: Page,
+  comboboxName: string | RegExp,
+  text: string,
+  expected = text,
+) {
   // The trigger button (the popover's search input is also a combobox).
   const combobox = page.getByRole("combobox", { name: comboboxName }).and(page.locator("button"));
   await combobox.focus();
   await page.keyboard.type(text, { delay: 20 });
-  const option = page.getByRole("option").filter({ hasText: text }).first();
+  const option = page.getByRole("option").filter({ hasText: expected }).first();
   await expect(option).toBeVisible();
   await expect(option).toHaveAttribute("data-selected", "true");
   await page.keyboard.press("Enter");
-  await expect(combobox).toContainText(text);
+  await expect(combobox).toContainText(expected);
 }

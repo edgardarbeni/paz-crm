@@ -143,6 +143,87 @@ async def test_search_by_key_and_name(client: AsyncClient, root: dict[str, str])
 
 
 @pytest.mark.usefixtures("loaded")
+async def test_search_by_number_or_name_with_state(
+    client: AsyncClient, root: dict[str, str]
+) -> None:
+    """D-79: pickers find every level by name or number plus the state's name."""
+
+    async def found(q: str, **extra: Any) -> list[dict[str, Any]]:
+        response = await client.get(
+            "/api/v1/geography/search", headers=root, params={"q": q, **extra}
+        )
+        assert response.status_code == 200, response.text
+        items: list[dict[str, Any]] = response.json()
+        return items
+
+    async def keys(q: str, **extra: Any) -> list[str]:
+        return [f"{item['level']}:{item['key']}" for item in await found(q, **extra)]
+
+    # Section number without the state prefix, plus the state (any order, level words ignored).
+    assert await keys("103 prueba") == ["section:01-0103"]
+    assert await keys("Sección 103 de Estado de Prueba") == ["section:01-0103"]
+    assert await keys("prueba 103", level="section") == ["section:01-0103"]
+    # Districts: number + state; "df"/"dl" narrow the level, "distrito" means both.
+    assert set(await keys("distrito 2 prueba")) == {
+        "federal_district:01-02",
+        "local_district:01-02",
+    }
+    assert await keys("df 2 prueba") == ["federal_district:01-02"]
+    # Only the state: what is inside it for the level asked for.
+    assert await keys("prueba", level="federal_district") == [
+        "federal_district:01-01",
+        "federal_district:01-02",
+    ]
+    assert await keys("estado de prueba", level="section", limit=3) == [
+        "section:01-0101",
+        "section:01-0102",
+        "section:01-0103",
+    ]
+    assert "state:01" in await keys("prueba")
+    # Name + state.
+    assert await keys("uno prueba", level="municipality") == ["municipality:01-001"]
+    assert "neighborhood:01-COL-11" in await keys("cañadas, estado de prueba")
+    assert "neighborhood:01-COL-11" in await keys("cañadas")
+    # Digits that are not followed by a state are part of a name: nothing matches here.
+    assert await keys("103 narnia") == []
+
+    # state_id keeps the results inside an already chosen state (addresses).
+    state = (await found("prueba", level="state"))[0]["id"]
+    assert await keys("103", state_id=state) == ["section:01-0103"]
+    assert await keys("dos", level="municipality", state_id=state) == ["municipality:01-002"]
+    other = "01900000-0000-7000-8000-000000000000"
+    assert await keys("103", state_id=other) == []
+    assert await keys("dos", level="municipality", state_id=other) == []
+    assert await keys("prueba", level="federal_district", state_id=other) == []
+
+    section = (await found("103 prueba"))[0]
+    assert section["state_name"] == "ESTADO DE PRUEBA"
+    assert section["municipality_name"] == "MUNICIPIO DOS"
+    district = (await found("df 2 prueba"))[0]
+    assert district["state_name"] == "ESTADO DE PRUEBA"
+    assert district["municipality_name"] is None
+
+
+@pytest.mark.usefixtures("loaded")
+async def test_explorer_search_by_number_or_state(
+    client: AsyncClient, root: dict[str, str]
+) -> None:
+    async def keys(level: str, q: str) -> list[str]:
+        response = await client.get(f"/api/v1/geography/{level}", headers=root, params={"q": q})
+        assert response.status_code == 200, response.text
+        return [item["key"] for item in response.json()["items"]]
+
+    assert await keys("section", "103") == ["01-0103"]
+    assert await keys("federal_district", "prueba") == ["01-01", "01-02"]
+    assert await keys("municipality", "dos") == ["01-002"]
+    assert await keys("municipality", "2") == ["01-002"]
+    region = await client.get(
+        "/api/v1/geography/electoral_region", headers=root, params={"q": "norte"}
+    )
+    assert region.status_code == 400
+
+
+@pytest.mark.usefixtures("loaded")
 async def test_locate_point(
     client: AsyncClient, root: dict[str, str], owner_engine: AsyncEngine
 ) -> None:
@@ -268,6 +349,20 @@ async def test_section_scope_limits_every_query(
     assert (
         await client.get("/api/v1/geography/search", headers=headers, params={"q": "01-0104"})
     ).json() == []
+    # Searching by the state's name does not widen the scope (D-79).
+    assert (
+        await client.get("/api/v1/geography/search", headers=headers, params={"q": "104 prueba"})
+    ).json() == []
+    districts = await client.get(
+        "/api/v1/geography/search",
+        headers=headers,
+        params={"q": "prueba", "level": "federal_district"},
+    )
+    assert [d["key"] for d in districts.json()] == ["01-01"]
+    explorer = await client.get(
+        "/api/v1/geography/federal_district", headers=headers, params={"q": "prueba"}
+    )
+    assert [d["key"] for d in explorer.json()["items"]] == ["01-01"]
 
     lon, lat = await lonlat(owner_engine, 3500, 500)  # section 104
     assert (

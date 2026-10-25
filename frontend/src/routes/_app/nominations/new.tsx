@@ -16,7 +16,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { useCatalogs } from "@/features/candidacies/use-catalogs";
 import { GEO_LEVEL_LABELS } from "@/lib/labels";
-import { type GeoSearchLevel, searchGeoItems } from "@/lib/search";
+import { GEO_SEARCH_HINTS, type GeoSearchLevel, searchGeoItems } from "@/lib/search";
 
 export const Route = createFileRoute("/_app/nominations/new")({
   validateSearch: z.object({ process_id: z.string().optional() }),
@@ -141,12 +141,13 @@ function NewNominationPage() {
               >
                 <AsyncCombobox
                   id="nomination-node"
-                  label={`Buscar ${GEO_LEVEL_LABELS[level]?.toLowerCase()} por clave o nombre`}
+                  label={`Buscar ${GEO_LEVEL_LABELS[level]?.toLowerCase()}`}
                   value={node}
                   onChange={setNode}
                   queryKey={["geo-search", level]}
                   search={(term) => searchGeoItems(term, [level as GeoSearchLevel])}
                   minChars={1}
+                  placeholder={GEO_SEARCH_HINTS[level]}
                 />
               </FieldShell>
             ) : null}

@@ -5,7 +5,13 @@ test("capture a complete municipal slate with the keyboard and submit it", async
   await login(page, "capture");
   await page.goto(`/nominations/new?process_id=${seed.process_id}`);
   await page.getByLabel("Cargo").selectOption({ label: "Presidencia municipal" });
-  await pickWithKeyboard(page, /Buscar municipio/, "MUNICIPIO UNO");
+  // Name + state, as in D-79; the option shows the state.
+  await pickWithKeyboard(
+    page,
+    /Buscar municipio/,
+    "uno prueba",
+    "MUNICIPIO UNO · ESTADO DE PRUEBA",
+  );
   await page.getByLabel("Partido que postula").selectOption({ label: "PAZ — PAZ" });
   await page.getByRole("button", { name: "Crear y capturar fórmulas" }).click();
 
@@ -78,8 +84,8 @@ test("a coordinator limited to one municipality: read-only beyond the scope, inv
   await expect(table).toContainText("Distrito local");
   const rows = table.getByRole("row");
   // District 2 (sections of municipality 2 only) is not listed; district 1 overlaps the scope.
-  await expect(rows.filter({ hasText: "Distrito local 01-01" })).toHaveCount(1);
-  await expect(rows.filter({ hasText: "Distrito local 01-02" })).toHaveCount(0);
+  await expect(rows.filter({ hasText: "Distrito local 01 ·" })).toHaveCount(1);
+  await expect(rows.filter({ hasText: "Distrito local 02 ·" })).toHaveCount(0);
 
   await page.goto(`/nominations/${seed.nominations.local_district_1}`);
   await expect(page.getByText("Solo lectura (fuera de tu alcance)")).toBeVisible();

@@ -2523,7 +2523,7 @@
         "tags": [
           "geography"
         ],
-        "summary": "Buscar por clave INE o por nombre",
+        "summary": "Buscar por clave INE, número o nombre, con el estado",
         "operationId": "searchGeography",
         "security": [
           {
@@ -2541,6 +2541,7 @@
               "maxLength": 100,
               "examples": [
                 "01-0338",
+                "338 Aguascalientes",
                 "Calvillo"
               ],
               "title": "Q"
@@ -2586,6 +2587,25 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "state_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Limita los resultados a un estado.",
+              "title": "State Id"
+            },
+            "description": "Limita los resultados a un estado."
           }
         ],
         "responses": {
@@ -3135,17 +3155,17 @@
               "anyOf": [
                 {
                   "type": "string",
-                  "minLength": 2,
+                  "minLength": 1,
                   "maxLength": 100
                 },
                 {
                   "type": "null"
                 }
               ],
-              "description": "Nombre",
+              "description": "Número (clave del nivel) o nombre; en distritos y secciones, el estado.",
               "title": "Q"
             },
-            "description": "Nombre"
+            "description": "Número (clave del nivel) o nombre; en distritos y secciones, el estado."
           },
           {
             "name": "electoral_region_id",
@@ -7443,6 +7463,30 @@
             ],
             "title": "State Code"
           },
+          "state_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "State Name",
+            "description": "Nombre del estado al que pertenece."
+          },
+          "municipality_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Municipality Name",
+            "description": "Municipio (secciones, localidades y colonias)."
+          },
           "electoral_region_id": {
             "anyOf": [
               {
@@ -7618,6 +7662,30 @@
               }
             ],
             "title": "State Code"
+          },
+          "state_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "State Name",
+            "description": "Nombre del estado al que pertenece."
+          },
+          "municipality_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Municipality Name",
+            "description": "Municipio (secciones, localidades y colonias)."
           },
           "electoral_region_id": {
             "anyOf": [

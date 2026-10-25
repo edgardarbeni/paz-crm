@@ -2,10 +2,11 @@ import { useQuery } from "@tanstack/react-query";
 import { getGeoNodeOptions } from "@/client/@tanstack/react-query.gen";
 import type { GetGeoNodeData } from "@/client/types.gen";
 import { GEO_LEVEL_LABELS } from "@/lib/labels";
+import { geoNodeLabel } from "@/lib/search";
 
 export type GeoNodeLevel = GetGeoNodeData["path"]["level"];
 
-/** "01-001 · AGUASCALIENTES" for a node id (cached per node). */
+/** "Calvillo · Aguascalientes", "Sección 0338 · Aguascalientes" for a node id (cached). */
 export function GeoName({
   level,
   id,
@@ -23,10 +24,9 @@ export function GeoName({
   });
   if (level === "national") return <>Nacional</>;
   if (!id) return <>—</>;
-  const text = node.data
-    ? node.data.name
-      ? `${node.data.key} · ${node.data.name}`
-      : node.data.key
-    : "…";
-  return <>{withLevel ? `${GEO_LEVEL_LABELS[level]} ${text}` : text}</>;
+  if (!node.data) return <>…</>;
+  const { label } = geoNodeLabel(node.data);
+  // Districts, sections and regions already say what they are.
+  const named = ["state", "municipality", "locality", "neighborhood"].includes(level);
+  return <>{withLevel && named ? `${GEO_LEVEL_LABELS[level]} ${label}` : label}</>;
 }

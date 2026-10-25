@@ -858,7 +858,7 @@ export const listFrameworksOptions = (options?: Options<ListFrameworksData>) => 
 export const searchGeographyQueryKey = (options: Options<SearchGeographyData>) => createQueryKey('searchGeography', options);
 
 /**
- * Buscar por clave INE o por nombre
+ * Buscar por clave INE, número o nombre, con el estado
  */
 export const searchGeographyOptions = (options: Options<SearchGeographyData>) => queryOptions<SearchGeographyResponse, SearchGeographyError, SearchGeographyResponse, ReturnType<typeof searchGeographyQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {

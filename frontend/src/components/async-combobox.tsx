@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Check, ChevronsUpDown, X } from "lucide-react";
-import { useId, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -34,6 +34,8 @@ interface AsyncComboboxProps {
   id?: string;
   className?: string;
   emptyText?: string;
+  /** What the search understands (defaults to the minimum length). */
+  placeholder?: string;
 }
 
 /**
@@ -52,8 +54,15 @@ export function AsyncCombobox({
   id,
   className,
   emptyText = "Sin coincidencias.",
+  placeholder,
 }: AsyncComboboxProps) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpenState] = useState(false);
+  // Mirrors `open` synchronously: keys can arrive before React re-renders after opening.
+  const openRef = useRef(false);
+  const setOpen = (value: boolean) => {
+    openRef.current = value;
+    setOpenState(value);
+  };
   const [term, setTerm] = useState("");
   const debounced = useDebounced(term.trim(), 250);
   const listId = useId();
@@ -83,8 +92,11 @@ export function AsyncCombobox({
               if (event.key === "Delete" && value) {
                 event.preventDefault();
                 onChange(null);
-              } else if (event.key.length === 1 && !event.metaKey && !event.ctrlKey && !open) {
-                setTerm(event.key);
+              } else if (event.key.length === 1 && !event.metaKey && !event.ctrlKey) {
+                // Keys typed before the search input takes focus are appended, not lost.
+                const key = event.key;
+                const wasOpen = openRef.current;
+                setTerm((current) => (wasOpen ? current + key : key));
                 setOpen(true);
               }
             }}
@@ -113,7 +125,7 @@ export function AsyncCombobox({
           <CommandInput
             value={term}
             onValueChange={setTerm}
-            placeholder={`Buscar (mín. ${minChars} caracteres)…`}
+            placeholder={placeholder ? `${placeholder}…` : `Buscar (mín. ${minChars} caracteres)…`}
             aria-label={`Buscar ${label}`}
           />
           <CommandList id={listId}>

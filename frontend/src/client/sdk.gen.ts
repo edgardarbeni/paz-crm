@@ -498,7 +498,7 @@ export const listFrameworks = <ThrowOnError extends boolean = false>(options?: O
 });
 
 /**
- * Buscar por clave INE o por nombre
+ * Buscar por clave INE, número o nombre, con el estado
  */
 export const searchGeography = <ThrowOnError extends boolean = false>(options: Options<SearchGeographyData, ThrowOnError>): RequestResult<SearchGeographyResponses, SearchGeographyErrors, ThrowOnError> => (options.client ?? client).get<SearchGeographyResponses, SearchGeographyErrors, ThrowOnError>({
     responseValidator: async (data) => await zSearchGeographyResponse.parseAsync(data),

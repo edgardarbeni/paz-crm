@@ -239,18 +239,26 @@ def _node_select(level: LevelDef) -> Select[Any]:
         *(column.label(name) for name, column in level.parents.items()),
     ]
     statement = select(*columns)
+    state_columns: tuple[Any, ...] = (
+        col(State.state_code).label("state_code"),
+        col(State.name).label("state_name"),
+    )
     if level.name == "state":
-        statement = statement.add_columns(col(State.state_code).label("state_code"))
+        statement = statement.add_columns(*state_columns)
     elif "state_id" in level.parents:
-        statement = statement.add_columns(col(State.state_code).label("state_code")).join(
+        statement = statement.add_columns(*state_columns).join(
             State, col(State.id) == level.parents["state_id"]
         )
     else:
-        statement = statement.add_columns(literal(None).label("state_code"))
-    if level.name == "locality":
         statement = statement.add_columns(
-            col(Municipality.municipality_code).label("municipality_code")
-        ).join(Municipality, col(Municipality.id) == col(Locality.municipality_id))
+            literal(None).label("state_code"), literal(None).label("state_name")
+        )
+    if "municipality_id" in level.parents:
+        # Context for pickers: sections, localities and colonias repeat names across municipalities.
+        statement = statement.add_columns(
+            col(Municipality.municipality_code).label("municipality_code"),
+            col(Municipality.name).label("municipality_name"),
+        ).join(Municipality, col(Municipality.id) == level.parents["municipality_id"])
     return statement
 
 
@@ -263,6 +271,8 @@ def node_payload(level: str, row: dict[str, Any]) -> dict[str, Any]:
         "key": format_key(level, row.get("state_code"), row),
         "name": row.get("name"),
         "state_code": row.get("state_code"),
+        "state_name": row.get("state_name"),
+        "municipality_name": row.get("municipality_name"),
         **parents,
     }
 
@@ -287,11 +297,7 @@ async def list_nodes(
             raise BadRequestError(f"El nivel {level.name} no se filtra por {name}.")
         statement = statement.where(level.parents[name] == value)
     if search:
-        if level.label is None:
-            raise BadRequestError(f"El nivel {level.name} no tiene nombre para buscar.")
-        statement = statement.where(
-            func.f_unaccent(func.lower(level.label)).ilike(f"%{_normalize(search)}%")
-        )
+        statement = statement.where(_list_search(level, search))
     visible = level.visible(geo)
     if visible is not None:
         statement = statement.where(visible)
@@ -307,6 +313,21 @@ async def list_nodes(
         next_cursor=page.next_cursor,
         has_more=page.has_more,
     )
+
+
+def _list_search(level: LevelDef, search: str) -> ColumnElement[bool]:
+    """Explorer filter (D-79): a number matches the INE code; text matches the name, or the
+    state's name for levels without one (districts, sections)."""
+    if match := _NUMBER.match(search):
+        return level.code == int(match.group(1))
+    if len(search.strip()) < 2:
+        raise BadRequestError("Escribe al menos 2 caracteres o un número.")
+    label = level.label
+    if label is None:
+        if level.name == "electoral_region":
+            raise BadRequestError("Las circunscripciones se buscan por número.")
+        label = col(State.name)
+    return func.f_unaccent(func.lower(label)).ilike(f"%{_normalize(search)}%")
 
 
 def _normalize(value: str) -> str:
@@ -463,71 +484,289 @@ _KEY = re.compile(r"^\s*(\d{1,2})\s*[-/ .]\s*(\d{1,4})\s*$")
 _COMPACT = re.compile(r"^\s*(\d{2})(\d{3,4})\s*$")
 _NUMBER = re.compile(r"^\s*(\d{1,4})\s*$")
 _KEY_LEVELS = ("section", "municipality", "federal_district", "local_district")
+_NAMED_LEVELS = ("state", "municipality", "locality", "neighborhood")
+# Words that only say which level is meant ("sección 338", "df 3 jalisco"); they are dropped
+# when the query carries a number, and they narrow the levels when the caller sent none.
+_LEVEL_WORDS: dict[str, tuple[str, ...]] = {
+    "seccion": ("section",),
+    "secc": ("section",),
+    "sec": ("section",),
+    "distrito": ("federal_district", "local_district"),
+    "dto": ("federal_district", "local_district"),
+    "df": ("federal_district",),
+    "federal": ("federal_district",),
+    "dl": ("local_district",),
+    "local": ("local_district",),
+    "municipio": ("municipality",),
+    "mpio": ("municipality",),
+}
+_FILLER = {"de", "del", "en", "la", "el", "no", "num", "numero"}
 
 
-async def search(  # noqa: PLR0912
-    db: AsyncSession, geo: GeoScope, query: str, *, levels: list[str] | None, limit: int
+def _fold(value: str) -> str:
+    """Lowercase without accents or punctuation, for comparisons done in Python."""
+    stripped = "".join(
+        ch for ch in unicodedata.normalize("NFD", value.lower()) if unicodedata.category(ch) != "Mn"
+    )
+    return " ".join(re.sub(r"[^\w#]+", " ", stripped).split())
+
+
+@dataclass(frozen=True)
+class _StateRef:
+    id: uuid.UUID
+    name: str  # folded
+
+
+async def _states(db: AsyncSession, framework: GeographicFramework) -> list[_StateRef]:
+    rows = await db.execute(
+        select(col(State.id), col(State.name)).where(
+            col(State.framework_id) == framework.id, col(State.is_active).is_(True)
+        )
+    )
+    return [_StateRef(row.id, _fold(row.name)) for row in rows]
+
+
+def _match_states(states: list[_StateRef], text: str) -> list[uuid.UUID]:
+    """States named by `text`: exact name, else every state with a word starting with it
+    ("prueba", "agua", "mexico" → México; "ciudad de mexico" → only CDMX)."""
+    if len(text) < 3 or set(text.split()) <= _FILLER:
+        return []
+    exact = [state.id for state in states if state.name == text]
+    if exact:
+        return exact
+    return [
+        state.id
+        for state in states
+        if state.name.startswith(text) or f" {text}" in f" {state.name}"
+    ]
+
+
+def _strip_filler(words: list[str]) -> list[str]:
+    while words and words[0] in _FILLER:
+        words = words[1:]
+    while words and words[-1] in _FILLER:
+        words = words[:-1]
+    return words
+
+
+def _split_state(
+    states: list[_StateRef], words: list[str]
+) -> tuple[list[uuid.UUID], list[str]] | None:
+    """The longest leading or trailing run of words that names a state, and the rest:
+    "centro aguascalientes" → (Aguascalientes, ["centro"])."""
+    for size in range(len(words), 0, -1):
+        for candidate, rest in (
+            (words[-size:], words[:-size]),
+            (words[:size], words[size:]),
+        ):
+            if matched := _match_states(states, " ".join(candidate)):
+                return matched, _strip_filler(rest)
+    return None
+
+
+def _in_states(level: LevelDef, state_ids: list[uuid.UUID]) -> ColumnElement[bool]:
+    column = col(State.id) if level.name == "state" else level.parents["state_id"]
+    return column.in_(state_ids)
+
+
+async def _run(
+    db: AsyncSession, geo: GeoScope, name: str, statement: Select[Any]
 ) -> list[dict[str, Any]]:
-    """Flexible INE key search ('09-0123', '9 123', '090123', '338') or accent-insensitive
-    name search (municipalities, localities, colonias, states)."""
-    framework = await active_framework(db)
-    wanted = levels or []
-    state_code: int | None = None
-    number: int | None = None
-    if match := _KEY.match(query):
-        state_code, number = int(match.group(1)), int(match.group(2))
-    elif match := _COMPACT.match(query):
-        state_code, number = int(match.group(1)), int(match.group(2))
-        if not wanted:
-            wanted = ["section"] if len(match.group(2)) == 4 else ["municipality"]
-    elif match := _NUMBER.match(query):
-        number = int(match.group(1))
+    visible = LEVELS[name].visible(geo)
+    if visible is not None:
+        statement = statement.where(visible)
+    return [node_payload(name, dict(row)) for row in (await db.execute(statement)).mappings()]
 
+
+def _active(level: LevelDef, framework: GeographicFramework) -> Select[Any]:
+    return _node_select(level).where(
+        col(level.model.framework_id) == framework.id, col(level.model.is_active).is_(True)
+    )
+
+
+async def _by_number(
+    db: AsyncSession,
+    geo: GeoScope,
+    framework: GeographicFramework,
+    names: list[str],
+    number: int,
+    *,
+    state_code: int | None = None,
+    state_ids: list[uuid.UUID] | None = None,
+    limit: int,
+) -> list[dict[str, Any]]:
     results: list[dict[str, Any]] = []
-    if number is not None:
-        for name in wanted or list(_KEY_LEVELS):
-            if name not in _KEY_LEVELS:
-                continue
-            level = LEVELS[name]
-            statement = _node_select(level).where(
-                col(level.model.framework_id) == framework.id,
-                col(level.model.is_active).is_(True),
-                level.code == number,
-            )
-            if state_code is not None:
-                statement = statement.where(col(State.state_code) == state_code)
-            visible = level.visible(geo)
-            if visible is not None:
-                statement = statement.where(visible)
-            rows = (
-                await db.execute(statement.order_by(col(State.state_code)).limit(limit))
-            ).mappings()
-            results.extend(node_payload(name, dict(row)) for row in rows)
-        return results[:limit]
+    for name in names:
+        if name not in _KEY_LEVELS:
+            continue
+        level = LEVELS[name]
+        statement = _active(level, framework).where(level.code == number)
+        if state_code is not None:
+            statement = statement.where(col(State.state_code) == state_code)
+        if state_ids is not None:
+            statement = statement.where(_in_states(level, state_ids))
+        statement = statement.order_by(col(State.state_code)).limit(limit)
+        results.extend(await _run(db, geo, name, statement))
+    return results
 
-    term = _normalize(query)
-    if len(term) < 3:
-        raise BadRequestError("Escribe al menos 3 caracteres o una clave (p. ej. 09-0123).")
-    for name in wanted or ["state", "municipality", "locality", "neighborhood"]:
-        level = level_def(name)
+
+async def _by_name(
+    db: AsyncSession,
+    geo: GeoScope,
+    framework: GeographicFramework,
+    names: list[str],
+    term: str,
+    *,
+    state_ids: list[uuid.UUID] | None = None,
+    limit: int,
+) -> list[dict[str, Any]]:
+    results: list[dict[str, Any]] = []
+    for name in names:
+        level = LEVELS[name]
         if level.label is None:
             continue
         normalized = func.f_unaccent(func.lower(level.label))
-        statement = _node_select(level).where(
-            col(level.model.framework_id) == framework.id,
-            col(level.model.is_active).is_(True),
-            normalized.ilike(f"%{term}%"),
-        )
-        visible = level.visible(geo)
-        if visible is not None:
-            statement = statement.where(visible)
+        statement = _active(level, framework).where(normalized.ilike(f"%{_normalize(term)}%"))
+        if state_ids is not None:
+            statement = statement.where(_in_states(level, state_ids))
         statement = statement.order_by(
             func.similarity(normalized, term).desc(), col(level.model.id)
         ).limit(limit)
-        results.extend(
-            node_payload(name, dict(row)) for row in (await db.execute(statement)).mappings()
+        results.extend(await _run(db, geo, name, statement))
+    return results
+
+
+async def _within_states(
+    db: AsyncSession,
+    geo: GeoScope,
+    framework: GeographicFramework,
+    names: list[str],
+    state_ids: list[uuid.UUID],
+    *,
+    limit: int,
+) -> list[dict[str, Any]]:
+    """Every node of the levels inside the states, for queries that only name a state."""
+    results: list[dict[str, Any]] = []
+    for name in names:
+        if name == "state":
+            continue
+        level = LEVELS[name]
+        order = level.label if level.label is not None else level.code
+        statement = (
+            _active(level, framework)
+            .where(_in_states(level, state_ids))
+            .order_by(col(State.state_code), order, col(level.model.id))
+            .limit(limit)
         )
-    return results[:limit]
+        results.extend(await _run(db, geo, name, statement))
+    return results
+
+
+def _unique(results: list[dict[str, Any]], limit: int) -> list[dict[str, Any]]:
+    seen: set[uuid.UUID] = set()
+    unique = []
+    for item in results:
+        if item["id"] not in seen:
+            seen.add(item["id"])
+            unique.append(item)
+    return unique[:limit]
+
+
+async def search(
+    db: AsyncSession,
+    geo: GeoScope,
+    query: str,
+    *,
+    levels: list[str] | None,
+    limit: int,
+    state_id: uuid.UUID | None = None,
+) -> list[dict[str, Any]]:
+    """Geography search (D-79). Understands, in this order:
+
+    - INE keys: '09-0123', '9 123', '090123' (state + number) or a bare number ('338').
+    - A number plus a state name, with optional level words: '338 aguascalientes',
+      'distrito 3 jalisco', 'jalisco df 3'.
+    - A name plus a state: 'centro aguascalientes' (colonias called Centro in that state).
+    - Only a state: 'jalisco' finds the state and, for the levels asked for, what is inside it.
+    - Otherwise an accent-insensitive name (municipalities, localities, colonias, states).
+
+    `state_id` keeps every result inside one state (e.g. an address whose state is chosen).
+    """
+    framework = await active_framework(db)
+    wanted = list(levels or [])
+    within = [state_id] if state_id else None
+
+    def narrow(state_ids: list[uuid.UUID] | None) -> list[uuid.UUID] | None:
+        if within is None or state_ids is None:
+            return state_ids if state_ids is not None else within
+        return [item for item in state_ids if item in within]
+
+    async def by_number(
+        names: list[str],
+        number: int,
+        state_code: int | None = None,
+        state_ids: list[uuid.UUID] | None = None,
+    ) -> list[dict[str, Any]]:
+        found = await _by_number(
+            db,
+            geo,
+            framework,
+            names,
+            number,
+            state_code=state_code,
+            state_ids=narrow(state_ids),
+            limit=limit,
+        )
+        return _unique(found, limit)
+
+    if match := _KEY.match(query):
+        return await by_number(
+            wanted or list(_KEY_LEVELS), int(match.group(2)), state_code=int(match.group(1))
+        )
+    if match := _COMPACT.match(query):
+        default = ["section"] if len(match.group(2)) == 4 else ["municipality"]
+        return await by_number(
+            wanted or default, int(match.group(2)), state_code=int(match.group(1))
+        )
+    if match := _NUMBER.match(query):
+        return await by_number(wanted or list(_KEY_LEVELS), int(match.group(1)))
+
+    words = _fold(query).split()
+    numbers = [word for word in words if word.isdigit()]
+    states = await _states(db, framework)
+    if len(numbers) == 1 and len(numbers[0]) <= 4:
+        # "338 aguascalientes", "distrito 3 jalisco": a number inside the named state(s).
+        implied = [level for word in words if word in _LEVEL_WORDS for level in _LEVEL_WORDS[word]]
+        text = _strip_filler(
+            [word for word in words if not word.isdigit() and word not in _LEVEL_WORDS]
+        )
+        state_ids = _match_states(states, " ".join(text)) if text else None
+        if not text or state_ids:
+            names = wanted or list(dict.fromkeys(implied)) or list(_KEY_LEVELS)
+            return await by_number(names, int(numbers[0]), state_ids=state_ids)
+        # Not a state: the digits are part of a name ("18 de marzo").
+
+    term = " ".join(words)
+    if len(term) < 3:
+        raise BadRequestError("Escribe al menos 3 caracteres o una clave (p. ej. 09-0123).")
+    names = wanted or list(_NAMED_LEVELS)
+    results: list[dict[str, Any]] = []
+    if split := _split_state(states, words):
+        state_ids, rest = split
+        if rest:
+            results += await _by_name(
+                db, geo, framework, names, " ".join(rest), state_ids=narrow(state_ids), limit=limit
+            )
+        else:
+            results += await _by_name(
+                db, geo, framework, names, term, state_ids=within, limit=limit
+            )
+            inside = narrow(state_ids)
+            if wanted and inside:
+                results += await _within_states(db, geo, framework, wanted, inside, limit=limit)
+            return _unique(results, limit)
+    results += await _by_name(db, geo, framework, names, term, state_ids=within, limit=limit)
+    return _unique(results, limit)
 
 
 # --- vector tiles ----------------------------------------------------------------------------
