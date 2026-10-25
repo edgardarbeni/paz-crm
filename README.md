@@ -12,7 +12,7 @@ posteriores, padrón, defensa del voto, jurídico, atención social, encuestas y
 | [`docs/fases/`](docs/fases/) | Cierre de cada fase: entregables, suposiciones, deuda y riesgos |
 | [`docs/api/`](docs/api/) | Colección de ejemplos de la API (Bruno) |
 
-**Estado:** fases A a D aprobadas · fase E (panel de administración) implementada, pendiente de aprobación.
+**Estado:** MVP completo: fases A a E aprobadas (D-77).
 
 ## Estructura
 

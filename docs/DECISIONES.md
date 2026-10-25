@@ -400,6 +400,8 @@ No hay integración con RENAPO.
 
 **D-76 · Edición de cargos.** `PATCH /office-types/{id}` cambia nombre, posiciones por defecto, suplencia y orden. El código, los niveles, el principio y el tipo de postulación quedan fijos al crearse, porque las postulaciones dependen de ellos.
 
+**D-77 · Fase E aprobada; MVP completo.** El usuario aprobó la fase E el 2026-10-25; PR #5 fusionado a `main`. Con ella quedan entregadas las 5 fases del plan (D-42).
+
 ---
 
 ## Suposiciones vigentes

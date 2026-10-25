@@ -1,6 +1,6 @@
 # Cierre de fase E — Panel de administración
 
-**Fecha:** 2026-10-25 · **Rama:** `feat/phase-e-admin-panel` · **Estado:** implementada, pendiente de aprobación.
+**Fecha:** 2026-10-25 · **Rama:** `feat/phase-e-admin-panel` · **Estado:** aprobada el 2026-10-25 · PR [#5](https://github.com/edgardarbeni/paz-crm/pull/5) (D-77).
 
 ## Criterios de aceptación (PLAN_FASES.md)
 
