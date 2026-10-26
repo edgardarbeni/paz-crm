@@ -1,4 +1,4 @@
-"""Candidacies (schema `candidacies`). See MODELO_DATOS.md §4 and D-21..D-29.
+"""Candidacies (schema `candidacies`). See docs/reference/data-model.md §4 and D-21..D-29.
 
 One structure for every office: a *nomination* (postulación) has a geography and a nominator
 (party or coalition); each *formula* is one position of it, always owner + substitute.

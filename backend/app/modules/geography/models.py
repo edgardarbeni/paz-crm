@@ -1,9 +1,10 @@
-"""Geography tables (schema `geography`). See docs/MODELO_DATOS.md §1, D-01..D-20, D-57..D-59.
+"""Geography tables (schema `geography`).
+See docs/reference/data-model.md §1, D-01..D-20, D-57..D-59.
 
 - Imported rows are read-only for the application (D-04): they carry `import_run_id` and
   `is_active` instead of soft delete, and are not audited row by row (D-36); each run is.
 - Parent references use composite foreign keys ``(framework_id, parent_id)`` so a row can
-  never point to a parent from another framework (MODELO_DATOS.md §1, D-41 point 6).
+  never point to a parent from another framework (docs/reference/data-model.md §1, D-41 point 6).
 """
 
 import uuid

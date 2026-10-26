@@ -1,6 +1,6 @@
 # Modelo de datos — PAZOS MVP
 
-**Estado:** aprobado el 2026-10-24 (D-41). **Base:** `docs/DECISIONES.md`, `CLAUDE.md` y `docs/DISENO_BD_GEOESPACIAL.md`.
+**Estado:** aprobado el 2026-10-24 (D-41). **Base:** `docs/adr/`, el brief original (`docs/history/BRIEF_MVP.md`) y `docs/reference/DISENO_BD_GEOESPACIAL.md`. Antes se llamaba `docs/MODELO_DATOS.md`.
 
 ---
 

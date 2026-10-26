@@ -1,5 +1,5 @@
 """people (persons, contacts, addresses, consents) and candidacies (catalogs, processes,
-configuration, coalitions, nominations, formulas, history, rule overrides) — MODELO_DATOS §3-4
+configuration, coalitions, nominations, formulas, history, rule overrides) — data-model.md §3-4
 
 Revision ID: 0007
 Revises: 0006
