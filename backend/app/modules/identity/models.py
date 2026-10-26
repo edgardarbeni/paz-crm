@@ -1,4 +1,4 @@
-"""Identity tables (schema `identity`). See docs/MODELO_DATOS.md §2 and D-48."""
+"""Identity tables (schema `identity`). See docs/reference/data-model.md §2 and D-48."""
 
 import uuid
 from datetime import datetime

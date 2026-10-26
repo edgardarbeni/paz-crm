@@ -1,6 +1,7 @@
 """People (schema `people`): the reusable person record, base of the future padrón.
-See MODELO_DATOS.md §3, D-30..D-32. Sensitive fields are encrypted at the application level
-(AES-256-GCM envelope) with HMAC blind indexes for uniqueness and exact lookups."""
+See docs/reference/data-model.md §3, D-30..D-32. Sensitive fields are encrypted at the
+application level (AES-256-GCM envelope) with HMAC blind indexes for uniqueness and exact
+lookups."""
 
 import uuid
 from datetime import date, datetime

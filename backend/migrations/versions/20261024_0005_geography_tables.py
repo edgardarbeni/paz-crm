@@ -1,4 +1,4 @@
-"""geography: frameworks, imports, code catalogs and imported geography (MODELO_DATOS §1)
+"""geography: frameworks, imports, code catalogs and imported geography (data-model.md §1)
 
 Hand-adjusted after autogenerate: blocks id sequence (partitioned tables), and
 `geography.ensure_block_partition(framework_id)` creating one LIST partition per framework.

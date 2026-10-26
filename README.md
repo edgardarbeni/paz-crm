@@ -5,11 +5,12 @@ posteriores, padrón, defensa del voto, jurídico, atención social, encuestas y
 
 | Documento | Contenido |
 |---|---|
-| [`CLAUDE.md`](CLAUDE.md) | Brief del proyecto: alcance, requisitos, stack y proceso |
-| [`docs/DECISIONES.md`](docs/DECISIONES.md) | Registro de decisiones (tiene precedencia sobre los demás) |
-| [`docs/MODELO_DATOS.md`](docs/MODELO_DATOS.md) | Modelo de datos aprobado (ER en Mermaid) |
-| [`docs/PLAN_FASES.md`](docs/PLAN_FASES.md) | Plan por fases aprobado |
-| [`docs/fases/`](docs/fases/) | Cierre de cada fase: entregables, suposiciones, deuda y riesgos |
+| [`CLAUDE.md`](CLAUDE.md) | Convenciones, comandos, proceso de trabajo e índice de módulos |
+| [`docs/adr/`](docs/adr/README.md) | Decisiones de arquitectura, una por archivo (tienen precedencia sobre los demás) |
+| [`docs/architecture.md`](docs/architecture.md) | Stack, requisitos no funcionales, cómo está construido el núcleo y receta para agregar un módulo |
+| [`docs/modules/`](docs/modules/) | Ficha de cada módulo (`_TEMPLATE.md` para los nuevos) |
+| [`docs/reference/`](docs/reference/) | Modelo de datos aprobado (ER en Mermaid) y referencia geoespacial del INE |
+| [`docs/history/`](docs/history/) | Brief original, plan por fases y cierres de fase (entregables, suposiciones, deuda y riesgos) |
 | [`docs/api/`](docs/api/) | Colección de ejemplos de la API (Bruno) |
 
 **Estado:** MVP completo: fases A a E aprobadas (D-77).
@@ -21,7 +22,7 @@ backend/    API FastAPI (uv) — app/core, app/modules/<módulo>, migrations (Al
 frontend/   Panel React 19 + TanStack (pnpm) — cliente de API generado en src/client
 infra/      Imagen PostgreSQL 18 + PostGIS (infra/db) y Caddy (infra/caddy)
 scripts/    bootstrap-env.sh, gen-api.sh
-docs/       Decisiones, modelo, plan, cierres de fase, colección Bruno
+docs/       ADR, arquitectura, fichas de módulo, referencia, historia, colección Bruno
 compose.yaml  Stack de desarrollo
 ```
 
