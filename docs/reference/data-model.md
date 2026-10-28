@@ -255,7 +255,7 @@ erDiagram
 - **Consistencia de marco:** cada tabla lleva `framework_id` para filtrar el marco activo sin joins. La coherencia hijo-padre se garantiza con FKs compuestas `(framework_id, parent_id) → parent(framework_id, id)`.
 - **Punto-en-polígono (< 50 ms p95):** índice GiST sobre `section_parts.geom` → `sections` → municipio, DL y DF por FK → estado → circunscripción. Son 5 joins por PK y un solo lookup espacial.
 - **Búsqueda por nombre:** índices GIN `gin_trgm_ops` sobre `unaccent(lower(name))` en municipios, localidades y colonias.
-- **Vector tiles:** `ST_AsMVT` sobre `geom` con `ST_SimplifyPreserveTopology` según el zoom. Si las métricas lo piden, se agregan columnas `geom_low` precalculadas en estados, municipios y distritos.
+- **Vector tiles:** `ST_AsMVT` sobre `geom` con `ST_SimplifyPreserveTopology` según el zoom. Si las métricas lo piden, se agregan columnas `geom_low` precalculadas en estados, municipios y distritos. *Implementado en [D-80](../adr/D-80-teselas-geometrias-generalizadas.md): `geom_low` (z ≤ 6) y `geom_mid` (z 7–9) en estados, distritos y municipios, y `geom_mid` en secciones.*
 - **Particionado (D-14):** `blocks PARTITION BY LIST (framework_id)`. Por eso la PK es `(framework_id, id)`.
 
 ---

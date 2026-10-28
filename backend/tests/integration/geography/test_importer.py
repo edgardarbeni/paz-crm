@@ -6,6 +6,7 @@ import py7zr
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncEngine
 
+from app.modules.geography.generalize import generalize
 from app.modules.geography.models import ImportStatus
 from tests.fixtures.bgd import build_state
 from tests.integration.geography.conftest import Importer, rows, scalar
@@ -136,7 +137,8 @@ async def test_derived_data(run_import: Importer, owner_engine: AsyncEngine) -> 
 async def test_reimport_is_idempotent_and_keeps_ids(
     run_import: Importer, owner_engine: AsyncEngine
 ) -> None:
-    await run_import()
+    first = await run_import()
+    assert first.counts["derived"]["generalized_geometries"] > 0
     ids_before = await scalar(
         owner_engine, "SELECT string_agg(id::text, ',' ORDER BY id) FROM geography.sections"
     )
@@ -148,6 +150,7 @@ async def test_reimport_is_idempotent_and_keeps_ids(
     for name, counts in second.counts["tables"].items():
         assert (counts["inserted"], counts["updated"], counts["deactivated"]) == (0, 0, 0), name
     assert second.counts["tables"]["sections"]["unchanged"] == 8
+    assert second.counts["derived"]["generalized_geometries"] == 0  # D-80: nothing rewritten
     assert ids_before == await scalar(
         owner_engine, "SELECT string_agg(id::text, ',' ORDER BY id) FROM geography.sections"
     )
@@ -307,3 +310,48 @@ async def test_conflicting_code_descriptions_are_cleared_for_good(
         )
         == "FRACCIONAMIENTO"
     )
+
+
+async def test_generalize_fills_low_zoom_columns_and_skips_current_rows(
+    run_import: Importer, owner_engine: AsyncEngine
+) -> None:
+    await run_import()
+    missing = await scalar(
+        owner_engine,
+        "SELECT (SELECT count(*) FROM geography.municipalities WHERE geom_low IS NULL OR geom_mid IS NULL)"
+        " + (SELECT count(*) FROM geography.states WHERE geom_low IS NULL OR geom_mid IS NULL)"
+        " + (SELECT count(*) FROM geography.sections WHERE is_active AND geom_mid IS NULL)",
+    )
+    assert missing == 0
+
+    async with owner_engine.begin() as connection:
+        # Densify one municipality with collinear vertices: the simplified copies drop them.
+        await connection.execute(
+            text(
+                "UPDATE geography.municipalities SET geom = ST_Segmentize(geom, 0.00005)"
+                " WHERE municipality_code = 1"
+            )
+        )
+        framework_id = (
+            await connection.execute(text("SELECT id FROM geography.geographic_frameworks"))
+        ).scalar_one()
+        # The simplified copy equals the stored one: nothing is rewritten.
+        assert await generalize(connection, framework_id=framework_id) == 0
+        await connection.execute(
+            text(
+                "UPDATE geography.municipalities SET geom_low = NULL, geom_mid = NULL"
+                " WHERE municipality_code = 1"
+            )
+        )
+        assert await generalize(connection, framework_id=framework_id) == 2
+        assert await generalize(connection, framework_id=framework_id) == 0
+    points = (
+        await rows(
+            owner_engine,
+            "SELECT ST_NPoints(geom) AS geom, ST_NPoints(geom_low) AS low, ST_NPoints(geom_mid) AS mid"
+            " FROM geography.municipalities WHERE municipality_code = 1",
+        )
+    )[0]
+    assert points["geom"] > 100
+    assert points["low"] <= 5
+    assert points["mid"] <= 5

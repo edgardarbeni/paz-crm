@@ -15,6 +15,7 @@ from sqlmodel import col
 
 from app.core.errors import BadRequestError, ForbiddenError, NotFoundError
 from app.core.pagination import CursorPage, PageParams, paginate, parse_sort
+from app.modules.geography.generalize import tile_geometry
 from app.modules.geography.models import (
     Block,
     ElectoralRegion,
@@ -805,13 +806,15 @@ async def tile(db: AsyncSession, geo: GeoScope, layer: str, z: int, x: int, y: i
     if z < min_zoom:
         return b""
     scope = "" if geo.unrestricted else f"AND {_TILE_SCOPE[layer]}"
+    # The bbox filter stays on `geom` (its GiST index); only the emitted geometry changes (D-80).
+    geometry = tile_geometry(table, z)
     sql = f"""
         WITH bounds AS (
           SELECT ST_TileEnvelope(:z, :x, :y) AS env,
                  ST_Transform(ST_TileEnvelope(:z, :x, :y, margin => 0.015625), 4326) AS env4326
         ), features AS (
           SELECT {node} AS id, {code} AS code, {name} AS name,
-                 ST_AsMVTGeom(ST_Transform(s.geom, 3857), bounds.env, 4096, 64, true) AS geom
+                 ST_AsMVTGeom(ST_Transform({geometry}, 3857), bounds.env, 4096, 64, true) AS geom
           FROM geography.{table} s, bounds
           WHERE s.framework_id = :fw AND s.is_active AND s.geom && bounds.env4326 {scope}
         )

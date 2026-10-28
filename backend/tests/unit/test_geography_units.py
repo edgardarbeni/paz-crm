@@ -5,6 +5,7 @@ from typing import Any
 import httpx
 import pytest
 
+from app.modules.geography.generalize import LOW, MID, tile_geometry
 from app.modules.geography.importer.layers import SPECS, postal_code, postal_codes, stage
 from app.modules.geography.importer.source import LayerData, SourceError, _clean, open_source
 from app.modules.geography.ine import (
@@ -190,3 +191,31 @@ async def test_ine_client_errors() -> None:
             await client.bgd_item(1)
         with pytest.raises(IneDownloadError, match="catálogo"):
             await client.catalog_item("Csecc", 31)
+
+
+LOW_SQL = "COALESCE(s.geom_low, s.geom)"
+MID_SQL = "COALESCE(s.geom_mid, s.geom)"
+
+
+@pytest.mark.parametrize(
+    ("table", "z", "expected"),
+    [
+        ("states", 0, LOW_SQL),
+        ("municipalities", 6, LOW_SQL),
+        ("federal_districts", 7, MID_SQL),
+        ("local_districts", 9, MID_SQL),
+        ("municipalities", 10, "s.geom"),
+        ("sections", 9, MID_SQL),
+        ("sections", 10, "s.geom"),
+        ("neighborhoods", 12, "s.geom"),
+        ("blocks", 14, "s.geom"),
+    ],
+)
+def test_tile_geometry_by_zoom_band(table: str, z: int, expected: str) -> None:
+    assert tile_geometry(table, z) == expected
+
+
+def test_band_tolerance_is_half_a_pixel_at_the_band_max_zoom() -> None:
+    # 4 tile units (of 4096) at z6 ≈ 611 m and at z9 ≈ 76 m, in degrees (D-80)
+    assert LOW.tolerance == pytest.approx(611.5 / 111_320, rel=1e-3)
+    assert MID.tolerance == pytest.approx(76.4 / 111_320, rel=1e-3)

@@ -1,12 +1,16 @@
 """Geography API (D-19) and geographic scope (D-34), including what users must NOT see."""
 
 import math
+import uuid
 from typing import Any
 
 import pytest
 from httpx import AsyncClient
-from sqlalchemy.ext.asyncio import AsyncEngine
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession
 
+from app.modules.geography import service
+from app.modules.identity.services.scopes import GeoScope
 from tests.fixtures.bgd import X0, Y0
 from tests.integration.conftest import Account, UserFactory, token_for
 from tests.integration.geography.conftest import Importer, rows, scalar
@@ -278,6 +282,36 @@ async def test_vector_tiles(
     assert (
         await client.get("/api/v1/geography/tiles/sections/2/9/9.mvt", headers=root)
     ).status_code == 400
+
+
+@pytest.mark.usefixtures("loaded")
+async def test_tiles_use_generalized_geometry_by_zoom(owner_engine: AsyncEngine) -> None:
+    lon, lat = await lonlat(owner_engine, 1000, 1000)
+    everyone = GeoScope(user_id=uuid.uuid4(), unrestricted=True)
+
+    async def municipalities(z: int) -> bytes:
+        n = 2**z
+        rad = math.radians(lat)
+        x = int((lon + 180) / 360 * n)
+        y = int((1 - math.log(math.tan(rad) + 1 / math.cos(rad)) / math.pi) / 2 * n)
+        async with AsyncSession(owner_engine) as db:
+            return await service.tile(db, everyone, "municipalities", z, x, y)
+
+    async def set_low(expression: str) -> None:
+        async with owner_engine.begin() as connection:
+            await connection.execute(
+                text(f"UPDATE geography.municipalities SET geom_low = {expression}")
+            )
+
+    low_before, high_before = await municipalities(6), await municipalities(10)
+    assert low_before
+    # z <= 6 is drawn from geom_low, z >= 10 from geom (D-80)
+    await set_low("ST_Multi(ST_Buffer(ST_Centroid(geom), 0.002))")
+    assert await municipalities(6) != low_before
+    assert await municipalities(10) == high_before
+    # Not generalized yet: falls back to geom
+    await set_low("NULL")
+    assert await municipalities(6) == low_before
 
 
 @pytest.mark.usefixtures("loaded")

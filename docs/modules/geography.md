@@ -1,6 +1,6 @@
 # Módulo: Geografía electoral
 
-Código: `backend/app/modules/geography` · esquema `geography` · migración `0005` · API `/api/v1/geography`.
+Código: `backend/app/modules/geography` · esquema `geography` · migraciones `0005` y `0010` · API `/api/v1/geography`.
 Modelo completo: [`reference/data-model.md` §1](../reference/data-model.md). Referencia de las capas del INE: [`reference/DISENO_BD_GEOESPACIAL.md`](../reference/DISENO_BD_GEOESPACIAL.md).
 
 ## Propósito y usuarios
@@ -34,6 +34,7 @@ Pantallas del panel: Explorador (`/geography`), detalle de nodo (`/geography/$le
 - Circunscripción: la asignación estado → circunscripción viene de `ENTIDAD.circunscri`; su geometría se calcula como `ST_Union` de los estados ([D-07](../adr/D-07-circunscripcion.md)).
 - No se modelan circunscripciones plurinominales locales ([D-08](../adr/D-08-diputaciones-locales-rp.md)).
 - `section_parts`: secciones subdivididas (`ST_Subdivide`) para el punto-en-polígono.
+- Geometrías generalizadas para teselas ([D-80](../adr/D-80-teselas-geometrias-generalizadas.md)): `geom_low` (z ≤ 6) y `geom_mid` (z 7–9) en estados, distritos federales, distritos locales y municipios; `geom_mid` en secciones. Son copias de `geom` simplificadas con `ST_SimplifyPreserveTopology` a 4 unidades de tesela del zoom máximo de su banda (≤ ½ píxel). Nullable: sin ellas la tesela usa `geom`.
 
 **Geografía tradicional.**
 | Entidad | Relación con la sección | Notas |
@@ -56,6 +57,7 @@ Pantallas del panel: Explorador (`/geography`), detalle de nodo (`/geography/$le
   - Normaliza encoding, `SIN NOMBRE` → `NULL`, reproyecta a EPSG:4326, valida por registro, carga con `COPY` y hace upsert por llave natural.
   - `--dry-run` no escribe nada salvo la corrida y su reporte.
   - Lo que desaparece del origen queda `is_active = false`, pero solo en capas que cargaron sin errores (`deactivation_skipped` en otro caso).
+  - Al final de cada estado calcula las geometrías generalizadas (`derived.generalized_geometries` en el reporte); si no cambiaron no las reescribe. `paz geo generalize [--framework]` las calcula para datos ya cargados.
   - Validaciones por registro: geometrías inválidas reparadas, manzanas fuera de su sección, distritos de manzana distintos a los de su sección, padres inexistentes, pares del catálogo sin intersección (`catalog_pair_without_overlap`). Son advertencias; manda la sección.
 - **Activación de marco** (`paz geo activate --framework NOMBRE`, [D-41](../adr/D-41-modelo-datos-aprobado.md) punto 7): remapea alcances de usuario y domicilios por llave natural; lo que no tiene equivalente se elimina (alcances) o se limpia (nodos del domicilio) y se reporta; reconstruye `user_scope_sections` y ejecuta `ANALYZE` ([D-63](../adr/D-63-operacion-geografia.md)).
 - **Búsqueda (`GET /geography/search`, [D-19](../adr/D-19-api-geografica.md), [D-79](../adr/D-79-busqueda-geografica-nombre-estado.md)):** clave INE flexible (`09-0123`, `9 123`, `090123`), número + estado en cualquier orden con palabras de nivel opcionales, nombre + estado, o solo estado (con `level`, devuelve lo que contiene); `state_id` opcional. El estado se reconoce por nombre o inicio de palabra, sin catálogo de abreviaturas. Las respuestas incluyen `state_name` y `municipality_name`.
@@ -101,18 +103,23 @@ Medido de punta a punta por la API con `scripts/benchmark_geo.py` (500 coordenad
 | Búsqueda D-79 (todos los formatos, local) | 5–24 ms | < 200 ms |
 | Tesela de secciones z11 acotada | 48.9 ms | — |
 
-- Teselas MVT: `ST_AsMVT` sobre la geometría original, cuantizada a la rejilla de la tesela (aún sin la simplificación por zoom que pide D-19); caché en Redis (`PAZ_GEO_TILE_CACHE_SECONDS`, 3600 s) solo para usuarios sin restricción (las acotadas se calculan siempre, DT-17).
-- Teselas medidas el 2026-10-28 con la carga nacional (PostGIS directo, sin caché, sobre CDMX):
+- Teselas MVT: `ST_AsMVT` sobre la geometría generalizada de la banda de zoom ([D-80](../adr/D-80-teselas-geometrias-generalizadas.md)) y sobre `geom` desde z10; caché en Redis (`PAZ_GEO_TILE_CACHE_SECONDS`, 3600 s, llaves `tile:v2:…`) solo para usuarios sin restricción (las acotadas se calculan siempre, DT-17).
+- Teselas medidas con la carga nacional (PostGIS directo, sin caché, sobre CDMX), antes y después de D-80 (2026-10-28):
 
-  | Tesela | Sin restricción | Acotada a CDMX | Tamaño |
+  | Tesela | Antes | Después | Acotada a CDMX (después) |
   |---|---|---|---|
-  | Municipios z6 | 343–458 ms | 190 ms | 900 KB |
-  | Distritos locales z6 | 190–230 ms | 110–150 ms | 360 KB |
-  | Secciones z9 | 100–130 ms | 60 ms | 790 KB |
-  | Estados z4–6 | 70–150 ms | 75–220 ms | 60–100 KB |
-  | Secciones z ≥ 11, colonias, manzanas | 1–35 ms | igual | ≤ 350 KB |
+  | Municipios z6 | 343–458 ms · 900 KB | 24–58 ms · 188 KB | 5–11 ms |
+  | Distritos locales z6 | 190–230 ms · 360 KB | 13–18 ms · 48 KB | 5–9 ms |
+  | Distritos federales z6 | 158–189 ms · 269 KB | 10–13 ms · 33 KB | 5–14 ms |
+  | Estados z4 | 72–152 ms · 57 KB | 9–54 ms · 17 KB | 5–49 ms |
+  | Secciones z9 | 66–130 ms · 790 KB | 43–114 ms · 504 KB | 31–36 ms |
+  | Secciones z ≥ 11, colonias, manzanas | 1–35 ms | sin cambio (usan `geom`) | — |
 
-  Una pantalla completa en z6 (72 teselas) tarda 0.55–0.72 s y pesa 3.1 MB; un acierto en Redis, 0.08 ms. En el visor no hay fuga de memoria (heap plano en ~41 MB tras 180 saltos), pero con las capas por defecto el desplazamiento baja a 18–31 cuadros por segundo. Las capas ocultas no descargan teselas. Mejora aprobada: [D-80](../adr/D-80-teselas-geometrias-generalizadas.md) (geometrías generalizadas por banda de zoom).
+  - Una pantalla completa en z6 (72 teselas de estados, distritos federales y municipios) pasó de 0.55–0.72 s y 3.1 MB a 85–243 ms y 534 KB. Un acierto en Redis tarda 0.07 ms.
+  - Contenido: en 1,863 teselas de z5 a z9 los nodos visibles son idénticos a los de `geom`. Solo 19 de 107 mil rasgos difieren, todos en el margen de 64 unidades fuera del área visible.
+  - Visor (Chromium sin interfaz, gráficos por software, capas por defecto): el desplazamiento pasó de 30–31 a 52–55 cuadros por segundo. No hay fuga de memoria: el heap queda plano en ~41 MB tras 180 saltos. Las capas ocultas no descargan teselas.
+  - En z5–z6 el trazo se ve un poco más delgado: la geometría original zigzagueaba dentro del mismo píxel y engrosaba la línea. Formas y posiciones coinciden.
+  - Generar las columnas para todo el país toma 47 s (80,244 geometrías). En secciones z9 el peso viene de la cantidad de polígonos; subir el zoom mínimo de secciones queda como decisión de producto aparte.
 - Riesgo R-7: planes malos en `user_scope_sections` tras cargas masivas sin estadísticas (207 ms en lugar de 5.6 ms); mitigado con `ANALYZE`.
 - Datos de desarrollo y CI: Aguascalientes, 736 secciones y ~25 mil manzanas (`scripts/seed-dev-geo.sh`, [D-20](../adr/D-20-datos-desarrollo-ci.md)); los tests usan una BGD sintética.
 
@@ -142,7 +149,7 @@ No emite eventos asíncronos; todo ocurre dentro de la transacción de la import
 | Descripciones de código contradictorias quedan vacías para siempre | ✅ `test_conflicting_code_descriptions_are_cleared_for_good` |
 | Búsqueda por clave, número + estado, nombre + estado y solo estado | ✅ `test_search_by_key_and_name`, `test_search_by_number_or_name_with_state`, `test_explorer_search_by_number_or_state` |
 | Teselas MVT por capa y zoom | ✅ `test_vector_tiles` |
-| Teselas de zoom bajo con geometría generalizada: municipios z6 ≤ 200 KB y ≤ 50 ms con la carga nacional, mismo contenido para usuarios acotados ([D-80](../adr/D-80-teselas-geometrias-generalizadas.md)) | ⏳ Pendiente de implementar |
+| Teselas de zoom bajo con geometría generalizada: municipios z6 ≤ 200 KB y ≤ 50 ms con la carga nacional, mismo contenido para usuarios acotados ([D-80](../adr/D-80-teselas-geometrias-generalizadas.md)) | ✅ 188 KB, 24–33 ms con buffers calientes (58 ms en frío); `test_tiles_use_generalized_geometry_by_zoom`, `test_generalize_fills_low_zoom_columns_and_skips_current_rows`, `test_reimport_is_idempotent_and_keeps_ids` |
 | Un usuario sin alcance no ve nada; uno con alcance de sección no ve otras secciones en listados, detalle, búsqueda, `locate` ni teselas | ✅ `test_user_without_scope_sees_nothing`, `test_section_scope_limits_every_query`, `test_scoped_tiles_only_contain_the_scope` |
 | No se otorga alcance fuera del propio | ✅ `test_scope_assignment_cannot_exceed_own_scope` |
 | Activar un marco remapea alcances y domicilios por llave natural | ✅ `test_activation_remaps_scopes`, `test_activation_remaps_person_addresses` |

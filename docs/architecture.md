@@ -364,7 +364,7 @@ alguna ADR ya la cubre. Los requisitos vienen del brief original, hoy repartido 
 | 8 | PK UUIDv7 con `created_at`, `updated_at` y `deleted_at` en todas las tablas, salvo D-03, D-04 y D-37 | `identity.user_scope_sections` usa PK compuesta `(user_id, section_id)` sin timestamps. Es una tabla derivada, en la línea de D-03, pero no está listada como excepción | Parcial |
 | 9 | WebAuthn/passkeys "preparado como extensión" | No hay código específico; `user_sessions.auth_methods` (RFC 8176) admite nuevos métodos y `reference/data-model.md` prevé una tabla `webauthn_credentials` futura | Sí (data-model.md) |
 | 10 | Valores sensibles de la bitácora "enmascarados o cifrados" (D-37) y purga ARCO de personas (D-69) | `Person` no declara `__audit_masked__`. Las altas y ediciones guardan en la bitácora inmutable el nombre, la fecha de nacimiento, el sexo, la entidad, la geografía y el CP en claro, y `paz people purge` no puede borrarlos. CURP, contactos y domicilio sí salen enmascarados porque son `bytes` (ver [people.md](modules/people.md)) | No; pendiente de definir |
-| 11 | D-19: teselas MVT "con simplificación por zoom" | `geography/service.py:tile` solo cuantiza con `ST_AsMVTGeom` sobre la geometría original; en zoom bajo una tesela de municipios pesa ~900 KB y tarda ~350 ms | Sí, [D-80](adr/D-80-teselas-geometrias-generalizadas.md) |
+| 11 | D-19: teselas MVT "con simplificación por zoom" | Resuelta: hasta D-80 `tile` solo cuantizaba la geometría original (~900 KB y ~350 ms por tesela de municipios en z6). Ahora sirve `geom_low` / `geom_mid` según el zoom (188 KB, 24–58 ms) | Sí, [D-80](adr/D-80-teselas-geometrias-generalizadas.md) |
 
 **Detalle de la diferencia 1.** Las escrituras sin auditar son:
 
