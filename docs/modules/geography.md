@@ -101,7 +101,18 @@ Medido de punta a punta por la API con `scripts/benchmark_geo.py` (500 coordenad
 | Búsqueda D-79 (todos los formatos, local) | 5–24 ms | < 200 ms |
 | Tesela de secciones z11 acotada | 48.9 ms | — |
 
-- Teselas MVT: `ST_AsMVT` con simplificación por zoom; caché en Redis (`PAZ_GEO_TILE_CACHE_SECONDS`, 3600 s) solo para usuarios sin restricción (las acotadas se calculan siempre, DT-17).
+- Teselas MVT: `ST_AsMVT` sobre la geometría original, cuantizada a la rejilla de la tesela (aún sin la simplificación por zoom que pide D-19); caché en Redis (`PAZ_GEO_TILE_CACHE_SECONDS`, 3600 s) solo para usuarios sin restricción (las acotadas se calculan siempre, DT-17).
+- Teselas medidas el 2026-10-28 con la carga nacional (PostGIS directo, sin caché, sobre CDMX):
+
+  | Tesela | Sin restricción | Acotada a CDMX | Tamaño |
+  |---|---|---|---|
+  | Municipios z6 | 343–458 ms | 190 ms | 900 KB |
+  | Distritos locales z6 | 190–230 ms | 110–150 ms | 360 KB |
+  | Secciones z9 | 100–130 ms | 60 ms | 790 KB |
+  | Estados z4–6 | 70–150 ms | 75–220 ms | 60–100 KB |
+  | Secciones z ≥ 11, colonias, manzanas | 1–35 ms | igual | ≤ 350 KB |
+
+  Una pantalla completa en z6 (72 teselas) tarda 0.55–0.72 s y pesa 3.1 MB; un acierto en Redis, 0.08 ms. En el visor no hay fuga de memoria (heap plano en ~41 MB tras 180 saltos), pero con las capas por defecto el desplazamiento baja a 18–31 cuadros por segundo. Las capas ocultas no descargan teselas. Mejora aprobada: [D-80](../adr/D-80-teselas-geometrias-generalizadas.md) (geometrías generalizadas por banda de zoom).
 - Riesgo R-7: planes malos en `user_scope_sections` tras cargas masivas sin estadísticas (207 ms en lugar de 5.6 ms); mitigado con `ANALYZE`.
 - Datos de desarrollo y CI: Aguascalientes, 736 secciones y ~25 mil manzanas (`scripts/seed-dev-geo.sh`, [D-20](../adr/D-20-datos-desarrollo-ci.md)); los tests usan una BGD sintética.
 
@@ -131,6 +142,7 @@ No emite eventos asíncronos; todo ocurre dentro de la transacción de la import
 | Descripciones de código contradictorias quedan vacías para siempre | ✅ `test_conflicting_code_descriptions_are_cleared_for_good` |
 | Búsqueda por clave, número + estado, nombre + estado y solo estado | ✅ `test_search_by_key_and_name`, `test_search_by_number_or_name_with_state`, `test_explorer_search_by_number_or_state` |
 | Teselas MVT por capa y zoom | ✅ `test_vector_tiles` |
+| Teselas de zoom bajo con geometría generalizada: municipios z6 ≤ 200 KB y ≤ 50 ms con la carga nacional, mismo contenido para usuarios acotados ([D-80](../adr/D-80-teselas-geometrias-generalizadas.md)) | ⏳ Pendiente de implementar |
 | Un usuario sin alcance no ve nada; uno con alcance de sección no ve otras secciones en listados, detalle, búsqueda, `locate` ni teselas | ✅ `test_user_without_scope_sees_nothing`, `test_section_scope_limits_every_query`, `test_scoped_tiles_only_contain_the_scope` |
 | No se otorga alcance fuera del propio | ✅ `test_scope_assignment_cannot_exceed_own_scope` |
 | Activar un marco remapea alcances y domicilios por llave natural | ✅ `test_activation_remaps_scopes`, `test_activation_remaps_person_addresses` |
