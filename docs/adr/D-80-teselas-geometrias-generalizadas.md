@@ -1,6 +1,6 @@
 # D-80 · Teselas con geometrías generalizadas por zoom (amplía D-19)
 
-- **Estado:** Propuesta (pendiente de aprobación; al aprobarse pasa a Aceptada)
+- **Estado:** Aceptada (2026-10-28: opción A y `k = 4`)
 - **Área:** Geografía electoral
 
 ## Contexto
