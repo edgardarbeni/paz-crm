@@ -1,0 +1,22 @@
+meta {
+  name: Cambiar reclutador
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}/api/v1/peace-movement/members/{{memberId}}/reassign
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "recruiter_member_id": "{{recruiterId}}",
+    "reason": "Acuerdo de la coordinación estatal"
+  }
+}

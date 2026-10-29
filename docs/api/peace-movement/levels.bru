@@ -1,0 +1,15 @@
+meta {
+  name: Niveles de participación
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/v1/peace-movement/levels
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}

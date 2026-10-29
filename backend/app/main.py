@@ -17,7 +17,7 @@ from app.core.middleware import (
     RequestContextMiddleware,
     SecurityHeadersMiddleware,
 )
-from app.core.modules import api_routers
+from app.core.modules import api_routers, setup_modules
 from app.core.redis import build_redis
 from app.core.storage import build_storage
 from app.core.telemetry import configure_telemetry
@@ -28,6 +28,7 @@ API_PREFIX = "/api/v1"
 
 def build_api_router() -> APIRouter:
     """Mounts the routers of every installed module (`app/modules/*/module.py`)."""
+    setup_modules()
     router = APIRouter(prefix=API_PREFIX, responses=PROBLEM_RESPONSES)
     for module_router in api_routers():
         router.include_router(module_router)

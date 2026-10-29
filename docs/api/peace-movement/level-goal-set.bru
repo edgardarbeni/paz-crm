@@ -1,0 +1,23 @@
+meta {
+  name: Fijar meta de un nivel por estado
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/v1/peace-movement/level-goals
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "level_id": "{{levelId}}",
+    "state_id": "{{stateId}}",
+    "recruit_goal": 12
+  }
+}

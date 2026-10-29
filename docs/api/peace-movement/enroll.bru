@@ -1,0 +1,41 @@
+meta {
+  name: Inscribir pacificador
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/v1/peace-movement/members
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "person": {
+      "given_names": "Juan",
+      "paternal_surname": "López",
+      "curp": "LODA900101HASPZN09",
+      "address": {
+        "street": "Calle de la Paz 1",
+        "section_id": "{{sectionId}}"
+      },
+      "contacts": [
+        {
+          "contact_type": "mobile",
+          "value": "4491234567"
+        }
+      ]
+    },
+    "level_id": "{{levelId}}",
+    "origin": "recruiter",
+    "recruiter_member_id": "{{recruiterId}}",
+    "consent": {
+      "channel": "panel"
+    }
+  }
+}

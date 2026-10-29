@@ -21,12 +21,23 @@ export const Perm = {
   PERSON_WRITE: "people.person.write",
   PERSON_READ_SENSITIVE: "people.person.read_sensitive",
   PERSON_DELETE: "people.person.delete",
+  NOTICE_MANAGE: "people.notice.manage",
   CANDIDACIES_READ: "candidacies.read",
   CATALOG_MANAGE: "candidacies.catalog.manage",
   PROCESS_MANAGE: "candidacies.process.manage",
   NOMINATION_WRITE: "candidacies.nomination.write",
   NOMINATION_APPROVE: "candidacies.nomination.approve",
   RULE_OVERRIDE: "candidacies.rule.override",
+  PEACE_MEMBER_READ: "peace_movement.member.read",
+  PEACE_MEMBER_WRITE: "peace_movement.member.write",
+  PEACE_MEMBER_VALIDATE: "peace_movement.member.validate",
+  PEACE_MEMBER_REASSIGN: "peace_movement.member.reassign",
+  PEACE_MEMBER_IMPORT: "peace_movement.member.import",
+  PEACE_HOUSE_READ: "peace_movement.house.read",
+  PEACE_HOUSE_WRITE: "peace_movement.house.write",
+  PEACE_HOUSE_REASSIGN_CREDIT: "peace_movement.house.reassign_credit",
+  PEACE_STATS_READ: "peace_movement.stats.read",
+  PEACE_GOAL_MANAGE: "peace_movement.goal.manage",
 } as const;
 
 export type PermCode = (typeof Perm)[keyof typeof Perm];

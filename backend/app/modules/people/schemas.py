@@ -118,7 +118,30 @@ class ConsentIn(Schema):
 
 class ConsentOut(Schema):
     id: uuid.UUID
+    notice_code: str
     notice_version: str
     channel: str
     evidence_uri: str | None
     accepted_at: datetime
+
+
+NoticeCode = Annotated[str, StringConstraints(pattern=r"^[a-z][a-z0-9_]{1,49}$")]
+
+
+class NoticeIn(Schema):
+    code: NoticeCode = Field(description="`general` o `peace_movement` (aviso del MP).")
+    version: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=50)]
+    title: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=200)]
+    body: Annotated[str, StringConstraints(strip_whitespace=True, min_length=20, max_length=50_000)]
+
+
+class NoticeOut(Schema):
+    id: uuid.UUID
+    code: str
+    version: str
+    title: str
+    body: str
+    body_sha256: str
+    is_sample: bool
+    valid_from: datetime
+    valid_to: datetime | None

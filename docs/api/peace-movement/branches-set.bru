@@ -1,0 +1,23 @@
+meta {
+  name: Asignar ramas a un usuario
+  type: http
+  seq: 9
+}
+
+put {
+  url: {{baseUrl}}/api/v1/peace-movement/users/{{userId}}/branches
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "member_ids": [
+      "{{memberId}}"
+    ]
+  }
+}

@@ -3,8 +3,8 @@
 import { type InfiniteData, infiniteQueryOptions, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen';
-import { acceptInvitation, activateUser, addConsent, approveNomination, cancelNomination, changeFormulaStatus, changePassword, configureMunicipalities, configureProcessOffices, configureProcessRules, confirmTotp, createCoalition, createFormula, createNomination, createOfficeType, createParty, createPerson, createProcess, createRole, deletePerson, deleteRole, disableTotp, disableUser, forgotPassword, getGeoNode, getGeoNodeChildren, getHealth, getImportRun, getMe, getNomination, getNominationHistory, getPerson, getProcess, getReadiness, getRole, getUser, getUserScopes, getVectorTile, inspectInvitation, inviteUser, listAccessEntries, listAuditEntries, listCoalitions, listConsents, listFrameworks, listGeoNodes, listImportIssues, listImportRuns, listMunicipalitySettings, listMySessions, listNominations, listOfficeTypes, listParties, listPermissions, listProcesses, listProcessOffices, listProcessRules, listRoles, listUsers, listUserSessions, listValidationRules, locatePoint, login, logout, type Options, refreshSession, regenerateRecoveryCodes, resendInvitation, resetPassword, resetUserMfa, revokeMyOtherSessions, revokeMySession, revokeUserSessions, searchGeography, searchPeople, setRolePermissions, setupTotp, setUserRoles, setUserScopes, submitNomination, substituteFormula, unlockUser, updateFormulaMembers, updateNomination, updateOfficeType, updateParty, updatePerson, updateProcess, updateRole, updateUser, validateNomination, verifyMfa } from '../sdk.gen';
-import type { AcceptInvitationData, AcceptInvitationError, AcceptInvitationResponse, ActivateUserData, ActivateUserError, ActivateUserResponse, AddConsentData, AddConsentError, AddConsentResponse, ApproveNominationData, ApproveNominationError, ApproveNominationResponse, CancelNominationData, CancelNominationError, CancelNominationResponse, ChangeFormulaStatusData, ChangeFormulaStatusError, ChangeFormulaStatusResponse, ChangePasswordData, ChangePasswordError, ChangePasswordResponse, ConfigureMunicipalitiesData, ConfigureMunicipalitiesError, ConfigureMunicipalitiesResponse, ConfigureProcessOfficesData, ConfigureProcessOfficesError, ConfigureProcessOfficesResponse, ConfigureProcessRulesData, ConfigureProcessRulesError, ConfigureProcessRulesResponse, ConfirmTotpData, ConfirmTotpError, ConfirmTotpResponse, CreateCoalitionData, CreateCoalitionError, CreateCoalitionResponse, CreateFormulaData, CreateFormulaError, CreateFormulaResponse, CreateNominationData, CreateNominationError, CreateNominationResponse, CreateOfficeTypeData, CreateOfficeTypeError, CreateOfficeTypeResponse, CreatePartyData, CreatePartyError, CreatePartyResponse, CreatePersonData, CreatePersonError, CreatePersonResponse, CreateProcessData, CreateProcessError, CreateProcessResponse, CreateRoleData, CreateRoleError, CreateRoleResponse, DeletePersonData, DeletePersonError, DeletePersonResponse, DeleteRoleData, DeleteRoleError, DeleteRoleResponse, DisableTotpData, DisableTotpError, DisableTotpResponse, DisableUserData, DisableUserError, DisableUserResponse, ForgotPasswordData, ForgotPasswordError, GetGeoNodeChildrenData, GetGeoNodeChildrenError, GetGeoNodeChildrenResponse, GetGeoNodeData, GetGeoNodeError, GetGeoNodeResponse, GetHealthData, GetHealthError, GetHealthResponse, GetImportRunData, GetImportRunError, GetImportRunResponse, GetMeData, GetMeError, GetMeResponse, GetNominationData, GetNominationError, GetNominationHistoryData, GetNominationHistoryError, GetNominationHistoryResponse, GetNominationResponse, GetPersonData, GetPersonError, GetPersonResponse, GetProcessData, GetProcessError, GetProcessResponse, GetReadinessData, GetReadinessError, GetReadinessResponse, GetRoleData, GetRoleError, GetRoleResponse, GetUserData, GetUserError, GetUserResponse, GetUserScopesData, GetUserScopesError, GetUserScopesResponse, GetVectorTileData, GetVectorTileError, InspectInvitationData, InspectInvitationError, InspectInvitationResponse, InviteUserData, InviteUserError, InviteUserResponse, ListAccessEntriesData, ListAccessEntriesError, ListAccessEntriesResponse, ListAuditEntriesData, ListAuditEntriesError, ListAuditEntriesResponse, ListCoalitionsData, ListCoalitionsError, ListCoalitionsResponse, ListConsentsData, ListConsentsError, ListConsentsResponse, ListFrameworksData, ListFrameworksError, ListFrameworksResponse, ListGeoNodesData, ListGeoNodesError, ListGeoNodesResponse, ListImportIssuesData, ListImportIssuesError, ListImportIssuesResponse, ListImportRunsData, ListImportRunsError, ListImportRunsResponse, ListMunicipalitySettingsData, ListMunicipalitySettingsError, ListMunicipalitySettingsResponse, ListMySessionsData, ListMySessionsError, ListMySessionsResponse, ListNominationsData, ListNominationsError, ListNominationsResponse, ListOfficeTypesData, ListOfficeTypesError, ListOfficeTypesResponse, ListPartiesData, ListPartiesError, ListPartiesResponse, ListPermissionsData, ListPermissionsError, ListPermissionsResponse, ListProcessesData, ListProcessesError, ListProcessesResponse, ListProcessOfficesData, ListProcessOfficesError, ListProcessOfficesResponse, ListProcessRulesData, ListProcessRulesError, ListProcessRulesResponse, ListRolesData, ListRolesError, ListRolesResponse, ListUsersData, ListUsersError, ListUserSessionsData, ListUserSessionsError, ListUserSessionsResponse, ListUsersResponse, ListValidationRulesData, ListValidationRulesError, ListValidationRulesResponse, LocatePointData, LocatePointError, LocatePointResponse, LoginData, LoginError, LoginResponse, LogoutData, LogoutError, LogoutResponse, RefreshSessionData, RefreshSessionError, RefreshSessionResponse, RegenerateRecoveryCodesData, RegenerateRecoveryCodesError, RegenerateRecoveryCodesResponse, ResendInvitationData, ResendInvitationError, ResendInvitationResponse, ResetPasswordData, ResetPasswordError, ResetPasswordResponse, ResetUserMfaData, ResetUserMfaError, ResetUserMfaResponse, RevokeMyOtherSessionsData, RevokeMyOtherSessionsError, RevokeMyOtherSessionsResponse, RevokeMySessionData, RevokeMySessionError, RevokeMySessionResponse, RevokeUserSessionsData, RevokeUserSessionsError, RevokeUserSessionsResponse, SearchGeographyData, SearchGeographyError, SearchGeographyResponse, SearchPeopleData, SearchPeopleError, SearchPeopleResponse, SetRolePermissionsData, SetRolePermissionsError, SetRolePermissionsResponse, SetupTotpData, SetupTotpError, SetupTotpResponse, SetUserRolesData, SetUserRolesError, SetUserRolesResponse, SetUserScopesData, SetUserScopesError, SetUserScopesResponse, SubmitNominationData, SubmitNominationError, SubmitNominationResponse, SubstituteFormulaData, SubstituteFormulaError, SubstituteFormulaResponse, UnlockUserData, UnlockUserError, UnlockUserResponse, UpdateFormulaMembersData, UpdateFormulaMembersError, UpdateFormulaMembersResponse, UpdateNominationData, UpdateNominationError, UpdateNominationResponse, UpdateOfficeTypeData, UpdateOfficeTypeError, UpdateOfficeTypeResponse, UpdatePartyData, UpdatePartyError, UpdatePartyResponse, UpdatePersonData, UpdatePersonError, UpdatePersonResponse, UpdateProcessData, UpdateProcessError, UpdateProcessResponse, UpdateRoleData, UpdateRoleError, UpdateRoleResponse, UpdateUserData, UpdateUserError, UpdateUserResponse, ValidateNominationData, ValidateNominationError, ValidateNominationResponse, VerifyMfaData, VerifyMfaError, VerifyMfaResponse } from '../types.gen';
+import { acceptInvitation, activateUser, addConsent, approveNomination, cancelNomination, changeFormulaStatus, changeMemberLevel, changePassword, configureMunicipalities, configureProcessOffices, configureProcessRules, confirmTotp, createCoalition, createFormula, createNomination, createOfficeType, createParty, createPerson, createProcess, createRole, createZoneCoordinator, deletePerson, deleteRole, disableTotp, disableUser, endZoneCoordinator, enrollMember, forgotPassword, getGeoNode, getGeoNodeChildren, getHealth, getImportRun, getMe, getMember, getMemberHistory, getNomination, getNominationHistory, getPeaceSettings, getPerson, getProcess, getReadiness, getRole, getUser, getUserScopes, getVectorTile, inspectInvitation, inviteUser, listAccessEntries, listAuditEntries, listCoalitions, listConsents, listFrameworks, listGeoNodes, listHouseGoals, listImportIssues, listImportRuns, listLevelGoals, listMemberChildren, listMunicipalitySettings, listMySessions, listNominations, listOfficeTypes, listParticipationLevels, listParties, listPermissions, listPrivacyNotices, listProcesses, listProcessOffices, listProcessRules, listRoles, listUserBranches, listUsers, listUserSessions, listValidationRules, listZoneCoordinators, locatePoint, login, logout, memberLeaves, type Options, publishPrivacyNotice, reassignMember, refreshSession, regenerateRecoveryCodes, rejectMember, resendInvitation, resetPassword, resetUserMfa, revokeMyOtherSessions, revokeMySession, revokeUserSessions, searchGeography, searchMembers, searchPeople, setHouseGoal, setLevelGoal, setRolePermissions, setupTotp, setUserBranches, setUserRoles, setUserScopes, submitNomination, substituteFormula, unlockUser, updateFormulaMembers, updateNomination, updateOfficeType, updateParty, updatePeaceSettings, updatePerson, updateProcess, updateRole, updateUser, validateMember, validateNomination, verifyMfa } from '../sdk.gen';
+import type { AcceptInvitationData, AcceptInvitationError, AcceptInvitationResponse, ActivateUserData, ActivateUserError, ActivateUserResponse, AddConsentData, AddConsentError, AddConsentResponse, ApproveNominationData, ApproveNominationError, ApproveNominationResponse, CancelNominationData, CancelNominationError, CancelNominationResponse, ChangeFormulaStatusData, ChangeFormulaStatusError, ChangeFormulaStatusResponse, ChangeMemberLevelData, ChangeMemberLevelError, ChangeMemberLevelResponse, ChangePasswordData, ChangePasswordError, ChangePasswordResponse, ConfigureMunicipalitiesData, ConfigureMunicipalitiesError, ConfigureMunicipalitiesResponse, ConfigureProcessOfficesData, ConfigureProcessOfficesError, ConfigureProcessOfficesResponse, ConfigureProcessRulesData, ConfigureProcessRulesError, ConfigureProcessRulesResponse, ConfirmTotpData, ConfirmTotpError, ConfirmTotpResponse, CreateCoalitionData, CreateCoalitionError, CreateCoalitionResponse, CreateFormulaData, CreateFormulaError, CreateFormulaResponse, CreateNominationData, CreateNominationError, CreateNominationResponse, CreateOfficeTypeData, CreateOfficeTypeError, CreateOfficeTypeResponse, CreatePartyData, CreatePartyError, CreatePartyResponse, CreatePersonData, CreatePersonError, CreatePersonResponse, CreateProcessData, CreateProcessError, CreateProcessResponse, CreateRoleData, CreateRoleError, CreateRoleResponse, CreateZoneCoordinatorData, CreateZoneCoordinatorError, CreateZoneCoordinatorResponse, DeletePersonData, DeletePersonError, DeletePersonResponse, DeleteRoleData, DeleteRoleError, DeleteRoleResponse, DisableTotpData, DisableTotpError, DisableTotpResponse, DisableUserData, DisableUserError, DisableUserResponse, EndZoneCoordinatorData, EndZoneCoordinatorError, EndZoneCoordinatorResponse, EnrollMemberData, EnrollMemberError, EnrollMemberResponse, ForgotPasswordData, ForgotPasswordError, GetGeoNodeChildrenData, GetGeoNodeChildrenError, GetGeoNodeChildrenResponse, GetGeoNodeData, GetGeoNodeError, GetGeoNodeResponse, GetHealthData, GetHealthError, GetHealthResponse, GetImportRunData, GetImportRunError, GetImportRunResponse, GetMeData, GetMeError, GetMemberData, GetMemberError, GetMemberHistoryData, GetMemberHistoryError, GetMemberHistoryResponse, GetMemberResponse, GetMeResponse, GetNominationData, GetNominationError, GetNominationHistoryData, GetNominationHistoryError, GetNominationHistoryResponse, GetNominationResponse, GetPeaceSettingsData, GetPeaceSettingsError, GetPeaceSettingsResponse, GetPersonData, GetPersonError, GetPersonResponse, GetProcessData, GetProcessError, GetProcessResponse, GetReadinessData, GetReadinessError, GetReadinessResponse, GetRoleData, GetRoleError, GetRoleResponse, GetUserData, GetUserError, GetUserResponse, GetUserScopesData, GetUserScopesError, GetUserScopesResponse, GetVectorTileData, GetVectorTileError, InspectInvitationData, InspectInvitationError, InspectInvitationResponse, InviteUserData, InviteUserError, InviteUserResponse, ListAccessEntriesData, ListAccessEntriesError, ListAccessEntriesResponse, ListAuditEntriesData, ListAuditEntriesError, ListAuditEntriesResponse, ListCoalitionsData, ListCoalitionsError, ListCoalitionsResponse, ListConsentsData, ListConsentsError, ListConsentsResponse, ListFrameworksData, ListFrameworksError, ListFrameworksResponse, ListGeoNodesData, ListGeoNodesError, ListGeoNodesResponse, ListHouseGoalsData, ListHouseGoalsError, ListHouseGoalsResponse, ListImportIssuesData, ListImportIssuesError, ListImportIssuesResponse, ListImportRunsData, ListImportRunsError, ListImportRunsResponse, ListLevelGoalsData, ListLevelGoalsError, ListLevelGoalsResponse, ListMemberChildrenData, ListMemberChildrenError, ListMemberChildrenResponse, ListMunicipalitySettingsData, ListMunicipalitySettingsError, ListMunicipalitySettingsResponse, ListMySessionsData, ListMySessionsError, ListMySessionsResponse, ListNominationsData, ListNominationsError, ListNominationsResponse, ListOfficeTypesData, ListOfficeTypesError, ListOfficeTypesResponse, ListParticipationLevelsData, ListParticipationLevelsError, ListParticipationLevelsResponse, ListPartiesData, ListPartiesError, ListPartiesResponse, ListPermissionsData, ListPermissionsError, ListPermissionsResponse, ListPrivacyNoticesData, ListPrivacyNoticesError, ListPrivacyNoticesResponse, ListProcessesData, ListProcessesError, ListProcessesResponse, ListProcessOfficesData, ListProcessOfficesError, ListProcessOfficesResponse, ListProcessRulesData, ListProcessRulesError, ListProcessRulesResponse, ListRolesData, ListRolesError, ListRolesResponse, ListUserBranchesData, ListUserBranchesError, ListUserBranchesResponse, ListUsersData, ListUsersError, ListUserSessionsData, ListUserSessionsError, ListUserSessionsResponse, ListUsersResponse, ListValidationRulesData, ListValidationRulesError, ListValidationRulesResponse, ListZoneCoordinatorsData, ListZoneCoordinatorsError, ListZoneCoordinatorsResponse, LocatePointData, LocatePointError, LocatePointResponse, LoginData, LoginError, LoginResponse, LogoutData, LogoutError, LogoutResponse, MemberLeavesData, MemberLeavesError, MemberLeavesResponse, PublishPrivacyNoticeData, PublishPrivacyNoticeError, PublishPrivacyNoticeResponse, ReassignMemberData, ReassignMemberError, ReassignMemberResponse, RefreshSessionData, RefreshSessionError, RefreshSessionResponse, RegenerateRecoveryCodesData, RegenerateRecoveryCodesError, RegenerateRecoveryCodesResponse, RejectMemberData, RejectMemberError, RejectMemberResponse, ResendInvitationData, ResendInvitationError, ResendInvitationResponse, ResetPasswordData, ResetPasswordError, ResetPasswordResponse, ResetUserMfaData, ResetUserMfaError, ResetUserMfaResponse, RevokeMyOtherSessionsData, RevokeMyOtherSessionsError, RevokeMyOtherSessionsResponse, RevokeMySessionData, RevokeMySessionError, RevokeMySessionResponse, RevokeUserSessionsData, RevokeUserSessionsError, RevokeUserSessionsResponse, SearchGeographyData, SearchGeographyError, SearchGeographyResponse, SearchMembersData, SearchMembersError, SearchMembersResponse, SearchPeopleData, SearchPeopleError, SearchPeopleResponse, SetHouseGoalData, SetHouseGoalError, SetHouseGoalResponse, SetLevelGoalData, SetLevelGoalError, SetLevelGoalResponse, SetRolePermissionsData, SetRolePermissionsError, SetRolePermissionsResponse, SetupTotpData, SetupTotpError, SetupTotpResponse, SetUserBranchesData, SetUserBranchesError, SetUserBranchesResponse, SetUserRolesData, SetUserRolesError, SetUserRolesResponse, SetUserScopesData, SetUserScopesError, SetUserScopesResponse, SubmitNominationData, SubmitNominationError, SubmitNominationResponse, SubstituteFormulaData, SubstituteFormulaError, SubstituteFormulaResponse, UnlockUserData, UnlockUserError, UnlockUserResponse, UpdateFormulaMembersData, UpdateFormulaMembersError, UpdateFormulaMembersResponse, UpdateNominationData, UpdateNominationError, UpdateNominationResponse, UpdateOfficeTypeData, UpdateOfficeTypeError, UpdateOfficeTypeResponse, UpdatePartyData, UpdatePartyError, UpdatePartyResponse, UpdatePeaceSettingsData, UpdatePeaceSettingsError, UpdatePeaceSettingsResponse, UpdatePersonData, UpdatePersonError, UpdatePersonResponse, UpdateProcessData, UpdateProcessError, UpdateProcessResponse, UpdateRoleData, UpdateRoleError, UpdateRoleResponse, UpdateUserData, UpdateUserError, UpdateUserResponse, ValidateMemberData, ValidateMemberError, ValidateMemberResponse, ValidateNominationData, ValidateNominationError, ValidateNominationResponse, VerifyMfaData, VerifyMfaError, VerifyMfaResponse } from '../types.gen';
 
 export type QueryKey<TOptions extends Options> = [
     Pick<TOptions, 'baseUrl' | 'body' | 'headers' | 'path' | 'query'> & {
@@ -1155,6 +1155,41 @@ export const getGeoNodeChildrenOptions = (options: Options<GetGeoNodeChildrenDat
     queryKey: getGeoNodeChildrenQueryKey(options)
 });
 
+export const listPrivacyNoticesQueryKey = (options?: Options<ListPrivacyNoticesData>) => createQueryKey('listPrivacyNotices', options);
+
+/**
+ * Avisos de privacidad y sus versiones
+ */
+export const listPrivacyNoticesOptions = (options?: Options<ListPrivacyNoticesData>) => queryOptions<ListPrivacyNoticesResponse, ListPrivacyNoticesError, ListPrivacyNoticesResponse, ReturnType<typeof listPrivacyNoticesQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listPrivacyNotices({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listPrivacyNoticesQueryKey(options)
+});
+
+/**
+ * Publicar una versión nueva de un aviso de privacidad
+ */
+export const publishPrivacyNoticeMutation = (options?: Partial<Options<PublishPrivacyNoticeData>>): UseMutationOptions<PublishPrivacyNoticeResponse, PublishPrivacyNoticeError, Options<PublishPrivacyNoticeData>> => {
+    const mutationOptions: UseMutationOptions<PublishPrivacyNoticeResponse, PublishPrivacyNoticeError, Options<PublishPrivacyNoticeData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await publishPrivacyNotice({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
 export const searchPeopleQueryKey = (options?: Options<SearchPeopleData>) => createQueryKey('searchPeople', options);
 
 /**
@@ -1884,6 +1919,450 @@ export const substituteFormulaMutation = (options?: Partial<Options<SubstituteFo
     const mutationOptions: UseMutationOptions<SubstituteFormulaResponse, SubstituteFormulaError, Options<SubstituteFormulaData>> = {
         mutationFn: async (fnOptions) => {
             const { data } = await substituteFormula({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const listParticipationLevelsQueryKey = (options?: Options<ListParticipationLevelsData>) => createQueryKey('listParticipationLevels', options);
+
+/**
+ * Niveles de participación
+ */
+export const listParticipationLevelsOptions = (options?: Options<ListParticipationLevelsData>) => queryOptions<ListParticipationLevelsResponse, ListParticipationLevelsError, ListParticipationLevelsResponse, ReturnType<typeof listParticipationLevelsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listParticipationLevels({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listParticipationLevelsQueryKey(options)
+});
+
+export const listLevelGoalsQueryKey = (options?: Options<ListLevelGoalsData>) => createQueryKey('listLevelGoals', options);
+
+/**
+ * Metas de reclutamiento
+ */
+export const listLevelGoalsOptions = (options?: Options<ListLevelGoalsData>) => queryOptions<ListLevelGoalsResponse, ListLevelGoalsError, ListLevelGoalsResponse, ReturnType<typeof listLevelGoalsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listLevelGoals({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listLevelGoalsQueryKey(options)
+});
+
+/**
+ * Fijar la meta de un nivel (nacional o por estado)
+ */
+export const setLevelGoalMutation = (options?: Partial<Options<SetLevelGoalData>>): UseMutationOptions<SetLevelGoalResponse, SetLevelGoalError, Options<SetLevelGoalData>> => {
+    const mutationOptions: UseMutationOptions<SetLevelGoalResponse, SetLevelGoalError, Options<SetLevelGoalData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await setLevelGoal({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const listHouseGoalsQueryKey = (options?: Options<ListHouseGoalsData>) => createQueryKey('listHouseGoals', options);
+
+/**
+ * Metas de integrantes por casa
+ */
+export const listHouseGoalsOptions = (options?: Options<ListHouseGoalsData>) => queryOptions<ListHouseGoalsResponse, ListHouseGoalsError, ListHouseGoalsResponse, ReturnType<typeof listHouseGoalsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listHouseGoals({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listHouseGoalsQueryKey(options)
+});
+
+/**
+ * Fijar la meta de integrantes por casa
+ */
+export const setHouseGoalMutation = (options?: Partial<Options<SetHouseGoalData>>): UseMutationOptions<SetHouseGoalResponse, SetHouseGoalError, Options<SetHouseGoalData>> => {
+    const mutationOptions: UseMutationOptions<SetHouseGoalResponse, SetHouseGoalError, Options<SetHouseGoalData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await setHouseGoal({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getPeaceSettingsQueryKey = (options?: Options<GetPeaceSettingsData>) => createQueryKey('getPeaceSettings', options);
+
+/**
+ * Configuración del módulo
+ */
+export const getPeaceSettingsOptions = (options?: Options<GetPeaceSettingsData>) => queryOptions<GetPeaceSettingsResponse, GetPeaceSettingsError, GetPeaceSettingsResponse, ReturnType<typeof getPeaceSettingsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getPeaceSettings({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getPeaceSettingsQueryKey(options)
+});
+
+/**
+ * Cambiar la configuración
+ */
+export const updatePeaceSettingsMutation = (options?: Partial<Options<UpdatePeaceSettingsData>>): UseMutationOptions<UpdatePeaceSettingsResponse, UpdatePeaceSettingsError, Options<UpdatePeaceSettingsData>> => {
+    const mutationOptions: UseMutationOptions<UpdatePeaceSettingsResponse, UpdatePeaceSettingsError, Options<UpdatePeaceSettingsData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await updatePeaceSettings({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const listZoneCoordinatorsQueryKey = (options?: Options<ListZoneCoordinatorsData>) => createQueryKey('listZoneCoordinators', options);
+
+/**
+ * Coordinadores de zona (crédito de casas sin Embajador)
+ */
+export const listZoneCoordinatorsOptions = (options?: Options<ListZoneCoordinatorsData>) => queryOptions<ListZoneCoordinatorsResponse, ListZoneCoordinatorsError, ListZoneCoordinatorsResponse, ReturnType<typeof listZoneCoordinatorsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listZoneCoordinators({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listZoneCoordinatorsQueryKey(options)
+});
+
+/**
+ * Asignar un coordinador de zona
+ */
+export const createZoneCoordinatorMutation = (options?: Partial<Options<CreateZoneCoordinatorData>>): UseMutationOptions<CreateZoneCoordinatorResponse, CreateZoneCoordinatorError, Options<CreateZoneCoordinatorData>> => {
+    const mutationOptions: UseMutationOptions<CreateZoneCoordinatorResponse, CreateZoneCoordinatorError, Options<CreateZoneCoordinatorData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createZoneCoordinator({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Terminar la vigencia de un coordinador de zona
+ */
+export const endZoneCoordinatorMutation = (options?: Partial<Options<EndZoneCoordinatorData>>): UseMutationOptions<EndZoneCoordinatorResponse, EndZoneCoordinatorError, Options<EndZoneCoordinatorData>> => {
+    const mutationOptions: UseMutationOptions<EndZoneCoordinatorResponse, EndZoneCoordinatorError, Options<EndZoneCoordinatorData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await endZoneCoordinator({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const searchMembersQueryKey = (options?: Options<SearchMembersData>) => createQueryKey('searchMembers', options);
+
+/**
+ * Buscar pacificadores
+ */
+export const searchMembersOptions = (options?: Options<SearchMembersData>) => queryOptions<SearchMembersResponse, SearchMembersError, SearchMembersResponse, ReturnType<typeof searchMembersQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await searchMembers({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: searchMembersQueryKey(options)
+});
+
+export const searchMembersInfiniteQueryKey = (options?: Options<SearchMembersData>): QueryKey<Options<SearchMembersData>> => createQueryKey('searchMembers', options, true);
+
+/**
+ * Buscar pacificadores
+ */
+export const searchMembersInfiniteOptions = (options?: Options<SearchMembersData>) => {
+    const opts = infiniteQueryOptions<SearchMembersResponse, SearchMembersError, InfiniteData<SearchMembersResponse>, QueryKey<Options<SearchMembersData>>, string | null | Pick<QueryKey<Options<SearchMembersData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<SearchMembersData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    cursor: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await searchMembers({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: searchMembersInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
+
+/**
+ * Inscribir pacificador
+ */
+export const enrollMemberMutation = (options?: Partial<Options<EnrollMemberData>>): UseMutationOptions<EnrollMemberResponse, EnrollMemberError, Options<EnrollMemberData>> => {
+    const mutationOptions: UseMutationOptions<EnrollMemberResponse, EnrollMemberError, Options<EnrollMemberData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await enrollMember({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getMemberQueryKey = (options: Options<GetMemberData>) => createQueryKey('getMember', options);
+
+/**
+ * Detalle de pacificador
+ */
+export const getMemberOptions = (options: Options<GetMemberData>) => queryOptions<GetMemberResponse, GetMemberError, GetMemberResponse, ReturnType<typeof getMemberQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getMember({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getMemberQueryKey(options)
+});
+
+export const listMemberChildrenQueryKey = (options: Options<ListMemberChildrenData>) => createQueryKey('listMemberChildren', options);
+
+/**
+ * Reclutas directos (los de fuera del alcance, solo en total)
+ */
+export const listMemberChildrenOptions = (options: Options<ListMemberChildrenData>) => queryOptions<ListMemberChildrenResponse, ListMemberChildrenError, ListMemberChildrenResponse, ReturnType<typeof listMemberChildrenQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listMemberChildren({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listMemberChildrenQueryKey(options)
+});
+
+export const listMemberChildrenInfiniteQueryKey = (options: Options<ListMemberChildrenData>): QueryKey<Options<ListMemberChildrenData>> => createQueryKey('listMemberChildren', options, true);
+
+/**
+ * Reclutas directos (los de fuera del alcance, solo en total)
+ */
+export const listMemberChildrenInfiniteOptions = (options: Options<ListMemberChildrenData>) => {
+    const opts = infiniteQueryOptions<ListMemberChildrenResponse, ListMemberChildrenError, InfiniteData<ListMemberChildrenResponse>, QueryKey<Options<ListMemberChildrenData>>, string | null | Pick<QueryKey<Options<ListMemberChildrenData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<ListMemberChildrenData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    cursor: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await listMemberChildren({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: listMemberChildrenInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
+
+export const getMemberHistoryQueryKey = (options: Options<GetMemberHistoryData>) => createQueryKey('getMemberHistory', options);
+
+/**
+ * Historial de niveles y reclutadores
+ */
+export const getMemberHistoryOptions = (options: Options<GetMemberHistoryData>) => queryOptions<GetMemberHistoryResponse, GetMemberHistoryError, GetMemberHistoryResponse, ReturnType<typeof getMemberHistoryQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getMemberHistory({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getMemberHistoryQueryKey(options)
+});
+
+/**
+ * Validar inscripción pendiente
+ */
+export const validateMemberMutation = (options?: Partial<Options<ValidateMemberData>>): UseMutationOptions<ValidateMemberResponse, ValidateMemberError, Options<ValidateMemberData>> => {
+    const mutationOptions: UseMutationOptions<ValidateMemberResponse, ValidateMemberError, Options<ValidateMemberData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await validateMember({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Rechazar inscripción pendiente
+ */
+export const rejectMemberMutation = (options?: Partial<Options<RejectMemberData>>): UseMutationOptions<RejectMemberResponse, RejectMemberError, Options<RejectMemberData>> => {
+    const mutationOptions: UseMutationOptions<RejectMemberResponse, RejectMemberError, Options<RejectMemberData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await rejectMember({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Registrar que el pacificador deja el movimiento
+ */
+export const memberLeavesMutation = (options?: Partial<Options<MemberLeavesData>>): UseMutationOptions<MemberLeavesResponse, MemberLeavesError, Options<MemberLeavesData>> => {
+    const mutationOptions: UseMutationOptions<MemberLeavesResponse, MemberLeavesError, Options<MemberLeavesData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await memberLeaves({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Cambiar el nivel de participación
+ */
+export const changeMemberLevelMutation = (options?: Partial<Options<ChangeMemberLevelData>>): UseMutationOptions<ChangeMemberLevelResponse, ChangeMemberLevelError, Options<ChangeMemberLevelData>> => {
+    const mutationOptions: UseMutationOptions<ChangeMemberLevelResponse, ChangeMemberLevelError, Options<ChangeMemberLevelData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await changeMemberLevel({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Cambiar el reclutador (mueve toda su red)
+ */
+export const reassignMemberMutation = (options?: Partial<Options<ReassignMemberData>>): UseMutationOptions<ReassignMemberResponse, ReassignMemberError, Options<ReassignMemberData>> => {
+    const mutationOptions: UseMutationOptions<ReassignMemberResponse, ReassignMemberError, Options<ReassignMemberData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await reassignMember({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const listUserBranchesQueryKey = (options: Options<ListUserBranchesData>) => createQueryKey('listUserBranches', options);
+
+/**
+ * Ramas asignadas a un usuario (alcance por rama)
+ */
+export const listUserBranchesOptions = (options: Options<ListUserBranchesData>) => queryOptions<ListUserBranchesResponse, ListUserBranchesError, ListUserBranchesResponse, ReturnType<typeof listUserBranchesQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listUserBranches({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listUserBranchesQueryKey(options)
+});
+
+/**
+ * Reemplazar las ramas de un usuario
+ */
+export const setUserBranchesMutation = (options?: Partial<Options<SetUserBranchesData>>): UseMutationOptions<SetUserBranchesResponse, SetUserBranchesError, Options<SetUserBranchesData>> => {
+    const mutationOptions: UseMutationOptions<SetUserBranchesResponse, SetUserBranchesError, Options<SetUserBranchesData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await setUserBranches({
                 ...options,
                 ...fnOptions,
                 throwOnError: true

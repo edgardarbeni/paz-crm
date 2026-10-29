@@ -6,6 +6,7 @@ address falls in the scope, when they belong to a nomination the user can see, o
 address has been captured yet (so capture is possible). Documented as an assumption.
 """
 
+import hashlib
 import json
 import re
 import uuid
@@ -24,7 +25,14 @@ from app.core.errors import BadRequestError, ConflictError, ForbiddenError, NotF
 from app.core.pagination import CursorPage, PageParams, paginate, parse_sort
 from app.modules.identity.services.scopes import GeoScope
 from app.modules.people import curp as curp_rules
-from app.modules.people.models import Person, PersonAddress, PersonContact, PrivacyConsent
+from app.modules.people import hooks
+from app.modules.people.models import (
+    Person,
+    PersonAddress,
+    PersonContact,
+    PrivacyConsent,
+    PrivacyNotice,
+)
 from app.modules.people.schemas import AddressIn, ConsentIn, ContactIn, PersonCreate, PersonUpdate
 
 CURP_CONTEXT = "people.persons.curp"
@@ -284,6 +292,24 @@ async def create_person(
     *,
     can_accept_incoherence: bool,
 ) -> PersonView:
+    view = await build_person(db, crypto, geo, body, can_accept_incoherence=can_accept_incoherence)
+    await db.commit()
+    await db.refresh(view.person)
+    return view
+
+
+async def build_person(
+    db: AsyncSession,
+    crypto: Crypto,
+    geo: GeoScope,
+    body: PersonCreate,
+    *,
+    can_accept_incoherence: bool,
+    address_outside_scope: bool = False,
+) -> PersonView:
+    """Creates the person and flushes without committing, so another module can write in the
+    same transaction. `address_outside_scope` skips the D-66 address rule; only a module with
+    its own scope rule may pass it (D-83: enrollment inside a branch)."""
     person = Person(
         given_names=body.given_names,
         paternal_surname=body.paternal_surname,
@@ -302,7 +328,8 @@ async def create_person(
     await _ensure_curp_unique(db, person)
     if body.address:
         await _validate_geography(db, body.address)
-        await _ensure_address_in_scope(db, geo, body.address)
+        if not address_outside_scope:
+            await _ensure_address_in_scope(db, geo, body.address)
     db.add(person)
     await db.flush()
     person_id = pk(person)
@@ -310,8 +337,7 @@ async def create_person(
     db.add_all(contacts)
     addresses = [_address_row(person_id, crypto, body.address)] if body.address else []
     db.add_all(addresses)
-    await db.commit()
-    await db.refresh(person)
+    await db.flush()
     return PersonView(person=person, contacts=contacts, addresses=addresses, warnings=warnings)
 
 
@@ -370,7 +396,10 @@ async def update_person(
         for address in await _live(db, PersonAddress, person_id):
             address.deleted_at = now
             address.is_primary = False
-        db.add(_address_row(person_id, crypto, body.address))
+        replacement = _address_row(person_id, crypto, body.address)
+        db.add(replacement)
+        await db.flush()
+        await hooks.address_changed(db, person_id, replacement)
     await db.commit()
     view = await get_person(db, geo, person_id)
     view.warnings = warnings
@@ -378,7 +407,13 @@ async def update_person(
 
 
 async def get_person(db: AsyncSession, geo: GeoScope, person_id: uuid.UUID) -> PersonView:
-    person = await visible_person(db, geo, person_id)
+    return await person_view(db, await visible_person(db, geo, person_id))
+
+
+async def person_view(db: AsyncSession, person: Person) -> PersonView:
+    """Live contacts and addresses of an already authorized person (also a deleted one, for
+    modules that keep records of it under their own scope rule)."""
+    person_id = pk(person)
     contacts = (
         (
             await db.execute(
@@ -494,6 +529,7 @@ async def delete_person(db: AsyncSession, geo: GeoScope, person_id: uuid.UUID) -
         )
     person.deleted_at = datetime.now(UTC)
     person.purge_after = date.today() + timedelta(days=PURGE_RETENTION_DAYS)
+    await hooks.person_deleted(db, person_id)
     await db.commit()
     return person.purge_after
 
@@ -512,6 +548,89 @@ async def add_consent(
     db.add(consent)
     await db.commit()
     return consent
+
+
+async def record_consent(
+    db: AsyncSession,
+    person_id: uuid.UUID,
+    notice: PrivacyNotice,
+    *,
+    channel: str,
+    evidence_uri: str | None = None,
+) -> PrivacyConsent:
+    """Consent on a catalogued notice, flushed in the caller's transaction (D-82)."""
+    consent = PrivacyConsent(
+        person_id=person_id,
+        notice_id=notice.id,
+        notice_code=notice.code,
+        notice_version=notice.version,
+        notice_text_sha256=notice.body_sha256,
+        channel=channel,
+        evidence_uri=evidence_uri,
+        accepted_at=datetime.now(UTC),
+    )
+    db.add(consent)
+    await db.flush()
+    return consent
+
+
+# --- privacy notices (D-82) -------------------------------------------------------------------
+
+
+async def current_notice(db: AsyncSession, code: str) -> PrivacyNotice | None:
+    return (
+        await db.execute(
+            select(PrivacyNotice).where(
+                col(PrivacyNotice.code) == code,
+                col(PrivacyNotice.valid_to).is_(None),
+                col(PrivacyNotice.deleted_at).is_(None),
+            )
+        )
+    ).scalar_one_or_none()
+
+
+async def list_notices(db: AsyncSession, code: str | None = None) -> list[PrivacyNotice]:
+    statement = select(PrivacyNotice).where(col(PrivacyNotice.deleted_at).is_(None))
+    if code:
+        statement = statement.where(col(PrivacyNotice.code) == code)
+    rows = await db.execute(
+        statement.order_by(col(PrivacyNotice.code), col(PrivacyNotice.valid_from).desc())
+    )
+    return list(rows.scalars())
+
+
+async def publish_notice(
+    db: AsyncSession, *, code: str, version: str, title: str, body: str, is_sample: bool = False
+) -> PrivacyNotice:
+    """New current version of a notice; the previous one stays in the catalog, closed."""
+    duplicate = (
+        await db.execute(
+            select(col(PrivacyNotice.id)).where(
+                col(PrivacyNotice.code) == code,
+                col(PrivacyNotice.version) == version,
+                col(PrivacyNotice.deleted_at).is_(None),
+            )
+        )
+    ).first()
+    if duplicate is not None:
+        raise ConflictError(f"Ya existe la versión «{version}» del aviso «{code}».")
+    now = datetime.now(UTC)
+    previous = await current_notice(db, code)
+    if previous is not None:
+        previous.valid_to = now
+        await db.flush()
+    notice = PrivacyNotice(
+        code=code,
+        version=version,
+        title=title,
+        body=body,
+        body_sha256=hashlib.sha256(body.encode()).hexdigest(),
+        is_sample=is_sample,
+        valid_from=now,
+    )
+    db.add(notice)
+    await db.commit()
+    return notice
 
 
 async def list_consents(
