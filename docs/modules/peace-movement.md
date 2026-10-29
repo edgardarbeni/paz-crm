@@ -1,6 +1,6 @@
 # Módulo: Movimiento de Paz
 
-**Estado:** especificación aprobada; ADR D-82 a D-92 aceptadas el 2026-10-29; sin implementar.
+**Estado:** fases 0a, 0b y 1 implementadas (pacificadores, metas, coordinadores de zona y alcance por rama); casas, agregados, entradas masivas y panel pendientes. ADR D-82 a D-95.
 **Paquete propuesto:** `backend/app/modules/peace_movement` · esquema `peace_movement` · API
 `/api/v1/peace-movement`.
 **Brief:** respuestas de Darío del 2026-10-29. Las reglas que eran suposiciones quedaron
@@ -91,6 +91,7 @@ Dos metas vigentes no pueden empalmarse para el mismo nivel y estado (incluido e
 | `registered_by_user_id` | Usuario que hizo la operación. Nulo en inscripciones públicas por enlace |
 | `channel` | `panel` · `referral_link` · `import` · `field_app` |
 | `status` | `pending_validation` · `active` · `rejected` · `left` (dejó el MP; la persona sigue en `people`) · `withdrawn` (baja ARCO de la persona, D-69) |
+| `status_reason`, `left_on` | Motivo del rechazo, de la salida o de la baja, y fecha de salida |
 | `validated_by_user_id`, `validated_at` | Quién validó y cuándo |
 | `referral_code` | Código único y no adivinable para su enlace y QR personal |
 | `tree_id` | Entero interno (bigint de secuencia) usado como etiqueta en la ruta; la PK sigue siendo UUIDv7 (D-91) |
@@ -403,6 +404,23 @@ Reglas:
 
 **Eventos:** no hay bus de eventos. `network_changes` funciona como tabla de salida (outbox) para los agregados y puede alimentar notificaciones futuras.
 
+## API (fase 1)
+
+Bajo `/api/v1/peace-movement`, con el alcance de pacificadores (D-83) en todas las lecturas:
+
+| Ruta | Permiso | Uso |
+|---|---|---|
+| `GET /levels` · `GET /level-goals` · `GET /house-goals` · `GET /settings` · `GET /zone-coordinators` | `member.read` | Catálogos, metas (`state_id`, `history`), configuración y coordinadores |
+| `POST /level-goals` · `POST /house-goals` · `PUT /settings` · `POST /zone-coordinators` · `POST /zone-coordinators/{id}/end` | `goal.manage` | Metas con historial, umbrales y zonas |
+| `GET /members` · `GET /members/{id}` · `/children` · `/history` | `member.read` | Búsqueda (estatus, nivel, estado, reclutador, nombre), detalle con avance y semáforo (queda en `audit.access_log`), reclutas directos con los ocultos solo en total |
+| `POST /members` · `POST /members/{id}/level` | `member.write` | Inscripción desde el panel (persona nueva o existente, consentimiento del aviso vigente) y cambio de nivel |
+| `POST /members/{id}/validate` · `/reject` · `/leave` | `member.validate` | Validar o rechazar pendientes y registrar salidas |
+| `POST /members/{id}/reassign` | `member.reassign` | Cambiar reclutador con toda su red |
+| `GET` / `PUT /users/{id}/branches` | `identity.user.read` / `identity.user.assign_scopes` | Alcance por rama con antiescalamiento |
+
+Avisos de privacidad: `GET` y `POST /api/v1/people/privacy-notices` (`people.notice.manage` para
+publicar).
+
 ## Requisitos de entregas posteriores (no implementar ahora)
 
 ### Portal de pacificadores
@@ -461,7 +479,7 @@ siguiente.
 |---|---|---|
 | **0a. Bitácora** ✅ | Las cuatro escrituras Core auditadas (diferencia 1); `Person` con `__audit_masked__` (diferencia 10); `audit.access_log` y `record_access`; auditoría por lote (`record_bulk`); consulta de la bitácora con alcance (diferencia 3) | D-89, D-90, D-93 |
 | **0b. Infraestructura** ✅ | Contenedor `scheduler` (supercronic) con `purge` y `ensure-partitions` y candado consultivo; almacenamiento compatible con S3 (SeaweedFS en desarrollo, D-94); registro de módulos (`module.py`) y test de la copia de permisos del panel (diferencia 2) | D-84, D-94 |
-| **1. Pacificadores** | En `people`: `privacy_notices`, consentimientos con `notice_code` y canales nuevos, baja ARCO que marca `withdrawn`, purga sin romper nodos. Esquema `peace_movement` con `ltree`; catálogos, metas, `settings`, coordinadores de zona; `members` con historiales; alcance por rama; API y permisos | D-82, D-83, D-91, D-92 |
+| **1. Pacificadores** ✅ | En `people`: `privacy_notices`, consentimientos con `notice_code` y canales nuevos, baja ARCO que marca `withdrawn`, purga sin romper nodos. Esquema `peace_movement` con `ltree`; catálogos, metas, `settings`, coordinadores de zona; `members` con historiales; alcance por rama; API y permisos | D-82, D-83, D-91, D-92, D-95 |
 | **2. Casas de Paz** | Casas con ubicación aproximada y exacta cifrada, integrantes, reuniones con invitados, fotos, crédito y consolidación | D-85, D-92 |
 | **3. Agregados** | `network_changes`, `member_network_stats`, `enrollment_daily_counts`, tarea del `scheduler`, estadísticas y reportes; semilla de 1 millón y medición de las metas de rendimiento | D-84, D-90 |
 | **4. Entradas masivas y públicas** | Inscripción pública con prueba de trabajo, carga por lotes idempotente e importación con dry-run | D-86, D-90 |

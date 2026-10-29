@@ -261,6 +261,55 @@ export type AuthenticatedResponse = {
 };
 
 /**
+ * BranchOut
+ */
+export type BranchOut = {
+    /**
+     * Member Id
+     */
+    member_id: string;
+    person: PersonSummary;
+    /**
+     * Depth
+     */
+    depth: number;
+};
+
+/**
+ * BranchesIn
+ */
+export type BranchesIn = {
+    /**
+     * Member Ids
+     */
+    member_ids: Array<string>;
+};
+
+/**
+ * ChildrenPage
+ */
+export type ChildrenPage = {
+    /**
+     * Items
+     */
+    items: Array<MemberSummary>;
+    /**
+     * Next Cursor
+     */
+    next_cursor: string | null;
+    /**
+     * Has More
+     */
+    has_more: boolean;
+    /**
+     * Hidden
+     *
+     * Reclutas directos fuera del alcance: solo el total.
+     */
+    hidden: number;
+};
+
+/**
  * CoalitionIn
  */
 export type CoalitionIn = {
@@ -300,6 +349,23 @@ export type CoalitionOut = {
 };
 
 /**
+ * ConsentCapture
+ *
+ * Acceptance of the current Peace Movement notice (D-82); the notice text comes from the
+ * catalog, so only how it was captured travels here.
+ */
+export type ConsentCapture = {
+    /**
+     * Channel
+     */
+    channel?: 'panel' | 'paper';
+    /**
+     * Evidence Uri
+     */
+    evidence_uri?: string | null;
+};
+
+/**
  * ConsentIn
  */
 export type ConsentIn = {
@@ -325,6 +391,10 @@ export type ConsentOut = {
      * Id
      */
     id: string;
+    /**
+     * Notice Code
+     */
+    notice_code: string;
     /**
      * Notice Version
      */
@@ -486,6 +556,26 @@ export type CursorPageImportRunOut = {
 };
 
 /**
+ * CursorPage[MemberSummary]
+ */
+export type CursorPageMemberSummary = {
+    /**
+     * Items
+     */
+    items: Array<MemberSummary>;
+    /**
+     * Next Cursor
+     *
+     * Pasar en `cursor` para obtener la siguiente página.
+     */
+    next_cursor?: string | null;
+    /**
+     * Has More
+     */
+    has_more: boolean;
+};
+
+/**
  * CursorPage[NominationSummary]
  */
 export type CursorPageNominationSummary = {
@@ -556,6 +646,30 @@ export type DeletionOut = {
 };
 
 /**
+ * DirectCounts
+ */
+export type DirectCounts = {
+    /**
+     * Active
+     */
+    active: number;
+    /**
+     * Pending
+     */
+    pending: number;
+    /**
+     * Total
+     */
+    total: number;
+    /**
+     * Hidden
+     *
+     * Reclutas directos fuera del alcance del usuario.
+     */
+    hidden: number;
+};
+
+/**
  * ElectionLevel
  */
 export type ElectionLevel = 'federal' | 'local';
@@ -564,6 +678,39 @@ export type ElectionLevel = 'federal' | 'local';
  * ElectionRegime
  */
 export type ElectionRegime = 'party_based' | 'normative_system';
+
+/**
+ * EnrollmentIn
+ */
+export type EnrollmentIn = {
+    /**
+     * Person Id
+     *
+     * Persona existente; excluyente con `person`.
+     */
+    person_id?: string | null;
+    /**
+     * Persona nueva. Si la CURP ya existe, se reutiliza esa persona sin cambiar sus datos.
+     */
+    person?: PersonCreate | null;
+    /**
+     * Level Id
+     */
+    level_id: string;
+    /**
+     * Recruiter Member Id
+     */
+    recruiter_member_id?: string | null;
+    /**
+     * Origin
+     */
+    origin?: 'recruiter' | 'structure' | 'event' | 'campaign';
+    /**
+     * Origin Detail
+     */
+    origin_detail?: string | null;
+    consent: ConsentCapture;
+};
 
 /**
  * FieldViolation
@@ -666,8 +813,8 @@ export type FormulaOut = {
      * Substitution Reason
      */
     substitution_reason: string | null;
-    owner: MemberOut | null;
-    substitute: MemberOut | null;
+    owner: AppModulesCandidaciesSchemasMemberOut | null;
+    substitute: AppModulesCandidaciesSchemasMemberOut | null;
 };
 
 /**
@@ -918,6 +1065,52 @@ export type HealthStatus = {
 };
 
 /**
+ * HouseGoalIn
+ */
+export type HouseGoalIn = {
+    /**
+     * State Id
+     *
+     * Nulo = meta nacional.
+     */
+    state_id?: string | null;
+    /**
+     * Member Goal
+     */
+    member_goal: number;
+    /**
+     * Valid From
+     */
+    valid_from?: string | null;
+};
+
+/**
+ * HouseGoalOut
+ */
+export type HouseGoalOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * State Id
+     */
+    state_id: string | null;
+    /**
+     * Member Goal
+     */
+    member_goal: number;
+    /**
+     * Valid From
+     */
+    valid_from: string;
+    /**
+     * Valid To
+     */
+    valid_to: string | null;
+};
+
+/**
  * ImportIssueOut
  */
 export type ImportIssueOut = {
@@ -1076,6 +1269,140 @@ export type InvitationTokenRequest = {
 };
 
 /**
+ * LevelChangeIn
+ */
+export type LevelChangeIn = {
+    /**
+     * Level Id
+     */
+    level_id: string;
+    /**
+     * Reason
+     */
+    reason?: string | null;
+};
+
+/**
+ * LevelChangeOut
+ */
+export type LevelChangeOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * From Level Id
+     */
+    from_level_id: string;
+    /**
+     * To Level Id
+     */
+    to_level_id: string;
+    /**
+     * Changed By User Id
+     */
+    changed_by_user_id: string | null;
+    /**
+     * Changed At
+     */
+    changed_at: string;
+    /**
+     * Reason
+     */
+    reason: string | null;
+};
+
+/**
+ * LevelGoalIn
+ */
+export type LevelGoalIn = {
+    /**
+     * Level Id
+     */
+    level_id: string;
+    /**
+     * State Id
+     *
+     * Nulo = meta nacional.
+     */
+    state_id?: string | null;
+    /**
+     * Recruit Goal
+     */
+    recruit_goal: number;
+    /**
+     * House Goal
+     */
+    house_goal?: number | null;
+    /**
+     * Valid From
+     *
+     * Por defecto, hoy.
+     */
+    valid_from?: string | null;
+};
+
+/**
+ * LevelGoalOut
+ */
+export type LevelGoalOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Level Id
+     */
+    level_id: string;
+    /**
+     * State Id
+     */
+    state_id: string | null;
+    /**
+     * Recruit Goal
+     */
+    recruit_goal: number;
+    /**
+     * House Goal
+     */
+    house_goal: number | null;
+    /**
+     * Valid From
+     */
+    valid_from: string;
+    /**
+     * Valid To
+     */
+    valid_to: string | null;
+};
+
+/**
+ * LevelOut
+ */
+export type LevelOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Rank
+     */
+    rank: number;
+    /**
+     * Sort Order
+     */
+    sort_order: number;
+};
+
+/**
  * LoginRequest
  */
 export type LoginRequest = {
@@ -1141,21 +1468,56 @@ export type MeResponse = {
 };
 
 /**
- * MemberOut
+ * MemberHistory
  */
-export type MemberOut = {
+export type MemberHistory = {
     /**
-     * Person Id
+     * Levels
      */
-    person_id: string;
+    levels: Array<LevelChangeOut>;
     /**
-     * Full Name
+     * Recruiters
      */
-    full_name: string;
+    recruiters: Array<RecruiterChangeOut>;
+};
+
+/**
+ * MemberSummary
+ */
+export type MemberSummary = {
     /**
-     * Sex
+     * Id
      */
-    sex: string | null;
+    id: string;
+    person: PersonSummary;
+    /**
+     * Level Id
+     */
+    level_id: string;
+    /**
+     * Status
+     */
+    status: string;
+    /**
+     * Depth
+     */
+    depth: number;
+    /**
+     * State Id
+     */
+    state_id: string;
+    /**
+     * Section Id
+     */
+    section_id: string;
+    /**
+     * Recruited By Member Id
+     */
+    recruited_by_member_id: string | null;
+    /**
+     * Enrolled On
+     */
+    enrolled_on: string;
 };
 
 /**
@@ -1449,6 +1811,72 @@ export type NominationUpdate = {
      * Notes
      */
     notes?: string | null;
+};
+
+/**
+ * NoticeIn
+ */
+export type NoticeIn = {
+    /**
+     * Code
+     *
+     * `general` o `peace_movement` (aviso del MP).
+     */
+    code: string;
+    /**
+     * Version
+     */
+    version: string;
+    /**
+     * Title
+     */
+    title: string;
+    /**
+     * Body
+     */
+    body: string;
+};
+
+/**
+ * NoticeOut
+ */
+export type NoticeOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Version
+     */
+    version: string;
+    /**
+     * Title
+     */
+    title: string;
+    /**
+     * Body
+     */
+    body: string;
+    /**
+     * Body Sha256
+     */
+    body_sha256: string;
+    /**
+     * Is Sample
+     */
+    is_sample: boolean;
+    /**
+     * Valid From
+     */
+    valid_from: string;
+    /**
+     * Valid To
+     */
+    valid_to: string | null;
 };
 
 /**
@@ -2133,6 +2561,30 @@ export type ReadinessStatus = {
 };
 
 /**
+ * ReasonIn
+ */
+export type ReasonIn = {
+    /**
+     * Reason
+     */
+    reason: string;
+};
+
+/**
+ * ReassignIn
+ */
+export type ReassignIn = {
+    /**
+     * Recruiter Member Id
+     */
+    recruiter_member_id: string;
+    /**
+     * Reason
+     */
+    reason: string;
+};
+
+/**
  * RecoveryCodesRequest
  */
 export type RecoveryCodesRequest = {
@@ -2150,6 +2602,40 @@ export type RecoveryCodesResponse = {
      * Recovery Codes
      */
     recovery_codes: Array<string>;
+};
+
+/**
+ * RecruiterChangeOut
+ */
+export type RecruiterChangeOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * From Member Id
+     */
+    from_member_id: string | null;
+    /**
+     * To Member Id
+     */
+    to_member_id: string;
+    /**
+     * Changed By User Id
+     */
+    changed_by_user_id: string | null;
+    /**
+     * Changed At
+     */
+    changed_at: string;
+    /**
+     * Reason
+     */
+    reason: string;
+    /**
+     * Subtree Size
+     */
+    subtree_size: number;
 };
 
 /**
@@ -2364,6 +2850,42 @@ export type SessionOut = {
      * Current
      */
     current?: boolean;
+};
+
+/**
+ * SettingsIn
+ */
+export type SettingsIn = {
+    /**
+     * Traffic Light Yellow Pct
+     */
+    traffic_light_yellow_pct: number;
+    /**
+     * Traffic Light Green Pct
+     */
+    traffic_light_green_pct: number;
+    /**
+     * Depth Alert Threshold
+     */
+    depth_alert_threshold: number;
+};
+
+/**
+ * SettingsOut
+ */
+export type SettingsOut = {
+    /**
+     * Traffic Light Yellow Pct
+     */
+    traffic_light_yellow_pct: number;
+    /**
+     * Traffic Light Green Pct
+     */
+    traffic_light_green_pct: number;
+    /**
+     * Depth Alert Threshold
+     */
+    depth_alert_threshold: number;
 };
 
 /**
@@ -2705,6 +3227,187 @@ export type ViolationOut = {
      * Formula Id
      */
     formula_id?: string | null;
+};
+
+/**
+ * ZoneCoordinatorIn
+ */
+export type ZoneCoordinatorIn = {
+    /**
+     * User Id
+     */
+    user_id: string;
+    /**
+     * State Id
+     */
+    state_id: string;
+    /**
+     * Nodes
+     */
+    nodes: Array<ZoneNodeIn>;
+    /**
+     * Valid From
+     */
+    valid_from?: string | null;
+};
+
+/**
+ * ZoneCoordinatorOut
+ */
+export type ZoneCoordinatorOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * User Id
+     */
+    user_id: string;
+    /**
+     * State Id
+     */
+    state_id: string;
+    /**
+     * Valid From
+     */
+    valid_from: string;
+    /**
+     * Valid To
+     */
+    valid_to: string | null;
+    /**
+     * Nodes
+     */
+    nodes: Array<ZoneNodeOut>;
+    /**
+     * Section Count
+     */
+    section_count: number;
+};
+
+/**
+ * ZoneNodeIn
+ */
+export type ZoneNodeIn = {
+    /**
+     * Level
+     */
+    level: 'state' | 'federal_district' | 'local_district' | 'municipality' | 'section';
+    /**
+     * Node Id
+     */
+    node_id: string;
+};
+
+/**
+ * ZoneNodeOut
+ */
+export type ZoneNodeOut = {
+    /**
+     * Level
+     */
+    level: 'state' | 'federal_district' | 'local_district' | 'municipality' | 'section';
+    /**
+     * Node Id
+     */
+    node_id: string;
+};
+
+/**
+ * MemberOut
+ */
+export type AppModulesCandidaciesSchemasMemberOut = {
+    /**
+     * Person Id
+     */
+    person_id: string;
+    /**
+     * Full Name
+     */
+    full_name: string;
+    /**
+     * Sex
+     */
+    sex: string | null;
+};
+
+/**
+ * MemberOut
+ */
+export type AppModulesPeaceMovementSchemasMemberOut = {
+    /**
+     * Id
+     */
+    id: string;
+    person: PersonOut;
+    /**
+     * Level Id
+     */
+    level_id: string;
+    /**
+     * Status
+     */
+    status: string;
+    /**
+     * Status Reason
+     */
+    status_reason: string | null;
+    /**
+     * Origin
+     */
+    origin: string;
+    /**
+     * Origin Detail
+     */
+    origin_detail: string | null;
+    /**
+     * Channel
+     */
+    channel: string;
+    /**
+     * Enrolled On
+     */
+    enrolled_on: string;
+    /**
+     * Left On
+     */
+    left_on: string | null;
+    recruited_by: MemberSummary | null;
+    /**
+     * Referral Code
+     */
+    referral_code: string;
+    /**
+     * Depth
+     */
+    depth: number;
+    /**
+     * State Id
+     */
+    state_id: string;
+    /**
+     * Section Id
+     */
+    section_id: string;
+    /**
+     * Validated At
+     */
+    validated_at: string | null;
+    direct: DirectCounts;
+    /**
+     * Recruit Goal
+     *
+     * Meta vigente del nivel en su estado.
+     */
+    recruit_goal: number | null;
+    /**
+     * Progress Pct
+     */
+    progress_pct: number | null;
+    /**
+     * Traffic Light
+     */
+    traffic_light: 'red' | 'yellow' | 'green' | null;
 };
 
 export type GetHealthData = {
@@ -4597,6 +5300,71 @@ export type GetGeoNodeChildrenResponses = {
 
 export type GetGeoNodeChildrenResponse = GetGeoNodeChildrenResponses[keyof GetGeoNodeChildrenResponses];
 
+export type ListPrivacyNoticesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Code
+         */
+        code?: string | null;
+    };
+    url: '/api/v1/people/privacy-notices';
+};
+
+export type ListPrivacyNoticesErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ListPrivacyNoticesError = ListPrivacyNoticesErrors[keyof ListPrivacyNoticesErrors];
+
+export type ListPrivacyNoticesResponses = {
+    /**
+     * Response Listprivacynotices
+     *
+     * Successful Response
+     */
+    200: Array<NoticeOut>;
+};
+
+export type ListPrivacyNoticesResponse = ListPrivacyNoticesResponses[keyof ListPrivacyNoticesResponses];
+
+export type PublishPrivacyNoticeData = {
+    body: NoticeIn;
+    path?: never;
+    query?: never;
+    url: '/api/v1/people/privacy-notices';
+};
+
+export type PublishPrivacyNoticeErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type PublishPrivacyNoticeError = PublishPrivacyNoticeErrors[keyof PublishPrivacyNoticeErrors];
+
+export type PublishPrivacyNoticeResponses = {
+    /**
+     * Successful Response
+     */
+    201: NoticeOut;
+};
+
+export type PublishPrivacyNoticeResponse = PublishPrivacyNoticeResponses[keyof PublishPrivacyNoticeResponses];
+
 export type SearchPeopleData = {
     body?: never;
     path?: never;
@@ -6016,3 +6784,813 @@ export type SubstituteFormulaResponses = {
 };
 
 export type SubstituteFormulaResponse = SubstituteFormulaResponses[keyof SubstituteFormulaResponses];
+
+export type ListParticipationLevelsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/peace-movement/levels';
+};
+
+export type ListParticipationLevelsErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ListParticipationLevelsError = ListParticipationLevelsErrors[keyof ListParticipationLevelsErrors];
+
+export type ListParticipationLevelsResponses = {
+    /**
+     * Response Listparticipationlevels
+     *
+     * Successful Response
+     */
+    200: Array<LevelOut>;
+};
+
+export type ListParticipationLevelsResponse = ListParticipationLevelsResponses[keyof ListParticipationLevelsResponses];
+
+export type ListLevelGoalsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * State Id
+         *
+         * Estado (incluye la meta nacional).
+         */
+        state_id?: string | null;
+        /**
+         * History
+         *
+         * Incluir metas o vigencias ya cerradas.
+         */
+        history?: boolean;
+    };
+    url: '/api/v1/peace-movement/level-goals';
+};
+
+export type ListLevelGoalsErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ListLevelGoalsError = ListLevelGoalsErrors[keyof ListLevelGoalsErrors];
+
+export type ListLevelGoalsResponses = {
+    /**
+     * Response Listlevelgoals
+     *
+     * Successful Response
+     */
+    200: Array<LevelGoalOut>;
+};
+
+export type ListLevelGoalsResponse = ListLevelGoalsResponses[keyof ListLevelGoalsResponses];
+
+export type SetLevelGoalData = {
+    body: LevelGoalIn;
+    path?: never;
+    query?: never;
+    url: '/api/v1/peace-movement/level-goals';
+};
+
+export type SetLevelGoalErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type SetLevelGoalError = SetLevelGoalErrors[keyof SetLevelGoalErrors];
+
+export type SetLevelGoalResponses = {
+    /**
+     * Successful Response
+     */
+    201: LevelGoalOut;
+};
+
+export type SetLevelGoalResponse = SetLevelGoalResponses[keyof SetLevelGoalResponses];
+
+export type ListHouseGoalsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * State Id
+         *
+         * Estado (incluye la meta nacional).
+         */
+        state_id?: string | null;
+        /**
+         * History
+         *
+         * Incluir metas o vigencias ya cerradas.
+         */
+        history?: boolean;
+    };
+    url: '/api/v1/peace-movement/house-goals';
+};
+
+export type ListHouseGoalsErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ListHouseGoalsError = ListHouseGoalsErrors[keyof ListHouseGoalsErrors];
+
+export type ListHouseGoalsResponses = {
+    /**
+     * Response Listhousegoals
+     *
+     * Successful Response
+     */
+    200: Array<HouseGoalOut>;
+};
+
+export type ListHouseGoalsResponse = ListHouseGoalsResponses[keyof ListHouseGoalsResponses];
+
+export type SetHouseGoalData = {
+    body: HouseGoalIn;
+    path?: never;
+    query?: never;
+    url: '/api/v1/peace-movement/house-goals';
+};
+
+export type SetHouseGoalErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type SetHouseGoalError = SetHouseGoalErrors[keyof SetHouseGoalErrors];
+
+export type SetHouseGoalResponses = {
+    /**
+     * Successful Response
+     */
+    201: HouseGoalOut;
+};
+
+export type SetHouseGoalResponse = SetHouseGoalResponses[keyof SetHouseGoalResponses];
+
+export type GetPeaceSettingsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/peace-movement/settings';
+};
+
+export type GetPeaceSettingsErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type GetPeaceSettingsError = GetPeaceSettingsErrors[keyof GetPeaceSettingsErrors];
+
+export type GetPeaceSettingsResponses = {
+    /**
+     * Successful Response
+     */
+    200: SettingsOut;
+};
+
+export type GetPeaceSettingsResponse = GetPeaceSettingsResponses[keyof GetPeaceSettingsResponses];
+
+export type UpdatePeaceSettingsData = {
+    body: SettingsIn;
+    path?: never;
+    query?: never;
+    url: '/api/v1/peace-movement/settings';
+};
+
+export type UpdatePeaceSettingsErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type UpdatePeaceSettingsError = UpdatePeaceSettingsErrors[keyof UpdatePeaceSettingsErrors];
+
+export type UpdatePeaceSettingsResponses = {
+    /**
+     * Successful Response
+     */
+    200: SettingsOut;
+};
+
+export type UpdatePeaceSettingsResponse = UpdatePeaceSettingsResponses[keyof UpdatePeaceSettingsResponses];
+
+export type ListZoneCoordinatorsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * State Id
+         *
+         * Estado (incluye la meta nacional).
+         */
+        state_id?: string | null;
+        /**
+         * History
+         *
+         * Incluir metas o vigencias ya cerradas.
+         */
+        history?: boolean;
+    };
+    url: '/api/v1/peace-movement/zone-coordinators';
+};
+
+export type ListZoneCoordinatorsErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ListZoneCoordinatorsError = ListZoneCoordinatorsErrors[keyof ListZoneCoordinatorsErrors];
+
+export type ListZoneCoordinatorsResponses = {
+    /**
+     * Response Listzonecoordinators
+     *
+     * Successful Response
+     */
+    200: Array<ZoneCoordinatorOut>;
+};
+
+export type ListZoneCoordinatorsResponse = ListZoneCoordinatorsResponses[keyof ListZoneCoordinatorsResponses];
+
+export type CreateZoneCoordinatorData = {
+    body: ZoneCoordinatorIn;
+    path?: never;
+    query?: never;
+    url: '/api/v1/peace-movement/zone-coordinators';
+};
+
+export type CreateZoneCoordinatorErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type CreateZoneCoordinatorError = CreateZoneCoordinatorErrors[keyof CreateZoneCoordinatorErrors];
+
+export type CreateZoneCoordinatorResponses = {
+    /**
+     * Successful Response
+     */
+    201: ZoneCoordinatorOut;
+};
+
+export type CreateZoneCoordinatorResponse = CreateZoneCoordinatorResponses[keyof CreateZoneCoordinatorResponses];
+
+export type EndZoneCoordinatorData = {
+    body?: never;
+    path: {
+        /**
+         * Zone Id
+         */
+        zone_id: string;
+    };
+    query?: never;
+    url: '/api/v1/peace-movement/zone-coordinators/{zone_id}/end';
+};
+
+export type EndZoneCoordinatorErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type EndZoneCoordinatorError = EndZoneCoordinatorErrors[keyof EndZoneCoordinatorErrors];
+
+export type EndZoneCoordinatorResponses = {
+    /**
+     * Successful Response
+     */
+    200: ZoneCoordinatorOut;
+};
+
+export type EndZoneCoordinatorResponse = EndZoneCoordinatorResponses[keyof EndZoneCoordinatorResponses];
+
+export type SearchMembersData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Status
+         */
+        status?: string | null;
+        /**
+         * Level Id
+         */
+        level_id?: string | null;
+        /**
+         * State Id
+         */
+        state_id?: string | null;
+        /**
+         * Recruiter Id
+         */
+        recruiter_id?: string | null;
+        /**
+         * Q
+         */
+        q?: string | null;
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Cursor
+         */
+        cursor?: string | null;
+        /**
+         * Sort
+         *
+         * Campos separados por coma; prefijo '-' para descendente.
+         */
+        sort?: string | null;
+    };
+    url: '/api/v1/peace-movement/members';
+};
+
+export type SearchMembersErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type SearchMembersError = SearchMembersErrors[keyof SearchMembersErrors];
+
+export type SearchMembersResponses = {
+    /**
+     * Successful Response
+     */
+    200: CursorPageMemberSummary;
+};
+
+export type SearchMembersResponse = SearchMembersResponses[keyof SearchMembersResponses];
+
+export type EnrollMemberData = {
+    body: EnrollmentIn;
+    path?: never;
+    query?: never;
+    url: '/api/v1/peace-movement/members';
+};
+
+export type EnrollMemberErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type EnrollMemberError = EnrollMemberErrors[keyof EnrollMemberErrors];
+
+export type EnrollMemberResponses = {
+    /**
+     * Successful Response
+     */
+    201: AppModulesPeaceMovementSchemasMemberOut;
+};
+
+export type EnrollMemberResponse = EnrollMemberResponses[keyof EnrollMemberResponses];
+
+export type GetMemberData = {
+    body?: never;
+    path: {
+        /**
+         * Member Id
+         *
+         * Id del pacificador.
+         */
+        member_id: string;
+    };
+    query?: never;
+    url: '/api/v1/peace-movement/members/{member_id}';
+};
+
+export type GetMemberErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type GetMemberError = GetMemberErrors[keyof GetMemberErrors];
+
+export type GetMemberResponses = {
+    /**
+     * Successful Response
+     */
+    200: AppModulesPeaceMovementSchemasMemberOut;
+};
+
+export type GetMemberResponse = GetMemberResponses[keyof GetMemberResponses];
+
+export type ListMemberChildrenData = {
+    body?: never;
+    path: {
+        /**
+         * Member Id
+         *
+         * Id del pacificador.
+         */
+        member_id: string;
+    };
+    query?: {
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Cursor
+         */
+        cursor?: string | null;
+        /**
+         * Sort
+         *
+         * Campos separados por coma; prefijo '-' para descendente.
+         */
+        sort?: string | null;
+    };
+    url: '/api/v1/peace-movement/members/{member_id}/children';
+};
+
+export type ListMemberChildrenErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ListMemberChildrenError = ListMemberChildrenErrors[keyof ListMemberChildrenErrors];
+
+export type ListMemberChildrenResponses = {
+    /**
+     * Successful Response
+     */
+    200: ChildrenPage;
+};
+
+export type ListMemberChildrenResponse = ListMemberChildrenResponses[keyof ListMemberChildrenResponses];
+
+export type GetMemberHistoryData = {
+    body?: never;
+    path: {
+        /**
+         * Member Id
+         *
+         * Id del pacificador.
+         */
+        member_id: string;
+    };
+    query?: never;
+    url: '/api/v1/peace-movement/members/{member_id}/history';
+};
+
+export type GetMemberHistoryErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type GetMemberHistoryError = GetMemberHistoryErrors[keyof GetMemberHistoryErrors];
+
+export type GetMemberHistoryResponses = {
+    /**
+     * Successful Response
+     */
+    200: MemberHistory;
+};
+
+export type GetMemberHistoryResponse = GetMemberHistoryResponses[keyof GetMemberHistoryResponses];
+
+export type ValidateMemberData = {
+    body?: never;
+    path: {
+        /**
+         * Member Id
+         *
+         * Id del pacificador.
+         */
+        member_id: string;
+    };
+    query?: never;
+    url: '/api/v1/peace-movement/members/{member_id}/validate';
+};
+
+export type ValidateMemberErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ValidateMemberError = ValidateMemberErrors[keyof ValidateMemberErrors];
+
+export type ValidateMemberResponses = {
+    /**
+     * Successful Response
+     */
+    200: AppModulesPeaceMovementSchemasMemberOut;
+};
+
+export type ValidateMemberResponse = ValidateMemberResponses[keyof ValidateMemberResponses];
+
+export type RejectMemberData = {
+    body: ReasonIn;
+    path: {
+        /**
+         * Member Id
+         *
+         * Id del pacificador.
+         */
+        member_id: string;
+    };
+    query?: never;
+    url: '/api/v1/peace-movement/members/{member_id}/reject';
+};
+
+export type RejectMemberErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type RejectMemberError = RejectMemberErrors[keyof RejectMemberErrors];
+
+export type RejectMemberResponses = {
+    /**
+     * Successful Response
+     */
+    200: AppModulesPeaceMovementSchemasMemberOut;
+};
+
+export type RejectMemberResponse = RejectMemberResponses[keyof RejectMemberResponses];
+
+export type MemberLeavesData = {
+    body: ReasonIn;
+    path: {
+        /**
+         * Member Id
+         *
+         * Id del pacificador.
+         */
+        member_id: string;
+    };
+    query?: never;
+    url: '/api/v1/peace-movement/members/{member_id}/leave';
+};
+
+export type MemberLeavesErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type MemberLeavesError = MemberLeavesErrors[keyof MemberLeavesErrors];
+
+export type MemberLeavesResponses = {
+    /**
+     * Successful Response
+     */
+    200: AppModulesPeaceMovementSchemasMemberOut;
+};
+
+export type MemberLeavesResponse = MemberLeavesResponses[keyof MemberLeavesResponses];
+
+export type ChangeMemberLevelData = {
+    body: LevelChangeIn;
+    path: {
+        /**
+         * Member Id
+         *
+         * Id del pacificador.
+         */
+        member_id: string;
+    };
+    query?: never;
+    url: '/api/v1/peace-movement/members/{member_id}/level';
+};
+
+export type ChangeMemberLevelErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ChangeMemberLevelError = ChangeMemberLevelErrors[keyof ChangeMemberLevelErrors];
+
+export type ChangeMemberLevelResponses = {
+    /**
+     * Successful Response
+     */
+    200: AppModulesPeaceMovementSchemasMemberOut;
+};
+
+export type ChangeMemberLevelResponse = ChangeMemberLevelResponses[keyof ChangeMemberLevelResponses];
+
+export type ReassignMemberData = {
+    body: ReassignIn;
+    path: {
+        /**
+         * Member Id
+         *
+         * Id del pacificador.
+         */
+        member_id: string;
+    };
+    query?: never;
+    url: '/api/v1/peace-movement/members/{member_id}/reassign';
+};
+
+export type ReassignMemberErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ReassignMemberError = ReassignMemberErrors[keyof ReassignMemberErrors];
+
+export type ReassignMemberResponses = {
+    /**
+     * Successful Response
+     */
+    200: AppModulesPeaceMovementSchemasMemberOut;
+};
+
+export type ReassignMemberResponse = ReassignMemberResponses[keyof ReassignMemberResponses];
+
+export type ListUserBranchesData = {
+    body?: never;
+    path: {
+        /**
+         * User Id
+         */
+        user_id: string;
+    };
+    query?: never;
+    url: '/api/v1/peace-movement/users/{user_id}/branches';
+};
+
+export type ListUserBranchesErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ListUserBranchesError = ListUserBranchesErrors[keyof ListUserBranchesErrors];
+
+export type ListUserBranchesResponses = {
+    /**
+     * Response Listuserbranches
+     *
+     * Successful Response
+     */
+    200: Array<BranchOut>;
+};
+
+export type ListUserBranchesResponse = ListUserBranchesResponses[keyof ListUserBranchesResponses];
+
+export type SetUserBranchesData = {
+    body: BranchesIn;
+    path: {
+        /**
+         * User Id
+         */
+        user_id: string;
+    };
+    query?: never;
+    url: '/api/v1/peace-movement/users/{user_id}/branches';
+};
+
+export type SetUserBranchesErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type SetUserBranchesError = SetUserBranchesErrors[keyof SetUserBranchesErrors];
+
+export type SetUserBranchesResponses = {
+    /**
+     * Response Setuserbranches
+     *
+     * Successful Response
+     */
+    200: Array<BranchOut>;
+};
+
+export type SetUserBranchesResponse = SetUserBranchesResponses[keyof SetUserBranchesResponses];

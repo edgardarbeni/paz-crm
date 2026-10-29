@@ -296,6 +296,49 @@ def people_purge() -> None:
     typer.echo(f"Personas anonimizadas: {purged}")
 
 
+SAMPLE_NOTICES = {
+    "peace_movement": (
+        "Aviso de privacidad del Movimiento de Paz (EJEMPLO, no válido)",
+        "TEXTO DE EJEMPLO PARA DESARROLLO. Este no es el aviso de privacidad del Movimiento de "
+        "Paz: el texto definitivo y la forma de recabar el consentimiento expreso dependen de la "
+        "revisión jurídica (D-92). No lo uses fuera de desarrollo.",
+    ),
+}
+
+
+@people_cli.command("sample-notice")
+def people_sample_notice(
+    code: Annotated[str, typer.Option(help="Código del aviso.")] = "peace_movement",
+) -> None:
+    """Publica un aviso de privacidad de EJEMPLO (solo desarrollo y pruebas)."""
+    from app.core.db.session import build_engine, build_sessionmaker  # noqa: PLC0415
+    from app.modules.people.service import current_notice, publish_notice  # noqa: PLC0415
+
+    settings = get_settings()
+    if settings.environment.value in {"staging", "production"}:
+        typer.echo("El aviso de ejemplo solo se publica en desarrollo o pruebas.", err=True)
+        raise typer.Exit(1)
+    if code not in SAMPLE_NOTICES:
+        typer.echo(f"No hay texto de ejemplo para «{code}».", err=True)
+        raise typer.Exit(1)
+    title, body = SAMPLE_NOTICES[code]
+
+    async def run() -> str:
+        engine = build_engine(settings)
+        try:
+            async with build_sessionmaker(engine)() as db:
+                if await current_notice(db, code) is not None:
+                    return "Ya hay un aviso vigente; no se publicó el de ejemplo."
+                await publish_notice(
+                    db, code=code, version="ejemplo", title=title, body=body, is_sample=True
+                )
+                return f"Aviso de ejemplo «{code}» publicado."
+        finally:
+            await engine.dispose()
+
+    typer.echo(asyncio.run(run()))
+
+
 storage_cli = typer.Typer(help="Almacenamiento de archivos (S3).", no_args_is_help=True)
 cli.add_typer(storage_cli, name="storage")
 
@@ -320,4 +363,7 @@ def keys_generate() -> None:
 
 
 def main() -> None:
+    from app.core.modules import setup_modules  # noqa: PLC0415
+
+    setup_modules()
     cli()

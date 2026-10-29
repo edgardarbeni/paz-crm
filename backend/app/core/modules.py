@@ -32,6 +32,8 @@ class ModuleSpec:
     routers: tuple[str, ...] = ()
     # "package.module:Enum" with the module's permission codes (`<module>.<resource>.<action>`).
     permissions: str | None = None
+    # Dotted module imported once at startup to register hooks in other modules (e.g. people).
+    setup: str | None = None
 
 
 def _resolve(reference: str) -> Any:
@@ -63,6 +65,14 @@ def import_models() -> None:
     for spec in installed_modules():
         if spec.models:
             import_module(spec.models)
+
+
+@cache
+def setup_modules() -> None:
+    """Imports each module's `setup` (API startup, CLI and tests). Idempotent."""
+    for spec in installed_modules():
+        if spec.setup:
+            import_module(spec.setup)
 
 
 def api_routers() -> list[APIRouter]:

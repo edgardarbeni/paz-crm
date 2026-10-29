@@ -3705,6 +3705,129 @@
         }
       }
     },
+    "/api/v1/people/privacy-notices": {
+      "get": {
+        "tags": [
+          "people"
+        ],
+        "summary": "Avisos de privacidad y sus versiones",
+        "operationId": "listPrivacyNotices",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "code",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 50
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Code"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NoticeOut"
+                  },
+                  "title": "Response Listprivacynotices"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "people"
+        ],
+        "summary": "Publicar una versión nueva de un aviso de privacidad",
+        "operationId": "publishPrivacyNotice",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NoticeIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoticeOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/people": {
       "get": {
         "tags": [
@@ -6375,6 +6498,1567 @@
           }
         }
       }
+    },
+    "/api/v1/peace-movement/levels": {
+      "get": {
+        "tags": [
+          "peace-movement"
+        ],
+        "summary": "Niveles de participación",
+        "operationId": "listParticipationLevels",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/LevelOut"
+                  },
+                  "type": "array",
+                  "title": "Response Listparticipationlevels"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/peace-movement/level-goals": {
+      "get": {
+        "tags": [
+          "peace-movement"
+        ],
+        "summary": "Metas de reclutamiento",
+        "operationId": "listLevelGoals",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "state_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Estado (incluye la meta nacional).",
+              "title": "State Id"
+            },
+            "description": "Estado (incluye la meta nacional)."
+          },
+          {
+            "name": "history",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Incluir metas o vigencias ya cerradas.",
+              "default": false,
+              "title": "History"
+            },
+            "description": "Incluir metas o vigencias ya cerradas."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LevelGoalOut"
+                  },
+                  "title": "Response Listlevelgoals"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "peace-movement"
+        ],
+        "summary": "Fijar la meta de un nivel (nacional o por estado)",
+        "operationId": "setLevelGoal",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LevelGoalIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LevelGoalOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/peace-movement/house-goals": {
+      "get": {
+        "tags": [
+          "peace-movement"
+        ],
+        "summary": "Metas de integrantes por casa",
+        "operationId": "listHouseGoals",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "state_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Estado (incluye la meta nacional).",
+              "title": "State Id"
+            },
+            "description": "Estado (incluye la meta nacional)."
+          },
+          {
+            "name": "history",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Incluir metas o vigencias ya cerradas.",
+              "default": false,
+              "title": "History"
+            },
+            "description": "Incluir metas o vigencias ya cerradas."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/HouseGoalOut"
+                  },
+                  "title": "Response Listhousegoals"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "peace-movement"
+        ],
+        "summary": "Fijar la meta de integrantes por casa",
+        "operationId": "setHouseGoal",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HouseGoalIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HouseGoalOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/peace-movement/settings": {
+      "get": {
+        "tags": [
+          "peace-movement"
+        ],
+        "summary": "Configuración del módulo",
+        "operationId": "getPeaceSettings",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "peace-movement"
+        ],
+        "summary": "Cambiar la configuración",
+        "operationId": "updatePeaceSettings",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SettingsIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/peace-movement/zone-coordinators": {
+      "get": {
+        "tags": [
+          "peace-movement"
+        ],
+        "summary": "Coordinadores de zona (crédito de casas sin Embajador)",
+        "operationId": "listZoneCoordinators",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "state_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Estado (incluye la meta nacional).",
+              "title": "State Id"
+            },
+            "description": "Estado (incluye la meta nacional)."
+          },
+          {
+            "name": "history",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Incluir metas o vigencias ya cerradas.",
+              "default": false,
+              "title": "History"
+            },
+            "description": "Incluir metas o vigencias ya cerradas."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ZoneCoordinatorOut"
+                  },
+                  "title": "Response Listzonecoordinators"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "peace-movement"
+        ],
+        "summary": "Asignar un coordinador de zona",
+        "operationId": "createZoneCoordinator",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ZoneCoordinatorIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ZoneCoordinatorOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/peace-movement/zone-coordinators/{zone_id}/end": {
+      "post": {
+        "tags": [
+          "peace-movement"
+        ],
+        "summary": "Terminar la vigencia de un coordinador de zona",
+        "operationId": "endZoneCoordinator",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "zone_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Zone Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ZoneCoordinatorOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/peace-movement/members": {
+      "get": {
+        "tags": [
+          "peace-movement"
+        ],
+        "summary": "Buscar pacificadores",
+        "operationId": "searchMembers",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^(pending_validation|active|rejected|left|withdrawn)$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "level_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Level Id"
+            }
+          },
+          {
+            "name": "state_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "State Id"
+            }
+          },
+          {
+            "name": "recruiter_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Recruiter Id"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 2,
+                  "maxLength": 100
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 1024
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 200
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Campos separados por coma; prefijo '-' para descendente.",
+              "examples": [
+                "-created_at,name"
+              ],
+              "title": "Sort"
+            },
+            "description": "Campos separados por coma; prefijo '-' para descendente."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CursorPage_MemberSummary_"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "peace-movement"
+        ],
+        "summary": "Inscribir pacificador",
+        "operationId": "enrollMember",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EnrollmentIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/app__modules__peace_movement__schemas__MemberOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/peace-movement/members/{member_id}": {
+      "get": {
+        "tags": [
+          "peace-movement"
+        ],
+        "summary": "Detalle de pacificador",
+        "operationId": "getMember",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "member_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Id del pacificador.",
+              "title": "Member Id"
+            },
+            "description": "Id del pacificador."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/app__modules__peace_movement__schemas__MemberOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/peace-movement/members/{member_id}/children": {
+      "get": {
+        "tags": [
+          "peace-movement"
+        ],
+        "summary": "Reclutas directos (los de fuera del alcance, solo en total)",
+        "operationId": "listMemberChildren",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "member_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Id del pacificador.",
+              "title": "Member Id"
+            },
+            "description": "Id del pacificador."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 1024
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 200
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Campos separados por coma; prefijo '-' para descendente.",
+              "examples": [
+                "-created_at,name"
+              ],
+              "title": "Sort"
+            },
+            "description": "Campos separados por coma; prefijo '-' para descendente."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChildrenPage"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/peace-movement/members/{member_id}/history": {
+      "get": {
+        "tags": [
+          "peace-movement"
+        ],
+        "summary": "Historial de niveles y reclutadores",
+        "operationId": "getMemberHistory",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "member_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Id del pacificador.",
+              "title": "Member Id"
+            },
+            "description": "Id del pacificador."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberHistory"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/peace-movement/members/{member_id}/validate": {
+      "post": {
+        "tags": [
+          "peace-movement"
+        ],
+        "summary": "Validar inscripción pendiente",
+        "operationId": "validateMember",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "member_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Id del pacificador.",
+              "title": "Member Id"
+            },
+            "description": "Id del pacificador."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/app__modules__peace_movement__schemas__MemberOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/peace-movement/members/{member_id}/reject": {
+      "post": {
+        "tags": [
+          "peace-movement"
+        ],
+        "summary": "Rechazar inscripción pendiente",
+        "operationId": "rejectMember",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "member_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Id del pacificador.",
+              "title": "Member Id"
+            },
+            "description": "Id del pacificador."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReasonIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/app__modules__peace_movement__schemas__MemberOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/peace-movement/members/{member_id}/leave": {
+      "post": {
+        "tags": [
+          "peace-movement"
+        ],
+        "summary": "Registrar que el pacificador deja el movimiento",
+        "operationId": "memberLeaves",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "member_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Id del pacificador.",
+              "title": "Member Id"
+            },
+            "description": "Id del pacificador."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReasonIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/app__modules__peace_movement__schemas__MemberOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/peace-movement/members/{member_id}/level": {
+      "post": {
+        "tags": [
+          "peace-movement"
+        ],
+        "summary": "Cambiar el nivel de participación",
+        "operationId": "changeMemberLevel",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "member_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Id del pacificador.",
+              "title": "Member Id"
+            },
+            "description": "Id del pacificador."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LevelChangeIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/app__modules__peace_movement__schemas__MemberOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/peace-movement/members/{member_id}/reassign": {
+      "post": {
+        "tags": [
+          "peace-movement"
+        ],
+        "summary": "Cambiar el reclutador (mueve toda su red)",
+        "operationId": "reassignMember",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "member_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Id del pacificador.",
+              "title": "Member Id"
+            },
+            "description": "Id del pacificador."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReassignIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/app__modules__peace_movement__schemas__MemberOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/peace-movement/users/{user_id}/branches": {
+      "get": {
+        "tags": [
+          "peace-movement"
+        ],
+        "summary": "Ramas asignadas a un usuario (alcance por rama)",
+        "operationId": "listUserBranches",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "User Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BranchOut"
+                  },
+                  "title": "Response Listuserbranches"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "peace-movement"
+        ],
+        "summary": "Reemplazar las ramas de un usuario",
+        "operationId": "setUserBranches",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "User Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BranchesIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BranchOut"
+                  },
+                  "title": "Response Setuserbranches"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -6975,6 +8659,89 @@
         ],
         "title": "AuthenticatedResponse"
       },
+      "BranchOut": {
+        "properties": {
+          "member_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Member Id"
+          },
+          "person": {
+            "$ref": "#/components/schemas/PersonSummary"
+          },
+          "depth": {
+            "type": "integer",
+            "title": "Depth"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "member_id",
+          "person",
+          "depth"
+        ],
+        "title": "BranchOut"
+      },
+      "BranchesIn": {
+        "properties": {
+          "member_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "title": "Member Ids"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "member_ids"
+        ],
+        "title": "BranchesIn"
+      },
+      "ChildrenPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/MemberSummary"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          },
+          "has_more": {
+            "type": "boolean",
+            "title": "Has More"
+          },
+          "hidden": {
+            "type": "integer",
+            "title": "Hidden",
+            "description": "Reclutas directos fuera del alcance: solo el total."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "items",
+          "next_cursor",
+          "has_more",
+          "hidden"
+        ],
+        "title": "ChildrenPage"
+      },
       "CoalitionIn": {
         "properties": {
           "name": {
@@ -7047,6 +8814,35 @@
         ],
         "title": "CoalitionOut"
       },
+      "ConsentCapture": {
+        "properties": {
+          "channel": {
+            "type": "string",
+            "enum": [
+              "panel",
+              "paper"
+            ],
+            "title": "Channel",
+            "default": "panel"
+          },
+          "evidence_uri": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evidence Uri"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "ConsentCapture",
+        "description": "Acceptance of the current Peace Movement notice (D-82); the notice text comes from the\ncatalog, so only how it was captured travels here."
+      },
       "ConsentIn": {
         "properties": {
           "notice_version": {
@@ -7092,6 +8888,10 @@
             "format": "uuid",
             "title": "Id"
           },
+          "notice_code": {
+            "type": "string",
+            "title": "Notice Code"
+          },
           "notice_version": {
             "type": "string",
             "title": "Notice Version"
@@ -7121,6 +8921,7 @@
         "type": "object",
         "required": [
           "id",
+          "notice_code",
           "notice_version",
           "channel",
           "evidence_uri",
@@ -7355,6 +9156,39 @@
         ],
         "title": "CursorPage[ImportRunOut]"
       },
+      "CursorPage_MemberSummary_": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/MemberSummary"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor",
+            "description": "Pasar en `cursor` para obtener la siguiente página."
+          },
+          "has_more": {
+            "type": "boolean",
+            "title": "Has More"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "has_more"
+        ],
+        "title": "CursorPage[MemberSummary]"
+      },
       "CursorPage_NominationSummary_": {
         "properties": {
           "items": {
@@ -7467,6 +9301,36 @@
         ],
         "title": "DeletionOut"
       },
+      "DirectCounts": {
+        "properties": {
+          "active": {
+            "type": "integer",
+            "title": "Active"
+          },
+          "pending": {
+            "type": "integer",
+            "title": "Pending"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "hidden": {
+            "type": "integer",
+            "title": "Hidden",
+            "description": "Reclutas directos fuera del alcance del usuario."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "active",
+          "pending",
+          "total",
+          "hidden"
+        ],
+        "title": "DirectCounts"
+      },
       "ElectionLevel": {
         "type": "string",
         "enum": [
@@ -7482,6 +9346,84 @@
           "normative_system"
         ],
         "title": "ElectionRegime"
+      },
+      "EnrollmentIn": {
+        "properties": {
+          "person_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Person Id",
+            "description": "Persona existente; excluyente con `person`."
+          },
+          "person": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PersonCreate"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Persona nueva. Si la CURP ya existe, se reutiliza esa persona sin cambiar sus datos."
+          },
+          "level_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Level Id"
+          },
+          "recruiter_member_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recruiter Member Id"
+          },
+          "origin": {
+            "type": "string",
+            "enum": [
+              "recruiter",
+              "structure",
+              "event",
+              "campaign"
+            ],
+            "title": "Origin",
+            "default": "recruiter"
+          },
+          "origin_detail": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Origin Detail"
+          },
+          "consent": {
+            "$ref": "#/components/schemas/ConsentCapture"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "level_id",
+          "consent"
+        ],
+        "title": "EnrollmentIn"
       },
       "FieldViolation": {
         "properties": {
@@ -7684,7 +9626,7 @@
           "owner": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/MemberOut"
+                "$ref": "#/components/schemas/app__modules__candidacies__schemas__MemberOut"
               },
               {
                 "type": "null"
@@ -7694,7 +9636,7 @@
           "substitute": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/MemberOut"
+                "$ref": "#/components/schemas/app__modules__candidacies__schemas__MemberOut"
               },
               {
                 "type": "null"
@@ -8257,6 +10199,99 @@
         ],
         "title": "HealthStatus"
       },
+      "HouseGoalIn": {
+        "properties": {
+          "state_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "State Id",
+            "description": "Nulo = meta nacional."
+          },
+          "member_goal": {
+            "type": "integer",
+            "maximum": 100000.0,
+            "minimum": 1.0,
+            "title": "Member Goal"
+          },
+          "valid_from": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valid From"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "member_goal"
+        ],
+        "title": "HouseGoalIn"
+      },
+      "HouseGoalOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "state_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "State Id"
+          },
+          "member_goal": {
+            "type": "integer",
+            "title": "Member Goal"
+          },
+          "valid_from": {
+            "type": "string",
+            "format": "date",
+            "title": "Valid From"
+          },
+          "valid_to": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valid To"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "state_id",
+          "member_goal",
+          "valid_from",
+          "valid_to"
+        ],
+        "title": "HouseGoalOut"
+      },
       "ImportIssueOut": {
         "properties": {
           "id": {
@@ -8538,6 +10573,258 @@
         ],
         "title": "InvitationTokenRequest"
       },
+      "LevelChangeIn": {
+        "properties": {
+          "level_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Level Id"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500,
+                "minLength": 3
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "level_id"
+        ],
+        "title": "LevelChangeIn"
+      },
+      "LevelChangeOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "from_level_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "From Level Id"
+          },
+          "to_level_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "To Level Id"
+          },
+          "changed_by_user_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Changed By User Id"
+          },
+          "changed_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Changed At"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "from_level_id",
+          "to_level_id",
+          "changed_by_user_id",
+          "changed_at",
+          "reason"
+        ],
+        "title": "LevelChangeOut"
+      },
+      "LevelGoalIn": {
+        "properties": {
+          "level_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Level Id"
+          },
+          "state_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "State Id",
+            "description": "Nulo = meta nacional."
+          },
+          "recruit_goal": {
+            "type": "integer",
+            "maximum": 1000000.0,
+            "minimum": 0.0,
+            "title": "Recruit Goal"
+          },
+          "house_goal": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 10000.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "House Goal"
+          },
+          "valid_from": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valid From",
+            "description": "Por defecto, hoy."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "level_id",
+          "recruit_goal"
+        ],
+        "title": "LevelGoalIn"
+      },
+      "LevelGoalOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "level_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Level Id"
+          },
+          "state_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "State Id"
+          },
+          "recruit_goal": {
+            "type": "integer",
+            "title": "Recruit Goal"
+          },
+          "house_goal": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "House Goal"
+          },
+          "valid_from": {
+            "type": "string",
+            "format": "date",
+            "title": "Valid From"
+          },
+          "valid_to": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valid To"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "level_id",
+          "state_id",
+          "recruit_goal",
+          "house_goal",
+          "valid_from",
+          "valid_to"
+        ],
+        "title": "LevelGoalOut"
+      },
+      "LevelOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "rank": {
+            "type": "integer",
+            "title": "Rank"
+          },
+          "sort_order": {
+            "type": "integer",
+            "title": "Sort Order"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "code",
+          "name",
+          "rank",
+          "sort_order"
+        ],
+        "title": "LevelOut"
+      },
       "LoginRequest": {
         "properties": {
           "email": {
@@ -8650,37 +10937,96 @@
         ],
         "title": "MeResponse"
       },
-      "MemberOut": {
+      "MemberHistory": {
         "properties": {
-          "person_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Person Id"
+          "levels": {
+            "items": {
+              "$ref": "#/components/schemas/LevelChangeOut"
+            },
+            "type": "array",
+            "title": "Levels"
           },
-          "full_name": {
-            "type": "string",
-            "title": "Full Name"
-          },
-          "sex": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Sex"
+          "recruiters": {
+            "items": {
+              "$ref": "#/components/schemas/RecruiterChangeOut"
+            },
+            "type": "array",
+            "title": "Recruiters"
           }
         },
         "additionalProperties": false,
         "type": "object",
         "required": [
-          "person_id",
-          "full_name",
-          "sex"
+          "levels",
+          "recruiters"
         ],
-        "title": "MemberOut"
+        "title": "MemberHistory"
+      },
+      "MemberSummary": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "person": {
+            "$ref": "#/components/schemas/PersonSummary"
+          },
+          "level_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Level Id"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "depth": {
+            "type": "integer",
+            "title": "Depth"
+          },
+          "state_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "State Id"
+          },
+          "section_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Section Id"
+          },
+          "recruited_by_member_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recruited By Member Id"
+          },
+          "enrolled_on": {
+            "type": "string",
+            "format": "date",
+            "title": "Enrolled On"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "person",
+          "level_id",
+          "status",
+          "depth",
+          "state_id",
+          "section_id",
+          "recruited_by_member_id",
+          "enrolled_on"
+        ],
+        "title": "MemberSummary"
       },
       "MfaRequiredResponse": {
         "properties": {
@@ -9250,6 +11596,107 @@
         "additionalProperties": false,
         "type": "object",
         "title": "NominationUpdate"
+      },
+      "NoticeIn": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{1,49}$",
+            "title": "Code",
+            "description": "`general` o `peace_movement` (aviso del MP)."
+          },
+          "version": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 1,
+            "title": "Version"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title"
+          },
+          "body": {
+            "type": "string",
+            "maxLength": 50000,
+            "minLength": 20,
+            "title": "Body"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "version",
+          "title",
+          "body"
+        ],
+        "title": "NoticeIn"
+      },
+      "NoticeOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "body": {
+            "type": "string",
+            "title": "Body"
+          },
+          "body_sha256": {
+            "type": "string",
+            "title": "Body Sha256"
+          },
+          "is_sample": {
+            "type": "boolean",
+            "title": "Is Sample"
+          },
+          "valid_from": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Valid From"
+          },
+          "valid_to": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valid To"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "code",
+          "version",
+          "title",
+          "body",
+          "body_sha256",
+          "is_sample",
+          "valid_from",
+          "valid_to"
+        ],
+        "title": "NoticeOut"
       },
       "OfficeTypeIn": {
         "properties": {
@@ -10624,6 +13071,44 @@
         ],
         "title": "ReadinessStatus"
       },
+      "ReasonIn": {
+        "properties": {
+          "reason": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 3,
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "reason"
+        ],
+        "title": "ReasonIn"
+      },
+      "ReassignIn": {
+        "properties": {
+          "recruiter_member_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Recruiter Member Id"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 3,
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "recruiter_member_id",
+          "reason"
+        ],
+        "title": "ReassignIn"
+      },
       "RecoveryCodesRequest": {
         "properties": {
           "code": {
@@ -10656,6 +13141,69 @@
           "recovery_codes"
         ],
         "title": "RecoveryCodesResponse"
+      },
+      "RecruiterChangeOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "from_member_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "From Member Id"
+          },
+          "to_member_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "To Member Id"
+          },
+          "changed_by_user_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Changed By User Id"
+          },
+          "changed_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Changed At"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason"
+          },
+          "subtree_size": {
+            "type": "integer",
+            "title": "Subtree Size"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "from_member_id",
+          "to_member_id",
+          "changed_by_user_id",
+          "changed_at",
+          "reason",
+          "subtree_size"
+        ],
+        "title": "RecruiterChangeOut"
       },
       "RevokedCount": {
         "properties": {
@@ -11055,6 +13603,66 @@
           "expires_at"
         ],
         "title": "SessionOut"
+      },
+      "SettingsIn": {
+        "properties": {
+          "traffic_light_yellow_pct": {
+            "type": "integer",
+            "maximum": 999.0,
+            "minimum": 1.0,
+            "title": "Traffic Light Yellow Pct"
+          },
+          "traffic_light_green_pct": {
+            "type": "integer",
+            "maximum": 1000.0,
+            "minimum": 1.0,
+            "title": "Traffic Light Green Pct"
+          },
+          "depth_alert_threshold": {
+            "type": "integer",
+            "maximum": 10000.0,
+            "minimum": 1.0,
+            "title": "Depth Alert Threshold"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "traffic_light_yellow_pct",
+          "traffic_light_green_pct",
+          "depth_alert_threshold"
+        ],
+        "title": "SettingsIn"
+      },
+      "SettingsOut": {
+        "properties": {
+          "traffic_light_yellow_pct": {
+            "type": "integer",
+            "maximum": 999.0,
+            "minimum": 1.0,
+            "title": "Traffic Light Yellow Pct"
+          },
+          "traffic_light_green_pct": {
+            "type": "integer",
+            "maximum": 1000.0,
+            "minimum": 1.0,
+            "title": "Traffic Light Green Pct"
+          },
+          "depth_alert_threshold": {
+            "type": "integer",
+            "maximum": 10000.0,
+            "minimum": 1.0,
+            "title": "Depth Alert Threshold"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "traffic_light_yellow_pct",
+          "traffic_light_green_pct",
+          "depth_alert_threshold"
+        ],
+        "title": "SettingsOut"
       },
       "Severity": {
         "type": "string",
@@ -11633,6 +14241,369 @@
           "message"
         ],
         "title": "ViolationOut"
+      },
+      "ZoneCoordinatorIn": {
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "state_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "State Id"
+          },
+          "nodes": {
+            "items": {
+              "$ref": "#/components/schemas/ZoneNodeIn"
+            },
+            "type": "array",
+            "maxItems": 500,
+            "minItems": 1,
+            "title": "Nodes"
+          },
+          "valid_from": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valid From"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "user_id",
+          "state_id",
+          "nodes"
+        ],
+        "title": "ZoneCoordinatorIn"
+      },
+      "ZoneCoordinatorOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "state_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "State Id"
+          },
+          "valid_from": {
+            "type": "string",
+            "format": "date",
+            "title": "Valid From"
+          },
+          "valid_to": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valid To"
+          },
+          "nodes": {
+            "items": {
+              "$ref": "#/components/schemas/ZoneNodeOut"
+            },
+            "type": "array",
+            "title": "Nodes"
+          },
+          "section_count": {
+            "type": "integer",
+            "title": "Section Count"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "user_id",
+          "state_id",
+          "valid_from",
+          "valid_to",
+          "nodes",
+          "section_count"
+        ],
+        "title": "ZoneCoordinatorOut"
+      },
+      "ZoneNodeIn": {
+        "properties": {
+          "level": {
+            "type": "string",
+            "enum": [
+              "state",
+              "federal_district",
+              "local_district",
+              "municipality",
+              "section"
+            ],
+            "title": "Level"
+          },
+          "node_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Node Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "level",
+          "node_id"
+        ],
+        "title": "ZoneNodeIn"
+      },
+      "ZoneNodeOut": {
+        "properties": {
+          "level": {
+            "type": "string",
+            "enum": [
+              "state",
+              "federal_district",
+              "local_district",
+              "municipality",
+              "section"
+            ],
+            "title": "Level"
+          },
+          "node_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Node Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "level",
+          "node_id"
+        ],
+        "title": "ZoneNodeOut"
+      },
+      "app__modules__candidacies__schemas__MemberOut": {
+        "properties": {
+          "person_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Person Id"
+          },
+          "full_name": {
+            "type": "string",
+            "title": "Full Name"
+          },
+          "sex": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sex"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "person_id",
+          "full_name",
+          "sex"
+        ],
+        "title": "MemberOut"
+      },
+      "app__modules__peace_movement__schemas__MemberOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "person": {
+            "$ref": "#/components/schemas/PersonOut"
+          },
+          "level_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Level Id"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "status_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status Reason"
+          },
+          "origin": {
+            "type": "string",
+            "title": "Origin"
+          },
+          "origin_detail": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Origin Detail"
+          },
+          "channel": {
+            "type": "string",
+            "title": "Channel"
+          },
+          "enrolled_on": {
+            "type": "string",
+            "format": "date",
+            "title": "Enrolled On"
+          },
+          "left_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Left On"
+          },
+          "recruited_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MemberSummary"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "referral_code": {
+            "type": "string",
+            "title": "Referral Code"
+          },
+          "depth": {
+            "type": "integer",
+            "title": "Depth"
+          },
+          "state_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "State Id"
+          },
+          "section_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Section Id"
+          },
+          "validated_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Validated At"
+          },
+          "direct": {
+            "$ref": "#/components/schemas/DirectCounts"
+          },
+          "recruit_goal": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recruit Goal",
+            "description": "Meta vigente del nivel en su estado."
+          },
+          "progress_pct": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Progress Pct"
+          },
+          "traffic_light": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "red",
+                  "yellow",
+                  "green"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Traffic Light"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "person",
+          "level_id",
+          "status",
+          "status_reason",
+          "origin",
+          "origin_detail",
+          "channel",
+          "enrolled_on",
+          "left_on",
+          "recruited_by",
+          "referral_code",
+          "depth",
+          "state_id",
+          "section_id",
+          "validated_at",
+          "direct",
+          "recruit_goal",
+          "progress_pct",
+          "traffic_light"
+        ],
+        "title": "MemberOut"
       }
     },
     "securitySchemes": {

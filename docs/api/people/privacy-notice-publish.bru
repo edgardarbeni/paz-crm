@@ -1,0 +1,24 @@
+meta {
+  name: Publicar aviso de privacidad
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}/api/v1/people/privacy-notices
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "code": "peace_movement",
+    "version": "2026-10",
+    "title": "Aviso de privacidad del Movimiento de Paz",
+    "body": "Texto aprobado por el área jurídica…"
+  }
+}

@@ -30,6 +30,7 @@ class Perm(StrEnum):
     PERSON_WRITE = "people.person.write"
     PERSON_READ_SENSITIVE = "people.person.read_sensitive"
     PERSON_DELETE = "people.person.delete"
+    NOTICE_MANAGE = "people.notice.manage"
     CANDIDACIES_READ = "candidacies.read"
     CATALOG_MANAGE = "candidacies.catalog.manage"
     PROCESS_MANAGE = "candidacies.process.manage"

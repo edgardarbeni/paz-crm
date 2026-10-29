@@ -130,6 +130,13 @@ uv run paz --help                    # CLI de operación
   - Procesos: `/api/v1/processes` con `offices`, `municipalities`, `rules` y `coalitions`. Al crearse, todo queda deshabilitado y solo la regla "persona no duplicada" está activa (D-23, D-28).
   - Postulaciones y fórmulas: `/api/v1/nominations` y `/api/v1/formulas`, con validación, envío, aprobación, cancelación, cambios de estatus, sustitución e historial (D-67, D-68).
   - Las reglas bloqueantes devuelven 409 `rule-violation` con `violations`; se aceptan con `override` y el permiso `candidacies.rule.override`.
+- **Movimiento de Paz (fase 1 de su plan).**
+  - API en `/api/v1/peace-movement`: inscripción de pacificadores (persona nueva o existente,
+    consentimiento del aviso vigente), pirámide de reclutamiento con `ltree`, validación,
+    cambio de nivel, reasignación con toda la red, salida del movimiento, metas por estado con
+    historial, configuración, coordinadores de zona y alcance por rama (D-82 a D-95).
+  - Antes de inscribir hace falta el aviso del MP: `POST /api/v1/people/privacy-notices` o, en
+    desarrollo, `paz people sample-notice`.
 - **Errores.** Siempre RFC 9457 (`application/problem+json`): `type` es `urn:pazos:problem:<code>`
   e incluye `request_id`.
 - **Paginación.** Por cursor (`app.core.pagination`): `limit` ≤ 200, `cursor` opaco y `sort`

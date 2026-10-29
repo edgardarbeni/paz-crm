@@ -1,0 +1,15 @@
+meta {
+  name: Buscar pacificadores
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/v1/peace-movement/members?status=active&limit=50
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}

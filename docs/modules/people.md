@@ -40,7 +40,8 @@ ER completo en [`reference/data-model.md` §3](../reference/data-model.md#3-pers
 | `persons` | `given_names`, `paternal_surname`, `maternal_surname`, `search_name` (generada), `birth_date`, `sex` (`H`/`M`/`X`), `birth_entity`, `curp_ciphertext`, `curp_hash`, `curp_coherence_overridden`, `key_version`, `purge_after` | `birth_entity` usa el código de dos letras de la CURP (`AS`…`ZS`, `NE` = extranjero, [D-65](../adr/D-65-ajustes-implementacion-personas-candidaturas.md)) |
 | `person_contacts` | `contact_type` (`mobile`/`landline`/`email`), `value_ciphertext`, `value_hash`, `is_primary`, `key_version` | N por persona |
 | `person_addresses` | `address_type` (`home`/`work`/`other`), `address_ciphertext` (calle, números, referencias), `postal_code`, FKs de geografía, `is_primary`, `key_version` | Solo uno vigente; al reemplazarlo el anterior queda con soft-delete |
-| `privacy_consents` | `notice_version`, `channel` (`panel`/`paper`/`web`), `evidence_uri`, `accepted_at` | Historial de aceptaciones del aviso de privacidad |
+| `privacy_notices` | `code` (`general`, `peace_movement`), `version`, `title`, `body`, `body_sha256`, `is_sample`, `valid_from`, `valid_to` | Catálogo de versiones de cada aviso; una vigente por código ([D-82](../adr/D-82-consentimiento-aviso-movimiento-paz.md)) |
+| `privacy_consents` | `notice_id`, `notice_code`, `notice_version`, `notice_text_sha256`, `channel` (`panel`/`paper`/`web`/`referral_link`/`import`/`field_app`), `evidence_uri`, `accepted_at` | Historial de aceptaciones. Las hechas sobre un aviso del catálogo copian su código y la huella del texto, así que la prueba no depende del catálogo |
 
 **Ciclo de vida de una persona:**
 1. **Activa.**
@@ -156,12 +157,22 @@ API responde 404; si existe pero está fuera del alcance, 403.
 **Lo consumen:**
 - `candidacies`: las fórmulas referencian `persons.id` y la regla «persona no duplicada» la
   usa.
+- `peace_movement`: un pacificador es una persona. Crea personas con `build_person` (sin
+  confirmar, en su propia transacción), registra el consentimiento del aviso vigente con
+  `record_consent` y sirve los datos de la persona con `views.person_out` bajo su propio
+  alcance ([D-83](../adr/D-83-alcance-por-rama.md)).
 - `paz geo activate`: remapea la geografía de los domicilios al nuevo marco.
 
 **Eventos:** no hay bus de eventos. El módulo emite las entradas de bitácora de cada
-escritura del ORM (`create`, `update`, `soft_delete`).
+escritura del ORM (`create`, `update`, `soft_delete`). Los módulos que dependen de una persona
+se suscriben con `people/hooks.py`: `on_person_deleted` (baja ARCO) y `on_address_changed`
+(nuevo domicilio principal). Corren dentro de la transacción, antes del commit
+([D-95](../adr/D-95-ajustes-implementacion-pacificadores.md)).
 
-**Tareas programadas:** `paz people purge` se ejecuta con cron usando el rol dueño de la base.
+**Avisos:** `GET` y `POST /people/privacy-notices`; publicar requiere `people.notice.manage`.
+En desarrollo, `paz people sample-notice` publica un aviso de ejemplo marcado como tal.
+
+**Tareas programadas:** `paz people purge` la ejecuta el contenedor `scheduler` ([D-84](../adr/D-84-tareas-periodicas.md)).
 
 ## Criterios de aceptación
 Cubiertos por `tests/integration/candidacies/test_people.py` y `tests/unit/test_curp.py`:

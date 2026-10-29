@@ -2,8 +2,8 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { AcceptInvitationData, AcceptInvitationErrors, AcceptInvitationResponses, ActivateUserData, ActivateUserErrors, ActivateUserResponses, AddConsentData, AddConsentErrors, AddConsentResponses, ApproveNominationData, ApproveNominationErrors, ApproveNominationResponses, CancelNominationData, CancelNominationErrors, CancelNominationResponses, ChangeFormulaStatusData, ChangeFormulaStatusErrors, ChangeFormulaStatusResponses, ChangePasswordData, ChangePasswordErrors, ChangePasswordResponses, ConfigureMunicipalitiesData, ConfigureMunicipalitiesErrors, ConfigureMunicipalitiesResponses, ConfigureProcessOfficesData, ConfigureProcessOfficesErrors, ConfigureProcessOfficesResponses, ConfigureProcessRulesData, ConfigureProcessRulesErrors, ConfigureProcessRulesResponses, ConfirmTotpData, ConfirmTotpErrors, ConfirmTotpResponses, CreateCoalitionData, CreateCoalitionErrors, CreateCoalitionResponses, CreateFormulaData, CreateFormulaErrors, CreateFormulaResponses, CreateNominationData, CreateNominationErrors, CreateNominationResponses, CreateOfficeTypeData, CreateOfficeTypeErrors, CreateOfficeTypeResponses, CreatePartyData, CreatePartyErrors, CreatePartyResponses, CreatePersonData, CreatePersonErrors, CreatePersonResponses, CreateProcessData, CreateProcessErrors, CreateProcessResponses, CreateRoleData, CreateRoleErrors, CreateRoleResponses, DeletePersonData, DeletePersonErrors, DeletePersonResponses, DeleteRoleData, DeleteRoleErrors, DeleteRoleResponses, DisableTotpData, DisableTotpErrors, DisableTotpResponses, DisableUserData, DisableUserErrors, DisableUserResponses, ForgotPasswordData, ForgotPasswordErrors, ForgotPasswordResponses, GetGeoNodeChildrenData, GetGeoNodeChildrenErrors, GetGeoNodeChildrenResponses, GetGeoNodeData, GetGeoNodeErrors, GetGeoNodeResponses, GetHealthData, GetHealthErrors, GetHealthResponses, GetImportRunData, GetImportRunErrors, GetImportRunResponses, GetMeData, GetMeErrors, GetMeResponses, GetNominationData, GetNominationErrors, GetNominationHistoryData, GetNominationHistoryErrors, GetNominationHistoryResponses, GetNominationResponses, GetPersonData, GetPersonErrors, GetPersonResponses, GetProcessData, GetProcessErrors, GetProcessResponses, GetReadinessData, GetReadinessErrors, GetReadinessResponses, GetRoleData, GetRoleErrors, GetRoleResponses, GetUserData, GetUserErrors, GetUserResponses, GetUserScopesData, GetUserScopesErrors, GetUserScopesResponses, GetVectorTileData, GetVectorTileErrors, GetVectorTileResponses, InspectInvitationData, InspectInvitationErrors, InspectInvitationResponses, InviteUserData, InviteUserErrors, InviteUserResponses, ListAccessEntriesData, ListAccessEntriesErrors, ListAccessEntriesResponses, ListAuditEntriesData, ListAuditEntriesErrors, ListAuditEntriesResponses, ListCoalitionsData, ListCoalitionsErrors, ListCoalitionsResponses, ListConsentsData, ListConsentsErrors, ListConsentsResponses, ListFrameworksData, ListFrameworksErrors, ListFrameworksResponses, ListGeoNodesData, ListGeoNodesErrors, ListGeoNodesResponses, ListImportIssuesData, ListImportIssuesErrors, ListImportIssuesResponses, ListImportRunsData, ListImportRunsErrors, ListImportRunsResponses, ListMunicipalitySettingsData, ListMunicipalitySettingsErrors, ListMunicipalitySettingsResponses, ListMySessionsData, ListMySessionsErrors, ListMySessionsResponses, ListNominationsData, ListNominationsErrors, ListNominationsResponses, ListOfficeTypesData, ListOfficeTypesErrors, ListOfficeTypesResponses, ListPartiesData, ListPartiesErrors, ListPartiesResponses, ListPermissionsData, ListPermissionsErrors, ListPermissionsResponses, ListProcessesData, ListProcessesErrors, ListProcessesResponses, ListProcessOfficesData, ListProcessOfficesErrors, ListProcessOfficesResponses, ListProcessRulesData, ListProcessRulesErrors, ListProcessRulesResponses, ListRolesData, ListRolesErrors, ListRolesResponses, ListUsersData, ListUsersErrors, ListUserSessionsData, ListUserSessionsErrors, ListUserSessionsResponses, ListUsersResponses, ListValidationRulesData, ListValidationRulesErrors, ListValidationRulesResponses, LocatePointData, LocatePointErrors, LocatePointResponses, LoginData, LoginErrors, LoginResponses, LogoutData, LogoutErrors, LogoutResponses, RefreshSessionData, RefreshSessionErrors, RefreshSessionResponses, RegenerateRecoveryCodesData, RegenerateRecoveryCodesErrors, RegenerateRecoveryCodesResponses, ResendInvitationData, ResendInvitationErrors, ResendInvitationResponses, ResetPasswordData, ResetPasswordErrors, ResetPasswordResponses, ResetUserMfaData, ResetUserMfaErrors, ResetUserMfaResponses, RevokeMyOtherSessionsData, RevokeMyOtherSessionsErrors, RevokeMyOtherSessionsResponses, RevokeMySessionData, RevokeMySessionErrors, RevokeMySessionResponses, RevokeUserSessionsData, RevokeUserSessionsErrors, RevokeUserSessionsResponses, SearchGeographyData, SearchGeographyErrors, SearchGeographyResponses, SearchPeopleData, SearchPeopleErrors, SearchPeopleResponses, SetRolePermissionsData, SetRolePermissionsErrors, SetRolePermissionsResponses, SetupTotpData, SetupTotpErrors, SetupTotpResponses, SetUserRolesData, SetUserRolesErrors, SetUserRolesResponses, SetUserScopesData, SetUserScopesErrors, SetUserScopesResponses, SubmitNominationData, SubmitNominationErrors, SubmitNominationResponses, SubstituteFormulaData, SubstituteFormulaErrors, SubstituteFormulaResponses, UnlockUserData, UnlockUserErrors, UnlockUserResponses, UpdateFormulaMembersData, UpdateFormulaMembersErrors, UpdateFormulaMembersResponses, UpdateNominationData, UpdateNominationErrors, UpdateNominationResponses, UpdateOfficeTypeData, UpdateOfficeTypeErrors, UpdateOfficeTypeResponses, UpdatePartyData, UpdatePartyErrors, UpdatePartyResponses, UpdatePersonData, UpdatePersonErrors, UpdatePersonResponses, UpdateProcessData, UpdateProcessErrors, UpdateProcessResponses, UpdateRoleData, UpdateRoleErrors, UpdateRoleResponses, UpdateUserData, UpdateUserErrors, UpdateUserResponses, ValidateNominationData, ValidateNominationErrors, ValidateNominationResponses, VerifyMfaData, VerifyMfaErrors, VerifyMfaResponses } from './types.gen';
-import { zAcceptInvitationResponse, zActivateUserResponse, zAddConsentResponse, zApproveNominationResponse, zCancelNominationResponse, zChangeFormulaStatusResponse, zChangePasswordResponse, zConfigureMunicipalitiesResponse, zConfigureProcessOfficesResponse, zConfigureProcessRulesResponse, zConfirmTotpResponse, zCreateCoalitionResponse, zCreateFormulaResponse, zCreateNominationResponse, zCreateOfficeTypeResponse, zCreatePartyResponse, zCreatePersonResponse, zCreateProcessResponse, zCreateRoleResponse, zDeletePersonResponse, zDeleteRoleResponse, zDisableTotpResponse, zDisableUserResponse, zGetGeoNodeChildrenResponse, zGetGeoNodeResponse, zGetHealthResponse, zGetImportRunResponse, zGetMeResponse, zGetNominationHistoryResponse, zGetNominationResponse, zGetPersonResponse, zGetProcessResponse, zGetReadinessResponse, zGetRoleResponse, zGetUserResponse, zGetUserScopesResponse, zInspectInvitationResponse, zInviteUserResponse, zListAccessEntriesResponse, zListAuditEntriesResponse, zListCoalitionsResponse, zListConsentsResponse, zListFrameworksResponse, zListGeoNodesResponse, zListImportIssuesResponse, zListImportRunsResponse, zListMunicipalitySettingsResponse, zListMySessionsResponse, zListNominationsResponse, zListOfficeTypesResponse, zListPartiesResponse, zListPermissionsResponse, zListProcessesResponse, zListProcessOfficesResponse, zListProcessRulesResponse, zListRolesResponse, zListUserSessionsResponse, zListUsersResponse, zListValidationRulesResponse, zLocatePointResponse, zLoginResponse, zLogoutResponse, zRefreshSessionResponse, zRegenerateRecoveryCodesResponse, zResendInvitationResponse, zResetPasswordResponse, zResetUserMfaResponse, zRevokeMyOtherSessionsResponse, zRevokeMySessionResponse, zRevokeUserSessionsResponse, zSearchGeographyResponse, zSearchPeopleResponse, zSetRolePermissionsResponse, zSetupTotpResponse, zSetUserRolesResponse, zSetUserScopesResponse, zSubmitNominationResponse, zSubstituteFormulaResponse, zUnlockUserResponse, zUpdateFormulaMembersResponse, zUpdateNominationResponse, zUpdateOfficeTypeResponse, zUpdatePartyResponse, zUpdatePersonResponse, zUpdateProcessResponse, zUpdateRoleResponse, zUpdateUserResponse, zValidateNominationResponse, zVerifyMfaResponse } from './zod.gen';
+import type { AcceptInvitationData, AcceptInvitationErrors, AcceptInvitationResponses, ActivateUserData, ActivateUserErrors, ActivateUserResponses, AddConsentData, AddConsentErrors, AddConsentResponses, ApproveNominationData, ApproveNominationErrors, ApproveNominationResponses, CancelNominationData, CancelNominationErrors, CancelNominationResponses, ChangeFormulaStatusData, ChangeFormulaStatusErrors, ChangeFormulaStatusResponses, ChangeMemberLevelData, ChangeMemberLevelErrors, ChangeMemberLevelResponses, ChangePasswordData, ChangePasswordErrors, ChangePasswordResponses, ConfigureMunicipalitiesData, ConfigureMunicipalitiesErrors, ConfigureMunicipalitiesResponses, ConfigureProcessOfficesData, ConfigureProcessOfficesErrors, ConfigureProcessOfficesResponses, ConfigureProcessRulesData, ConfigureProcessRulesErrors, ConfigureProcessRulesResponses, ConfirmTotpData, ConfirmTotpErrors, ConfirmTotpResponses, CreateCoalitionData, CreateCoalitionErrors, CreateCoalitionResponses, CreateFormulaData, CreateFormulaErrors, CreateFormulaResponses, CreateNominationData, CreateNominationErrors, CreateNominationResponses, CreateOfficeTypeData, CreateOfficeTypeErrors, CreateOfficeTypeResponses, CreatePartyData, CreatePartyErrors, CreatePartyResponses, CreatePersonData, CreatePersonErrors, CreatePersonResponses, CreateProcessData, CreateProcessErrors, CreateProcessResponses, CreateRoleData, CreateRoleErrors, CreateRoleResponses, CreateZoneCoordinatorData, CreateZoneCoordinatorErrors, CreateZoneCoordinatorResponses, DeletePersonData, DeletePersonErrors, DeletePersonResponses, DeleteRoleData, DeleteRoleErrors, DeleteRoleResponses, DisableTotpData, DisableTotpErrors, DisableTotpResponses, DisableUserData, DisableUserErrors, DisableUserResponses, EndZoneCoordinatorData, EndZoneCoordinatorErrors, EndZoneCoordinatorResponses, EnrollMemberData, EnrollMemberErrors, EnrollMemberResponses, ForgotPasswordData, ForgotPasswordErrors, ForgotPasswordResponses, GetGeoNodeChildrenData, GetGeoNodeChildrenErrors, GetGeoNodeChildrenResponses, GetGeoNodeData, GetGeoNodeErrors, GetGeoNodeResponses, GetHealthData, GetHealthErrors, GetHealthResponses, GetImportRunData, GetImportRunErrors, GetImportRunResponses, GetMeData, GetMeErrors, GetMemberData, GetMemberErrors, GetMemberHistoryData, GetMemberHistoryErrors, GetMemberHistoryResponses, GetMemberResponses, GetMeResponses, GetNominationData, GetNominationErrors, GetNominationHistoryData, GetNominationHistoryErrors, GetNominationHistoryResponses, GetNominationResponses, GetPeaceSettingsData, GetPeaceSettingsErrors, GetPeaceSettingsResponses, GetPersonData, GetPersonErrors, GetPersonResponses, GetProcessData, GetProcessErrors, GetProcessResponses, GetReadinessData, GetReadinessErrors, GetReadinessResponses, GetRoleData, GetRoleErrors, GetRoleResponses, GetUserData, GetUserErrors, GetUserResponses, GetUserScopesData, GetUserScopesErrors, GetUserScopesResponses, GetVectorTileData, GetVectorTileErrors, GetVectorTileResponses, InspectInvitationData, InspectInvitationErrors, InspectInvitationResponses, InviteUserData, InviteUserErrors, InviteUserResponses, ListAccessEntriesData, ListAccessEntriesErrors, ListAccessEntriesResponses, ListAuditEntriesData, ListAuditEntriesErrors, ListAuditEntriesResponses, ListCoalitionsData, ListCoalitionsErrors, ListCoalitionsResponses, ListConsentsData, ListConsentsErrors, ListConsentsResponses, ListFrameworksData, ListFrameworksErrors, ListFrameworksResponses, ListGeoNodesData, ListGeoNodesErrors, ListGeoNodesResponses, ListHouseGoalsData, ListHouseGoalsErrors, ListHouseGoalsResponses, ListImportIssuesData, ListImportIssuesErrors, ListImportIssuesResponses, ListImportRunsData, ListImportRunsErrors, ListImportRunsResponses, ListLevelGoalsData, ListLevelGoalsErrors, ListLevelGoalsResponses, ListMemberChildrenData, ListMemberChildrenErrors, ListMemberChildrenResponses, ListMunicipalitySettingsData, ListMunicipalitySettingsErrors, ListMunicipalitySettingsResponses, ListMySessionsData, ListMySessionsErrors, ListMySessionsResponses, ListNominationsData, ListNominationsErrors, ListNominationsResponses, ListOfficeTypesData, ListOfficeTypesErrors, ListOfficeTypesResponses, ListParticipationLevelsData, ListParticipationLevelsErrors, ListParticipationLevelsResponses, ListPartiesData, ListPartiesErrors, ListPartiesResponses, ListPermissionsData, ListPermissionsErrors, ListPermissionsResponses, ListPrivacyNoticesData, ListPrivacyNoticesErrors, ListPrivacyNoticesResponses, ListProcessesData, ListProcessesErrors, ListProcessesResponses, ListProcessOfficesData, ListProcessOfficesErrors, ListProcessOfficesResponses, ListProcessRulesData, ListProcessRulesErrors, ListProcessRulesResponses, ListRolesData, ListRolesErrors, ListRolesResponses, ListUserBranchesData, ListUserBranchesErrors, ListUserBranchesResponses, ListUsersData, ListUsersErrors, ListUserSessionsData, ListUserSessionsErrors, ListUserSessionsResponses, ListUsersResponses, ListValidationRulesData, ListValidationRulesErrors, ListValidationRulesResponses, ListZoneCoordinatorsData, ListZoneCoordinatorsErrors, ListZoneCoordinatorsResponses, LocatePointData, LocatePointErrors, LocatePointResponses, LoginData, LoginErrors, LoginResponses, LogoutData, LogoutErrors, LogoutResponses, MemberLeavesData, MemberLeavesErrors, MemberLeavesResponses, PublishPrivacyNoticeData, PublishPrivacyNoticeErrors, PublishPrivacyNoticeResponses, ReassignMemberData, ReassignMemberErrors, ReassignMemberResponses, RefreshSessionData, RefreshSessionErrors, RefreshSessionResponses, RegenerateRecoveryCodesData, RegenerateRecoveryCodesErrors, RegenerateRecoveryCodesResponses, RejectMemberData, RejectMemberErrors, RejectMemberResponses, ResendInvitationData, ResendInvitationErrors, ResendInvitationResponses, ResetPasswordData, ResetPasswordErrors, ResetPasswordResponses, ResetUserMfaData, ResetUserMfaErrors, ResetUserMfaResponses, RevokeMyOtherSessionsData, RevokeMyOtherSessionsErrors, RevokeMyOtherSessionsResponses, RevokeMySessionData, RevokeMySessionErrors, RevokeMySessionResponses, RevokeUserSessionsData, RevokeUserSessionsErrors, RevokeUserSessionsResponses, SearchGeographyData, SearchGeographyErrors, SearchGeographyResponses, SearchMembersData, SearchMembersErrors, SearchMembersResponses, SearchPeopleData, SearchPeopleErrors, SearchPeopleResponses, SetHouseGoalData, SetHouseGoalErrors, SetHouseGoalResponses, SetLevelGoalData, SetLevelGoalErrors, SetLevelGoalResponses, SetRolePermissionsData, SetRolePermissionsErrors, SetRolePermissionsResponses, SetupTotpData, SetupTotpErrors, SetupTotpResponses, SetUserBranchesData, SetUserBranchesErrors, SetUserBranchesResponses, SetUserRolesData, SetUserRolesErrors, SetUserRolesResponses, SetUserScopesData, SetUserScopesErrors, SetUserScopesResponses, SubmitNominationData, SubmitNominationErrors, SubmitNominationResponses, SubstituteFormulaData, SubstituteFormulaErrors, SubstituteFormulaResponses, UnlockUserData, UnlockUserErrors, UnlockUserResponses, UpdateFormulaMembersData, UpdateFormulaMembersErrors, UpdateFormulaMembersResponses, UpdateNominationData, UpdateNominationErrors, UpdateNominationResponses, UpdateOfficeTypeData, UpdateOfficeTypeErrors, UpdateOfficeTypeResponses, UpdatePartyData, UpdatePartyErrors, UpdatePartyResponses, UpdatePeaceSettingsData, UpdatePeaceSettingsErrors, UpdatePeaceSettingsResponses, UpdatePersonData, UpdatePersonErrors, UpdatePersonResponses, UpdateProcessData, UpdateProcessErrors, UpdateProcessResponses, UpdateRoleData, UpdateRoleErrors, UpdateRoleResponses, UpdateUserData, UpdateUserErrors, UpdateUserResponses, ValidateMemberData, ValidateMemberErrors, ValidateMemberResponses, ValidateNominationData, ValidateNominationErrors, ValidateNominationResponses, VerifyMfaData, VerifyMfaErrors, VerifyMfaResponses } from './types.gen';
+import { zAcceptInvitationResponse, zActivateUserResponse, zAddConsentResponse, zApproveNominationResponse, zCancelNominationResponse, zChangeFormulaStatusResponse, zChangeMemberLevelResponse, zChangePasswordResponse, zConfigureMunicipalitiesResponse, zConfigureProcessOfficesResponse, zConfigureProcessRulesResponse, zConfirmTotpResponse, zCreateCoalitionResponse, zCreateFormulaResponse, zCreateNominationResponse, zCreateOfficeTypeResponse, zCreatePartyResponse, zCreatePersonResponse, zCreateProcessResponse, zCreateRoleResponse, zCreateZoneCoordinatorResponse, zDeletePersonResponse, zDeleteRoleResponse, zDisableTotpResponse, zDisableUserResponse, zEndZoneCoordinatorResponse, zEnrollMemberResponse, zGetGeoNodeChildrenResponse, zGetGeoNodeResponse, zGetHealthResponse, zGetImportRunResponse, zGetMemberHistoryResponse, zGetMemberResponse, zGetMeResponse, zGetNominationHistoryResponse, zGetNominationResponse, zGetPeaceSettingsResponse, zGetPersonResponse, zGetProcessResponse, zGetReadinessResponse, zGetRoleResponse, zGetUserResponse, zGetUserScopesResponse, zInspectInvitationResponse, zInviteUserResponse, zListAccessEntriesResponse, zListAuditEntriesResponse, zListCoalitionsResponse, zListConsentsResponse, zListFrameworksResponse, zListGeoNodesResponse, zListHouseGoalsResponse, zListImportIssuesResponse, zListImportRunsResponse, zListLevelGoalsResponse, zListMemberChildrenResponse, zListMunicipalitySettingsResponse, zListMySessionsResponse, zListNominationsResponse, zListOfficeTypesResponse, zListParticipationLevelsResponse, zListPartiesResponse, zListPermissionsResponse, zListPrivacyNoticesResponse, zListProcessesResponse, zListProcessOfficesResponse, zListProcessRulesResponse, zListRolesResponse, zListUserBranchesResponse, zListUserSessionsResponse, zListUsersResponse, zListValidationRulesResponse, zListZoneCoordinatorsResponse, zLocatePointResponse, zLoginResponse, zLogoutResponse, zMemberLeavesResponse, zPublishPrivacyNoticeResponse, zReassignMemberResponse, zRefreshSessionResponse, zRegenerateRecoveryCodesResponse, zRejectMemberResponse, zResendInvitationResponse, zResetPasswordResponse, zResetUserMfaResponse, zRevokeMyOtherSessionsResponse, zRevokeMySessionResponse, zRevokeUserSessionsResponse, zSearchGeographyResponse, zSearchMembersResponse, zSearchPeopleResponse, zSetHouseGoalResponse, zSetLevelGoalResponse, zSetRolePermissionsResponse, zSetupTotpResponse, zSetUserBranchesResponse, zSetUserRolesResponse, zSetUserScopesResponse, zSubmitNominationResponse, zSubstituteFormulaResponse, zUnlockUserResponse, zUpdateFormulaMembersResponse, zUpdateNominationResponse, zUpdateOfficeTypeResponse, zUpdatePartyResponse, zUpdatePeaceSettingsResponse, zUpdatePersonResponse, zUpdateProcessResponse, zUpdateRoleResponse, zUpdateUserResponse, zValidateMemberResponse, zValidateNominationResponse, zVerifyMfaResponse } from './zod.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -597,6 +597,30 @@ export const getGeoNodeChildren = <ThrowOnError extends boolean = false>(options
 });
 
 /**
+ * Avisos de privacidad y sus versiones
+ */
+export const listPrivacyNotices = <ThrowOnError extends boolean = false>(options?: Options<ListPrivacyNoticesData, ThrowOnError>): RequestResult<ListPrivacyNoticesResponses, ListPrivacyNoticesErrors, ThrowOnError> => (options?.client ?? client).get<ListPrivacyNoticesResponses, ListPrivacyNoticesErrors, ThrowOnError>({
+    responseValidator: async (data) => await zListPrivacyNoticesResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/people/privacy-notices',
+    ...options
+});
+
+/**
+ * Publicar una versión nueva de un aviso de privacidad
+ */
+export const publishPrivacyNotice = <ThrowOnError extends boolean = false>(options: Options<PublishPrivacyNoticeData, ThrowOnError>): RequestResult<PublishPrivacyNoticeResponses, PublishPrivacyNoticeErrors, ThrowOnError> => (options.client ?? client).post<PublishPrivacyNoticeResponses, PublishPrivacyNoticeErrors, ThrowOnError>({
+    responseValidator: async (data) => await zPublishPrivacyNoticeResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/people/privacy-notices',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
  * Buscar personas
  */
 export const searchPeople = <ThrowOnError extends boolean = false>(options?: Options<SearchPeopleData, ThrowOnError>): RequestResult<SearchPeopleResponses, SearchPeopleErrors, ThrowOnError> => (options?.client ?? client).get<SearchPeopleResponses, SearchPeopleErrors, ThrowOnError>({
@@ -1067,6 +1091,266 @@ export const substituteFormula = <ThrowOnError extends boolean = false>(options:
     responseValidator: async (data) => await zSubstituteFormulaResponse.parseAsync(data),
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/v1/formulas/{formula_id}/substitute',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Niveles de participación
+ */
+export const listParticipationLevels = <ThrowOnError extends boolean = false>(options?: Options<ListParticipationLevelsData, ThrowOnError>): RequestResult<ListParticipationLevelsResponses, ListParticipationLevelsErrors, ThrowOnError> => (options?.client ?? client).get<ListParticipationLevelsResponses, ListParticipationLevelsErrors, ThrowOnError>({
+    responseValidator: async (data) => await zListParticipationLevelsResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/peace-movement/levels',
+    ...options
+});
+
+/**
+ * Metas de reclutamiento
+ */
+export const listLevelGoals = <ThrowOnError extends boolean = false>(options?: Options<ListLevelGoalsData, ThrowOnError>): RequestResult<ListLevelGoalsResponses, ListLevelGoalsErrors, ThrowOnError> => (options?.client ?? client).get<ListLevelGoalsResponses, ListLevelGoalsErrors, ThrowOnError>({
+    responseValidator: async (data) => await zListLevelGoalsResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/peace-movement/level-goals',
+    ...options
+});
+
+/**
+ * Fijar la meta de un nivel (nacional o por estado)
+ */
+export const setLevelGoal = <ThrowOnError extends boolean = false>(options: Options<SetLevelGoalData, ThrowOnError>): RequestResult<SetLevelGoalResponses, SetLevelGoalErrors, ThrowOnError> => (options.client ?? client).post<SetLevelGoalResponses, SetLevelGoalErrors, ThrowOnError>({
+    responseValidator: async (data) => await zSetLevelGoalResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/peace-movement/level-goals',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Metas de integrantes por casa
+ */
+export const listHouseGoals = <ThrowOnError extends boolean = false>(options?: Options<ListHouseGoalsData, ThrowOnError>): RequestResult<ListHouseGoalsResponses, ListHouseGoalsErrors, ThrowOnError> => (options?.client ?? client).get<ListHouseGoalsResponses, ListHouseGoalsErrors, ThrowOnError>({
+    responseValidator: async (data) => await zListHouseGoalsResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/peace-movement/house-goals',
+    ...options
+});
+
+/**
+ * Fijar la meta de integrantes por casa
+ */
+export const setHouseGoal = <ThrowOnError extends boolean = false>(options: Options<SetHouseGoalData, ThrowOnError>): RequestResult<SetHouseGoalResponses, SetHouseGoalErrors, ThrowOnError> => (options.client ?? client).post<SetHouseGoalResponses, SetHouseGoalErrors, ThrowOnError>({
+    responseValidator: async (data) => await zSetHouseGoalResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/peace-movement/house-goals',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Configuración del módulo
+ */
+export const getPeaceSettings = <ThrowOnError extends boolean = false>(options?: Options<GetPeaceSettingsData, ThrowOnError>): RequestResult<GetPeaceSettingsResponses, GetPeaceSettingsErrors, ThrowOnError> => (options?.client ?? client).get<GetPeaceSettingsResponses, GetPeaceSettingsErrors, ThrowOnError>({
+    responseValidator: async (data) => await zGetPeaceSettingsResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/peace-movement/settings',
+    ...options
+});
+
+/**
+ * Cambiar la configuración
+ */
+export const updatePeaceSettings = <ThrowOnError extends boolean = false>(options: Options<UpdatePeaceSettingsData, ThrowOnError>): RequestResult<UpdatePeaceSettingsResponses, UpdatePeaceSettingsErrors, ThrowOnError> => (options.client ?? client).put<UpdatePeaceSettingsResponses, UpdatePeaceSettingsErrors, ThrowOnError>({
+    responseValidator: async (data) => await zUpdatePeaceSettingsResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/peace-movement/settings',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Coordinadores de zona (crédito de casas sin Embajador)
+ */
+export const listZoneCoordinators = <ThrowOnError extends boolean = false>(options?: Options<ListZoneCoordinatorsData, ThrowOnError>): RequestResult<ListZoneCoordinatorsResponses, ListZoneCoordinatorsErrors, ThrowOnError> => (options?.client ?? client).get<ListZoneCoordinatorsResponses, ListZoneCoordinatorsErrors, ThrowOnError>({
+    responseValidator: async (data) => await zListZoneCoordinatorsResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/peace-movement/zone-coordinators',
+    ...options
+});
+
+/**
+ * Asignar un coordinador de zona
+ */
+export const createZoneCoordinator = <ThrowOnError extends boolean = false>(options: Options<CreateZoneCoordinatorData, ThrowOnError>): RequestResult<CreateZoneCoordinatorResponses, CreateZoneCoordinatorErrors, ThrowOnError> => (options.client ?? client).post<CreateZoneCoordinatorResponses, CreateZoneCoordinatorErrors, ThrowOnError>({
+    responseValidator: async (data) => await zCreateZoneCoordinatorResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/peace-movement/zone-coordinators',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Terminar la vigencia de un coordinador de zona
+ */
+export const endZoneCoordinator = <ThrowOnError extends boolean = false>(options: Options<EndZoneCoordinatorData, ThrowOnError>): RequestResult<EndZoneCoordinatorResponses, EndZoneCoordinatorErrors, ThrowOnError> => (options.client ?? client).post<EndZoneCoordinatorResponses, EndZoneCoordinatorErrors, ThrowOnError>({
+    responseValidator: async (data) => await zEndZoneCoordinatorResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/peace-movement/zone-coordinators/{zone_id}/end',
+    ...options
+});
+
+/**
+ * Buscar pacificadores
+ */
+export const searchMembers = <ThrowOnError extends boolean = false>(options?: Options<SearchMembersData, ThrowOnError>): RequestResult<SearchMembersResponses, SearchMembersErrors, ThrowOnError> => (options?.client ?? client).get<SearchMembersResponses, SearchMembersErrors, ThrowOnError>({
+    responseValidator: async (data) => await zSearchMembersResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/peace-movement/members',
+    ...options
+});
+
+/**
+ * Inscribir pacificador
+ */
+export const enrollMember = <ThrowOnError extends boolean = false>(options: Options<EnrollMemberData, ThrowOnError>): RequestResult<EnrollMemberResponses, EnrollMemberErrors, ThrowOnError> => (options.client ?? client).post<EnrollMemberResponses, EnrollMemberErrors, ThrowOnError>({
+    responseValidator: async (data) => await zEnrollMemberResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/peace-movement/members',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Detalle de pacificador
+ */
+export const getMember = <ThrowOnError extends boolean = false>(options: Options<GetMemberData, ThrowOnError>): RequestResult<GetMemberResponses, GetMemberErrors, ThrowOnError> => (options.client ?? client).get<GetMemberResponses, GetMemberErrors, ThrowOnError>({
+    responseValidator: async (data) => await zGetMemberResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/peace-movement/members/{member_id}',
+    ...options
+});
+
+/**
+ * Reclutas directos (los de fuera del alcance, solo en total)
+ */
+export const listMemberChildren = <ThrowOnError extends boolean = false>(options: Options<ListMemberChildrenData, ThrowOnError>): RequestResult<ListMemberChildrenResponses, ListMemberChildrenErrors, ThrowOnError> => (options.client ?? client).get<ListMemberChildrenResponses, ListMemberChildrenErrors, ThrowOnError>({
+    responseValidator: async (data) => await zListMemberChildrenResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/peace-movement/members/{member_id}/children',
+    ...options
+});
+
+/**
+ * Historial de niveles y reclutadores
+ */
+export const getMemberHistory = <ThrowOnError extends boolean = false>(options: Options<GetMemberHistoryData, ThrowOnError>): RequestResult<GetMemberHistoryResponses, GetMemberHistoryErrors, ThrowOnError> => (options.client ?? client).get<GetMemberHistoryResponses, GetMemberHistoryErrors, ThrowOnError>({
+    responseValidator: async (data) => await zGetMemberHistoryResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/peace-movement/members/{member_id}/history',
+    ...options
+});
+
+/**
+ * Validar inscripción pendiente
+ */
+export const validateMember = <ThrowOnError extends boolean = false>(options: Options<ValidateMemberData, ThrowOnError>): RequestResult<ValidateMemberResponses, ValidateMemberErrors, ThrowOnError> => (options.client ?? client).post<ValidateMemberResponses, ValidateMemberErrors, ThrowOnError>({
+    responseValidator: async (data) => await zValidateMemberResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/peace-movement/members/{member_id}/validate',
+    ...options
+});
+
+/**
+ * Rechazar inscripción pendiente
+ */
+export const rejectMember = <ThrowOnError extends boolean = false>(options: Options<RejectMemberData, ThrowOnError>): RequestResult<RejectMemberResponses, RejectMemberErrors, ThrowOnError> => (options.client ?? client).post<RejectMemberResponses, RejectMemberErrors, ThrowOnError>({
+    responseValidator: async (data) => await zRejectMemberResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/peace-movement/members/{member_id}/reject',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Registrar que el pacificador deja el movimiento
+ */
+export const memberLeaves = <ThrowOnError extends boolean = false>(options: Options<MemberLeavesData, ThrowOnError>): RequestResult<MemberLeavesResponses, MemberLeavesErrors, ThrowOnError> => (options.client ?? client).post<MemberLeavesResponses, MemberLeavesErrors, ThrowOnError>({
+    responseValidator: async (data) => await zMemberLeavesResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/peace-movement/members/{member_id}/leave',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Cambiar el nivel de participación
+ */
+export const changeMemberLevel = <ThrowOnError extends boolean = false>(options: Options<ChangeMemberLevelData, ThrowOnError>): RequestResult<ChangeMemberLevelResponses, ChangeMemberLevelErrors, ThrowOnError> => (options.client ?? client).post<ChangeMemberLevelResponses, ChangeMemberLevelErrors, ThrowOnError>({
+    responseValidator: async (data) => await zChangeMemberLevelResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/peace-movement/members/{member_id}/level',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Cambiar el reclutador (mueve toda su red)
+ */
+export const reassignMember = <ThrowOnError extends boolean = false>(options: Options<ReassignMemberData, ThrowOnError>): RequestResult<ReassignMemberResponses, ReassignMemberErrors, ThrowOnError> => (options.client ?? client).post<ReassignMemberResponses, ReassignMemberErrors, ThrowOnError>({
+    responseValidator: async (data) => await zReassignMemberResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/peace-movement/members/{member_id}/reassign',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Ramas asignadas a un usuario (alcance por rama)
+ */
+export const listUserBranches = <ThrowOnError extends boolean = false>(options: Options<ListUserBranchesData, ThrowOnError>): RequestResult<ListUserBranchesResponses, ListUserBranchesErrors, ThrowOnError> => (options.client ?? client).get<ListUserBranchesResponses, ListUserBranchesErrors, ThrowOnError>({
+    responseValidator: async (data) => await zListUserBranchesResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/peace-movement/users/{user_id}/branches',
+    ...options
+});
+
+/**
+ * Reemplazar las ramas de un usuario
+ */
+export const setUserBranches = <ThrowOnError extends boolean = false>(options: Options<SetUserBranchesData, ThrowOnError>): RequestResult<SetUserBranchesResponses, SetUserBranchesErrors, ThrowOnError> => (options.client ?? client).put<SetUserBranchesResponses, SetUserBranchesErrors, ThrowOnError>({
+    responseValidator: async (data) => await zSetUserBranchesResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/peace-movement/users/{user_id}/branches',
     ...options,
     headers: {
         'Content-Type': 'application/json',

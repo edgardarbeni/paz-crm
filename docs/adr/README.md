@@ -169,6 +169,7 @@ plantean alternativas; el 2026-10-29 se aceptó la opción recomendada de cada u
 | [D-92](D-92-reglas-negocio-movimiento-paz.md) | Reglas de negocio del Movimiento de Paz confirmadas | Aceptada |
 | [D-93](D-93-bitacora-alcance-y-enmascarado.md) | Bitácora: alcance de consulta, enmascarado de personas y escrituras Core (detalla D-37 y D-45) | Aceptada |
 | [D-94](D-94-infraestructura-scheduler-s3-modulos.md) | Infraestructura: scheduler, S3 de desarrollo y registro de módulos (detalla D-38 y D-84) | Aceptada |
+| [D-95](D-95-ajustes-implementacion-pacificadores.md) | Ajustes de implementación de la fase 1 del Movimiento de Paz (pacificadores) | Aceptada |
 
 ## Suposiciones vigentes
 

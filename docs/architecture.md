@@ -91,11 +91,13 @@ backend/app/
     candidacies/     catálogos, procesos, postulaciones, fórmulas y reglas
       models · schemas · service · router · nominations.py · rules.py ·
       composition.py · scope.py
+    peace_movement/  pacificadores (pirámide con ltree), metas, coordinadores de zona, ramas
+      models · schemas · catalog.py · members.py · scope.py · hooks.py · router
     audit/           solo router.py: lectura de la bitácora
 ```
 
 **Esquemas de PostgreSQL.** Cada módulo con tablas tiene su esquema: `identity`, `geography`,
-`people` y `candidacies`. Además existe `audit`, que se gestiona con SQL a mano. Los modelos
+`people`, `candidacies` y `peace_movement`. Además existe `audit`, que se gestiona con SQL a mano. Los modelos
 declaran `__table_args__ = {"schema": "<módulo>"}`.
 
 **Capas.** En la práctica cada módulo tiene `models` (tablas SQLModel), `schemas` (DTOs
@@ -210,6 +212,7 @@ restricción.
 | Geografía | `LevelDef.visible(geo)` (`geography/service.py`) | El nodo toca al menos una sección del alcance |
 | Candidaturas | `scope.readable_filter`, `is_editable`, `ensure_node_within_scope` | Se lee si comparte una sección y se edita si todas están en el alcance (vista `candidacies.nomination_sections`, migración 0009). Las postulaciones nacionales exigen alcance nacional |
 | Personas | `people/service.py:visible_filter` | Domicilio en el alcance, sin domicilio, o parte de una postulación visible |
+| Movimiento de Paz | `peace_movement/scope.py:member_visibility` | Sección del domicilio en el alcance **o** dentro de una rama asignada (`user_branch_scopes`, `path <@`), aunque cruce estados ([D-83](adr/D-83-alcance-por-rama.md)) |
 | Usuarios | `manageable_users_filter`, `ensure_within_scope` | Solo se gestiona a usuarios cuyo alcance está dentro del propio |
 
 **Antiescalamiento.** `set_scopes` rechaza otorgar un nodo con secciones fuera del alcance
@@ -264,10 +267,10 @@ contraseñas, importaciones y activación de marcos. Para escrituras masivas con
 - **Alembic asíncrono.** Corre con el rol dueño (`PAZ_MIGRATIONS_DATABASE_URL`); la API usa
   `paz_app`. Nunca se usa `create_all` fuera de tests.
 - **Nombres.** `file_template` produce archivos `AAAAMMDD_<rev>_<slug>.py` con revisiones
-  secuenciales (`0001` … `0011`). Usa `--rev-id`:
+  secuenciales (`0001` … `0014`). Usa `--rev-id`:
   ```bash
   cd backend
-  uv run alembic revision --autogenerate --rev-id 0012 -m "foo tables"
+  uv run alembic revision --autogenerate --rev-id 0015 -m "foo tables"
   uv run alembic upgrade head
   ```
 - **Autogenerate (`migrations/env.py`).**

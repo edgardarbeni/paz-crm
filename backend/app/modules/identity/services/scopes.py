@@ -234,3 +234,9 @@ async def rebuild_all(db: AsyncSession) -> int:
     for user_id in users:
         await rebuild_scope_sections(db, user_id)
     return len(users)
+
+
+# Shared with modules that resolve their own geographic zones (e.g. Peace Movement coordinators).
+node_sections_sql = _node_sections_sql
+validate_node = _validate_node
+active_framework = _active_framework

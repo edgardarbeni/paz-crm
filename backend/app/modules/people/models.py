@@ -138,18 +138,63 @@ class PersonAddress(BusinessTable, table=True):
     key_version: int | None = Field(default=None, sa_type=SmallInteger)
 
 
+CONSENT_CHANNELS = ("panel", "paper", "web", "referral_link", "import", "field_app")
+
+
+class PrivacyNotice(BusinessTable, table=True):
+    """A version of a privacy notice (D-82). `code` tells notices apart (`general`, the Peace
+    Movement's `peace_movement`); one version per code is current (`valid_to` null)."""
+
+    __tablename__ = "privacy_notices"
+    __table_args__ = (
+        Index(
+            "uq_privacy_notices_code_version",
+            "code",
+            "version",
+            unique=True,
+            postgresql_where=text("deleted_at IS NULL"),
+        ),
+        Index(
+            "uq_privacy_notices_current",
+            "code",
+            unique=True,
+            postgresql_where=text("valid_to IS NULL AND deleted_at IS NULL"),
+        ),
+        {"schema": SCHEMA},
+    )
+
+    code: str = Field(max_length=50)
+    version: str = Field(max_length=50)
+    title: str = Field(max_length=200)
+    body: str = Field(sa_type=Text)
+    body_sha256: str = Field(max_length=64)
+    is_sample: bool = Field(default=False, sa_column_kwargs={"server_default": text("false")})
+    valid_from: datetime = Field(sa_type=TZ)
+    valid_to: datetime | None = Field(default=None, sa_type=TZ)
+
+
 class PrivacyConsent(BusinessTable, table=True):
-    """Acceptance of the privacy notice (LFPDPPP)."""
+    """Acceptance of a privacy notice (LFPDPPP). Consents given on a catalogued notice copy its
+    code and text hash, so the proof survives the notice row (D-82)."""
 
     __tablename__ = "privacy_consents"
     __table_args__ = (
-        CheckConstraint("channel IN ('panel', 'paper', 'web')", name="channel"),
+        CheckConstraint(
+            "channel IN (" + ", ".join(f"'{c}'" for c in CONSENT_CHANNELS) + ")", name="channel"
+        ),
         {"schema": SCHEMA},
     )
     __audit_masked__: ClassVar[frozenset[str]] = frozenset()
 
     person_id: uuid.UUID = _person_fk()
+    notice_id: uuid.UUID | None = Field(
+        default=None, foreign_key=f"{SCHEMA}.privacy_notices.id", ondelete="RESTRICT"
+    )
+    notice_code: str = Field(
+        default="general", max_length=50, sa_column_kwargs={"server_default": "general"}
+    )
     notice_version: str = Field(max_length=50)
+    notice_text_sha256: str | None = Field(default=None, max_length=64)
     channel: str = Field(sa_type=Text)
     evidence_uri: str | None = Field(default=None, max_length=500)
     accepted_at: datetime = Field(sa_type=TZ)
