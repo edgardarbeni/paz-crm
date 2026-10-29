@@ -218,7 +218,15 @@ del actor; el alcance nacional solo lo otorga quien ya lo tiene.
   PostgreSQL por `audit.append_entry(...)` (`SECURITY DEFINER`).
 - `paz_app` solo puede ejecutar esa función y leer; los triggers rechazan UPDATE, DELETE y
   TRUNCATE.
-- Operación: `paz audit verify-chain` y `paz audit ensure-partitions`.
+- Operación: `paz audit verify-chain` y `paz audit ensure-partitions`, que crea las
+  particiones de las dos tablas.
+- **Lecturas sensibles:** `audit.access_log`, append-only y particionada igual, pero **fuera de
+  la cadena** para que las lecturas no esperen el candado global ([D-89](adr/D-89-bitacora-lecturas.md)).
+  Se escribe con `record_access(...)` (función `audit.record_access`, `SECURITY DEFINER`) y
+  guarda quién leyó qué, nunca el contenido.
+- **Consulta con alcance** ([D-93](adr/D-93-bitacora-alcance-y-enmascarado.md)):
+  `GET /audit-log` y `GET /audit-log/access` muestran a un usuario con alcance limitado solo
+  las entradas hechas por él o por usuarios que puede gestionar.
 
 **Escritura automática.**
 - `build_sessionmaker` usa `sync_session_class=AuditedSession`.
@@ -236,7 +244,8 @@ del actor; el alcance nacional solo lo otorga quien ya lo tiene.
 
 **Escritura explícita.** `record_audit(db, action=..., entity_table=..., ...)` dentro de la
 transacción del llamador. Se usa para eventos que no son filas: login, MFA, sesiones,
-contraseñas, importaciones y activación de marcos.
+contraseñas, importaciones y activación de marcos. Para escrituras masivas con Core,
+`record_bulk(...)` deja una sola entrada con los IDs afectados ([D-90](adr/D-90-auditoria-escrituras-masivas.md)).
 
 > **Regla:** las sentencias Core (`update(...)`, `delete(...)`, `text("UPDATE …")`) **no**
 > pasan por el hook. Para escrituras auditables hay que usar el ORM o llamar a
@@ -247,10 +256,10 @@ contraseñas, importaciones y activación de marcos.
 - **Alembic asíncrono.** Corre con el rol dueño (`PAZ_MIGRATIONS_DATABASE_URL`); la API usa
   `paz_app`. Nunca se usa `create_all` fuera de tests.
 - **Nombres.** `file_template` produce archivos `AAAAMMDD_<rev>_<slug>.py` con revisiones
-  secuenciales (`0001` … `0009`). Usa `--rev-id`:
+  secuenciales (`0001` … `0011`). Usa `--rev-id`:
   ```bash
   cd backend
-  uv run alembic revision --autogenerate --rev-id 0010 -m "foo tables"
+  uv run alembic revision --autogenerate --rev-id 0012 -m "foo tables"
   uv run alembic upgrade head
   ```
 - **Autogenerate (`migrations/env.py`).**
@@ -354,32 +363,29 @@ alguna ADR ya la cubre. Los requisitos vienen del brief original, hoy repartido 
 
 | # | El requisito dice | El código hace | Decisión |
 |---|---|---|---|
-| 1 | Bitácora "para toda escritura del sistema" | Cuatro escrituras Core se saltan el hook sin llamar a `record_audit`, contra lo que exige D-45 (ver abajo) | **No: es un hueco** |
+| 1 | Bitácora "para toda escritura del sistema" | Resuelta: las cuatro escrituras Core que se saltaban el hook pasaron al ORM (ver abajo) | Sí, [D-93](adr/D-93-bitacora-alcance-y-enmascarado.md) |
 | 2 | "Cada módulo futuro se agrega como un paquete nuevo sin tocar el núcleo" | Un módulo nuevo obliga a editar `app/main.py`, `app/models.py`, `migrations/env.py` (`_MANAGED_SCHEMAS`), `identity/permissions.py` y la copia del panel en `permissions.ts`. No hay registro automático de módulos | No |
-| 3 | Bitácora consultable con alcance geográfico implícito (el rol `admin` es "dentro de su alcance") | `GET /audit-log` solo exige `audit.log.read`; un admin estatal lee la bitácora completa, incluidos `before` y `after` de entidades fuera de su alcance (los `bytes` salen enmascarados) | No; confirmar si es intencional |
+| 3 | Bitácora consultable con alcance geográfico implícito (el rol `admin` es "dentro de su alcance") | Resuelta: un usuario con alcance limitado solo ve las entradas suyas y de los usuarios que puede gestionar | Sí, [D-93](adr/D-93-bitacora-alcance-y-enmascarado.md) |
 | 4 | Cada módulo con `models, schemas, repository, service, router`; D-34: "filtro en la capa de repositorio" | Solo `identity` tiene `repository.py`. En los demás, las consultas y los filtros de alcance viven en `service.py` y archivos de dominio. El filtro sí está en la consulta SQL, que es lo que importa | Parcial (D-34 habla de repositorio) |
 | 5 | "Los routers solo orquestan" | Hay lógica en algunos routers: `geography/router.py` consulta marcos directo y maneja la caché de teselas en Redis; `people/router.py` descifra y enmascara la CURP y los contactos; algunas rutas de `identity` hacen `commit` | No |
 | 6 | Redis "para caché, rate limiting y sesiones revocadas" | Redis se usa para rate limiting y caché de teselas MVT (solo usuarios sin restricción). La revocación se verifica en BD en cada petición | Sí (fase B, "Revocación inmediata") |
 | 7 | `app/core (config, seguridad, db, auditoría)` | La seguridad de identidad (JWT, Argon2, TOTP) vive en `identity/security`; `core` tiene `crypto` (cifrado de campos), rate limit y middlewares | No (organización) |
 | 8 | PK UUIDv7 con `created_at`, `updated_at` y `deleted_at` en todas las tablas, salvo D-03, D-04 y D-37 | `identity.user_scope_sections` usa PK compuesta `(user_id, section_id)` sin timestamps. Es una tabla derivada, en la línea de D-03, pero no está listada como excepción | Parcial |
 | 9 | WebAuthn/passkeys "preparado como extensión" | No hay código específico; `user_sessions.auth_methods` (RFC 8176) admite nuevos métodos y `reference/data-model.md` prevé una tabla `webauthn_credentials` futura | Sí (data-model.md) |
-| 10 | Valores sensibles de la bitácora "enmascarados o cifrados" (D-37) y purga ARCO de personas (D-69) | `Person` no declara `__audit_masked__`. Las altas y ediciones guardan en la bitácora inmutable el nombre, la fecha de nacimiento, el sexo, la entidad, la geografía y el CP en claro, y `paz people purge` no puede borrarlos. CURP, contactos y domicilio sí salen enmascarados porque son `bytes` (ver [people.md](modules/people.md)) | No; pendiente de definir |
+| 10 | Valores sensibles de la bitácora "enmascarados o cifrados" (D-37) y purga ARCO de personas (D-69) | Resuelta: `Person` enmascara nombre, apellidos, nacimiento, sexo y entidad, y `PersonAddress` el CP. La geografía del domicilio se conserva | Sí, [D-93](adr/D-93-bitacora-alcance-y-enmascarado.md) |
 | 11 | D-19: teselas MVT "con simplificación por zoom" | Resuelta: hasta D-80 `tile` solo cuantizaba la geometría original (~900 KB y ~350 ms por tesela de municipios en z6). Ahora sirve `geom_low` / `geom_mid` según el zoom (188 KB, 24–58 ms) | Sí, [D-80](adr/D-80-teselas-geometrias-generalizadas.md) |
 
-**Detalle de la diferencia 1.** Las escrituras sin auditar son:
+**Detalle de la diferencia 1 (resuelta).** Las escrituras que se saltaban el hook eran:
 
-| Ubicación | Qué no queda en la bitácora |
+| Ubicación | Ahora |
 |---|---|
-| `identity/services/scopes.py:214` (`set_scopes`) | El borrado de los `user_scopes` anteriores. Solo quedan las altas, así que no se puede reconstruir qué alcance se quitó |
-| `people/service.py:353-371` (`update_person`) | El soft-delete de contactos y domicilios anteriores |
-| `people/service.py:530-532` (`purge_due`) | El borrado físico de contactos, domicilios y consentimientos. La anonimización de la persona sí se audita |
-| `candidacies/nominations.py:810` (`update_members`) | El soft-delete de los integrantes anteriores de la fórmula |
+| `identity/services/scopes.py` (`set_scopes`) | Borra los `user_scopes` anteriores con el ORM; queda qué alcance se quitó |
+| `people/service.py` (`update_person`) | Retira contactos y domicilios con el ORM (`soft_delete`) |
+| `people/service.py` (`purge_due`) | Borra contactos, domicilios y consentimientos con el ORM (`delete`) |
+| `candidacies/nominations.py` (`update_members`) | Retira a los integrantes anteriores con el ORM (`soft_delete`) |
 
-Las escrituras Core sobre `recovery_codes`, `refresh_tokens` y `user_scope_sections` están
+Las escrituras Core sobre `recovery_codes`, `refresh_tokens` y `user_scope_sections` siguen
 excluidas a propósito (D-53, D-34).
-
-**Arreglo sugerido.** Pasar esas escrituras al ORM (cargar y marcar `deleted_at`, o
-`db.delete`) o llamar a `record_audit` con los IDs afectados. Agregar un test por caso.
 
 **Detalles menores.**
 - El docstring de `identity/permissions.py` menciona

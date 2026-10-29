@@ -211,7 +211,10 @@ async def set_scopes(
             if outside is not None:
                 raise ForbiddenError("No puedes otorgar un alcance fuera del tuyo.")
 
-    await db.execute(delete(UserScope).where(col(UserScope.user_id) == user_id))
+    # ORM deletes (not a Core DELETE) so the removed scopes stay in the audit log (D-45).
+    for previous in await scopes_of(db, user_id):
+        await db.delete(previous)
+    await db.flush()
     created: list[UserScope] = []
     for level, node in dict.fromkeys(scopes):
         values: dict[str, object] = {"user_id": user_id, "scope_level": level}

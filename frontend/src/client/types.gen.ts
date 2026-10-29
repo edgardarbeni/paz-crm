@@ -5,6 +5,56 @@ export type ClientOptions = {
 };
 
 /**
+ * AccessEntryOut
+ *
+ * A sensitive read (D-89): who read what, never the content.
+ */
+export type AccessEntryOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Occurred At
+     */
+    occurred_at: string;
+    /**
+     * Actor User Id
+     */
+    actor_user_id: string | null;
+    /**
+     * Actor Ip
+     */
+    actor_ip: string | null;
+    /**
+     * User Agent
+     */
+    user_agent: string | null;
+    /**
+     * Request Id
+     */
+    request_id: string | null;
+    /**
+     * Action
+     */
+    action: string;
+    /**
+     * Entity Table
+     */
+    entity_table: string;
+    /**
+     * Entity Id
+     */
+    entity_id: string | null;
+    /**
+     * Details
+     */
+    details: {
+        [key: string]: unknown;
+    } | null;
+};
+
+/**
  * AddressIn
  */
 export type AddressIn = {
@@ -333,6 +383,26 @@ export type ContactOut = {
      * Is Primary
      */
     is_primary: boolean;
+};
+
+/**
+ * CursorPage[AccessEntryOut]
+ */
+export type CursorPageAccessEntryOut = {
+    /**
+     * Items
+     */
+    items: Array<AccessEntryOut>;
+    /**
+     * Next Cursor
+     *
+     * Pasar en `cursor` para obtener la siguiente página.
+     */
+    next_cursor?: string | null;
+    /**
+     * Has More
+     */
+    has_more: boolean;
 };
 
 /**
@@ -3994,6 +4064,74 @@ export type ListAuditEntriesResponses = {
 };
 
 export type ListAuditEntriesResponse = ListAuditEntriesResponses[keyof ListAuditEntriesResponses];
+
+export type ListAccessEntriesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Actor User Id
+         */
+        actor_user_id?: string | null;
+        /**
+         * Action
+         */
+        action?: string | null;
+        /**
+         * Entity Table
+         */
+        entity_table?: string | null;
+        /**
+         * Entity Id
+         */
+        entity_id?: string | null;
+        /**
+         * Occurred From
+         */
+        occurred_from?: string | null;
+        /**
+         * Occurred To
+         */
+        occurred_to?: string | null;
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Cursor
+         */
+        cursor?: string | null;
+        /**
+         * Sort
+         *
+         * Campos separados por coma; prefijo '-' para descendente.
+         */
+        sort?: string | null;
+    };
+    url: '/api/v1/audit-log/access';
+};
+
+export type ListAccessEntriesErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ListAccessEntriesError = ListAccessEntriesErrors[keyof ListAccessEntriesErrors];
+
+export type ListAccessEntriesResponses = {
+    /**
+     * Successful Response
+     */
+    200: CursorPageAccessEntryOut;
+};
+
+export type ListAccessEntriesResponse = ListAccessEntriesResponses[keyof ListAccessEntriesResponses];
 
 export type ListFrameworksData = {
     body?: never;

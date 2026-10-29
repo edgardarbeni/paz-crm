@@ -93,10 +93,12 @@ uv run paz --help                    # CLI de operación
   que emiten las migraciones. `infra/db/initdb` crea `paz_app` en desarrollo y CI.
 - **Bitácora inmutable (D-37).** `audit.audit_log` es append-only y tiene cadena de hashes. Toda
   escritura del ORM queda registrada automáticamente (`AuditedSession`); los eventos que no son
-  filas se registran con `record_audit(...)`. Para operarla:
+  filas se registran con `record_audit(...)`. Las lecturas sensibles van a `audit.access_log`,
+  fuera de la cadena (`record_access(...)`, D-89). Quien tiene alcance limitado solo consulta
+  las entradas suyas y de los usuarios que gestiona (D-93). Para operarla:
   - `paz audit verify-chain`: recalcula la cadena y reporta el primer eslabón roto.
-  - `paz audit ensure-partitions`: crea las particiones mensuales. Se programa con cron
-    usando el rol dueño.
+  - `paz audit ensure-partitions`: crea las particiones mensuales de las dos tablas. Se
+    programa con cron usando el rol dueño.
 - **Cifrado de campos (D-31, D-32).** `FieldCipher` (AES-256-GCM con cifrado de sobre y llaves
   versionadas) y `BlindIndexer` (HMAC-SHA256). Para generar una llave: `paz keys generate`.
 - **Identidad (fase B).**

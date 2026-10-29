@@ -12,7 +12,13 @@ from sqlalchemy.exc import DBAPIError
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
 from sqlmodel import SQLModel
 
-from app.core.audit import ensure_partitions, record_audit, verify_chain
+from app.core.audit import (
+    ensure_partitions,
+    record_access,
+    record_audit,
+    record_bulk,
+    verify_chain,
+)
 from app.core.context import RequestContext, set_context
 from app.core.db.base import BusinessTable
 from app.core.db.session import build_sessionmaker
@@ -259,7 +265,7 @@ async def test_partitions(owner_engine: AsyncEngine) -> None:
     async with owner_engine.begin() as connection:
         assert await ensure_partitions(connection, months_ahead=3) == []
         created = await ensure_partitions(connection, months_ahead=5)
-        assert len(created) == 2
+        assert len(created) == 4  # two months for audit_log and two for access_log
         await connection.execute(
             text("SELECT audit.append_entry(NULL,NULL,NULL,NULL,'p',NULL,NULL,NULL,NULL)")
         )
@@ -275,4 +281,84 @@ async def test_action_is_required(owner_engine: AsyncEngine) -> None:
         with pytest.raises(DBAPIError, match="action is required"):
             await connection.execute(
                 text("SELECT audit.append_entry(NULL,NULL,NULL,NULL,'',NULL,NULL,NULL,NULL)")
+            )
+
+
+async def test_bulk_entry_lists_the_ids(app_engine: AsyncEngine, owner_engine: AsyncEngine) -> None:
+    ids = [uuid.uuid4() for _ in range(3)]
+    async with app_engine.begin() as connection:
+        await record_bulk(
+            connection,
+            action="probe_bulk",
+            entity_table="identity.audit_probes",
+            entity_ids=ids,
+            details={"reason": "prueba"},
+        )
+    async with owner_engine.connect() as connection:
+        after = (
+            await connection.execute(
+                text("SELECT after FROM audit.audit_log WHERE action = 'probe_bulk'")
+            )
+        ).scalar_one()
+    assert after == {"count": 3, "ids": [str(i) for i in ids], "reason": "prueba"}
+
+
+async def test_access_log_is_append_only_and_outside_the_chain(
+    app_engine: AsyncEngine, owner_engine: AsyncEngine
+) -> None:
+    actor = uuid.uuid4()
+    set_context(
+        RequestContext(request_id="req-access-1", client_ip="10.9.9.9", actor_user_id=actor)
+    )
+    async with owner_engine.connect() as connection:
+        head_before = (
+            await connection.execute(text("SELECT last_seq FROM audit.chain_head"))
+        ).scalar_one()
+    async with app_engine.begin() as connection:
+        await record_access(
+            connection,
+            action="read",
+            entity_table="people.persons",
+            entity_id="p-1",
+            details={"unmasked": True},
+        )
+    async with owner_engine.connect() as connection:
+        row = (
+            (
+                await connection.execute(
+                    text(
+                        "SELECT actor_user_id, actor_ip::text AS ip, request_id, details "
+                        "FROM audit.access_log WHERE entity_id = 'p-1'"
+                    )
+                )
+            )
+            .mappings()
+            .one()
+        )
+        head_after = (
+            await connection.execute(text("SELECT last_seq FROM audit.chain_head"))
+        ).scalar_one()
+    assert row == {
+        "actor_user_id": actor,
+        "ip": "10.9.9.9/32",
+        "request_id": "req-access-1",
+        "details": {"unmasked": True},
+    }
+    assert head_after == head_before  # reads never touch the chain
+
+    async with app_engine.connect() as connection:
+        with pytest.raises(DBAPIError, match="permission denied"):
+            await connection.execute(
+                text("INSERT INTO audit.access_log (action, entity_table) VALUES ('read', 'x')")
+            )
+    async with owner_engine.connect() as connection:
+        with pytest.raises(DBAPIError, match="append-only"):
+            await connection.execute(text("DELETE FROM audit.access_log"))
+    async with owner_engine.connect() as connection:
+        with pytest.raises(DBAPIError, match="append-only"):
+            await connection.execute(text("TRUNCATE audit.access_log"))
+    async with owner_engine.connect() as connection:
+        with pytest.raises(DBAPIError, match="required"):
+            await connection.execute(
+                text("SELECT audit.record_access(NULL,NULL,NULL,NULL,'',NULL,NULL,NULL)")
             )

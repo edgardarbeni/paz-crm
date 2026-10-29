@@ -459,7 +459,7 @@ siguiente.
 
 | Fase | Contenido | ADR |
 |---|---|---|
-| **0a. Bitácora** | Las cuatro escrituras Core auditadas (diferencia 1); `Person` con `__audit_masked__` (diferencia 10); `audit.access_log` y `record_access`; auditoría por lote; consulta de la bitácora con alcance (diferencia 3) | D-89, D-90 |
+| **0a. Bitácora** ✅ | Las cuatro escrituras Core auditadas (diferencia 1); `Person` con `__audit_masked__` (diferencia 10); `audit.access_log` y `record_access`; auditoría por lote (`record_bulk`); consulta de la bitácora con alcance (diferencia 3) | D-89, D-90, D-93 |
 | **0b. Infraestructura** | Contenedor `scheduler` (supercronic) con `purge` y `ensure-partitions` y candado consultivo; almacenamiento compatible con S3 (MinIO en desarrollo); registro de módulos (routers, modelos, esquemas y permisos por módulo) y test de la copia de permisos del panel (diferencia 2) | D-84 |
 | **1. Pacificadores** | En `people`: `privacy_notices`, consentimientos con `notice_code` y canales nuevos, baja ARCO que marca `withdrawn`, purga sin romper nodos. Esquema `peace_movement` con `ltree`; catálogos, metas, `settings`, coordinadores de zona; `members` con historiales; alcance por rama; API y permisos | D-82, D-83, D-91, D-92 |
 | **2. Casas de Paz** | Casas con ubicación aproximada y exacta cifrada, integrantes, reuniones con invitados, fotos, crédito y consolidación | D-85, D-92 |

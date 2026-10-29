@@ -182,7 +182,7 @@ async def test_slate_composition_and_creation_checks(
 
 
 async def test_formula_checks(
-    client: AsyncClient, root: dict[str, str], geo: Geo, setup: Setup
+    client: AsyncClient, root: dict[str, str], geo: Geo, setup: Setup, owner_engine: AsyncEngine
 ) -> None:
     nomination = (await nominate(client, root, setup, "local_deputy_rp", geo.state)).json()["id"]
     office = setup.offices["local_deputy_rp"]
@@ -224,6 +224,15 @@ async def test_formula_checks(
     )
     assert edited.status_code == 200, edited.text
     assert edited.json()["formulas"][0]["substitute"]["person_id"] == another_substitute
+    # The replaced members are soft-deleted through the ORM, so the audit log keeps them.
+    retired = await scalar(
+        owner_engine,
+        "SELECT count(*) FROM audit.audit_log a JOIN candidacies.formula_members m "
+        "ON a.entity_id = m.id::text WHERE a.entity_table = 'candidacies.formula_members' "
+        "AND a.action = 'soft_delete' AND m.formula_id = :formula",
+        formula=formula["id"],
+    )
+    assert retired == 2
 
 
 async def test_unique_person_rule_and_override(  # noqa: PLR0917

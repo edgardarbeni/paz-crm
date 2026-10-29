@@ -119,22 +119,18 @@ API responde 404; si existe pero está fuera del alcance, 403.
 - **Bitácora:** los valores `bytes` (cifrados y hashes) siempre se guardan como `***`. El
   test `test_create_encrypts_and_masks` verifica que la CURP y el teléfono no aparecen en
   claro en la base ni en `audit.audit_log`.
-- **Lecturas no auditadas:** las búsquedas y las consultas de detalle, incluidas las que
-  devuelven datos sin enmascarar con `read_sensitive`, no generan entradas en la bitácora.
-  Auditar las lecturas sensibles está **pendiente de definir**.
-- **Riesgo, la anonimización no alcanza a la bitácora:** `Person` no declara
-  `__audit_masked__`. Las entradas de alta y edición guardan en claro el nombre, la fecha de
-  nacimiento, el sexo y la entidad, y la geografía y el CP del domicilio. La bitácora es
-  inmutable ([D-37](../adr/D-37-bitacora-inmutable.md)), así que la purga no borra esos
-  valores. Hay que definir si se enmascaran o cifran.
-- **Escrituras sin auditar** ([`architecture.md` §8](../architecture.md)), que deberían usar
-  el ORM o `record_audit` según [D-45](../adr/D-45-implementacion-bitacora.md):
-  - `update_person` (`service.py:353-371`): el soft-delete de los contactos y el domicilio
-    anteriores se hace con `update(...)` de Core y no queda en la bitácora; solo quedan las
-    altas nuevas.
-  - `purge_due` (`service.py:530-532`): el borrado físico de contactos, domicilios y
-    consentimientos usa `delete(...)` de Core y no se audita. La anonimización de `persons`
-    sí se audita.
+- **Lecturas:** el detalle (`GET /people/{id}`) queda en `audit.access_log` con
+  `details.unmasked`, que indica si se devolvieron datos sin enmascarar
+  ([D-89](../adr/D-89-bitacora-lecturas.md), [D-93](../adr/D-93-bitacora-alcance-y-enmascarado.md)).
+  Las búsquedas no se registran.
+- **Datos personales enmascarados en la bitácora** ([D-93](../adr/D-93-bitacora-alcance-y-enmascarado.md)):
+  `Person` guarda como `***` el nombre, los apellidos, `search_name`, la fecha de nacimiento, el
+  sexo y la entidad; `PersonAddress`, el código postal. La bitácora es inmutable
+  ([D-37](../adr/D-37-bitacora-inmutable.md)), así que solo registra qué campos cambiaron. La
+  geografía del domicilio se conserva.
+- **Escrituras auditadas:** el reemplazo de contactos y domicilio en `update_person` y los
+  borrados de `purge_due` usan el ORM, así que cada fila retirada o borrada queda en la
+  bitácora ([D-93](../adr/D-93-bitacora-alcance-y-enmascarado.md)).
 
 ## Volumen y rendimiento
 - **Volumen esperado:** pendiente de definir. El MVP solo carga las personas de las
@@ -183,7 +179,8 @@ Cubiertos por `tests/integration/candidacies/test_people.py` y `tests/unit/test_
   y sin contactos, domicilios ni consentimientos (`test_consents_and_arco_deletion`).
 - Editar contactos o domicilio reemplaza los vigentes
   (`test_update_replaces_contacts_and_address`).
-- Pendientes de cubrir: la auditoría del reemplazo y de la purga (ver Datos sensibles).
+- El reemplazo y la purga quedan en la bitácora sin datos personales, y el detalle queda en
+  `audit.access_log` (`test_audit_hardening.py`).
 
 ## Fuera de alcance
 - **Padrón conjunto de personas** (movimiento por la paz y afiliación o militancia): es un
