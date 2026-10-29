@@ -25,11 +25,27 @@ export const ELECTORAL_LAYERS = [
 
 export type LayerId = (typeof ELECTORAL_LAYERS)[number]["id"];
 
+/** Tile layer that draws each geographic level (localities have none). */
+export const LEVEL_LAYERS: Partial<Record<string, LayerId>> = {
+  state: "states",
+  federal_district: "federal_districts",
+  local_district: "local_districts",
+  municipality: "municipalities",
+  section: "sections",
+  neighborhood: "neighborhoods",
+};
+
+// Distinct from every layer color and from the red node highlight.
+const HOVER_FILL = "#facc15";
+const HOVER_LINE = "#0f172a";
+
 interface GeoMapProps {
   visible: LayerId[];
   /** GeoJSON geometry to highlight and fit (node detail). */
   highlight?: Record<string, unknown> | null;
   bbox?: number[] | null;
+  /** Node to outline (e.g. while pointing at it in a list); drawn only where its layer has tiles. */
+  hovered?: { layer: LayerId; id: string } | null;
   onClick?: (lngLat: { lng: number; lat: number }) => void;
   className?: string;
 }
@@ -38,7 +54,7 @@ interface GeoMapProps {
  * MapLibre viewer over the API's vector tiles (MVT, D-19). Tiles carry the bearer token via
  * transformRequest, so each user only receives what their scope allows.
  */
-export function GeoMap({ visible, highlight, bbox, onClick, className }: GeoMapProps) {
+export function GeoMap({ visible, highlight, bbox, hovered, onClick, className }: GeoMapProps) {
   const container = useRef<HTMLElement>(null);
   const map = useRef<maplibregl.Map | null>(null);
   const [ready, setReady] = useState(false);
@@ -96,6 +112,29 @@ export function GeoMap({ visible, highlight, bbox, onClick, className }: GeoMapP
         source: "highlight",
         paint: { "line-color": "#dc2626", "line-width": 2 },
       });
+      // Hover outlines go above the highlighted node; hidden until used so their sources do not
+      // download tiles for nothing.
+      for (const layer of ELECTORAL_LAYERS) {
+        const target = {
+          source: layer.id,
+          "source-layer": layer.id,
+          filter: ["==", ["get", "id"], ""] as maplibregl.FilterSpecification,
+        };
+        instance.addLayer({
+          id: `${layer.id}-hover-fill`,
+          type: "fill",
+          ...target,
+          paint: { "fill-color": HOVER_FILL, "fill-opacity": 0.45 },
+          layout: { visibility: "none" },
+        });
+        instance.addLayer({
+          id: `${layer.id}-hover`,
+          type: "line",
+          ...target,
+          paint: { "line-color": HOVER_LINE, "line-width": 2.5 },
+          layout: { visibility: "none", "line-join": "round" },
+        });
+      }
       setReady(true);
     });
     instance.on("click", (event: maplibregl.MapMouseEvent) => clickRef.current?.(event.lngLat));
@@ -110,39 +149,51 @@ export function GeoMap({ visible, highlight, bbox, onClick, className }: GeoMapP
   useEffect(() => {
     const instance = map.current;
     if (!instance || !ready) return;
-    {
-      for (const layer of ELECTORAL_LAYERS) {
-        if (instance.getLayer(`${layer.id}-line`)) {
-          instance.setLayoutProperty(
-            `${layer.id}-line`,
-            "visibility",
-            visible.includes(layer.id) ? "visible" : "none",
-          );
-        }
-      }
-      const source = instance.getSource("highlight") as maplibregl.GeoJSONSource | undefined;
-      if (source) {
-        source.setData(
-          highlight
-            ? ({
-                type: "Feature",
-                geometry: highlight,
-                properties: {},
-              } as maplibregl.GeoJSONSourceSpecification["data"])
-            : { type: "FeatureCollection", features: [] },
-        );
-      }
-      if (bbox && bbox.length === 4) {
-        instance.fitBounds(
-          [
-            [bbox[0] ?? 0, bbox[1] ?? 0],
-            [bbox[2] ?? 0, bbox[3] ?? 0],
-          ],
-          { padding: 32, duration: 0 },
-        );
+    for (const layer of ELECTORAL_LAYERS) {
+      instance.setLayoutProperty(
+        `${layer.id}-line`,
+        "visibility",
+        visible.includes(layer.id) ? "visible" : "none",
+      );
+    }
+  }, [ready, visible]);
+
+  // Separate from the layers so toggling one does not move the camera back to the node.
+  useEffect(() => {
+    const instance = map.current;
+    if (!instance || !ready) return;
+    const source = instance.getSource("highlight") as maplibregl.GeoJSONSource | undefined;
+    source?.setData(
+      highlight
+        ? ({
+            type: "Feature",
+            geometry: highlight,
+            properties: {},
+          } as maplibregl.GeoJSONSourceSpecification["data"])
+        : { type: "FeatureCollection", features: [] },
+    );
+    if (bbox && bbox.length === 4) {
+      instance.fitBounds(
+        [
+          [bbox[0] ?? 0, bbox[1] ?? 0],
+          [bbox[2] ?? 0, bbox[3] ?? 0],
+        ],
+        { padding: 32, duration: 0 },
+      );
+    }
+  }, [ready, highlight, bbox]);
+
+  useEffect(() => {
+    const instance = map.current;
+    if (!instance || !ready) return;
+    for (const layer of ELECTORAL_LAYERS) {
+      const active = hovered?.layer === layer.id;
+      for (const id of [`${layer.id}-hover-fill`, `${layer.id}-hover`]) {
+        instance.setFilter(id, ["==", ["get", "id"], active ? hovered.id : ""]);
+        instance.setLayoutProperty(id, "visibility", active ? "visible" : "none");
       }
     }
-  }, [ready, visible, highlight, bbox]);
+  }, [ready, hovered]);
 
   return (
     <section

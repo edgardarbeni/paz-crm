@@ -106,6 +106,7 @@ uv run paz --help                    # CLI de operación
 - **Geografía (fase C).**
   - Importador: `paz geo download --state N` baja la BGD y los catálogos del INE con su manifiesto. `paz geo import <carpeta|7z> --state N [--catalogs DIR] [--dry-run]` hace el upsert por llave natural sin cambiar IDs; lo que desaparece del origen queda inactivo. Cada corrida guarda su reporte en `geography.import_runs` y `import_issues`.
   - Para activar un marco nuevo: `paz geo activate --framework NOMBRE`, que remapea los alcances de los usuarios.
+  - `paz geo generalize [--framework NOMBRE]` calcula las geometrías simplificadas de las teselas de zoom bajo (D-80) sin reimportar. La importación ya las calcula; el comando sirve para datos cargados antes de la migración `0010`.
   - API en `/api/v1/geography`: niveles, búsqueda por clave o nombre, `locate`, `tiles/{capa}/{z}/{x}/{y}.mvt` e importaciones. Todo queda limitado por el alcance del usuario (`PUT /api/v1/users/{id}/scopes`, D-34).
 - **Personas (fase D).**
   - API en `/api/v1/people`: búsqueda por nombre sin acentos, CURP o teléfono; alta con CURP validada (estructura, dígito verificador y coherencia, D-30); contactos y domicilio cifrados; consentimientos; baja ARCO.

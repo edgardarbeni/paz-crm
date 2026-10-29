@@ -11,6 +11,17 @@ export const GEO_LEVEL_LABELS: Record<string, string> = {
   neighborhood: "Colonia",
 };
 
+export const GEO_LEVEL_PLURALS: Record<string, string> = {
+  electoral_region: "Circunscripciones",
+  state: "Estados",
+  federal_district: "Distritos federales",
+  local_district: "Distritos locales",
+  municipality: "Municipios",
+  section: "Secciones",
+  locality: "Localidades",
+  neighborhood: "Colonias",
+};
+
 export const SEX_LABELS: Record<string, string> = { H: "Hombre", M: "Mujer", X: "No binario" };
 
 export const NOMINATION_STATUS: Record<string, string> = {

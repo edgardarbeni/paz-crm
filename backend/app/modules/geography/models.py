@@ -282,6 +282,9 @@ class State(_GeoNode, table=True):
     name: str = Field(max_length=100)
     source_id: int | None = Field(default=None, sa_type=Integer)
     geom: Any = _geom("MULTIPOLYGON")
+    # D-80: simplified copies for low-zoom tiles (geom_low z <= 6, geom_mid z 7-9).
+    geom_low: Any = _geom("MULTIPOLYGON", nullable=True)
+    geom_mid: Any = _geom("MULTIPOLYGON", nullable=True)
 
 
 class Municipality(_GeoNode, table=True):
@@ -300,6 +303,9 @@ class Municipality(_GeoNode, table=True):
     name: str = Field(max_length=150)
     source_id: int | None = Field(default=None, sa_type=Integer)
     geom: Any = _geom("MULTIPOLYGON")
+    # D-80: simplified copies for low-zoom tiles (geom_low z <= 6, geom_mid z 7-9).
+    geom_low: Any = _geom("MULTIPOLYGON", nullable=True)
+    geom_mid: Any = _geom("MULTIPOLYGON", nullable=True)
 
 
 class FederalDistrict(_GeoNode, table=True):
@@ -317,6 +323,9 @@ class FederalDistrict(_GeoNode, table=True):
     district_type_code: int | None = _code("federal_district_types")
     source_id: int | None = Field(default=None, sa_type=Integer)
     geom: Any = _geom("MULTIPOLYGON")
+    # D-80: simplified copies for low-zoom tiles (geom_low z <= 6, geom_mid z 7-9).
+    geom_low: Any = _geom("MULTIPOLYGON", nullable=True)
+    geom_mid: Any = _geom("MULTIPOLYGON", nullable=True)
 
 
 class LocalDistrict(_GeoNode, table=True):
@@ -333,6 +342,9 @@ class LocalDistrict(_GeoNode, table=True):
     district_number: int = Field(sa_type=SmallInteger)
     source_id: int | None = Field(default=None, sa_type=Integer)
     geom: Any = _geom("MULTIPOLYGON")
+    # D-80: simplified copies for low-zoom tiles (geom_low z <= 6, geom_mid z 7-9).
+    geom_low: Any = _geom("MULTIPOLYGON", nullable=True)
+    geom_mid: Any = _geom("MULTIPOLYGON", nullable=True)
 
 
 class Section(_GeoNode, table=True):
@@ -356,6 +368,8 @@ class Section(_GeoNode, table=True):
     section_type_code: int | None = _code("section_types")
     source_id: int | None = Field(default=None, sa_type=Integer)
     geom: Any = _geom("MULTIPOLYGON")
+    # D-80: simplified copy for low-zoom tiles (z 7-9).
+    geom_mid: Any = _geom("MULTIPOLYGON", nullable=True)
 
 
 class SectionPart(SQLModel, table=True):

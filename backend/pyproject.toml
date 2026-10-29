@@ -80,6 +80,7 @@ ignore = ["PLR0913", "PLR2004"]
 "app/modules/geography/importer/loader.py" = ["E501", "S608"]
 "app/modules/geography/service.py" = ["E501", "S608"]
 "app/modules/geography/frameworks.py" = ["E501", "S608"]
+"app/modules/geography/generalize.py" = ["E501", "S608"]
 "app/modules/identity/services/scopes.py" = ["S608"]
 # FastAPI handlers and Typer commands: signatures are defined by dependency injection.
 "app/**/router*.py" = ["PLR0917"]

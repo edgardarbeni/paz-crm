@@ -16,6 +16,7 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncConnection
 
 from app.core.config import Settings
+from app.modules.geography.generalize import generalize
 from app.modules.geography.importer.catalogs import IneCatalogs
 from app.modules.geography.importer.layers import LOAD_ORDER, SPECS, Issue, Staged
 
@@ -643,6 +644,7 @@ class Loader:
 
     async def derive(self, catalogs: IneCatalogs, staged: dict[str, Staged]) -> None:
         await self._electoral_regions()
+        await self._generalized_geometries()
         await self._section_parts()
         await self._blocks_outside_sections()
         await self._neighborhood_sections(catalogs)
@@ -663,6 +665,14 @@ class Loader:
             **self._params(),
         )
         self.result.derived["electoral_regions_geometry_updated"] = result.rowcount
+
+    async def _generalized_geometries(self) -> None:
+        """Simplified copies for low-zoom tiles (D-80); unchanged rows are not rewritten."""
+        if self.state_id is None:  # the state did not load: nothing to generalize
+            return
+        self.result.derived["generalized_geometries"] = await generalize(
+            self.connection, framework_id=self.framework_id, state_id=self.state_id
+        )
 
     async def _section_parts(self) -> None:
         await self._exec(

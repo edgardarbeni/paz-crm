@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Annotated
 
 import typer
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine
 
 from app.core.audit import ensure_partitions, verify_chain
@@ -225,6 +226,39 @@ def geo_activate(
         typer.echo(f"Usuarios recalculados: {report.users_rebuilt}")
 
     asyncio.run(run())
+
+
+@geo_cli.command("generalize")
+def geo_generalize(
+    framework: Annotated[
+        str | None, typer.Option(help="Nombre del marco (por defecto, el activo).")
+    ] = None,
+) -> None:
+    """Calcula las geometrías simplificadas de las teselas de zoom bajo sin reimportar (D-80)."""
+    from app.modules.geography.generalize import generalize  # noqa: PLC0415
+
+    async def run() -> int:
+        engine = create_async_engine(get_settings().async_migrations_database_url)
+        try:
+            async with engine.begin() as connection:
+                framework_id = (
+                    await connection.execute(
+                        text(
+                            "SELECT id FROM geography.geographic_frameworks"
+                            " WHERE deleted_at IS NULL"
+                            " AND (name = :name OR (CAST(:name AS text) IS NULL AND is_active))"
+                        ),
+                        {"name": framework},
+                    )
+                ).scalar_one_or_none()
+                if framework_id is None:
+                    typer.echo("Error: no existe el marco indicado ni hay uno activo.", err=True)
+                    raise typer.Exit(1)
+                return await generalize(connection, framework_id=framework_id)
+        finally:
+            await engine.dispose()
+
+    typer.echo(f"Geometrías generalizadas escritas: {asyncio.run(run())}")
 
 
 people_cli = typer.Typer(help="Personas (datos personales).", no_args_is_help=True)

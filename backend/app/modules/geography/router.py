@@ -17,6 +17,7 @@ from app.modules.geography.models import GeographicFramework, ImportIssue, Impor
 from app.modules.geography.schemas import (
     Ancestors,
     FrameworkOut,
+    GeoChildren,
     GeoNodeDetail,
     GeoNodeOut,
     ImportIssueOut,
@@ -104,7 +105,8 @@ async def get_tile(
     y: int,
 ) -> Response:
     framework = await service.active_framework(db)
-    cache_key = f"tile:{framework.id}:{layer}:{z}/{x}/{y}" if user.geo.unrestricted else None
+    # v2: tiles built from generalized geometries (D-80); older keys expire on their own.
+    cache_key = f"tile:v2:{framework.id}:{layer}:{z}/{x}/{y}" if user.geo.unrestricted else None
     data: bytes | None = None
     if cache_key:
         cached = await redis.get(cache_key)
@@ -238,4 +240,17 @@ async def get_node(
 ) -> GeoNodeDetail:
     return GeoNodeDetail.model_validate(
         await service.get_node(db, user.geo, level, node_id, geometry=geometry)
+    )
+
+
+@router.get(
+    "/{level}/{node_id}/children",
+    operation_id="getGeoNodeChildren",
+    summary="Qué contiene un nodo: niveles hijos y cuántos hay dentro del alcance",
+)
+async def get_node_children(
+    level: Level, node_id: uuid.UUID, db: SessionDep, user: GeoReader
+) -> GeoChildren:
+    return GeoChildren.model_validate(
+        {"items": await service.node_children(db, user.geo, level, node_id)}
     )

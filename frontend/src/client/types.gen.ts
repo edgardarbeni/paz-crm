@@ -650,6 +650,38 @@ export type FrameworkOut = {
 };
 
 /**
+ * GeoChildGroup
+ */
+export type GeoChildGroup = {
+    /**
+     * Level
+     */
+    level: 'electoral_region' | 'state' | 'federal_district' | 'local_district' | 'municipality' | 'section' | 'locality' | 'neighborhood';
+    /**
+     * Parent Filter
+     *
+     * Filtro de `GET /geography/{level}` que lista estos nodos.
+     */
+    parent_filter: string;
+    /**
+     * Count
+     *
+     * Nodos de este nivel dentro del nodo y del alcance.
+     */
+    count: number;
+};
+
+/**
+ * GeoChildren
+ */
+export type GeoChildren = {
+    /**
+     * Items
+     */
+    items: Array<GeoChildGroup>;
+};
+
+/**
  * GeoNodeDetail
  */
 export type GeoNodeDetail = {
@@ -4384,6 +4416,44 @@ export type GetGeoNodeResponses = {
 };
 
 export type GetGeoNodeResponse = GetGeoNodeResponses[keyof GetGeoNodeResponses];
+
+export type GetGeoNodeChildrenData = {
+    body?: never;
+    path: {
+        /**
+         * Level
+         */
+        level: 'electoral_region' | 'state' | 'federal_district' | 'local_district' | 'municipality' | 'section' | 'locality' | 'neighborhood';
+        /**
+         * Node Id
+         */
+        node_id: string;
+    };
+    query?: never;
+    url: '/api/v1/geography/{level}/{node_id}/children';
+};
+
+export type GetGeoNodeChildrenErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type GetGeoNodeChildrenError = GetGeoNodeChildrenErrors[keyof GetGeoNodeChildrenErrors];
+
+export type GetGeoNodeChildrenResponses = {
+    /**
+     * Successful Response
+     */
+    200: GeoChildren;
+};
+
+export type GetGeoNodeChildrenResponse = GetGeoNodeChildrenResponses[keyof GetGeoNodeChildrenResponses];
 
 export type SearchPeopleData = {
     body?: never;
