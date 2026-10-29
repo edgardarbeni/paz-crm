@@ -149,6 +149,24 @@ separado en archivos sin cambiar su texto; solo se actualizaron las rutas de los
 | [D-80](D-80-teselas-geometrias-generalizadas.md) | Teselas con geometrías generalizadas por zoom (amplía D-19) | Aceptada |
 | [D-81](D-81-contiene-en-detalle-de-nodo.md) | «Contiene» en el detalle de nodo | Aceptada |
 
+## Movimiento de Paz (propuestas)
+
+Propuestas derivadas de la ficha [peace-movement.md](../modules/peace-movement.md). Cada una
+plantea alternativas; al elegir una opción, el archivo pasa a «Aceptada» con la fecha y la opción.
+
+| D | Tema | Estado |
+|---|---|---|
+| [D-82](D-82-consentimiento-aviso-movimiento-paz.md) | Consentimiento del aviso del Movimiento de Paz (amplía D-69) | Propuesta |
+| [D-83](D-83-alcance-por-rama.md) | Alcance por rama (amplía D-34 y D-66) | Propuesta |
+| [D-84](D-84-tareas-periodicas.md) | Tareas periódicas y en segundo plano | Propuesta |
+| [D-85](D-85-ubicacion-casas-paz.md) | Precisión de la ubicación de las Casas de Paz | Propuesta |
+| [D-86](D-86-proteccion-bots-inscripcion-publica.md) | Protección contra bots en la inscripción pública | Propuesta |
+| [D-87](D-87-cuentas-portal-pacificadores.md) | Cuentas del portal de pacificadores (entrega posterior) | Propuesta |
+| [D-88](D-88-autenticacion-dispositivos-campo.md) | Autenticación de dispositivos de campo (entrega posterior) | Propuesta |
+| [D-89](D-89-bitacora-lecturas.md) | Bitácora de lecturas sensibles (amplía D-37 y D-45) | Propuesta |
+| [D-90](D-90-auditoria-escrituras-masivas.md) | Auditoría de escrituras masivas (amplía D-36 y D-45) | Propuesta |
+| [D-91](D-91-jerarquia-reclutamiento-ltree.md) | Jerarquía de reclutamiento con `ltree` | Propuesta |
+
 ## Suposiciones vigentes
 
 - El ID de origen de colonia en la BGD es estable entre cortes ([D-10](D-10-llave-natural-colonia.md)/[D-58](D-58-verificaciones-llave-colonia-fuentes-importador.md): único y consistente con el catálogo dentro del corte; la estabilidad entre cortes queda por verificar).

@@ -37,9 +37,10 @@ primero en su ficha de `docs/modules/`.
 | Geografía electoral | `app/modules/geography` | Implementado | [geography.md](docs/modules/geography.md) |
 | Personas (base del futuro padrón) | `app/modules/people` | Implementado | [people.md](docs/modules/people.md) |
 | Candidaturas | `app/modules/candidacies` | Implementado | [candidacies.md](docs/modules/candidacies.md) |
+| Movimiento de Paz (pacificadores, Casas de Paz, metas) | `app/modules/peace_movement` | Especificado; ADR D-82 a D-91 propuestas | [peace-movement.md](docs/modules/peace-movement.md) |
 
 Módulos futuros nombrados en el brief, todavía sin ficha:
-- padrón del movimiento por la paz y afiliación;
+- padrón de militancia y afiliación al partido (aparte del Movimiento de Paz);
 - información electoral histórica;
 - defensa del voto;
 - jurídico;
