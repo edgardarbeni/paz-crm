@@ -2126,6 +2126,10 @@ export type ReadinessStatus = {
      * Redis
      */
     redis: 'ok';
+    /**
+     * Storage
+     */
+    storage: 'ok' | 'disabled';
 };
 
 /**

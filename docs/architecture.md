@@ -29,7 +29,9 @@ Cada módulo tiene su ficha en [`modules/`](modules/).
 | Panel | React 19, TypeScript 6 ([D-47](adr/D-47-typescript-6-frontend.md)), Vite, TanStack Router (SPA), Query, Form + Zod y Table | Tailwind CSS 4 + shadcn/ui; MapLibre GL para el visor |
 | Cliente de API | Hey API (`@hey-api/openapi-ts`) con plugins de TanStack Query y Zod ([D-40](adr/D-40-cliente-api.md)) | Prohibido escribir `fetch` a mano |
 | Calidad panel | Biome, Vitest + Testing Library, Playwright ([D-73](adr/D-73-e2e-panel-contra-stack-real.md)) | pnpm |
-| Infraestructura | Monorepo ([D-39](adr/D-39-monorepo.md)), Docker Compose (api, db, redis, frontend, caddy, mailpit), Caddy con TLS | Despliegue portátil: DigitalOcean primero, AWS probable ([D-38](adr/D-38-despliegue.md)) |
+| Almacenamiento | S3 compatible con el SDK de MinIO (`core/storage.py`) | SeaweedFS en desarrollo y tests; Spaces o S3 en despliegue ([D-38](adr/D-38-despliegue.md), [D-94](adr/D-94-infraestructura-scheduler-s3-modulos.md)) |
+| Tareas programadas | supercronic en el contenedor `scheduler`, que ejecuta comandos `paz` con candado consultivo | [D-84](adr/D-84-tareas-periodicas.md); `backend/crontab` |
+| Infraestructura | Monorepo ([D-39](adr/D-39-monorepo.md)), Docker Compose (api, db, redis, s3, scheduler, frontend, caddy, mailpit), Caddy con TLS | Despliegue portátil: DigitalOcean primero, AWS probable ([D-38](adr/D-38-despliegue.md)) |
 | CI | GitHub Actions | Lint, type-check, tests, E2E, contrato de API y build de imágenes, por carpeta |
 
 ### Requisitos no funcionales
@@ -61,9 +63,9 @@ Cada módulo tiene su ficha en [`modules/`](modules/).
 
 ```
 backend/app/
-  main.py          create_app() y build_api_router(): middlewares, errores y routers
-  models.py        importa los modelos de tabla de cada módulo (metadata para Alembic y tests)
-  cli.py           CLI `paz` (Typer): users, geo, audit, keys, people, openapi
+  main.py          create_app() y build_api_router(): middlewares, errores y routers del registro
+  models.py        importa los modelos de los módulos instalados (metadata para Alembic y tests)
+  cli.py           CLI `paz` (Typer): users, geo, audit, keys, people, storage, openapi
   core/            infraestructura sin dominio
     config.py        Settings (pydantic-settings, prefijo PAZ_)
     db/              base.py (mixins y naming convention) · session.py (engine y SessionDep)
@@ -72,6 +74,9 @@ backend/app/
     errors.py        errores RFC 9457 y handlers
     pagination.py    paginación por cursor (paginate, PageParams, CursorPage)
     rate_limit.py    ventana fija en Redis
+    modules.py       registro de módulos: ModuleSpec, routers, esquemas, modelos y permisos
+    jobs.py          candado consultivo de las tareas programadas (exclusive_job)
+    storage.py       almacenamiento S3 (ObjectStorage, StorageDep, URLs firmadas)
     middleware.py    request_id, contexto (IP, user agent) y cabeceras de seguridad
     logging.py · telemetry.py · mail.py · redis.py · health.py · context.py
   modules/
@@ -135,7 +140,7 @@ sequenceDiagram
 ## 2. Registro de routers
 
 - Cada módulo define un `APIRouter` con `prefix` y `tags`. Por ejemplo `APIRouter(prefix="/people", tags=["people"])`; `candidacies` usa un router sin prefijo con rutas como `/parties` y `/processes`.
-- `app/main.py:build_api_router()` los monta a mano bajo `/api/v1` (`API_PREFIX`), con `responses=PROBLEM_RESPONSES` para que el OpenAPI declare los errores RFC 9457.
+- Cada módulo declara sus routers en `module.py` (`ModuleSpec.routers`, ver §7). `app/main.py:build_api_router()` monta los de todos los módulos instalados, en el orden de `ModuleSpec.order`, bajo `/api/v1` (`API_PREFIX`), con `responses=PROBLEM_RESPONSES` para que el OpenAPI declare los errores RFC 9457.
 - `/health` y `/ready` (`core/health.py`) quedan fuera de `/api/v1` (D-46).
 - Cada ruta declara un `operation_id` en camelCase y un `summary` en español. El cliente del panel se genera con esos nombres (`scripts/gen-api.sh`), y el CI falla si `frontend/openapi.json` o `frontend/src/client` están desactualizados.
 - Los servicios compartidos, que dependen de configuración (tokens, cifrado, índice ciego, rate limiter, correo), se construyen una vez en el `lifespan`: `app.state.identity = build_identity_services(...)`. Se inyectan con `ServicesDep` (`identity/container.py`); `people` lo usa para obtener `cipher` e `indexer`.
@@ -163,15 +168,18 @@ La convención es declarar alias por módulo, por ejemplo
 `Reader = Annotated[CurrentUser, permission(Perm.PERSON_READ)]`.
 
 **Registro de permisos.**
-- `identity/permissions.py:Perm` (`StrEnum`) es el registro único de los permisos de todos
-  los módulos. Los códigos siguen el formato `<módulo>.<recurso>.<acción>`.
+- Cada módulo declara sus códigos en un `StrEnum` y lo referencia en `module.py`
+  (`ModuleSpec.permissions`). `identity/permissions.py:Perm` reúne los de los módulos del
+  núcleo. El catálogo completo es `app.core.modules.permission_codes()`. Los códigos siguen el
+  formato `<módulo>.<recurso>.<acción>`.
 - Cada permiso se siembra por migración: se inserta en `identity.permissions` y se asigna a
   roles en `identity.role_permissions`. Ver las migraciones 0004, 0006 y 0008, que son
   autocontenidas y no importan código de la app.
-- `tests/integration/identity/test_bootstrap_and_registry.py` exige que la base y `PERMISSIONS`
-  coincidan exactamente.
+- `tests/integration/identity/test_bootstrap_and_registry.py` exige que la base y
+  `permission_codes()` coincidan exactamente.
 - El panel mantiene una copia manual en `frontend/src/lib/auth/permissions.ts` para ocultar
-  menús y acciones (`features/shell/nav.ts`). El backend siempre vuelve a verificar.
+  menús y acciones (`features/shell/nav.ts`); `tests/unit/test_module_registry.py` falla si
+  difiere del backend. El backend siempre vuelve a verificar.
 
 **Reglas (D-52).**
 - `roles.grants_all` (superadmin) concede todo y no tiene restricción geográfica.
@@ -263,8 +271,8 @@ contraseñas, importaciones y activación de marcos. Para escrituras masivas con
   uv run alembic upgrade head
   ```
 - **Autogenerate (`migrations/env.py`).**
-  - Ve los modelos registrados en `app/models.py`.
-  - Solo compara los esquemas de `_MANAGED_SCHEMAS` (`identity`, `geography`, `people`,
+  - Ve los modelos de los módulos instalados (`app/models.py` → `import_models()`).
+  - Solo compara los esquemas que declaran los módulos (`managed_schemas()`: `identity`, `geography`, `people`,
     `candidacies`).
   - Ignora `audit` y las particiones de manzanas que se crean en tiempo de ejecución.
   - Compara tipos y server defaults; corre una transacción por migración.
@@ -288,19 +296,33 @@ contraseñas, importaciones y activación de marcos. Para escrituras masivas con
 
 El ejemplo usa el módulo `foo` y el recurso `item`. Cada paso indica dónde se toca el código.
 
-1. **Paquete** `backend/app/modules/foo/`: `__init__.py`, `models.py`, `schemas.py`,
-   `service.py` y `router.py` (más `scope.py` si sus reglas de alcance no son triviales).
+1. **Paquete** `backend/app/modules/foo/`: `__init__.py`, `module.py`, `models.py`,
+   `schemas.py`, `service.py`, `router.py` y `permissions.py` (más `scope.py` si sus reglas de
+   alcance no son triviales). `module.py` registra el módulo; no se edita ningún archivo del
+   núcleo:
+   ```python
+   from app.core.modules import ModuleSpec
+
+   MODULE = ModuleSpec(
+       name="foo",
+       order=60,                                   # orden de los routers y de OpenAPI
+       schema="foo",                               # esquema que gestiona autogenerate
+       models="app.modules.foo.models",
+       routers=("app.modules.foo.router:router",),
+       permissions="app.modules.foo.permissions:FooPerm",
+   )
+   ```
 2. **Modelos.** Heredan de `BusinessTable` (o `ImportedMixin` si es geografía importada), con
    `__tablename__` en plural snake_case y `__table_args__ = {"schema": "foo"}`.
    - Declara `__audit_masked__` o `__audit_ignore_fields__` si aplica.
    - Para referencias geográficas, guarda `section_id`: el alcance se resuelve por sección.
    - Para datos sensibles, usa `FieldCipher` más `BlindIndexer` a través de `ServicesDep`,
      como en `people`.
-3. **Registrar los modelos** en `app/models.py` (`import app.modules.foo.models`).
+3. **Modelos:** ya quedan registrados por `ModuleSpec.models`.
 4. **Permisos.**
-   - Agrega los códigos a `Perm` en `app/modules/identity/permissions.py` (`foo.item.read`,
-     `foo.item.write`…).
-   - Cópialos en `frontend/src/lib/auth/permissions.ts`.
+   - Declara los códigos en `app/modules/foo/permissions.py` (`class FooPerm(StrEnum)`:
+     `foo.item.read`, `foo.item.write`…).
+   - Cópialos en `frontend/src/lib/auth/permissions.ts`; el test del registro falla si no.
 5. **Migración del esquema** (a mano, `--rev-id` siguiente):
    ```python
    from migrations.helpers import app_role, if_role_exists
@@ -318,8 +340,8 @@ El ejemplo usa el módulo `foo` y el recurso `item`. Cada paso indica dónde se 
        """))
    ```
    Con un `downgrade` simétrico.
-6. **Agregar `"foo"` a `_MANAGED_SCHEMAS`** en `migrations/env.py`. Después genera las tablas
-   con `alembic revision --autogenerate --rev-id …` y revisa el resultado: nombres de
+6. **Tablas:** el esquema ya está en `managed_schemas()` por `ModuleSpec.schema`. Genera las
+   tablas con `alembic revision --autogenerate --rev-id …` y revisa el resultado: nombres de
    índices, CHECKs e índices GiST o trigram.
 7. **Migración de semilla** de permisos y su asignación a roles, siguiendo el patrón de
    `0008_candidacies_seed.py` (listas `PERMISSIONS` y `GRANTS`, con downgrade que borra por
@@ -335,7 +357,7 @@ El ejemplo usa el módulo `foo` y el recurso `item`. Cada paso indica dónde se 
      responden 409 con un `code` propio.
 9. **Router.** `APIRouter(prefix="/foo", tags=["foo"])`, con alias
    `Reader = Annotated[CurrentUser, permission(Perm.FOO_ITEM_READ)]`, `operation_id` en
-   camelCase y `summary` en español. Móntalo en `app/main.py:build_api_router()`.
+   camelCase y `summary` en español. Se monta solo por `ModuleSpec.routers`.
 10. **Tests.**
     - Unitarios en `tests/unit`.
     - De integración en `tests/integration/foo/`, contra la API real, con al menos:
@@ -364,7 +386,7 @@ alguna ADR ya la cubre. Los requisitos vienen del brief original, hoy repartido 
 | # | El requisito dice | El código hace | Decisión |
 |---|---|---|---|
 | 1 | Bitácora "para toda escritura del sistema" | Resuelta: las cuatro escrituras Core que se saltaban el hook pasaron al ORM (ver abajo) | Sí, [D-93](adr/D-93-bitacora-alcance-y-enmascarado.md) |
-| 2 | "Cada módulo futuro se agrega como un paquete nuevo sin tocar el núcleo" | Un módulo nuevo obliga a editar `app/main.py`, `app/models.py`, `migrations/env.py` (`_MANAGED_SCHEMAS`), `identity/permissions.py` y la copia del panel en `permissions.ts`. No hay registro automático de módulos | No |
+| 2 | "Cada módulo futuro se agrega como un paquete nuevo sin tocar el núcleo" | Resuelta: cada módulo se registra con su `module.py` (routers, esquema, modelos y permisos). Solo queda la copia de permisos del panel, ahora verificada por un test | Sí, [D-94](adr/D-94-infraestructura-scheduler-s3-modulos.md) |
 | 3 | Bitácora consultable con alcance geográfico implícito (el rol `admin` es "dentro de su alcance") | Resuelta: un usuario con alcance limitado solo ve las entradas suyas y de los usuarios que puede gestionar | Sí, [D-93](adr/D-93-bitacora-alcance-y-enmascarado.md) |
 | 4 | Cada módulo con `models, schemas, repository, service, router`; D-34: "filtro en la capa de repositorio" | Solo `identity` tiene `repository.py`. En los demás, las consultas y los filtros de alcance viven en `service.py` y archivos de dominio. El filtro sí está en la consulta SQL, que es lo que importa | Parcial (D-34 habla de repositorio) |
 | 5 | "Los routers solo orquestan" | Hay lógica en algunos routers: `geography/router.py` consulta marcos directo y maneja la caché de teselas en Redis; `people/router.py` descifra y enmascara la CURP y los contactos; algunas rutas de `identity` hacen `commit` | No |
@@ -387,12 +409,6 @@ alguna ADR ya la cubre. Los requisitos vienen del brief original, hoy repartido 
 Las escrituras Core sobre `recovery_codes`, `refresh_tokens` y `user_scope_sections` siguen
 excluidas a propósito (D-53, D-34).
 
-**Detalles menores.**
-- El docstring de `identity/permissions.py` menciona
-  `tests/.../test_permissions_registry.py`, que no existe; el test real está en
-  `tests/integration/identity/test_bootstrap_and_registry.py`.
-- El mismo docstring sugiere declarar permisos "en su propio `permissions.py`", pero
-  `PERMISSIONS = frozenset(Perm)` solo lee el enum de `identity`, así que esa vía no funciona
-  sin cambiar el registro.
-- La copia de permisos del panel (`frontend/src/lib/auth/permissions.ts`) no tiene ningún
-  test que la compare con el backend.
+**Detalles menores** (resueltos en la fase 0b): el docstring de `identity/permissions.py`
+apunta al test real; los módulos pueden declarar sus permisos en su propio `StrEnum`, y la
+copia del panel tiene test (`tests/unit/test_module_registry.py`).

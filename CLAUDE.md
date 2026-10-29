@@ -82,7 +82,7 @@ docker compose up --build  # stack de desarrollo en https://localhost (ver READM
 El usuario corre `docker compose` desde este checkout. No cambies de rama aquí sin avisar.
 Para trabajar en otra rama, usa un git worktree. Después de cualquier cambio de rama:
 - Si cambiaron las dependencias del panel: `docker compose restart frontend`.
-- Si cambiaron las de la API o hay migraciones: `docker compose up -d --build api migrate`.
+- Si cambiaron las de la API o hay migraciones: `docker compose up -d --build api migrate scheduler`.
 - Antes de dar algo por terminado, verifica https://localhost.
 
 ## Convenciones

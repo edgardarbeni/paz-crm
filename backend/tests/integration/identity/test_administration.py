@@ -5,7 +5,8 @@ from httpx import AsyncClient
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncEngine
 
-from app.modules.identity.permissions import PERMISSIONS, SYSTEM_ROLES
+from app.core.modules import permission_codes
+from app.modules.identity.permissions import SYSTEM_ROLES
 from tests.integration.conftest import Account, UserFactory, bearer, login, token_for
 
 
@@ -294,7 +295,7 @@ async def test_roles_crud_and_guards(
     )
     assert frozen.status_code == 409
     superadmin_role = (await client.get(f"/api/v1/roles/{ids['superadmin']}", headers=root)).json()
-    assert superadmin_role["permissions"] == sorted(PERMISSIONS)
+    assert superadmin_role["permissions"] == sorted(permission_codes())
 
 
 async def test_permission_catalog_matches_code_registry(
@@ -302,10 +303,10 @@ async def test_permission_catalog_matches_code_registry(
 ) -> None:
     root = await token_for(client, superadmin)
     catalog = (await client.get("/api/v1/permissions", headers=root)).json()
-    assert {permission["code"] for permission in catalog} == PERMISSIONS
+    assert {permission["code"] for permission in catalog} == permission_codes()
     me = (await client.get("/api/v1/auth/me", headers=root)).json()
     assert me["grants_all"] is True
-    assert me["permissions"] == sorted(PERMISSIONS)
+    assert me["permissions"] == sorted(permission_codes())
 
 
 # --- audit viewer --------------------------------------------------------------------------------

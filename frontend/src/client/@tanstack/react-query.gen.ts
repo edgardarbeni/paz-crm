@@ -60,7 +60,7 @@ export const getHealthOptions = (options?: Options<GetHealthData>) => queryOptio
 export const getReadinessQueryKey = (options?: Options<GetReadinessData>) => createQueryKey('getReadiness', options);
 
 /**
- * Readiness: base de datos y Redis disponibles
+ * Readiness: base de datos, Redis y almacenamiento disponibles
  */
 export const getReadinessOptions = (options?: Options<GetReadinessData>) => queryOptions<GetReadinessResponse, GetReadinessError, GetReadinessResponse, ReturnType<typeof getReadinessQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {

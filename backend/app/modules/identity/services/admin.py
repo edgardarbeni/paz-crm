@@ -9,10 +9,10 @@ from sqlmodel import col
 
 from app.core.db.base import pk
 from app.core.errors import BadRequestError, ConflictError, ForbiddenError, NotFoundError
+from app.core.modules import permission_codes
 from app.core.pagination import CursorPage, PageParams, paginate, parse_sort
 from app.modules.identity import repository as repo
 from app.modules.identity.models import Role, RolePermission, User, UserRole, UserStatus
-from app.modules.identity.permissions import PERMISSIONS
 from app.modules.identity.services.access import (
     Access,
     ensure_can_assign,
@@ -249,7 +249,7 @@ class RoleView:
             "requires_mfa": role.requires_mfa,
             "is_system": role.is_system,
             "grants_all": role.grants_all,
-            "permissions": sorted(PERMISSIONS) if role.grants_all else self.permissions,
+            "permissions": sorted(permission_codes()) if role.grants_all else self.permissions,
             "user_count": self.user_count,
         }
 
@@ -279,7 +279,7 @@ async def _validated_permissions(
     db: AsyncSession, actor: Access, codes: list[str]
 ) -> list[uuid.UUID]:
     unique = sorted(set(codes))
-    unknown = set(unique) - PERMISSIONS
+    unknown = set(unique) - permission_codes()
     if unknown:
         raise BadRequestError("Permisos inexistentes: " + ", ".join(sorted(unknown)) + ".")
     ensure_can_grant(actor, unique)

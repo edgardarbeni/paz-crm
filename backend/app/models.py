@@ -1,9 +1,6 @@
-"""Imports every module's table models so Alembic and tests see the full metadata.
+"""Imports every installed module's table models so Alembic and tests see the full metadata.
+Modules declare their models in `module.py` (`app.core.modules`)."""
 
-Each phase adds its module here, e.g. ``import app.modules.identity.models``.
-"""
+from app.core.modules import import_models
 
-import app.modules.candidacies.models
-import app.modules.geography.models
-import app.modules.identity.models
-import app.modules.people.models  # noqa: F401
+import_models()

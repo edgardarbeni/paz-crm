@@ -14,10 +14,12 @@ from sqlalchemy.ext.asyncio import create_async_engine
 import app.models  # noqa: F401 - registers every table model on the metadata
 from app.core.config import as_asyncpg_url
 from app.core.db.base import metadata
+from app.core.modules import managed_schemas
 
 # Objects managed by hand-written SQL migrations, invisible to autogenerate.
 _UNMANAGED_SCHEMAS = {"audit"}
-_MANAGED_SCHEMAS = {"identity", "geography", "people", "candidacies"}
+# Each module declares its schema in `module.py` (`app.core.modules`).
+_MANAGED_SCHEMAS = managed_schemas()
 
 
 def include_name(name: str | None, type_: str, _: dict[str, Any]) -> bool:

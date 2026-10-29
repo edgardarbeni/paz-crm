@@ -14,6 +14,7 @@ from app.core.audit import ensure_partitions, verify_chain
 from app.core.config import Settings, get_settings
 from app.core.crypto.keys import generate_key
 from app.core.errors import AppError
+from app.core.jobs import exclusive_job
 
 cli = typer.Typer(help="PAZOS — comandos de operación.", no_args_is_help=True)
 audit_cli = typer.Typer(help="Bitácora de auditoría.", no_args_is_help=True)
@@ -56,15 +57,21 @@ def audit_ensure_partitions(
 ) -> None:
     """Crea las particiones mensuales faltantes (requiere el rol dueño; usar en cron)."""
 
-    async def run() -> list[str]:
+    async def run() -> list[str] | None:
         engine = create_async_engine(get_settings().async_migrations_database_url)
         try:
-            async with engine.begin() as connection:
-                return await ensure_partitions(connection, months_ahead=months_ahead)
+            async with exclusive_job(engine, "audit.ensure_partitions") as acquired:
+                if not acquired:
+                    return None
+                async with engine.begin() as connection:
+                    return await ensure_partitions(connection, months_ahead=months_ahead)
         finally:
             await engine.dispose()
 
     created = asyncio.run(run())
+    if created is None:
+        typer.echo("Otra ejecución está en curso; no se hizo nada.")
+        return
     typer.echo(f"Particiones creadas: {', '.join(created) if created else 'ninguna'}")
 
 
@@ -271,15 +278,39 @@ def people_purge() -> None:
     from app.core.db.session import build_engine, build_sessionmaker  # noqa: PLC0415
     from app.modules.people.service import purge_due  # noqa: PLC0415
 
-    async def run() -> int:
+    async def run() -> int | None:
         engine = build_engine(get_settings())
         try:
-            async with build_sessionmaker(engine)() as db:
-                return await purge_due(db)
+            async with exclusive_job(engine, "people.purge") as acquired:
+                if not acquired:
+                    return None
+                async with build_sessionmaker(engine)() as db:
+                    return await purge_due(db)
         finally:
             await engine.dispose()
 
-    typer.echo(f"Personas anonimizadas: {asyncio.run(run())}")
+    purged = asyncio.run(run())
+    if purged is None:
+        typer.echo("Otra ejecución está en curso; no se hizo nada.")
+        return
+    typer.echo(f"Personas anonimizadas: {purged}")
+
+
+storage_cli = typer.Typer(help="Almacenamiento de archivos (S3).", no_args_is_help=True)
+cli.add_typer(storage_cli, name="storage")
+
+
+@storage_cli.command("ensure-bucket")
+def storage_ensure_bucket() -> None:
+    """Crea el bucket configurado si no existe (desarrollo; en producción se aprovisiona)."""
+    from app.core.storage import build_storage  # noqa: PLC0415
+
+    storage = build_storage(get_settings())
+    if storage is None:
+        typer.echo("PAZ_STORAGE_ENDPOINT no está configurado; no se hizo nada.")
+        return
+    created = asyncio.run(storage.ensure_bucket())
+    typer.echo(f"Bucket «{storage.bucket}» {'creado' if created else 'ya existía'}.")
 
 
 @keys_cli.command("generate")

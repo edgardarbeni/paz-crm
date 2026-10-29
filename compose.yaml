@@ -22,6 +22,12 @@ x-backend-env: &backend-env
   PAZ_SMTP_HOST: mailpit
   PAZ_SMTP_PORT: "1025"
   PAZ_MAIL_FROM: PAZOS <no-reply@localhost>
+  # S3-compatible storage (D-38). The API reaches it as s3:8333; presigned URLs use the host port.
+  PAZ_STORAGE_ENDPOINT: http://s3:8333
+  PAZ_STORAGE_PUBLIC_ENDPOINT: http://localhost:${PAZ_S3_HOST_PORT:-8333}
+  PAZ_STORAGE_BUCKET: pazos
+  PAZ_STORAGE_ACCESS_KEY: ${PAZ_STORAGE_ACCESS_KEY:-paz-dev}
+  PAZ_STORAGE_SECRET_KEY: ${PAZ_STORAGE_SECRET_KEY:-paz-dev-storage-secret}
 
 services:
   db:
@@ -56,15 +62,35 @@ services:
       timeout: 3s
       retries: 20
 
+  # S3-compatible object storage for development (SeaweedFS; D-38). Production uses
+  # DigitalOcean Spaces or AWS S3 with the same variables.
+  s3:
+    image: chrislusf/seaweedfs:4.51
+    command: ["server", "-s3", "-dir=/data"]
+    environment:
+      AWS_ACCESS_KEY_ID: ${PAZ_STORAGE_ACCESS_KEY:-paz-dev}
+      AWS_SECRET_ACCESS_KEY: ${PAZ_STORAGE_SECRET_KEY:-paz-dev-storage-secret}
+    volumes:
+      - s3-data:/data
+    ports:
+      - "127.0.0.1:${PAZ_S3_HOST_PORT:-8333}:8333"
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z 127.0.0.1 8333"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
   migrate:
     build:
       context: ./backend
       target: dev
     image: paz/api:dev
-    command: ["alembic", "upgrade", "head"]
+    command: ["sh", "-c", "alembic upgrade head && paz storage ensure-bucket"]
     environment: *backend-env
     depends_on:
       db:
+        condition: service_healthy
+      s3:
         condition: service_healthy
 
   api:
@@ -80,6 +106,18 @@ services:
         condition: service_completed_successfully
       redis:
         condition: service_healthy
+
+  # Scheduled jobs (D-84): supercronic runs the `paz` commands listed in backend/crontab.
+  scheduler:
+    image: paz/api:dev
+    command: ["supercronic", "/app/crontab"]
+    environment: *backend-env
+    volumes:
+      - ./backend/app:/app/app
+      - ./backend/crontab:/app/crontab:ro
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
 
   frontend:
     build:
@@ -120,6 +158,7 @@ services:
 
 volumes:
   db-data:
+  s3-data:
   redis-data:
   caddy-data:
   frontend-node-modules:

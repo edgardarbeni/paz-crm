@@ -29,7 +29,7 @@ export const getHealth = <ThrowOnError extends boolean = false>(options?: Option
 });
 
 /**
- * Readiness: base de datos y Redis disponibles
+ * Readiness: base de datos, Redis y almacenamiento disponibles
  */
 export const getReadiness = <ThrowOnError extends boolean = false>(options?: Options<GetReadinessData, ThrowOnError>): RequestResult<GetReadinessResponses, GetReadinessErrors, ThrowOnError> => (options?.client ?? client).get<GetReadinessResponses, GetReadinessErrors, ThrowOnError>({
     responseValidator: async (data) => await zGetReadinessResponse.parseAsync(data),

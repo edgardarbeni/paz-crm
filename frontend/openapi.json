@@ -52,7 +52,7 @@
         "tags": [
           "health"
         ],
-        "summary": "Readiness: base de datos y Redis disponibles",
+        "summary": "Readiness: base de datos, Redis y almacenamiento disponibles",
         "operationId": "getReadiness",
         "responses": {
           "200": {
@@ -10605,13 +10605,22 @@
             "type": "string",
             "const": "ok",
             "title": "Redis"
+          },
+          "storage": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "disabled"
+            ],
+            "title": "Storage"
           }
         },
         "type": "object",
         "required": [
           "status",
           "database",
-          "redis"
+          "redis",
+          "storage"
         ],
         "title": "ReadinessStatus"
       },

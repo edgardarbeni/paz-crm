@@ -1,0 +1,8 @@
+# Scheduled jobs (D-84), run by supercronic in the `scheduler` container (times in UTC).
+# Every command takes an advisory lock, so an overlapping or manual run is skipped.
+# Syntax: minute hour day-of-month month day-of-week command
+
+# Monthly partitions of audit.audit_log and audit.access_log, three months ahead.
+10 3 * * * paz audit ensure-partitions
+# ARCO: anonymize persons whose retention period ended (D-69).
+30 3 * * * paz people purge
