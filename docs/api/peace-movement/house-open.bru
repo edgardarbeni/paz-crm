@@ -1,0 +1,40 @@
+meta {
+  name: Abrir Casa de Paz
+  type: http
+  seq: 10
+}
+
+post {
+  url: {{baseUrl}}/api/v1/peace-movement/houses
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "name": "Casa de Paz Las Flores",
+    "schedule": [
+      {
+        "day": "sat",
+        "starts_at": "10:00",
+        "ends_at": "12:00"
+      }
+    ],
+    "capacity": 30,
+    "address": {
+      "street": "Calle Girasol",
+      "exterior_number": "12",
+      "postal_code": "20000",
+      "longitude": -102.2916,
+      "latitude": 21.8818
+    },
+    "opened_by_member_id": "{{memberId}}",
+    "host_member_id": "{{memberId}}",
+    "contact_member_id": "{{recruiterId}}",
+    "member_ids": []
+  }
+}

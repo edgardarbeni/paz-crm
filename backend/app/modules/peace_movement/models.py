@@ -10,6 +10,7 @@ from datetime import date, datetime
 from enum import StrEnum
 from typing import Any, ClassVar, Literal
 
+from geoalchemy2 import Geometry
 from sqlalchemy import (
     BigInteger,
     CheckConstraint,
@@ -17,6 +18,7 @@ from sqlalchemy import (
     Date,
     DateTime,
     Index,
+    LargeBinary,
     SmallInteger,
     Text,
     text,
@@ -347,3 +349,143 @@ class NetworkChange(SQLModel, table=True):
     payload: dict[str, Any] | None = Field(default=None, sa_type=JSONB)
     created_at: datetime = Field(sa_column=Column(TZ, nullable=False, server_default=text("now()")))
     processed_at: datetime | None = Field(default=None, sa_type=TZ)
+
+
+# --- Peace Houses (phase 2) -------------------------------------------------------------------
+
+
+class HouseStatus(StrEnum):
+    OPEN = "open"
+    CONSOLIDATED = "consolidated"
+    CLOSED = "closed"
+
+
+class HouseMemberSource(StrEnum):
+    ENROLLMENT = "enrollment"  # chose the house when enrolling
+    ASSIGNMENT = "assignment"  # assigned afterwards
+    ROLE = "role"  # added because they are the host or the contact (D-92)
+
+
+# Open and consolidated houses are "current"; members and meetings only change in them.
+CURRENT_HOUSE_STATUSES = (HouseStatus.OPEN, HouseStatus.CONSOLIDATED)
+
+
+class PeaceHouse(BusinessTable, table=True):
+    """A Peace House. The exact address and coordinates are encrypted; `location` keeps the
+    point rounded to ~100 m for maps and geographic queries (D-85)."""
+
+    __tablename__ = "peace_houses"
+    __table_args__ = (
+        Index("gx_peace_houses_location", "location", postgresql_using="gist"),
+        _in("status", HouseStatus, "status"),
+        CheckConstraint(
+            "NOT (credited_member_id IS NOT NULL AND credited_user_id IS NOT NULL)",
+            name="single_credit",
+        ),
+        CheckConstraint("capacity IS NULL OR capacity > 0", name="capacity"),
+        {"schema": SCHEMA},
+    )
+
+    name: str = Field(max_length=150)
+    schedule: list[dict[str, Any]] = Field(default_factory=list, sa_type=JSONB)
+    capacity: int | None = None
+    # Street, numbers, references and the exact coordinates, as one encrypted JSON document.
+    address_ciphertext: bytes = Field(sa_type=LargeBinary)
+    key_version: int = Field(sa_type=SmallInteger)
+    location: Any = Field(sa_type=Geometry("POINT", srid=4326, spatial_index=False))
+    state_id: uuid.UUID = _fk("geography.states.id")
+    municipality_id: uuid.UUID = _fk("geography.municipalities.id")
+    section_id: uuid.UUID = _fk("geography.sections.id")
+    host_member_id: uuid.UUID | None = _fk(f"{SCHEMA}.members.id", nullable=True)
+    contact_member_id: uuid.UUID | None = _fk(f"{SCHEMA}.members.id", nullable=True)
+    opened_by_member_id: uuid.UUID = _fk(f"{SCHEMA}.members.id")
+    credited_member_id: uuid.UUID | None = _fk(f"{SCHEMA}.members.id", nullable=True)
+    credited_user_id: uuid.UUID | None = _fk("identity.users.id", nullable=True)
+    status: str = Field(sa_type=Text)
+    needs_reassignment: bool = Field(
+        default=False, sa_column_kwargs={"server_default": text("false")}
+    )
+    opened_on: date = Field(sa_type=Date)
+    consolidated_on: date | None = Field(default=None, sa_type=Date)
+    first_consolidated_on: date | None = Field(default=None, sa_type=Date)
+    closed_on: date | None = Field(default=None, sa_type=Date)
+    status_reason: str | None = Field(default=None, max_length=500)
+    public_location_consent_id: uuid.UUID | None = _fk(
+        "people.privacy_consents.id", nullable=True, ondelete="SET NULL"
+    )
+
+
+class PeaceHouseMember(BusinessTable, table=True):
+    __tablename__ = "peace_house_members"
+    __table_args__ = (
+        Index(
+            "uq_peace_house_members_current",
+            "house_id",
+            "member_id",
+            unique=True,
+            postgresql_where=text("left_on IS NULL AND deleted_at IS NULL"),
+        ),
+        _in("source", HouseMemberSource, "source"),
+        {"schema": SCHEMA},
+    )
+
+    house_id: uuid.UUID = _fk(f"{SCHEMA}.peace_houses.id")
+    member_id: uuid.UUID = _fk(f"{SCHEMA}.members.id")
+    joined_on: date = Field(sa_type=Date)
+    left_on: date | None = Field(default=None, sa_type=Date)
+    source: str = Field(sa_type=Text)
+
+
+class PeaceHouseCreditChange(BusinessTable, table=True):
+    __tablename__ = "peace_house_credit_changes"
+    __table_args__ = ({"schema": SCHEMA},)
+
+    house_id: uuid.UUID = _fk(f"{SCHEMA}.peace_houses.id")
+    from_member_id: uuid.UUID | None = _fk(f"{SCHEMA}.members.id", nullable=True)
+    from_user_id: uuid.UUID | None = _fk("identity.users.id", nullable=True)
+    to_member_id: uuid.UUID | None = _fk(f"{SCHEMA}.members.id", nullable=True)
+    to_user_id: uuid.UUID | None = _fk("identity.users.id", nullable=True)
+    changed_by_user_id: uuid.UUID | None = _fk("identity.users.id", nullable=True)
+    changed_at: datetime = Field(sa_type=TZ)
+    reason: str = Field(max_length=500)
+
+
+class PeaceHouseMeeting(BusinessTable, table=True):
+    __tablename__ = "peace_house_meetings"
+    __table_args__ = ({"schema": SCHEMA},)
+
+    house_id: uuid.UUID = _fk(f"{SCHEMA}.peace_houses.id")
+    held_at: datetime = Field(sa_type=TZ)
+    topic: str = Field(max_length=200)
+    notes: str | None = Field(default=None, sa_type=Text)
+
+
+class PeaceHouseMeetingAttendee(BusinessTable, table=True):
+    """A member or a guest (a person of `people` without CURP or address, D-92)."""
+
+    __tablename__ = "peace_house_meeting_attendees"
+    __table_args__ = (
+        Index(
+            "uq_peace_house_meeting_attendees_person",
+            "meeting_id",
+            "person_id",
+            unique=True,
+            postgresql_where=text("deleted_at IS NULL"),
+        ),
+        {"schema": SCHEMA},
+    )
+
+    meeting_id: uuid.UUID = _fk(f"{SCHEMA}.peace_house_meetings.id", ondelete="CASCADE")
+    person_id: uuid.UUID = _fk("people.persons.id")
+
+
+class PeaceHousePhoto(BusinessTable, table=True):
+    __tablename__ = "peace_house_photos"
+    __table_args__ = ({"schema": SCHEMA},)
+
+    house_id: uuid.UUID = _fk(f"{SCHEMA}.peace_houses.id")
+    storage_key: str = Field(max_length=300, unique=True)
+    content_type: str = Field(max_length=50)
+    size_bytes: int
+    caption: str | None = Field(default=None, max_length=300)
+    uploaded_by_user_id: uuid.UUID | None = _fk("identity.users.id", nullable=True)

@@ -175,6 +175,19 @@ export type Ancestors = {
 };
 
 /**
+ * AttendeeOut
+ */
+export type AttendeeOut = {
+    person: PersonSummary;
+    /**
+     * Member Id
+     *
+     * Nulo para invitados.
+     */
+    member_id: string | null;
+};
+
+/**
  * AuditEntryOut
  */
 export type AuditEntryOut = {
@@ -258,6 +271,22 @@ export type AuthenticatedResponse = {
      * `mfa_enrollment`: el rol exige 2FA y solo se permite enrolar TOTP.
      */
     scope: TokenScope;
+};
+
+/**
+ * Body_uploadHousePhoto
+ */
+export type BodyUploadHousePhoto = {
+    /**
+     * File
+     *
+     * Imagen JPEG, PNG o WebP.
+     */
+    file: Blob | File;
+    /**
+     * Caption
+     */
+    caption?: string | null;
 };
 
 /**
@@ -456,6 +485,24 @@ export type ContactOut = {
 };
 
 /**
+ * CreditIn
+ */
+export type CreditIn = {
+    /**
+     * Member Id
+     */
+    member_id?: string | null;
+    /**
+     * User Id
+     */
+    user_id?: string | null;
+    /**
+     * Reason
+     */
+    reason: string;
+};
+
+/**
  * CursorPage[AccessEntryOut]
  */
 export type CursorPageAccessEntryOut = {
@@ -516,6 +563,26 @@ export type CursorPageGeoNodeOut = {
 };
 
 /**
+ * CursorPage[HouseSummary]
+ */
+export type CursorPageHouseSummary = {
+    /**
+     * Items
+     */
+    items: Array<HouseSummary>;
+    /**
+     * Next Cursor
+     *
+     * Pasar en `cursor` para obtener la siguiente página.
+     */
+    next_cursor?: string | null;
+    /**
+     * Has More
+     */
+    has_more: boolean;
+};
+
+/**
  * CursorPage[ImportIssueOut]
  */
 export type CursorPageImportIssueOut = {
@@ -543,6 +610,26 @@ export type CursorPageImportRunOut = {
      * Items
      */
     items: Array<ImportRunOut>;
+    /**
+     * Next Cursor
+     *
+     * Pasar en `cursor` para obtener la siguiente página.
+     */
+    next_cursor?: string | null;
+    /**
+     * Has More
+     */
+    has_more: boolean;
+};
+
+/**
+ * CursorPage[MeetingSummary]
+ */
+export type CursorPageMeetingSummary = {
+    /**
+     * Items
+     */
+    items: Array<MeetingSummary>;
     /**
      * Next Cursor
      *
@@ -710,6 +797,12 @@ export type EnrollmentIn = {
      */
     origin_detail?: string | null;
     consent: ConsentCapture;
+    /**
+     * House Id
+     *
+     * Casa de Paz que integra al inscribirse.
+     */
+    house_id?: string | null;
 };
 
 /**
@@ -1055,6 +1148,28 @@ export type GeoNodeOut = {
 export type GeographicLevel = 'national' | 'electoral_region' | 'state' | 'federal_district' | 'local_district' | 'municipality';
 
 /**
+ * GuestIn
+ */
+export type GuestIn = {
+    /**
+     * Given Names
+     */
+    given_names: string;
+    /**
+     * Paternal Surname
+     */
+    paternal_surname: string;
+    /**
+     * Maternal Surname
+     */
+    maternal_surname?: string | null;
+    /**
+     * Mobile
+     */
+    mobile?: string | null;
+};
+
+/**
  * HealthStatus
  */
 export type HealthStatus = {
@@ -1062,6 +1177,76 @@ export type HealthStatus = {
      * Status
      */
     status: 'ok';
+};
+
+/**
+ * HouseAddressIn
+ */
+export type HouseAddressIn = {
+    /**
+     * Street
+     */
+    street: string;
+    /**
+     * Exterior Number
+     */
+    exterior_number?: string | null;
+    /**
+     * Interior Number
+     */
+    interior_number?: string | null;
+    /**
+     * References
+     */
+    references?: string | null;
+    /**
+     * Postal Code
+     */
+    postal_code?: string | null;
+    /**
+     * Longitude
+     */
+    longitude: number;
+    /**
+     * Latitude
+     */
+    latitude: number;
+};
+
+/**
+ * HouseAddressOut
+ */
+export type HouseAddressOut = {
+    /**
+     * Street
+     */
+    street?: string | null;
+    /**
+     * Exterior Number
+     */
+    exterior_number?: string | null;
+    /**
+     * Interior Number
+     */
+    interior_number?: string | null;
+    /**
+     * References
+     */
+    references?: string | null;
+    /**
+     * Postal Code
+     */
+    postal_code?: string | null;
+    /**
+     * Longitude
+     *
+     * Exacta; solo con permiso.
+     */
+    longitude?: number | null;
+    /**
+     * Latitude
+     */
+    latitude?: number | null;
 };
 
 /**
@@ -1108,6 +1293,268 @@ export type HouseGoalOut = {
      * Valid To
      */
     valid_to: string | null;
+};
+
+/**
+ * HouseIn
+ */
+export type HouseIn = {
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Schedule
+     */
+    schedule?: Array<ScheduleSlot>;
+    /**
+     * Capacity
+     */
+    capacity?: number | null;
+    address: HouseAddressIn;
+    /**
+     * Opened By Member Id
+     */
+    opened_by_member_id: string;
+    /**
+     * Host Member Id
+     */
+    host_member_id: string;
+    /**
+     * Contact Member Id
+     */
+    contact_member_id: string;
+    /**
+     * Member Ids
+     *
+     * Integrantes además del anfitrión y el contacto, que se agregan solos.
+     */
+    member_ids?: Array<string>;
+};
+
+/**
+ * HouseMemberIn
+ */
+export type HouseMemberIn = {
+    /**
+     * Member Id
+     */
+    member_id: string;
+};
+
+/**
+ * HouseMemberOut
+ */
+export type HouseMemberOut = {
+    member: MemberSummary;
+    /**
+     * Joined On
+     */
+    joined_on: string;
+    /**
+     * Source
+     */
+    source: string;
+};
+
+/**
+ * HouseOut
+ */
+export type HouseOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Status
+     */
+    status: string;
+    /**
+     * State Id
+     */
+    state_id: string;
+    /**
+     * Municipality Id
+     */
+    municipality_id: string;
+    /**
+     * Section Id
+     */
+    section_id: string;
+    /**
+     * Approx Longitude
+     */
+    approx_longitude: number;
+    /**
+     * Approx Latitude
+     */
+    approx_latitude: number;
+    /**
+     * Member Count
+     */
+    member_count: number;
+    /**
+     * Credited Member Id
+     */
+    credited_member_id: string | null;
+    /**
+     * Credited User Id
+     */
+    credited_user_id: string | null;
+    /**
+     * Credit Pending
+     */
+    credit_pending: boolean;
+    /**
+     * Needs Reassignment
+     */
+    needs_reassignment: boolean;
+    /**
+     * Publishable
+     */
+    publishable: boolean;
+    /**
+     * Opened On
+     */
+    opened_on: string;
+    /**
+     * Schedule
+     */
+    schedule: Array<ScheduleSlot>;
+    /**
+     * Capacity
+     */
+    capacity: number | null;
+    /**
+     * Calle y coordenadas exactas solo con permiso.
+     */
+    address: HouseAddressOut;
+    host: MemberSummary | null;
+    contact: MemberSummary | null;
+    /**
+     * Opened By Member Id
+     */
+    opened_by_member_id: string;
+    /**
+     * Member Goal
+     */
+    member_goal: number | null;
+    /**
+     * Progress Pct
+     */
+    progress_pct: number | null;
+    /**
+     * Consolidated On
+     */
+    consolidated_on: string | null;
+    /**
+     * First Consolidated On
+     */
+    first_consolidated_on: string | null;
+    /**
+     * Closed On
+     */
+    closed_on: string | null;
+    /**
+     * Status Reason
+     */
+    status_reason: string | null;
+};
+
+/**
+ * HouseSummary
+ */
+export type HouseSummary = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Status
+     */
+    status: string;
+    /**
+     * State Id
+     */
+    state_id: string;
+    /**
+     * Municipality Id
+     */
+    municipality_id: string;
+    /**
+     * Section Id
+     */
+    section_id: string;
+    /**
+     * Approx Longitude
+     */
+    approx_longitude: number;
+    /**
+     * Approx Latitude
+     */
+    approx_latitude: number;
+    /**
+     * Member Count
+     */
+    member_count: number;
+    /**
+     * Credited Member Id
+     */
+    credited_member_id: string | null;
+    /**
+     * Credited User Id
+     */
+    credited_user_id: string | null;
+    /**
+     * Credit Pending
+     */
+    credit_pending: boolean;
+    /**
+     * Needs Reassignment
+     */
+    needs_reassignment: boolean;
+    /**
+     * Publishable
+     */
+    publishable: boolean;
+    /**
+     * Opened On
+     */
+    opened_on: string;
+};
+
+/**
+ * HouseUpdate
+ */
+export type HouseUpdate = {
+    /**
+     * Name
+     */
+    name?: string | null;
+    /**
+     * Schedule
+     */
+    schedule?: Array<ScheduleSlot> | null;
+    /**
+     * Capacity
+     */
+    capacity?: number | null;
+    /**
+     * Host Member Id
+     */
+    host_member_id?: string | null;
+    /**
+     * Contact Member Id
+     */
+    contact_member_id?: string | null;
 };
 
 /**
@@ -1403,6 +1850,20 @@ export type LevelOut = {
 };
 
 /**
+ * LocationConsentIn
+ */
+export type LocationConsentIn = {
+    /**
+     * Channel
+     */
+    channel?: 'panel' | 'paper';
+    /**
+     * Evidence Uri
+     */
+    evidence_uri?: string | null;
+};
+
+/**
  * LoginRequest
  */
 export type LoginRequest = {
@@ -1465,6 +1926,98 @@ export type MeResponse = {
      * Geo Scopes
      */
     geo_scopes: Array<ScopeOut>;
+};
+
+/**
+ * MeetingIn
+ */
+export type MeetingIn = {
+    /**
+     * Held At
+     */
+    held_at: string;
+    /**
+     * Topic
+     */
+    topic: string;
+    /**
+     * Notes
+     */
+    notes?: string | null;
+    /**
+     * Member Ids
+     */
+    member_ids?: Array<string>;
+    /**
+     * Guest Person Ids
+     *
+     * Invitados ya registrados.
+     */
+    guest_person_ids?: Array<string>;
+    /**
+     * Guests
+     */
+    guests?: Array<GuestIn>;
+};
+
+/**
+ * MeetingOut
+ */
+export type MeetingOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Held At
+     */
+    held_at: string;
+    /**
+     * Topic
+     */
+    topic: string;
+    /**
+     * Attendee Count
+     */
+    attendee_count: number;
+    /**
+     * Guest Count
+     */
+    guest_count: number;
+    /**
+     * Notes
+     */
+    notes: string | null;
+    /**
+     * Attendees
+     */
+    attendees: Array<AttendeeOut>;
+};
+
+/**
+ * MeetingSummary
+ */
+export type MeetingSummary = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Held At
+     */
+    held_at: string;
+    /**
+     * Topic
+     */
+    topic: string;
+    /**
+     * Attendee Count
+     */
+    attendee_count: number;
+    /**
+     * Guest Count
+     */
+    guest_count: number;
 };
 
 /**
@@ -2284,6 +2837,38 @@ export type PersonUpdate = {
 };
 
 /**
+ * PhotoOut
+ */
+export type PhotoOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Caption
+     */
+    caption: string | null;
+    /**
+     * Content Type
+     */
+    content_type: string;
+    /**
+     * Size Bytes
+     */
+    size_bytes: number;
+    /**
+     * Url
+     *
+     * URL firmada, válida unos minutos.
+     */
+    url: string;
+    /**
+     * Created At
+     */
+    created_at: string;
+};
+
+/**
  * Principle
  */
 export type Principle = 'mr' | 'rp';
@@ -2766,6 +3351,24 @@ export type RoleUpdateRequest = {
  * RpMethod
  */
 export type RpMethod = 'closed_list' | 'best_loser' | 'mixed';
+
+/**
+ * ScheduleSlot
+ */
+export type ScheduleSlot = {
+    /**
+     * Day
+     */
+    day: 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
+    /**
+     * Starts At
+     */
+    starts_at: string;
+    /**
+     * Ends At
+     */
+    ends_at: string;
+};
 
 /**
  * ScopeIn
@@ -7594,3 +8197,675 @@ export type SetUserBranchesResponses = {
 };
 
 export type SetUserBranchesResponse = SetUserBranchesResponses[keyof SetUserBranchesResponses];
+
+export type SearchPeaceHousesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Status
+         */
+        status?: string | null;
+        /**
+         * State Id
+         */
+        state_id?: string | null;
+        /**
+         * Credited Member Id
+         */
+        credited_member_id?: string | null;
+        /**
+         * Credit Pending
+         */
+        credit_pending?: boolean | null;
+        /**
+         * Needs Reassignment
+         */
+        needs_reassignment?: boolean | null;
+        /**
+         * Publishable
+         */
+        publishable?: boolean | null;
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Cursor
+         */
+        cursor?: string | null;
+        /**
+         * Sort
+         *
+         * Campos separados por coma; prefijo '-' para descendente.
+         */
+        sort?: string | null;
+    };
+    url: '/api/v1/peace-movement/houses';
+};
+
+export type SearchPeaceHousesErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type SearchPeaceHousesError = SearchPeaceHousesErrors[keyof SearchPeaceHousesErrors];
+
+export type SearchPeaceHousesResponses = {
+    /**
+     * Successful Response
+     */
+    200: CursorPageHouseSummary;
+};
+
+export type SearchPeaceHousesResponse = SearchPeaceHousesResponses[keyof SearchPeaceHousesResponses];
+
+export type OpenPeaceHouseData = {
+    body: HouseIn;
+    path?: never;
+    query?: never;
+    url: '/api/v1/peace-movement/houses';
+};
+
+export type OpenPeaceHouseErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type OpenPeaceHouseError = OpenPeaceHouseErrors[keyof OpenPeaceHouseErrors];
+
+export type OpenPeaceHouseResponses = {
+    /**
+     * Successful Response
+     */
+    201: HouseOut;
+};
+
+export type OpenPeaceHouseResponse = OpenPeaceHouseResponses[keyof OpenPeaceHouseResponses];
+
+export type GetPeaceHouseData = {
+    body?: never;
+    path: {
+        /**
+         * House Id
+         *
+         * Id de la Casa de Paz.
+         */
+        house_id: string;
+    };
+    query?: never;
+    url: '/api/v1/peace-movement/houses/{house_id}';
+};
+
+export type GetPeaceHouseErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type GetPeaceHouseError = GetPeaceHouseErrors[keyof GetPeaceHouseErrors];
+
+export type GetPeaceHouseResponses = {
+    /**
+     * Successful Response
+     */
+    200: HouseOut;
+};
+
+export type GetPeaceHouseResponse = GetPeaceHouseResponses[keyof GetPeaceHouseResponses];
+
+export type UpdatePeaceHouseData = {
+    body: HouseUpdate;
+    path: {
+        /**
+         * House Id
+         *
+         * Id de la Casa de Paz.
+         */
+        house_id: string;
+    };
+    query?: never;
+    url: '/api/v1/peace-movement/houses/{house_id}';
+};
+
+export type UpdatePeaceHouseErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type UpdatePeaceHouseError = UpdatePeaceHouseErrors[keyof UpdatePeaceHouseErrors];
+
+export type UpdatePeaceHouseResponses = {
+    /**
+     * Successful Response
+     */
+    200: HouseOut;
+};
+
+export type UpdatePeaceHouseResponse = UpdatePeaceHouseResponses[keyof UpdatePeaceHouseResponses];
+
+export type ClosePeaceHouseData = {
+    body: ReasonIn;
+    path: {
+        /**
+         * House Id
+         *
+         * Id de la Casa de Paz.
+         */
+        house_id: string;
+    };
+    query?: never;
+    url: '/api/v1/peace-movement/houses/{house_id}/close';
+};
+
+export type ClosePeaceHouseErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ClosePeaceHouseError = ClosePeaceHouseErrors[keyof ClosePeaceHouseErrors];
+
+export type ClosePeaceHouseResponses = {
+    /**
+     * Successful Response
+     */
+    200: HouseOut;
+};
+
+export type ClosePeaceHouseResponse = ClosePeaceHouseResponses[keyof ClosePeaceHouseResponses];
+
+export type ReassignHouseCreditData = {
+    body: CreditIn;
+    path: {
+        /**
+         * House Id
+         *
+         * Id de la Casa de Paz.
+         */
+        house_id: string;
+    };
+    query?: never;
+    url: '/api/v1/peace-movement/houses/{house_id}/credit';
+};
+
+export type ReassignHouseCreditErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ReassignHouseCreditError = ReassignHouseCreditErrors[keyof ReassignHouseCreditErrors];
+
+export type ReassignHouseCreditResponses = {
+    /**
+     * Successful Response
+     */
+    200: HouseOut;
+};
+
+export type ReassignHouseCreditResponse = ReassignHouseCreditResponses[keyof ReassignHouseCreditResponses];
+
+export type ListHouseMembersData = {
+    body?: never;
+    path: {
+        /**
+         * House Id
+         *
+         * Id de la Casa de Paz.
+         */
+        house_id: string;
+    };
+    query?: never;
+    url: '/api/v1/peace-movement/houses/{house_id}/members';
+};
+
+export type ListHouseMembersErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ListHouseMembersError = ListHouseMembersErrors[keyof ListHouseMembersErrors];
+
+export type ListHouseMembersResponses = {
+    /**
+     * Response Listhousemembers
+     *
+     * Successful Response
+     */
+    200: Array<HouseMemberOut>;
+};
+
+export type ListHouseMembersResponse = ListHouseMembersResponses[keyof ListHouseMembersResponses];
+
+export type AddHouseMemberData = {
+    body: HouseMemberIn;
+    path: {
+        /**
+         * House Id
+         *
+         * Id de la Casa de Paz.
+         */
+        house_id: string;
+    };
+    query?: never;
+    url: '/api/v1/peace-movement/houses/{house_id}/members';
+};
+
+export type AddHouseMemberErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type AddHouseMemberError = AddHouseMemberErrors[keyof AddHouseMemberErrors];
+
+export type AddHouseMemberResponses = {
+    /**
+     * Response Addhousemember
+     *
+     * Successful Response
+     */
+    201: Array<HouseMemberOut>;
+};
+
+export type AddHouseMemberResponse = AddHouseMemberResponses[keyof AddHouseMemberResponses];
+
+export type RemoveHouseMemberData = {
+    body?: never;
+    path: {
+        /**
+         * House Id
+         *
+         * Id de la Casa de Paz.
+         */
+        house_id: string;
+        /**
+         * Member Id
+         *
+         * Id del pacificador.
+         */
+        member_id: string;
+    };
+    query?: never;
+    url: '/api/v1/peace-movement/houses/{house_id}/members/{member_id}';
+};
+
+export type RemoveHouseMemberErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type RemoveHouseMemberError = RemoveHouseMemberErrors[keyof RemoveHouseMemberErrors];
+
+export type RemoveHouseMemberResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type RemoveHouseMemberResponse = RemoveHouseMemberResponses[keyof RemoveHouseMemberResponses];
+
+export type RevokeHouseLocationConsentData = {
+    body?: never;
+    path: {
+        /**
+         * House Id
+         *
+         * Id de la Casa de Paz.
+         */
+        house_id: string;
+    };
+    query?: never;
+    url: '/api/v1/peace-movement/houses/{house_id}/public-location-consent';
+};
+
+export type RevokeHouseLocationConsentErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type RevokeHouseLocationConsentError = RevokeHouseLocationConsentErrors[keyof RevokeHouseLocationConsentErrors];
+
+export type RevokeHouseLocationConsentResponses = {
+    /**
+     * Successful Response
+     */
+    200: HouseOut;
+};
+
+export type RevokeHouseLocationConsentResponse = RevokeHouseLocationConsentResponses[keyof RevokeHouseLocationConsentResponses];
+
+export type RecordHouseLocationConsentData = {
+    body: LocationConsentIn;
+    path: {
+        /**
+         * House Id
+         *
+         * Id de la Casa de Paz.
+         */
+        house_id: string;
+    };
+    query?: never;
+    url: '/api/v1/peace-movement/houses/{house_id}/public-location-consent';
+};
+
+export type RecordHouseLocationConsentErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type RecordHouseLocationConsentError = RecordHouseLocationConsentErrors[keyof RecordHouseLocationConsentErrors];
+
+export type RecordHouseLocationConsentResponses = {
+    /**
+     * Successful Response
+     */
+    200: HouseOut;
+};
+
+export type RecordHouseLocationConsentResponse = RecordHouseLocationConsentResponses[keyof RecordHouseLocationConsentResponses];
+
+export type ListHouseMeetingsData = {
+    body?: never;
+    path: {
+        /**
+         * House Id
+         *
+         * Id de la Casa de Paz.
+         */
+        house_id: string;
+    };
+    query?: {
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Cursor
+         */
+        cursor?: string | null;
+        /**
+         * Sort
+         *
+         * Campos separados por coma; prefijo '-' para descendente.
+         */
+        sort?: string | null;
+    };
+    url: '/api/v1/peace-movement/houses/{house_id}/meetings';
+};
+
+export type ListHouseMeetingsErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ListHouseMeetingsError = ListHouseMeetingsErrors[keyof ListHouseMeetingsErrors];
+
+export type ListHouseMeetingsResponses = {
+    /**
+     * Successful Response
+     */
+    200: CursorPageMeetingSummary;
+};
+
+export type ListHouseMeetingsResponse = ListHouseMeetingsResponses[keyof ListHouseMeetingsResponses];
+
+export type AddHouseMeetingData = {
+    body: MeetingIn;
+    path: {
+        /**
+         * House Id
+         *
+         * Id de la Casa de Paz.
+         */
+        house_id: string;
+    };
+    query?: never;
+    url: '/api/v1/peace-movement/houses/{house_id}/meetings';
+};
+
+export type AddHouseMeetingErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type AddHouseMeetingError = AddHouseMeetingErrors[keyof AddHouseMeetingErrors];
+
+export type AddHouseMeetingResponses = {
+    /**
+     * Successful Response
+     */
+    201: MeetingOut;
+};
+
+export type AddHouseMeetingResponse = AddHouseMeetingResponses[keyof AddHouseMeetingResponses];
+
+export type GetHouseMeetingData = {
+    body?: never;
+    path: {
+        /**
+         * House Id
+         *
+         * Id de la Casa de Paz.
+         */
+        house_id: string;
+        /**
+         * Meeting Id
+         */
+        meeting_id: string;
+    };
+    query?: never;
+    url: '/api/v1/peace-movement/houses/{house_id}/meetings/{meeting_id}';
+};
+
+export type GetHouseMeetingErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type GetHouseMeetingError = GetHouseMeetingErrors[keyof GetHouseMeetingErrors];
+
+export type GetHouseMeetingResponses = {
+    /**
+     * Successful Response
+     */
+    200: MeetingOut;
+};
+
+export type GetHouseMeetingResponse = GetHouseMeetingResponses[keyof GetHouseMeetingResponses];
+
+export type ListHousePhotosData = {
+    body?: never;
+    path: {
+        /**
+         * House Id
+         *
+         * Id de la Casa de Paz.
+         */
+        house_id: string;
+    };
+    query?: never;
+    url: '/api/v1/peace-movement/houses/{house_id}/photos';
+};
+
+export type ListHousePhotosErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ListHousePhotosError = ListHousePhotosErrors[keyof ListHousePhotosErrors];
+
+export type ListHousePhotosResponses = {
+    /**
+     * Response Listhousephotos
+     *
+     * Successful Response
+     */
+    200: Array<PhotoOut>;
+};
+
+export type ListHousePhotosResponse = ListHousePhotosResponses[keyof ListHousePhotosResponses];
+
+export type UploadHousePhotoData = {
+    body: BodyUploadHousePhoto;
+    path: {
+        /**
+         * House Id
+         *
+         * Id de la Casa de Paz.
+         */
+        house_id: string;
+    };
+    query?: never;
+    url: '/api/v1/peace-movement/houses/{house_id}/photos';
+};
+
+export type UploadHousePhotoErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type UploadHousePhotoError = UploadHousePhotoErrors[keyof UploadHousePhotoErrors];
+
+export type UploadHousePhotoResponses = {
+    /**
+     * Successful Response
+     */
+    201: PhotoOut;
+};
+
+export type UploadHousePhotoResponse = UploadHousePhotoResponses[keyof UploadHousePhotoResponses];
+
+export type DeleteHousePhotoData = {
+    body?: never;
+    path: {
+        /**
+         * House Id
+         *
+         * Id de la Casa de Paz.
+         */
+        house_id: string;
+        /**
+         * Photo Id
+         */
+        photo_id: string;
+    };
+    query?: never;
+    url: '/api/v1/peace-movement/houses/{house_id}/photos/{photo_id}';
+};
+
+export type DeleteHousePhotoErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type DeleteHousePhotoError = DeleteHousePhotoErrors[keyof DeleteHousePhotoErrors];
+
+export type DeleteHousePhotoResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type DeleteHousePhotoResponse = DeleteHousePhotoResponses[keyof DeleteHousePhotoResponses];

@@ -26,6 +26,7 @@ from app.modules.peace_movement import catalog
 from app.modules.peace_movement.models import (
     CURRENT_STATUSES,
     EnrollmentChannel,
+    HouseMemberSource,
     Member,
     MemberLevelChange,
     MemberOrigin,
@@ -248,6 +249,14 @@ async def enroll(
     db.add(member)
     await db.flush()
     db.add(_change("enrolled", member, path, status=status))
+    if body.house_id is not None:
+        if status != MemberStatus.ACTIVE:
+            raise BadRequestError("Solo una inscripción activa puede integrar una casa.")
+        from app.modules.peace_movement import houses  # noqa: PLC0415 - houses imports members
+
+        await houses.add_member(
+            db, actor, body.house_id, pk(member), HouseMemberSource.ENROLLMENT, commit=False
+        )
     settings = await catalog.get_settings(db)
     if member.depth > settings.depth_alert_threshold:
         logger.warning(
@@ -301,6 +310,7 @@ async def leave(db: AsyncSession, actor: Actor, member_id: uuid.UUID, reason: st
     member.status_reason = reason
     member.left_on = date.today()
     db.add(_change("left", member, member.path))
+    await _leave_houses(db, member)
     await db.commit()
     return member
 
@@ -398,6 +408,13 @@ async def reassign(
     return member
 
 
+async def _leave_houses(db: AsyncSession, member: Member) -> None:
+    from app.modules.peace_movement import houses  # noqa: PLC0415 - houses imports members
+
+    await db.flush()
+    await houses.member_left(db, member)
+
+
 async def _has_recruits(db: AsyncSession, member: Member) -> bool:
     found = await db.execute(
         select(col(Member.id)).where(col(Member.recruited_by_member_id) == member.id).limit(1)
@@ -422,6 +439,7 @@ async def withdraw_person(db: AsyncSession, person_id: uuid.UUID) -> None:
         member.status = MemberStatus.WITHDRAWN
         member.status_reason = "Cancelación ARCO de la persona"
         db.add(_change("withdrawn", member, member.path))
+        await _leave_houses(db, member)
     await db.flush()
 
 
