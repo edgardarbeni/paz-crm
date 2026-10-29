@@ -5,6 +5,7 @@ previous step and passes PAZ_TEST_PG_IMAGE.
 """
 
 import asyncio
+import time
 import uuid
 from collections.abc import AsyncIterator, Iterator
 from dataclasses import dataclass
@@ -16,10 +17,12 @@ from alembic import command
 from alembic.config import Config
 from fastapi import FastAPI
 from httpx import ASGITransport, AsyncClient
+from minio import Minio
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 from testcontainers.community.postgres import PostgresContainer
 from testcontainers.community.redis import RedisContainer
+from testcontainers.core.container import DockerContainer
 
 from app.core.config import Settings
 from app.main import create_app
@@ -83,6 +86,34 @@ def redis_url() -> Iterator[str]:
     with RedisContainer("redis:8-alpine") as container:
         host = container.get_container_host_ip()
         yield f"redis://{host}:{container.get_exposed_port(6379)}/0"
+
+
+S3_IMAGE = "chrislusf/seaweedfs:4.51"  # same S3 server as compose.yaml
+S3_ACCESS_KEY, S3_SECRET_KEY = "paz-test", "paz-test-secret"
+
+
+@pytest.fixture(scope="session")
+def s3_endpoint() -> Iterator[str]:
+    """SeaweedFS with its S3 gateway; credentials from the environment, like in compose."""
+    container = (
+        DockerContainer(S3_IMAGE)
+        .with_command("server -s3 -dir=/data")
+        .with_env("AWS_ACCESS_KEY_ID", S3_ACCESS_KEY)
+        .with_env("AWS_SECRET_ACCESS_KEY", S3_SECRET_KEY)
+        .with_exposed_ports(8333)
+    )
+    with container:
+        endpoint = f"{container.get_container_host_ip()}:{container.get_exposed_port(8333)}"
+        client = Minio(endpoint, access_key=S3_ACCESS_KEY, secret_key=S3_SECRET_KEY, secure=False)
+        for _ in range(120):  # the S3 gateway starts after the master and the volume server
+            try:
+                client.bucket_exists("probe")
+                break
+            except Exception:
+                time.sleep(0.5)
+        else:
+            raise RuntimeError("SeaweedFS S3 did not start")
+        yield f"http://{endpoint}"
 
 
 @pytest.fixture(scope="session")

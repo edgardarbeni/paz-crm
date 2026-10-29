@@ -8,9 +8,9 @@ from datetime import UTC, datetime
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.errors import ForbiddenError
+from app.core.modules import permission_codes
 from app.modules.identity import repository as repo
 from app.modules.identity.models import Role
-from app.modules.identity.permissions import PERMISSIONS
 
 
 def utcnow() -> datetime:
@@ -33,7 +33,7 @@ class Access:
         return self.grants_all or permission in self.permissions
 
     def effective_permissions(self) -> list[str]:
-        return sorted(PERMISSIONS if self.grants_all else self.permissions)
+        return sorted(permission_codes() if self.grants_all else self.permissions)
 
 
 async def load_access(db: AsyncSession, user_id: uuid.UUID) -> Access:

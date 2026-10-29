@@ -7,7 +7,7 @@ describe("SystemStatus", () => {
   it("shows each dependency as operating when the API is ready", async () => {
     mockApi((request) => {
       expect(new URL(request.url).pathname).toBe("/ready");
-      return jsonResponse({ status: "ok", database: "ok", redis: "ok" });
+      return jsonResponse({ status: "ok", database: "ok", redis: "ok", storage: "disabled" });
     });
     renderWithQuery(<SystemStatus />);
 
@@ -16,6 +16,7 @@ describe("SystemStatus", () => {
     expect(list).toHaveTextContent("Base de datos");
     expect(list).toHaveTextContent("Redis");
     expect(screen.getAllByText("Operando")).toHaveLength(2);
+    expect(list).toHaveTextContent("Almacenamiento de archivosSin configurar");
   });
 
   it("shows the Problem Details message when dependencies are down", async () => {

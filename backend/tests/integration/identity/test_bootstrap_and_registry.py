@@ -5,8 +5,9 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 
 from app.core.config import Settings
 from app.core.errors import ConflictError
+from app.core.modules import permission_codes
 from app.modules.identity.bootstrap import create_superadmin
-from app.modules.identity.permissions import PERMISSIONS, SYSTEM_ROLES
+from app.modules.identity.permissions import SYSTEM_ROLES
 from tests.integration.conftest import PASSWORD
 
 
@@ -21,7 +22,7 @@ async def test_migrations_seed_the_registry(owner_engine: AsyncEngine) -> None:
                 text("SELECT code, requires_mfa, grants_all, is_system FROM identity.roles")
             )
         }
-    assert permissions == PERMISSIONS
+    assert permissions == permission_codes()
     assert set(SYSTEM_ROLES) <= set(roles)
     assert roles["superadmin"] == (True, True, True)
     assert roles["admin"][0] is True

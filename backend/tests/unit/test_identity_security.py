@@ -16,9 +16,10 @@ from app.core.mail import (
     build_mailer,
     send_safely,
 )
+from app.core.modules import permission_codes
 from app.modules.identity import emails
 from app.modules.identity.models import Role
-from app.modules.identity.permissions import PERMISSIONS, Perm
+from app.modules.identity.permissions import Perm
 from app.modules.identity.security import recovery_codes, totp
 from app.modules.identity.security.passwords import Passwords, WeakPasswordError
 from app.modules.identity.security.tokens import (
@@ -209,7 +210,7 @@ def test_access_rules() -> None:
     root = Access(roles=(_role(grants_all=True),), permissions=frozenset(), grants_all=True)
     assert root.requires_mfa
     assert root.has("anything.at.all")
-    assert root.effective_permissions() == sorted(PERMISSIONS)
+    assert root.effective_permissions() == sorted(permission_codes())
 
     ensure_can_grant(root, ["audit.log.read"])
     ensure_can_grant(plain, [Perm.USER_READ])

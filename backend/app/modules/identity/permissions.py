@@ -1,6 +1,10 @@
-"""Permission registry. Each module declares its permission codes here (or in its own
-`permissions.py`) and seeds them with a migration; `tests/.../test_permissions_registry.py`
-fails if code and database drift apart."""
+"""Permission codes of the core modules (identity, audit, geography, people, candidacies).
+
+A new module declares its own `StrEnum` and points to it from its `module.py`; the catalog is
+`app.core.modules.permission_codes()`. Every code is seeded by a migration, and
+`tests/integration/identity/test_bootstrap_and_registry.py` fails if code and database drift
+apart. The panel keeps a copy in `frontend/src/lib/auth/permissions.ts`, checked by
+`tests/unit/test_module_registry.py`."""
 
 from enum import StrEnum
 
@@ -34,5 +38,4 @@ class Perm(StrEnum):
     RULE_OVERRIDE = "candidacies.rule.override"
 
 
-PERMISSIONS: frozenset[str] = frozenset(Perm)
 SYSTEM_ROLES = ("superadmin", "admin", "coordinator", "capturist", "viewer")

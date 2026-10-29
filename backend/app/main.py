@@ -17,29 +17,20 @@ from app.core.middleware import (
     RequestContextMiddleware,
     SecurityHeadersMiddleware,
 )
+from app.core.modules import api_routers
 from app.core.redis import build_redis
+from app.core.storage import build_storage
 from app.core.telemetry import configure_telemetry
-from app.modules.audit import router as audit_router
-from app.modules.candidacies import router as candidacies_router
-from app.modules.geography import router as geography_router
 from app.modules.identity.container import build_identity_services
-from app.modules.identity.routers import admin as identity_admin
-from app.modules.identity.routers import auth as identity_auth
-from app.modules.people import router as people_router
 
 API_PREFIX = "/api/v1"
 
 
 def build_api_router() -> APIRouter:
-    """Module routers are mounted here as each phase adds them."""
+    """Mounts the routers of every installed module (`app/modules/*/module.py`)."""
     router = APIRouter(prefix=API_PREFIX, responses=PROBLEM_RESPONSES)
-    router.include_router(identity_auth.router)
-    router.include_router(identity_admin.users_router)
-    router.include_router(identity_admin.roles_router)
-    router.include_router(audit_router.router)
-    router.include_router(geography_router.router)
-    router.include_router(people_router.router)
-    router.include_router(candidacies_router.router)
+    for module_router in api_routers():
+        router.include_router(module_router)
     return router
 
 
@@ -59,6 +50,7 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
         app.state.redis = redis
         app.state.mailer = mailer
         app.state.identity = build_identity_services(settings, redis, mailer)
+        app.state.storage = build_storage(settings)
         try:
             yield
         finally:

@@ -78,6 +78,14 @@ class Settings(BaseSettings):
     ine_api_base_url: str = "https://cartografia.ine.mx/sige8/api"
     ine_storage_base_url: str = "https://storage.googleapis.com/mapoteca/"
 
+    # S3-compatible object storage (D-38). Without an endpoint, file features answer 503.
+    storage_endpoint: str | None = None
+    storage_public_endpoint: str | None = None
+    storage_bucket: str = "pazos"
+    storage_region: str = "us-east-1"
+    storage_access_key: str | None = None
+    storage_secret_key: SecretStr | None = None
+
     # E-mail (D-35). "memory" keeps messages in-process (tests); "console" logs them.
     mail_backend: Literal["smtp", "console", "memory"] = "smtp"
     smtp_host: str = "localhost"

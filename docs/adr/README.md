@@ -168,6 +168,7 @@ plantean alternativas; el 2026-10-29 se aceptó la opción recomendada de cada u
 | [D-91](D-91-jerarquia-reclutamiento-ltree.md) | Jerarquía de reclutamiento con `ltree` | Aceptada |
 | [D-92](D-92-reglas-negocio-movimiento-paz.md) | Reglas de negocio del Movimiento de Paz confirmadas | Aceptada |
 | [D-93](D-93-bitacora-alcance-y-enmascarado.md) | Bitácora: alcance de consulta, enmascarado de personas y escrituras Core (detalla D-37 y D-45) | Aceptada |
+| [D-94](D-94-infraestructura-scheduler-s3-modulos.md) | Infraestructura: scheduler, S3 de desarrollo y registro de módulos (detalla D-38 y D-84) | Aceptada |
 
 ## Suposiciones vigentes
 

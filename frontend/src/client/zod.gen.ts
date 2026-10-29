@@ -884,7 +884,8 @@ export const zProcessUpdate = z.object({
 export const zReadinessStatus = z.object({
     status: z.literal('ok'),
     database: z.literal('ok'),
-    redis: z.literal('ok')
+    redis: z.literal('ok'),
+    storage: z.enum(['ok', 'disabled'])
 });
 
 /**

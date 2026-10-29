@@ -36,15 +36,16 @@ compose.yaml  Stack de desarrollo
 
 ```bash
 ./scripts/bootstrap-env.sh        # crea .env con contraseñas y llaves aleatorias
-docker compose up --build         # db, redis, migrate, api, frontend, caddy, mailpit
+docker compose up --build         # db, redis, s3, migrate, api, scheduler, frontend, caddy, mailpit
 ```
 
 | URL | Servicio |
 |---|---|
 | https://localhost | Panel (Caddy con TLS local; acepta el certificado o ejecuta `docker compose exec caddy caddy trust`) |
 | https://localhost/docs · /redoc | Swagger UI y ReDoc |
-| https://localhost/ready | Readiness (base de datos + Redis) |
+| https://localhost/ready | Readiness (base de datos, Redis y almacenamiento) |
 | http://localhost:8025 | Mailpit (correos de desarrollo) |
+| http://localhost:8333 | S3 de desarrollo (SeaweedFS; objetos privados, se leen con URLs firmadas) |
 
 Si ya tienes servicios locales en los puertos 5432, 6379, etc., cámbialos en `.env`
 (variables `PAZ_*_HOST_PORT`, ver `.env.example`).
@@ -53,7 +54,7 @@ Si ya tienes servicios locales en los puertos 5432, 6379, etc., cámbialos en `.
 que el código nuevo se ve al instante. Las dependencias viven en un volumen y se sincronizan
 al arrancar: si la otra rama cambia `package.json`, ejecuta `docker compose restart frontend`.
 La API recarga `app/` y `migrations/` sola; si cambian sus dependencias o hay migraciones
-nuevas, ejecuta `docker compose up -d --build api migrate`.
+nuevas, ejecuta `docker compose up -d --build api migrate scheduler`.
 
 **Primer acceso.** Crea el superadministrador y entra con él (te pedirá configurar TOTP):
 
@@ -97,8 +98,18 @@ uv run paz --help                    # CLI de operación
   fuera de la cadena (`record_access(...)`, D-89). Quien tiene alcance limitado solo consulta
   las entradas suyas y de los usuarios que gestiona (D-93). Para operarla:
   - `paz audit verify-chain`: recalcula la cadena y reporta el primer eslabón roto.
-  - `paz audit ensure-partitions`: crea las particiones mensuales de las dos tablas. Se
-    programa con cron usando el rol dueño.
+  - `paz audit ensure-partitions`: crea las particiones mensuales de las dos tablas. La
+    programa el `scheduler`.
+- **Tareas programadas (D-84, D-94).** El contenedor `scheduler` ejecuta con supercronic los
+  comandos de `backend/crontab` (horas en UTC). Cada tarea toma un candado consultivo
+  (`app.core.jobs.exclusive_job`), así que una ejecución manual o empalmada no se duplica.
+  Fuera de compose, el mismo archivo sirve para un cron job del proveedor.
+- **Almacenamiento (D-38, D-94).** `app.core.storage` (S3 genérico con el SDK de MinIO):
+  objetos privados y URLs firmadas. En compose, SeaweedFS en `s3:8333`; `paz storage
+  ensure-bucket` crea el bucket al migrar. Sin `PAZ_STORAGE_ENDPOINT` las funciones con
+  archivos responden 503.
+- **Módulos (D-94).** Cada paquete de `app/modules/` con `module.py` se registra solo:
+  routers, esquema, modelos y permisos (receta en `docs/architecture.md` §7).
 - **Cifrado de campos (D-31, D-32).** `FieldCipher` (AES-256-GCM con cifrado de sobre y llaves
   versionadas) y `BlindIndexer` (HMAC-SHA256). Para generar una llave: `paz keys generate`.
 - **Identidad (fase B).**
@@ -113,7 +124,7 @@ uv run paz --help                    # CLI de operación
 - **Personas (fase D).**
   - API en `/api/v1/people`: búsqueda por nombre sin acentos, CURP o teléfono; alta con CURP validada (estructura, dígito verificador y coherencia, D-30); contactos y domicilio cifrados; consentimientos; baja ARCO.
   - CURP, contactos y calle salen enmascarados sin `people.person.read_sensitive` (D-66).
-  - `paz people purge` anonimiza a las personas cuya retención venció (D-69); se programa con cron.
+  - `paz people purge` anonimiza a las personas cuya retención venció (D-69); la programa el `scheduler`.
 - **Candidaturas (fase D).**
   - Catálogos: `/api/v1/parties`, `/office-types` (cargos nuevos sin migración) y `/validation-rules`.
   - Procesos: `/api/v1/processes` con `offices`, `municipalities`, `rules` y `coalitions`. Al crearse, todo queda deshabilitado y solo la regla "persona no duplicada" está activa (D-23, D-28).
