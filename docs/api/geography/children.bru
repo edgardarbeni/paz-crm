@@ -1,0 +1,23 @@
+meta {
+  name: Qué contiene un nodo
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}/api/v1/geography/state/{{nodeId}}/children
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+docs {
+  Niveles hijos del nodo y cuántos hay dentro del alcance del usuario, en orden. Cada grupo trae
+  `parent_filter`, el filtro de `GET /geography/{level}` que los lista. Estado: municipios,
+  distritos federales, distritos locales y secciones. Municipio: secciones, localidades y
+  colonias. Distrito: secciones. Circunscripción: estados. Sección: lista vacía.
+  Un nodo fuera del alcance responde 403; uno inexistente, 404.
+}

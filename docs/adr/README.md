@@ -147,6 +147,7 @@ separado en archivos sin cambiar su texto; solo se actualizaron las rutas de los
 | [D-78](D-78-identidad-visual-panel.md) | Identidad visual del panel | Aceptada |
 | [D-79](D-79-busqueda-geografica-nombre-estado.md) | Búsqueda geográfica por nombre y estado | Aceptada |
 | [D-80](D-80-teselas-geometrias-generalizadas.md) | Teselas con geometrías generalizadas por zoom (amplía D-19) | Aceptada |
+| [D-81](D-81-contiene-en-detalle-de-nodo.md) | «Contiene» en el detalle de nodo | Aceptada |
 
 ## Suposiciones vigentes
 

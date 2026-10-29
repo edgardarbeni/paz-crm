@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { geoNodeLabel } from "./search";
+import { geoChildLabel, geoNodeLabel } from "./search";
 
 const base = { state_name: "AGUASCALIENTES", municipality_name: null };
 
@@ -48,5 +48,30 @@ describe("geoNodeLabel", () => {
     expect(
       geoNodeLabel({ ...base, level: "locality", code: "1", key: "01-003-0001", name: null }).label,
     ).toBe("Sin nombre · AGUASCALIENTES");
+  });
+});
+
+describe("geoChildLabel", () => {
+  it("shows only the node's own number and name inside its parent", () => {
+    expect(geoChildLabel({ level: "municipality", code: "4", name: "TIJUANA" })).toEqual({
+      code: "004",
+      label: "TIJUANA",
+    });
+    expect(geoChildLabel({ level: "federal_district", code: "5", name: null })).toEqual({
+      code: null,
+      label: "Distrito 05",
+    });
+    expect(geoChildLabel({ level: "section", code: "338", name: null })).toEqual({
+      code: null,
+      label: "Sección 0338",
+    });
+    expect(geoChildLabel({ level: "locality", code: "12", name: null })).toEqual({
+      code: "0012",
+      label: "Sin nombre",
+    });
+    expect(geoChildLabel({ level: "neighborhood", code: "P15", name: "CENTRO" })).toEqual({
+      code: null,
+      label: "CENTRO",
+    });
   });
 });

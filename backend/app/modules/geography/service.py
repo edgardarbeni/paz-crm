@@ -391,6 +391,70 @@ async def get_node(
     return payload
 
 
+# What each level contains: (child level, filter of the child that points to the parent).
+CHILDREN: dict[str, tuple[tuple[str, str], ...]] = {
+    "electoral_region": (("state", "electoral_region_id"),),
+    "state": (
+        ("municipality", "state_id"),
+        ("federal_district", "state_id"),
+        ("local_district", "state_id"),
+        ("section", "state_id"),
+    ),
+    "municipality": (
+        ("section", "municipality_id"),
+        ("locality", "municipality_id"),
+        ("neighborhood", "municipality_id"),
+    ),
+    "federal_district": (("section", "federal_district_id"),),
+    "local_district": (("section", "local_district_id"),),
+}
+
+
+async def node_children(
+    db: AsyncSession, geo: GeoScope, level_name: str, node_id: uuid.UUID
+) -> list[dict[str, Any]]:
+    """How many nodes of each child level the node contains, within the caller's scope."""
+    level = level_def(level_name)
+    framework = await active_framework(db)
+    model = level.model
+    exists_row = (
+        await db.execute(
+            select(literal(1))
+            .select_from(model)
+            .where(col(model.id) == node_id, col(model.framework_id) == framework.id)
+        )
+    ).first()
+    if exists_row is None:
+        raise NotFoundError("Nodo geográfico no encontrado.")
+    visible = level.visible(geo)
+    if visible is not None:
+        allowed = (
+            await db.execute(
+                select(literal(1)).select_from(model).where(col(model.id) == node_id, visible)
+            )
+        ).first()
+        if allowed is None:
+            raise ForbiddenError("El nodo está fuera de tu alcance geográfico.")
+    groups: list[dict[str, Any]] = []
+    for child_name, parent_filter in CHILDREN.get(level.name, ()):
+        child = LEVELS[child_name]
+        statement = (
+            select(func.count())
+            .select_from(child.model)
+            .where(
+                col(child.model.framework_id) == framework.id,
+                col(child.model.is_active).is_(True),
+                child.parents[parent_filter] == node_id,
+            )
+        )
+        child_visible = child.visible(geo)
+        if child_visible is not None:
+            statement = statement.where(child_visible)
+        count = int((await db.execute(statement)).scalar_one())
+        groups.append({"level": child_name, "parent_filter": parent_filter, "count": count})
+    return groups
+
+
 _ANCESTORS_SQL = """
     SELECT s.id AS section_id, s.section_number, st.id AS state_id, st.state_code, st.name AS state_name,
            r.id AS electoral_region_id, r.region_number,

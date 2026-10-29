@@ -60,6 +60,19 @@ class GeoNodeDetail(GeoNodeOut):
     block_count: int | None = None
 
 
+class GeoChildGroup(Schema):
+    level: Level
+    parent_filter: str = Field(
+        description="Filtro de `GET /geography/{level}` que lista estos nodos.",
+        examples=["state_id"],
+    )
+    count: int = Field(description="Nodos de este nivel dentro del nodo y del alcance.")
+
+
+class GeoChildren(Schema):
+    items: list[GeoChildGroup]
+
+
 class FrameworkOut(Schema):
     id: uuid.UUID
     name: str

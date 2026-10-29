@@ -21,4 +21,12 @@ test("the map loads the base map and the scoped electoral tiles with the user's 
   await page.getByRole("table", { name: "Municipio" }).getByText("MUNICIPIO UNO").click();
   await expect(page.getByRole("heading", { level: 1, name: /MUNICIPIO UNO/ })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Pertenece a" })).toBeVisible();
+
+  // "Contiene" lists the children in place: the short group opens by itself and leads to them.
+  await expect(page.getByRole("heading", { name: "Contiene" })).toBeVisible();
+  const sections = page.getByRole("button", { name: /Secciones/ });
+  await expect(sections).toHaveAttribute("aria-expanded", "true");
+  await expect(sections).toContainText("4");
+  await page.getByRole("link", { name: "Sección 0101" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: /01-0101/ })).toBeVisible();
 });

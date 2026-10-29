@@ -36,6 +36,31 @@ export function geoNodeLabel(node: GeoNodeLike): { label: string; hint: string }
   }
 }
 
+/** A node listed inside its parent ("Contiene"): the parent already gives the state and the
+ * level, so only its own number and name are shown. */
+export function geoChildLabel(node: Pick<GeoNodeOut, "level" | "code" | "name">): {
+  code: string | null;
+  label: string;
+} {
+  switch (node.level) {
+    case "state":
+      return { code: pad(node.code, 2), label: node.name ?? node.code };
+    case "municipality":
+      return { code: pad(node.code, 3), label: node.name ?? "Sin nombre" };
+    case "locality":
+      return { code: pad(node.code, 4), label: node.name ?? "Sin nombre" };
+    case "federal_district":
+    case "local_district":
+      return { code: null, label: `Distrito ${pad(node.code, 2)}` };
+    case "section":
+      return { code: null, label: `Sección ${pad(node.code, 4)}` };
+    case "electoral_region":
+      return { code: null, label: `Circunscripción ${node.code}` };
+    default:
+      return { code: null, label: node.name ?? "Sin nombre" };
+  }
+}
+
 /** What each geographic picker understands, shown as its search placeholder. */
 export const GEO_SEARCH_HINTS: Record<string, string> = {
   state: "Nombre del estado",

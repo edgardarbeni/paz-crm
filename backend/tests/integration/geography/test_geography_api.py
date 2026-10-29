@@ -284,6 +284,63 @@ async def test_vector_tiles(
     ).status_code == 400
 
 
+def _groups(response: Any) -> list[tuple[str, str, int]]:
+    assert response.status_code == 200, response.text
+    return [(g["level"], g["parent_filter"], g["count"]) for g in response.json()["items"]]
+
+
+@pytest.mark.usefixtures("loaded")
+async def test_node_children_counts(
+    client: AsyncClient, root: dict[str, str], owner_engine: AsyncEngine
+) -> None:
+    state = await node_id(owner_engine, "states", "state_code = 1")
+    municipality_two = await node_id(owner_engine, "municipalities", "municipality_code = 2")
+    section = await node_id(owner_engine, "sections", "section_number = 101")
+    url = "/api/v1/geography/{}/{}/children"
+
+    assert _groups(await client.get(url.format("state", state), headers=root)) == [
+        ("municipality", "state_id", 2),
+        ("federal_district", "state_id", 2),
+        ("local_district", "state_id", 2),
+        ("section", "state_id", 8),
+    ]
+    by_municipality = _groups(
+        await client.get(url.format("municipality", municipality_two), headers=root)
+    )
+    assert [g[:2] for g in by_municipality] == [
+        ("section", "municipality_id"),
+        ("locality", "municipality_id"),
+        ("neighborhood", "municipality_id"),
+    ]
+    assert by_municipality[0][2] == 4
+    assert _groups(await client.get(url.format("section", section), headers=root)) == []
+    missing = await client.get(url.format("state", uuid.uuid4()), headers=root)
+    assert missing.status_code == 404
+
+
+@pytest.mark.usefixtures("loaded")
+async def test_node_children_only_count_the_scope(
+    client: AsyncClient, make_user: UserFactory, root: dict[str, str], owner_engine: AsyncEngine
+) -> None:
+    state = await node_id(owner_engine, "states", "state_code = 1")
+    municipality_one = await node_id(owner_engine, "municipalities", "municipality_code = 1")
+    municipality_two = await node_id(owner_engine, "municipalities", "municipality_code = 2")
+    _, headers = await _scoped_user(
+        client, make_user, root, [{"level": "municipality", "node_id": municipality_two}]
+    )
+    url = "/api/v1/geography/{}/{}/children"
+    assert _groups(await client.get(url.format("state", state), headers=headers)) == [
+        ("municipality", "state_id", 1),
+        ("federal_district", "state_id", 2),
+        ("local_district", "state_id", 2),
+        ("section", "state_id", 4),
+    ]
+    outside = await client.get(url.format("municipality", municipality_one), headers=headers)
+    assert outside.status_code == 403
+    no_permission = await token_for(client, await make_user(roles=()))
+    assert (await client.get(url.format("state", state), headers=no_permission)).status_code == 403
+
+
 @pytest.mark.usefixtures("loaded")
 async def test_tiles_use_generalized_geometry_by_zoom(owner_engine: AsyncEngine) -> None:
     lon, lat = await lonlat(owner_engine, 1000, 1000)

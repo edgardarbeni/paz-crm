@@ -202,6 +202,31 @@ export const zFrameworkOut = z.object({
 });
 
 /**
+ * GeoChildGroup
+ */
+export const zGeoChildGroup = z.object({
+    level: z.enum([
+        'electoral_region',
+        'state',
+        'federal_district',
+        'local_district',
+        'municipality',
+        'section',
+        'locality',
+        'neighborhood'
+    ]),
+    parent_filter: z.string(),
+    count: z.int()
+});
+
+/**
+ * GeoChildren
+ */
+export const zGeoChildren = z.object({
+    items: z.array(zGeoChildGroup)
+});
+
+/**
  * GeoNodeOut
  */
 export const zGeoNodeOut = z.object({
@@ -1719,6 +1744,25 @@ export const zGetGeoNodeQuery = z.object({
  * Successful Response
  */
 export const zGetGeoNodeResponse = zGeoNodeDetail;
+
+export const zGetGeoNodeChildrenPath = z.object({
+    level: z.enum([
+        'electoral_region',
+        'state',
+        'federal_district',
+        'local_district',
+        'municipality',
+        'section',
+        'locality',
+        'neighborhood'
+    ]),
+    node_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zGetGeoNodeChildrenResponse = zGeoChildren;
 
 export const zSearchPeopleQuery = z.object({
     q: z.string().min(2).max(100).nullish(),

@@ -16,6 +16,13 @@ Es la base territorial de todo el sistema: el modelo electoral del país (circun
 
 Pantallas del panel: Explorador (`/geography`), detalle de nodo (`/geography/$level/$nodeId`), Mapa (`/geography/map`), Ubicar coordenada (`/geography/locate`) e Importaciones (`/geography/imports`).
 
+**Detalle de nodo ([D-81](../adr/D-81-contiene-en-detalle-de-nodo.md)).** El mapa resalta el nodo; a un lado, «Pertenece a» (ancestros) y «Contiene».
+- «Contiene» tiene un grupo abatible por nivel hijo con su conteo dentro del alcance (p. ej. Baja California: 7 municipios, 9 distritos federales, 17 distritos locales y 2,254 secciones). Los grupos vacíos no se muestran.
+- Cada grupo lista ahí mismo los hijos, de 50 en 50 («Mostrar más»), con filtro por número o nombre cuando son más de 12, y un enlace al Explorador filtrado.
+- El primer grupo se abre solo si tiene 30 elementos o menos; uno largo ocultaría a los demás. El encabezado de un grupo abierto queda fijo al desplazarse, para poder cerrarlo.
+- Abrir un grupo dibuja su capa en el mapa sin mover la cámara. Al pasar el cursor (o el foco) por un hijo, se resalta en el mapa si su capa ya tiene teselas a ese zoom (secciones desde z9, colonias desde z12; las localidades no tienen capa).
+- En pantallas anchas la barra lateral mide lo mismo que el mapa y «Contiene» se desplaza por dentro; en móvil va debajo del mapa.
+
 ## Dependencias
 
 - `app.core`: `db.base` (`ImportedMixin`), `audit` (`record_audit`), `pagination`, `errors`.
@@ -61,7 +68,7 @@ Pantallas del panel: Explorador (`/geography`), detalle de nodo (`/geography/$le
   - Validaciones por registro: geometrías inválidas reparadas, manzanas fuera de su sección, distritos de manzana distintos a los de su sección, padres inexistentes, pares del catálogo sin intersección (`catalog_pair_without_overlap`). Son advertencias; manda la sección.
 - **Activación de marco** (`paz geo activate --framework NOMBRE`, [D-41](../adr/D-41-modelo-datos-aprobado.md) punto 7): remapea alcances de usuario y domicilios por llave natural; lo que no tiene equivalente se elimina (alcances) o se limpia (nodos del domicilio) y se reporta; reconstruye `user_scope_sections` y ejecuta `ANALYZE` ([D-63](../adr/D-63-operacion-geografia.md)).
 - **Búsqueda (`GET /geography/search`, [D-19](../adr/D-19-api-geografica.md), [D-79](../adr/D-79-busqueda-geografica-nombre-estado.md)):** clave INE flexible (`09-0123`, `9 123`, `090123`), número + estado en cualquier orden con palabras de nivel opcionales, nombre + estado, o solo estado (con `level`, devuelve lo que contiene); `state_id` opcional. El estado se reconoce por nombre o inicio de palabra, sin catálogo de abreviaturas. Las respuestas incluyen `state_name` y `municipality_name`.
-- **Consulta jerárquica:** hijos con `GET /geography/{level}` filtrando por el padre (`state_id`, `municipality_id`…) y paginación por cursor; ancestros en el detalle (`GET /geography/{level}/{node_id}`, la sección incluye `ancestors`) y en `locate`.
+- **Consulta jerárquica:** qué contiene un nodo y cuántos hay por nivel con `GET /geography/{level}/{node_id}/children` (dentro del alcance; 403 fuera de él); los hijos con `GET /geography/{level}` filtrando por el padre (`state_id`, `municipality_id`…) y paginación por cursor; ancestros en el detalle (`GET /geography/{level}/{node_id}`, la sección incluye `ancestors`) y en `locate`.
 - **Pendiente de definir:** estabilidad del ID de colonia entre cortes (solo hay un corte, [D-58](../adr/D-58-verificaciones-llave-colonia-fuentes-importador.md)); significado de `C` y `*` en `MANZANA.status` ([D-15](../adr/D-15-catalogos-codigos.md)).
 
 ## Permisos y alcance
@@ -149,6 +156,7 @@ No emite eventos asíncronos; todo ocurre dentro de la transacción de la import
 | Descripciones de código contradictorias quedan vacías para siempre | ✅ `test_conflicting_code_descriptions_are_cleared_for_good` |
 | Búsqueda por clave, número + estado, nombre + estado y solo estado | ✅ `test_search_by_key_and_name`, `test_search_by_number_or_name_with_state`, `test_explorer_search_by_number_or_state` |
 | Teselas MVT por capa y zoom | ✅ `test_vector_tiles` |
+| El detalle de un nodo lista lo que contiene, con conteos por nivel limitados al alcance, sin ir al Explorador | ✅ `test_node_children_counts`, `test_node_children_only_count_the_scope`, e2e `geography.spec.ts` |
 | Teselas de zoom bajo con geometría generalizada: municipios z6 ≤ 200 KB y ≤ 50 ms con la carga nacional, mismo contenido para usuarios acotados ([D-80](../adr/D-80-teselas-geometrias-generalizadas.md)) | ✅ 188 KB, 24–33 ms con buffers calientes (58 ms en frío); `test_tiles_use_generalized_geometry_by_zoom`, `test_generalize_fills_low_zoom_columns_and_skips_current_rows`, `test_reimport_is_idempotent_and_keeps_ids` |
 | Un usuario sin alcance no ve nada; uno con alcance de sección no ve otras secciones en listados, detalle, búsqueda, `locate` ni teselas | ✅ `test_user_without_scope_sees_nothing`, `test_section_scope_limits_every_query`, `test_scoped_tiles_only_contain_the_scope` |
 | No se otorga alcance fuera del propio | ✅ `test_scope_assignment_cannot_exceed_own_scope` |
