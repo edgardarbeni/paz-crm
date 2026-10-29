@@ -1,11 +1,10 @@
 # Módulo: Movimiento de Paz
 
-**Estado:** especificación aprobada para diseño; sin implementar.
+**Estado:** especificación aprobada; ADR D-82 a D-92 aceptadas el 2026-10-29; sin implementar.
 **Paquete propuesto:** `backend/app/modules/peace_movement` · esquema `peace_movement` · API
 `/api/v1/peace-movement`.
-**Brief:** respuestas de Darío del 2026-10-29. Lo marcado como **[SUPUESTO]** no fue dicho
-explícitamente y debe confirmarse; lo marcado como **[ADR]** requiere proponer una decisión
-con alternativas antes de implementarse. Las decisiones propuestas son D-82 a D-91
+**Brief:** respuestas de Darío del 2026-10-29. Las reglas que eran suposiciones quedaron
+confirmadas en D-92; lo marcado como **[ADR]** tiene su decisión enlazada. Las decisiones propuestas son D-82 a D-91
 ([índice](../adr/README.md#movimiento-de-paz-propuestas)).
 
 ## Propósito y usuarios
@@ -68,7 +67,10 @@ No se crean roles nuevos: los roles existentes reciben permisos `peace_movement.
 | `participation_levels` | `code`, `name`, `rank`, `sort_order` | Sembrados: `pacifier` (Pacificador), `peace_promoter` (Promotor de la Paz), `peace_messenger` (Mensajero de Paz), `peace_builder` (Constructor de Paz), `peace_ambassador` (Embajador de Paz), de menor a mayor `rank` |
 | `level_goals` | `level_id`, `state_id` (nulo = valor nacional por defecto), `recruit_goal`, `house_goal`, `valid_from`, `valid_to` | Metas ajustables **por estado** con historial. Semillas nacionales: 1, 10, 50, 100 y 500 reclutas; 5 casas para Embajador |
 | `house_goals` | `state_id` (nulo = nacional), `member_goal`, `valid_from`, `valid_to` | Meta de integrantes por casa, ajustable por estado. Semilla nacional: 100 |
-| `state_coordinators` | `state_id`, `user_id` | Usuario del sistema que recibe el crédito de casas sin Embajador en su red. **[SUPUESTO]** uno por estado |
+| `zone_coordinators` | `user_id`, `state_id`, `valid_from`, `valid_to` | Usuario del sistema que recibe el crédito de casas sin Embajador en su red. Varios por estado, cada uno con su zona (D-92) |
+| `zone_coordinator_nodes` | `zone_coordinator_id`, nodo de cualquier nivel dentro del estado (una FK por nivel, como `identity.user_scopes`) | Define la zona |
+| `zone_coordinator_sections` | `zone_coordinator_id`, `section_id` | Derivada de los nodos, como `user_scope_sections`; resuelve qué zona cubre una sección (gana la de menos secciones) |
+| `settings` | una fila: `traffic_light_yellow_pct` (50), `traffic_light_green_pct` (100), `depth_alert_threshold` (50) | Configuración del módulo editable por `admin` (D-92) |
 
 El avance siempre se mide contra la meta **vigente** del estado del pacificador o de la casa.
 Cambiar una meta no reescribe el pasado: queda en el historial (`valid_from`, `valid_to`).
@@ -113,14 +115,16 @@ Dos metas vigentes no pueden empalmarse para el mismo nivel y estado (incluido e
 | `host_member_id` | Anfitrión; debe ser pacificador. El domicilio de la casa puede ser distinto al suyo |
 | `contact_member_id` | Un solo contacto responsable; debe ser pacificador. Puede coincidir con el anfitrión |
 | `opened_by_member_id` | Pacificador que la abrió (cualquier nivel) |
-| `credited_member_id` / `credited_user_id` | A quién se acredita la casa (exactamente uno, ver reglas) |
+| `credited_member_id` / `credited_user_id` | A quién se acredita la casa: a lo más uno; ninguno = **crédito pendiente** (D-92) |
+| `needs_reassignment` | Sin anfitrión ni contacto vigente tras una salida (D-92) |
+| `first_consolidated_on` | Primera consolidación; se conserva si la casa regresa a `open` |
 | `status` | `open` (abierta) · `consolidated` (alcanzó la meta) · `closed` |
 | `opened_on`, `consolidated_on`, `closed_on` | Fechas de cada estatus |
 | `public_location_consent_id` | Consentimiento expreso del anfitrión para publicar la ubicación exacta. Nulo = la casa no es publicable |
 
 **Relacionadas:**
 - `peace_house_members`: `house_id`, `member_id`, `joined_on`, `left_on`, `source` (`enrollment` o `assignment`). Un pacificador puede integrar **varias** casas.
-- `peace_house_meetings`: `house_id`, `held_at`, `topic`, `notes`; con `peace_house_meeting_attendees` (`meeting_id`, `member_id`). Si se registran invitados (pregunta abierta 6), la columna sería `person_id`: `people` ya admite personas sin CURP ni domicilio.
+- `peace_house_meetings`: `house_id`, `held_at`, `topic`, `notes`; con `peace_house_meeting_attendees` (`meeting_id`, `person_id`): pacificadores e invitados; el invitado es una persona sin CURP ni domicilio (D-92).
 - `peace_house_photos`: `house_id`, referencia al archivo del almacenamiento de la fase 0, `caption`.
 
 ### Estadísticas e importación
@@ -146,8 +150,10 @@ erDiagram
     participation_levels ||--o{ level_goals : "metas"
     states |o--o{ level_goals : "por estado"
     states |o--o{ house_goals : "por estado"
-    states ||--o| state_coordinators : ""
-    users ||--o{ state_coordinators : ""
+    users ||--o{ zone_coordinators : ""
+    states ||--o{ zone_coordinators : ""
+    zone_coordinators ||--o{ zone_coordinator_nodes : "zona"
+    zone_coordinators ||--o{ zone_coordinator_sections : "derivada"
     members |o--o{ members : "recluta"
     sections ||--o{ members : "domicilio"
     members ||--o{ member_level_changes : ""
@@ -161,7 +167,7 @@ erDiagram
     members ||--o{ peace_house_members : ""
     peace_houses ||--o{ peace_house_meetings : ""
     peace_house_meetings ||--o{ peace_house_meeting_attendees : ""
-    members ||--o{ peace_house_meeting_attendees : ""
+    persons ||--o{ peace_house_meeting_attendees : "pacificador o invitado"
     peace_houses ||--o{ peace_house_photos : ""
     members ||--o| member_network_stats : "agregados"
     member_import_runs ||--o{ member_import_errors : ""
@@ -228,7 +234,7 @@ stateDiagram-v2
 stateDiagram-v2
   [*] --> open: alta con al menos 2 integrantes
   open --> consolidated: integrantes vigentes >= meta del estado
-  consolidated --> open: integrantes bajan de la meta [SUPUESTO]
+  consolidated --> open: integrantes bajan de la meta (D-92)
   open --> closed
   consolidated --> closed
 ```
@@ -247,13 +253,14 @@ stateDiagram-v2
   `campaign`; esas son las raíces de la pirámide.
 - Desde el panel, la inscripción de un capturista queda `active`. Por enlace, importación o app
   de campo queda `pending_validation` y no cuenta para metas ni estadísticas de avance hasta validarse.
-  **[SUPUESTO]** las importaciones hechas por un coordinator también entran pendientes.
-- El reclutador debe estar `active` al momento de la inscripción. **[SUPUESTO]**
+  Las importaciones de un coordinator o admin entran `active` (D-92).
+- El reclutador debe estar `active` al momento de la inscripción (D-92).
+- Sin un aviso del MP vigente en `people.privacy_notices`, no se puede inscribir: la inscripción
+  pública responde «no disponible» (D-92).
 - Si la CURP ya existe en `people`, se reutiliza la persona y los datos capturados **no**
   sobrescriben los suyos. En una inscripción pública las diferencias quedan como notas para la
   validación (no se revela que la persona existía).
-- Una inscripción `rejected` que creó una persona nueva da de baja a esa persona por el flujo
-  de D-69, salvo que ya tuviera otro uso (postulación u otro registro). **[SUPUESTO]**
+- Una inscripción `rejected` conserva la persona creada; el rechazo lleva motivo (D-92).
 - Un usuario con alcance por rama puede inscribir a un recluta con domicilio fuera de su alcance
   geográfico si el reclutador está en su rama: es una excepción explícita a D-66 ([D-83](../adr/D-83-alcance-por-rama.md)).
 
@@ -263,7 +270,7 @@ stateDiagram-v2
   vigente en su estado. La red total se reporta aparte y no cuenta para la meta.
 - El Embajador tiene además meta de casas (`house_goal`), medida con casas **consolidadas** a su crédito; las abiertas se reportan aparte.
 - Las metas son **acumuladas** desde la inscripción (no se reinician por periodo).
-- **[SUPUESTO]** semáforo de avance configurable: rojo < 50 %, amarillo 50–99 %, verde ≥ 100 %.
+- Semáforo de avance configurable en `settings`: rojo < 50 %, amarillo 50–99 %, verde ≥ 100 % (D-92).
 
 ### Reasignación de reclutador
 - Solo `coordinator` o `admin`, con motivo obligatorio; queda en `member_recruiter_changes`.
@@ -283,22 +290,23 @@ Son dos cosas distintas:
   - Hoy `delete_person` rechaza la baja de quien integra una fórmula vigente. Esa regla aplica
     igual a un pacificador candidato.
   - El nodo se **conserva**: sus reclutas no cambian de reclutador y las estadísticas de la red
-    se mantienen. `state_id` y `section_id` del nodo se conservan para los agregados.
-    **[SUPUESTO]**: confirmar con jurídico que la sección de una persona anonimizada no es un
-    dato a borrar.
-- Un nodo `left` o `withdrawn` no puede reclutar ni ser contacto o anfitrión. Si era contacto o
-  anfitrión de una casa, la casa queda marcada para reasignarlos. **[SUPUESTO]**
+    se mantienen. `state_id` y `section_id` del nodo se conservan para los agregados (D-92;
+    confirmación jurídica pendiente).
+- Un nodo `left` o `withdrawn` no puede reclutar ni ser contacto o anfitrión. Si era anfitrión,
+  el contacto toma su rol, y viceversa; si no queda ninguno, la casa queda con
+  `needs_reassignment` (D-92).
 
 ### Casas de Paz
-- Se pueden abrir con **al menos 2 integrantes** vigentes. **[SUPUESTO]** el anfitrión y el contacto cuentan como integrantes si se agregan como tales.
+- Se pueden abrir con **al menos 2 integrantes** vigentes. Anfitrión y contacto se agregan solos como integrantes y cuentan (D-92).
 - Pasa a `consolidated` cuando sus integrantes vigentes alcanzan `member_goal` del estado de la
   casa (100 por defecto). Se da seguimiento al avance hacia esa meta.
 - Un pacificador entra a una casa de dos formas: indicándola al inscribirse (`source = enrollment`) o por asignación posterior (`assignment`).
 - Cualquier pacificador puede abrir una casa. **Crédito:**
   1. se busca, desde quien la abre y hacia arriba en su `path` (incluido él mismo), el primer Embajador `active`;
-  2. si no hay ninguno, se acredita al usuario de `state_coordinators` del estado de la casa.
+  2. si no hay ninguno, al coordinador cuya zona vigente cubre la sección de la casa (la más específica si hay varias);
+  3. si ninguna zona la cubre, queda con crédito pendiente para asignarlo a mano.
 
-  **[SUPUESTO]** el crédito se fija al abrir la casa y solo un coordinator puede reasignarlo; no se recalcula si después alguien asciende.
+  El crédito se fija al abrir la casa y solo un coordinator puede reasignarlo, con motivo; no se recalcula si después alguien asciende o cambia una zona (D-92).
 - La ubicación exacta solo es publicable con el consentimiento expreso del anfitrión. El mapa público es una entrega posterior; esta versión solo guarda el consentimiento.
 
 ## Permisos y alcance
@@ -314,7 +322,7 @@ Son dos cosas distintas:
 | `peace_movement.house.write` | Abrir, editar y cerrar casas; integrantes, reuniones y fotos | admin, coordinator, capturist |
 | `peace_movement.house.reassign_credit` | Reasignar el crédito de una casa | admin, coordinator |
 | `peace_movement.stats.read` | Estadísticas y reportes | admin, coordinator, viewer |
-| `peace_movement.goal.manage` | Niveles, metas por estado y coordinadores estatales | admin |
+| `peace_movement.goal.manage` | Niveles, metas por estado, coordinadores de zona y configuración | admin |
 
 Los datos de contacto y domicilio se siguen rigiendo por `people.person.read_sensitive`.
 
@@ -358,7 +366,7 @@ Reglas:
 ## Volumen y rendimiento
 
 - **Volumen:** cientos de miles de pacificadores en 2 a 3 años; diseñar y medir con 1 millón.
-- **Profundidad:** desconocida. Se registra y monitorea `depth`, sin límite duro. **[SUPUESTO]** alerta operativa si un nodo supera 50 niveles.
+- **Profundidad:** desconocida. Se registra y monitorea `depth`, sin límite duro; alerta operativa (log y métrica) si un nodo supera `settings.depth_alert_threshold`, 50 por defecto (D-92).
 
 ### Cómo se evita la recursión infinita
 1. **Sin ciclos por construcción:** el reclutador existe antes que el reclutado y la reasignación rechaza descendientes.
@@ -427,7 +435,9 @@ Reglas:
 **Casas de Paz**
 - No se abre con menos de 2 integrantes; anfitrión y contacto deben ser pacificadores `active`.
 - Al llegar a la meta del estado pasa a `consolidated`; si la meta del estado cambia, el avance se mide contra la nueva.
-- El crédito va al primer Embajador hacia arriba de quien la abre; sin Embajador, al coordinador estatal.
+- El crédito va al primer Embajador hacia arriba de quien la abre; sin Embajador, al coordinador de la zona más específica que cubre la sección; sin zona, queda pendiente.
+- Una casa consolidada que baja de la meta regresa a `open` y conserva `first_consolidated_on`.
+- Si sale el anfitrión, el contacto toma su rol; sin ninguno, la casa queda con `needs_reassignment`.
 - Un pacificador puede pertenecer a varias casas.
 - Sin consentimiento del anfitrión, la casa no aparece en ninguna salida marcada como publicable.
 
@@ -442,39 +452,28 @@ Reglas:
 - La carga por lotes con el mismo lote enviado dos veces no duplica registros.
 - La importación en dry-run reporta errores por fila sin escribir nada.
 
-## Plan sugerido
+## Plan por fases
 
-0. **Endurecimiento del núcleo:** escrituras Core auditadas (diferencia 1), datos personales
-   enmascarados en la bitácora (diferencia 10), auditoría de lecturas sensibles, bitácora con
-   alcance (diferencia 3), almacenamiento de archivos compatible con S3, registro de módulos y
-   test de la copia de permisos del panel (diferencia 2), y ejecución de tareas en segundo plano.
-   Antes de empezarla deben aceptarse D-84, D-89 y D-90; antes de la fase 1, D-82, D-83 y D-91.
-   Garantizar en el despliegue que la API solo se alcance a través de Caddy: uvicorn acepta
-   `X-Forwarded-For` de cualquier origen y el rate limiting por IP depende de ello.
-1. Catálogos y metas, pacificadores, `ltree`, historiales, alcance por rama y API.
-2. Casas de Paz, integrantes, reuniones, fotos y crédito.
-3. Agregados, estadísticas y reportes.
-4. Inscripción pública, carga por lotes e importación masiva.
-5. Panel.
+Cada fase es una rama y un PR con tests verdes, documentación y aprobación antes de pasar a la
+siguiente.
+
+| Fase | Contenido | ADR |
+|---|---|---|
+| **0a. Bitácora** | Las cuatro escrituras Core auditadas (diferencia 1); `Person` con `__audit_masked__` (diferencia 10); `audit.access_log` y `record_access`; auditoría por lote; consulta de la bitácora con alcance (diferencia 3) | D-89, D-90 |
+| **0b. Infraestructura** | Contenedor `scheduler` (supercronic) con `purge` y `ensure-partitions` y candado consultivo; almacenamiento compatible con S3 (MinIO en desarrollo); registro de módulos (routers, modelos, esquemas y permisos por módulo) y test de la copia de permisos del panel (diferencia 2) | D-84 |
+| **1. Pacificadores** | En `people`: `privacy_notices`, consentimientos con `notice_code` y canales nuevos, baja ARCO que marca `withdrawn`, purga sin romper nodos. Esquema `peace_movement` con `ltree`; catálogos, metas, `settings`, coordinadores de zona; `members` con historiales; alcance por rama; API y permisos | D-82, D-83, D-91, D-92 |
+| **2. Casas de Paz** | Casas con ubicación aproximada y exacta cifrada, integrantes, reuniones con invitados, fotos, crédito y consolidación | D-85, D-92 |
+| **3. Agregados** | `network_changes`, `member_network_stats`, `enrollment_daily_counts`, tarea del `scheduler`, estadísticas y reportes; semilla de 1 millón y medición de las metas de rendimiento | D-84, D-90 |
+| **4. Entradas masivas y públicas** | Inscripción pública con prueba de trabajo, carga por lotes idempotente e importación con dry-run | D-86, D-90 |
+| **5. Panel** | Pantallas de pacificadores, red, casas, validación, metas y estadísticas; página pública de inscripción | — |
 
 ## Preguntas abiertas
 
-El código no responde ninguna (son reglas de negocio); donde da una pista, se anota.
+Las de negocio quedaron resueltas en [D-92](../adr/D-92-reglas-negocio-movimiento-paz.md).
+Quedan pendientes de jurídico:
 
-1. ¿Puede haber más de un coordinador estatal para el crédito de casas? ¿Cuál recibe el crédito?
-   Sugerencia: uno vigente por estado, con historial como las metas.
-2. ¿Las importaciones hechas por un coordinator entran como activas o pendientes? Precedente:
-   D-33 deja que lo capturado por un usuario con permiso no requiera aprobación, lo que apunta a
-   activas.
-3. ¿Una casa consolidada vuelve a «abierta» si pierde integrantes?
-4. ¿El crédito de una casa se recalcula si alguien de la cadena asciende a Embajador?
-5. ¿Los umbrales del semáforo de avance son los propuestos?
-6. ¿Los asistentes a reuniones deben ser pacificadores, o también se registran invitados?
-   `people` ya admite personas sin CURP ni domicilio, así que no haría falta una tabla aparte.
-7. Formato del consentimiento expreso del MP: pendiente de revisión jurídica. Lo que se guarda
-   está en D-82.
-8. ¿La sección de una persona anonimizada puede conservarse en su nodo para las estadísticas?
-   Pendiente de jurídico.
+1. Formato y forma de recabar el consentimiento expreso del MP (D-82 define cómo se guarda).
+2. Confirmar que el nodo anonimizado puede conservar la sección de la persona (D-92).
 
 ## Fuera de alcance
 

@@ -1,6 +1,6 @@
 # D-91 · Jerarquía de reclutamiento con `ltree`
 
-- **Estado:** Propuesta
+- **Estado:** Aceptada (2026-10-29: opción A, `ltree` materializado)
 - **Área:** Movimiento de Paz · Modelo de datos
 
 ## Contexto

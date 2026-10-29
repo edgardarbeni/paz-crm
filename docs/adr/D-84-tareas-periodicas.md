@@ -1,6 +1,6 @@
 # D-84 · Tareas periódicas y en segundo plano
 
-- **Estado:** Propuesta
+- **Estado:** Aceptada (2026-10-29: opción A, cron con `paz` en un contenedor `scheduler`)
 - **Área:** Infraestructura y repositorio
 
 ## Contexto

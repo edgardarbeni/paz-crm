@@ -1,6 +1,6 @@
 # D-82 · Consentimiento del aviso del Movimiento de Paz (amplía D-69)
 
-- **Estado:** Propuesta
+- **Estado:** Aceptada (2026-10-29: opción A, extender `people.privacy_consents`)
 - **Área:** Movimiento de Paz · Persona y datos sensibles
 
 ## Contexto
@@ -38,3 +38,7 @@ físicamente** los consentimientos al anonimizar (`people/service.py`, `purge_du
   el nodo anonimizado se conserva.
 - El formato y la forma de recabar el consentimiento expreso siguen pendientes de revisión
   jurídica (pregunta abierta 7 de la ficha). Esta ADR solo define dónde y cómo se guarda.
+- **Catálogo de avisos** (al aceptar): `people.privacy_notices` (`code`, `version`, `text`,
+  `text_sha256`, `valid_from`, `valid_to`) guarda cada versión del aviso. El consentimiento
+  apunta a la versión aceptada y copia `notice_code` y `notice_text_sha256`, así que la prueba
+  no depende de que el aviso siga en el catálogo. Ver [D-92](D-92-reglas-negocio-movimiento-paz.md).

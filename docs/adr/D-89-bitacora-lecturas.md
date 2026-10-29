@@ -1,6 +1,6 @@
 # D-89 · Bitácora de lecturas sensibles (amplía D-37 y D-45)
 
-- **Estado:** Propuesta
+- **Estado:** Aceptada (2026-10-29: opción B, tabla aparte `audit.access_log`)
 - **Área:** Identidad, acceso y auditoría
 
 ## Contexto

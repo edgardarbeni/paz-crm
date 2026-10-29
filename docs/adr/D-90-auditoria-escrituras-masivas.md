@@ -1,6 +1,6 @@
 # D-90 · Auditoría de escrituras masivas (amplía D-36 y D-45)
 
-- **Estado:** Propuesta
+- **Estado:** Aceptada (2026-10-29: opción B, una entrada por lote)
 - **Área:** Identidad, acceso y auditoría
 
 ## Contexto

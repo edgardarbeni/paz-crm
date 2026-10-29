@@ -1,6 +1,6 @@
 # D-88 · Autenticación de dispositivos de la app de campo
 
-- **Estado:** Propuesta (entrega posterior; puede decidirse más adelante)
+- **Estado:** Aceptada (2026-10-29: opción A, brigadista como usuario y dispositivo registrado)
 - **Área:** Movimiento de Paz · Identidad, acceso y auditoría
 
 ## Contexto

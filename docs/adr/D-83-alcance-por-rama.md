@@ -1,6 +1,6 @@
 # D-83 · Alcance por rama del Movimiento de Paz (amplía D-34 y D-66)
 
-- **Estado:** Propuesta
+- **Estado:** Aceptada (2026-10-29: opción B, alcance por rama dentro del módulo)
 - **Área:** Movimiento de Paz · Identidad, acceso y auditoría
 
 ## Contexto

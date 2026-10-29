@@ -1,6 +1,6 @@
 # D-86 · Protección contra bots en la inscripción pública
 
-- **Estado:** Propuesta
+- **Estado:** Aceptada (2026-10-29: opción A más C, defensas propias y prueba de trabajo propia)
 - **Área:** Movimiento de Paz · Seguridad
 
 ## Contexto

@@ -1,6 +1,6 @@
 # D-87 · Cuentas del portal de pacificadores
 
-- **Estado:** Propuesta (entrega posterior; puede decidirse más adelante)
+- **Estado:** Aceptada (2026-10-29: opción A, usuarios de `identity` con audiencia `portal`)
 - **Área:** Movimiento de Paz · Identidad, acceso y auditoría
 
 ## Contexto

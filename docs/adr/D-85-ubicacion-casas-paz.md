@@ -1,6 +1,6 @@
 # D-85 · Precisión de la ubicación de las Casas de Paz
 
-- **Estado:** Propuesta
+- **Estado:** Aceptada (2026-10-29: opción B, punto exacto cifrado y aproximado en claro)
 - **Área:** Movimiento de Paz · Persona y datos sensibles
 
 ## Contexto
