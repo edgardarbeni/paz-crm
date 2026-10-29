@@ -1,0 +1,15 @@
+meta {
+  name: Buscar Casas de Paz
+  type: http
+  seq: 11
+}
+
+get {
+  url: {{baseUrl}}/api/v1/peace-movement/houses?status=open
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}

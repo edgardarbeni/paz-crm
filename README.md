@@ -135,6 +135,9 @@ uv run paz --help                    # CLI de operación
     consentimiento del aviso vigente), pirámide de reclutamiento con `ltree`, validación,
     cambio de nivel, reasignación con toda la red, salida del movimiento, metas por estado con
     historial, configuración, coordinadores de zona y alcance por rama (D-82 a D-95).
+  - Casas de Paz en `/api/v1/peace-movement/houses`: apertura con crédito automático
+    (Embajador o coordinador de zona), integrantes, consolidación, reuniones con invitados,
+    fotos en S3 y consentimiento para publicar la ubicación (D-85, D-96).
   - Antes de inscribir hace falta el aviso del MP: `POST /api/v1/people/privacy-notices` o, en
     desarrollo, `paz people sample-notice`.
 - **Errores.** Siempre RFC 9457 (`application/problem+json`): `type` es `urn:pazos:problem:<code>`

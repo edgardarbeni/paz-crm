@@ -126,6 +126,9 @@ class EnrollmentIn(Schema):
     origin: Literal["recruiter", "structure", "event", "campaign"] = "recruiter"
     origin_detail: Annotated[str | None, Field(max_length=300)] = None
     consent: ConsentCapture
+    house_id: uuid.UUID | None = Field(
+        default=None, description="Casa de Paz que integra al inscribirse."
+    )
 
     @model_validator(mode="after")
     def _one_person(self) -> "EnrollmentIn":
@@ -233,3 +236,178 @@ class BranchOut(Schema):
     member_id: uuid.UUID
     person: PersonSummary
     depth: int
+
+
+# --- Peace Houses -----------------------------------------------------------------------------
+
+Weekday = Literal["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
+ClockTime = Annotated[str, StringConstraints(pattern=r"^([01]\d|2[0-3]):[0-5]\d$")]
+
+
+class ScheduleSlot(Schema):
+    day: Weekday
+    starts_at: ClockTime
+    ends_at: ClockTime
+
+    @model_validator(mode="after")
+    def _ordered(self) -> "ScheduleSlot":
+        if self.starts_at >= self.ends_at:
+            raise ValueError("La hora de inicio debe ser anterior a la de fin.")
+        return self
+
+
+class HouseAddressIn(Schema):
+    street: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=200)]
+    exterior_number: Annotated[str | None, Field(max_length=30)] = None
+    interior_number: Annotated[str | None, Field(max_length=30)] = None
+    references: Annotated[str | None, Field(max_length=300)] = None
+    postal_code: Annotated[str | None, StringConstraints(pattern=r"^\d{5}$")] = None
+    # Exact point; the house's section comes from it (it must fall in the active framework).
+    longitude: Annotated[float, Field(ge=-180, le=180)]
+    latitude: Annotated[float, Field(ge=-90, le=90)]
+
+
+class HouseIn(Schema):
+    name: Annotated[str, StringConstraints(strip_whitespace=True, min_length=2, max_length=150)]
+    schedule: list[ScheduleSlot] = Field(default_factory=list, max_length=21)
+    capacity: Annotated[int | None, Field(ge=1, le=10_000)] = None
+    address: HouseAddressIn
+    opened_by_member_id: uuid.UUID
+    host_member_id: uuid.UUID
+    contact_member_id: uuid.UUID
+    member_ids: list[uuid.UUID] = Field(
+        default_factory=list,
+        max_length=500,
+        description="Integrantes además del anfitrión y el contacto, que se agregan solos.",
+    )
+
+
+class HouseUpdate(Schema):
+    name: Annotated[
+        str | None, StringConstraints(strip_whitespace=True, min_length=2, max_length=150)
+    ] = None
+    schedule: list[ScheduleSlot] | None = Field(default=None, max_length=21)
+    capacity: Annotated[int | None, Field(ge=1, le=10_000)] = None
+    host_member_id: uuid.UUID | None = None
+    contact_member_id: uuid.UUID | None = None
+
+
+class HouseAddressOut(Schema):
+    street: str | None = None
+    exterior_number: str | None = None
+    interior_number: str | None = None
+    references: str | None = None
+    postal_code: str | None = None
+    longitude: float | None = Field(default=None, description="Exacta; solo con permiso.")
+    latitude: float | None = None
+
+
+class HouseSummary(Schema):
+    id: uuid.UUID
+    name: str
+    status: str
+    state_id: uuid.UUID
+    municipality_id: uuid.UUID
+    section_id: uuid.UUID
+    approx_longitude: float
+    approx_latitude: float
+    member_count: int
+    credited_member_id: uuid.UUID | None
+    credited_user_id: uuid.UUID | None
+    credit_pending: bool
+    needs_reassignment: bool
+    publishable: bool
+    opened_on: date
+
+
+class HouseOut(HouseSummary):
+    schedule: list[ScheduleSlot]
+    capacity: int | None
+    address: HouseAddressOut = Field(description="Calle y coordenadas exactas solo con permiso.")
+    host: MemberSummary | None
+    contact: MemberSummary | None
+    opened_by_member_id: uuid.UUID
+    member_goal: int | None
+    progress_pct: int | None
+    consolidated_on: date | None
+    first_consolidated_on: date | None
+    closed_on: date | None
+    status_reason: str | None
+
+
+class HouseMemberIn(Schema):
+    member_id: uuid.UUID
+
+
+class HouseMemberOut(Schema):
+    member: MemberSummary
+    joined_on: date
+    source: str
+
+
+class CreditIn(Schema):
+    member_id: uuid.UUID | None = None
+    user_id: uuid.UUID | None = None
+    reason: Reason
+
+    @model_validator(mode="after")
+    def _one(self) -> "CreditIn":
+        if (self.member_id is None) == (self.user_id is None):
+            raise ValueError("Indica un pacificador o un usuario, uno de los dos.")
+        return self
+
+
+class GuestIn(Schema):
+    given_names: Annotated[
+        str, StringConstraints(strip_whitespace=True, min_length=1, max_length=120)
+    ]
+    paternal_surname: Annotated[
+        str, StringConstraints(strip_whitespace=True, min_length=1, max_length=80)
+    ]
+    maternal_surname: Annotated[
+        str | None, StringConstraints(strip_whitespace=True, min_length=1, max_length=80)
+    ] = None
+    mobile: Annotated[str | None, StringConstraints(min_length=10, max_length=20)] = None
+
+
+class MeetingIn(Schema):
+    held_at: datetime
+    topic: Annotated[str, StringConstraints(strip_whitespace=True, min_length=2, max_length=200)]
+    notes: Annotated[str | None, Field(max_length=5000)] = None
+    member_ids: list[uuid.UUID] = Field(default_factory=list, max_length=1000)
+    guest_person_ids: list[uuid.UUID] = Field(
+        default_factory=list, max_length=500, description="Invitados ya registrados."
+    )
+    guests: list[GuestIn] = Field(default_factory=list, max_length=500)
+
+
+class AttendeeOut(Schema):
+    person: PersonSummary
+    member_id: uuid.UUID | None = Field(description="Nulo para invitados.")
+
+
+class MeetingSummary(Schema):
+    id: uuid.UUID
+    held_at: datetime
+    topic: str
+    attendee_count: int
+    guest_count: int
+
+
+class MeetingOut(MeetingSummary):
+    notes: str | None
+    attendees: list[AttendeeOut]
+
+
+class PhotoOut(Schema):
+    id: uuid.UUID
+    caption: str | None
+    content_type: str
+    size_bytes: int
+    url: str = Field(description="URL firmada, válida unos minutos.")
+    created_at: datetime
+
+
+class LocationConsentIn(Schema):
+    channel: Literal["panel", "paper"] = "paper"
+    evidence_uri: Annotated[str | None, Field(max_length=500)] = None

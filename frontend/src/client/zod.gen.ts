@@ -79,6 +79,14 @@ export const zAuditEntryOut = z.object({
 });
 
 /**
+ * Body_uploadHousePhoto
+ */
+export const zBodyUploadHousePhoto = z.object({
+    file: z.string(),
+    caption: z.string().max(300).nullish()
+});
+
+/**
  * BranchesIn
  */
 export const zBranchesIn = z.object({
@@ -166,6 +174,15 @@ export const zContactOut = z.object({
     contact_type: z.string(),
     value: z.string(),
     is_primary: z.boolean()
+});
+
+/**
+ * CreditIn
+ */
+export const zCreditIn = z.object({
+    member_id: z.uuid().nullish(),
+    user_id: z.uuid().nullish(),
+    reason: z.string().min(3).max(500)
 });
 
 /**
@@ -332,10 +349,46 @@ export const zGeographicLevel = z.enum([
 ]);
 
 /**
+ * GuestIn
+ */
+export const zGuestIn = z.object({
+    given_names: z.string().min(1).max(120),
+    paternal_surname: z.string().min(1).max(80),
+    maternal_surname: z.string().min(1).max(80).nullish(),
+    mobile: z.string().min(10).max(20).nullish()
+});
+
+/**
  * HealthStatus
  */
 export const zHealthStatus = z.object({
     status: z.literal('ok')
+});
+
+/**
+ * HouseAddressIn
+ */
+export const zHouseAddressIn = z.object({
+    street: z.string().min(1).max(200),
+    exterior_number: z.string().max(30).nullish(),
+    interior_number: z.string().max(30).nullish(),
+    references: z.string().max(300).nullish(),
+    postal_code: z.string().regex(/^\d{5}$/).nullish(),
+    longitude: z.number().gte(-180).lte(180),
+    latitude: z.number().gte(-90).lte(90)
+});
+
+/**
+ * HouseAddressOut
+ */
+export const zHouseAddressOut = z.object({
+    street: z.string().nullish(),
+    exterior_number: z.string().nullish(),
+    interior_number: z.string().nullish(),
+    references: z.string().nullish(),
+    postal_code: z.string().nullish(),
+    longitude: z.number().nullish(),
+    latitude: z.number().nullish()
 });
 
 /**
@@ -356,6 +409,43 @@ export const zHouseGoalOut = z.object({
     member_goal: z.int(),
     valid_from: z.iso.date(),
     valid_to: z.iso.date().nullable()
+});
+
+/**
+ * HouseMemberIn
+ */
+export const zHouseMemberIn = z.object({
+    member_id: z.uuid()
+});
+
+/**
+ * HouseSummary
+ */
+export const zHouseSummary = z.object({
+    id: z.uuid(),
+    name: z.string(),
+    status: z.string(),
+    state_id: z.uuid(),
+    municipality_id: z.uuid(),
+    section_id: z.uuid(),
+    approx_longitude: z.number(),
+    approx_latitude: z.number(),
+    member_count: z.int(),
+    credited_member_id: z.uuid().nullable(),
+    credited_user_id: z.uuid().nullable(),
+    credit_pending: z.boolean(),
+    needs_reassignment: z.boolean(),
+    publishable: z.boolean(),
+    opened_on: z.iso.date()
+});
+
+/**
+ * CursorPage[HouseSummary]
+ */
+export const zCursorPageHouseSummary = z.object({
+    items: z.array(zHouseSummary),
+    next_cursor: z.string().nullish(),
+    has_more: z.boolean()
 });
 
 /**
@@ -493,12 +583,52 @@ export const zLevelOut = z.object({
 });
 
 /**
+ * LocationConsentIn
+ */
+export const zLocationConsentIn = z.object({
+    channel: z.enum(['panel', 'paper']).optional().default('paper'),
+    evidence_uri: z.string().max(500).nullish()
+});
+
+/**
  * LoginRequest
  */
 export const zLoginRequest = z.object({
     email: z.email(),
     password: z.string().min(1).max(256),
     device_label: z.string().max(200).nullish()
+});
+
+/**
+ * MeetingIn
+ */
+export const zMeetingIn = z.object({
+    held_at: z.iso.datetime(),
+    topic: z.string().min(2).max(200),
+    notes: z.string().max(5000).nullish(),
+    member_ids: z.array(z.uuid()).max(1000).optional(),
+    guest_person_ids: z.array(z.uuid()).max(500).optional(),
+    guests: z.array(zGuestIn).max(500).optional()
+});
+
+/**
+ * MeetingSummary
+ */
+export const zMeetingSummary = z.object({
+    id: z.uuid(),
+    held_at: z.iso.datetime(),
+    topic: z.string(),
+    attendee_count: z.int(),
+    guest_count: z.int()
+});
+
+/**
+ * CursorPage[MeetingSummary]
+ */
+export const zCursorPageMeetingSummary = z.object({
+    items: z.array(zMeetingSummary),
+    next_cursor: z.string().nullish(),
+    has_more: z.boolean()
 });
 
 /**
@@ -835,7 +965,8 @@ export const zEnrollmentIn = z.object({
         'campaign'
     ]).optional().default('recruiter'),
     origin_detail: z.string().max(300).nullish(),
-    consent: zConsentCapture
+    consent: zConsentCapture,
+    house_id: z.uuid().nullish()
 });
 
 /**
@@ -870,6 +1001,14 @@ export const zPersonSummary = z.object({
 });
 
 /**
+ * AttendeeOut
+ */
+export const zAttendeeOut = z.object({
+    person: zPersonSummary,
+    member_id: z.uuid().nullable()
+});
+
+/**
  * BranchOut
  */
 export const zBranchOut = z.object({
@@ -885,6 +1024,19 @@ export const zCursorPagePersonSummary = z.object({
     items: z.array(zPersonSummary),
     next_cursor: z.string().nullish(),
     has_more: z.boolean()
+});
+
+/**
+ * MeetingOut
+ */
+export const zMeetingOut = z.object({
+    id: z.uuid(),
+    held_at: z.iso.datetime(),
+    topic: z.string(),
+    attendee_count: z.int(),
+    guest_count: z.int(),
+    notes: z.string().nullable(),
+    attendees: z.array(zAttendeeOut)
 });
 
 /**
@@ -922,6 +1074,15 @@ export const zCursorPageMemberSummary = z.object({
 });
 
 /**
+ * HouseMemberOut
+ */
+export const zHouseMemberOut = z.object({
+    member: zMemberSummary,
+    joined_on: z.iso.date(),
+    source: z.string()
+});
+
+/**
  * PersonUpdate
  */
 export const zPersonUpdate = z.object({
@@ -939,6 +1100,18 @@ export const zPersonUpdate = z.object({
     accept_curp_incoherence: z.boolean().optional().default(false),
     contacts: z.array(zContactIn).max(10).nullish(),
     address: zAddressIn.nullish()
+});
+
+/**
+ * PhotoOut
+ */
+export const zPhotoOut = z.object({
+    id: z.uuid(),
+    caption: z.string().nullable(),
+    content_type: z.string(),
+    size_bytes: z.int(),
+    url: z.string(),
+    created_at: z.iso.datetime()
 });
 
 /**
@@ -1194,6 +1367,81 @@ export const zProcessOfficeOut = z.object({
     rp_method_params: z.record(z.string(), z.unknown()).optional(),
     office_code: z.string(),
     office_name: z.string()
+});
+
+/**
+ * ScheduleSlot
+ */
+export const zScheduleSlot = z.object({
+    day: z.enum([
+        'mon',
+        'tue',
+        'wed',
+        'thu',
+        'fri',
+        'sat',
+        'sun'
+    ]),
+    starts_at: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/),
+    ends_at: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/)
+});
+
+/**
+ * HouseIn
+ */
+export const zHouseIn = z.object({
+    name: z.string().min(2).max(150),
+    schedule: z.array(zScheduleSlot).max(21).optional(),
+    capacity: z.int().gte(1).lte(10000).nullish(),
+    address: zHouseAddressIn,
+    opened_by_member_id: z.uuid(),
+    host_member_id: z.uuid(),
+    contact_member_id: z.uuid(),
+    member_ids: z.array(z.uuid()).max(500).optional()
+});
+
+/**
+ * HouseOut
+ */
+export const zHouseOut = z.object({
+    id: z.uuid(),
+    name: z.string(),
+    status: z.string(),
+    state_id: z.uuid(),
+    municipality_id: z.uuid(),
+    section_id: z.uuid(),
+    approx_longitude: z.number(),
+    approx_latitude: z.number(),
+    member_count: z.int(),
+    credited_member_id: z.uuid().nullable(),
+    credited_user_id: z.uuid().nullable(),
+    credit_pending: z.boolean(),
+    needs_reassignment: z.boolean(),
+    publishable: z.boolean(),
+    opened_on: z.iso.date(),
+    schedule: z.array(zScheduleSlot),
+    capacity: z.int().nullable(),
+    address: zHouseAddressOut,
+    host: zMemberSummary.nullable(),
+    contact: zMemberSummary.nullable(),
+    opened_by_member_id: z.uuid(),
+    member_goal: z.int().nullable(),
+    progress_pct: z.int().nullable(),
+    consolidated_on: z.iso.date().nullable(),
+    first_consolidated_on: z.iso.date().nullable(),
+    closed_on: z.iso.date().nullable(),
+    status_reason: z.string().nullable()
+});
+
+/**
+ * HouseUpdate
+ */
+export const zHouseUpdate = z.object({
+    name: z.string().min(2).max(150).nullish(),
+    schedule: z.array(zScheduleSlot).max(21).nullish(),
+    capacity: z.int().gte(1).lte(10000).nullish(),
+    host_member_id: z.uuid().nullish(),
+    contact_member_id: z.uuid().nullish()
 });
 
 /**
@@ -2776,3 +3024,191 @@ export const zSetUserBranchesPath = z.object({
  * Successful Response
  */
 export const zSetUserBranchesResponse = z.array(zBranchOut);
+
+export const zSearchPeaceHousesQuery = z.object({
+    status: z.string().regex(/^(open|consolidated|closed)$/).nullish(),
+    state_id: z.uuid().nullish(),
+    credited_member_id: z.uuid().nullish(),
+    credit_pending: z.boolean().nullish(),
+    needs_reassignment: z.boolean().nullish(),
+    publishable: z.boolean().nullish(),
+    limit: z.int().gte(1).lte(200).optional().default(50),
+    cursor: z.string().max(1024).nullish(),
+    sort: z.string().max(200).nullish()
+});
+
+/**
+ * Successful Response
+ */
+export const zSearchPeaceHousesResponse = zCursorPageHouseSummary;
+
+export const zOpenPeaceHouseBody = zHouseIn;
+
+/**
+ * Successful Response
+ */
+export const zOpenPeaceHouseResponse = zHouseOut;
+
+export const zGetPeaceHousePath = z.object({
+    house_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zGetPeaceHouseResponse = zHouseOut;
+
+export const zUpdatePeaceHouseBody = zHouseUpdate;
+
+export const zUpdatePeaceHousePath = z.object({
+    house_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zUpdatePeaceHouseResponse = zHouseOut;
+
+export const zClosePeaceHouseBody = zReasonIn;
+
+export const zClosePeaceHousePath = z.object({
+    house_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zClosePeaceHouseResponse = zHouseOut;
+
+export const zReassignHouseCreditBody = zCreditIn;
+
+export const zReassignHouseCreditPath = z.object({
+    house_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zReassignHouseCreditResponse = zHouseOut;
+
+export const zListHouseMembersPath = z.object({
+    house_id: z.uuid()
+});
+
+/**
+ * Response Listhousemembers
+ *
+ * Successful Response
+ */
+export const zListHouseMembersResponse = z.array(zHouseMemberOut);
+
+export const zAddHouseMemberBody = zHouseMemberIn;
+
+export const zAddHouseMemberPath = z.object({
+    house_id: z.uuid()
+});
+
+/**
+ * Response Addhousemember
+ *
+ * Successful Response
+ */
+export const zAddHouseMemberResponse = z.array(zHouseMemberOut);
+
+export const zRemoveHouseMemberPath = z.object({
+    house_id: z.uuid(),
+    member_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zRemoveHouseMemberResponse = z.void();
+
+export const zRevokeHouseLocationConsentPath = z.object({
+    house_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zRevokeHouseLocationConsentResponse = zHouseOut;
+
+export const zRecordHouseLocationConsentBody = zLocationConsentIn;
+
+export const zRecordHouseLocationConsentPath = z.object({
+    house_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zRecordHouseLocationConsentResponse = zHouseOut;
+
+export const zListHouseMeetingsPath = z.object({
+    house_id: z.uuid()
+});
+
+export const zListHouseMeetingsQuery = z.object({
+    limit: z.int().gte(1).lte(200).optional().default(50),
+    cursor: z.string().max(1024).nullish(),
+    sort: z.string().max(200).nullish()
+});
+
+/**
+ * Successful Response
+ */
+export const zListHouseMeetingsResponse = zCursorPageMeetingSummary;
+
+export const zAddHouseMeetingBody = zMeetingIn;
+
+export const zAddHouseMeetingPath = z.object({
+    house_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zAddHouseMeetingResponse = zMeetingOut;
+
+export const zGetHouseMeetingPath = z.object({
+    house_id: z.uuid(),
+    meeting_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zGetHouseMeetingResponse = zMeetingOut;
+
+export const zListHousePhotosPath = z.object({
+    house_id: z.uuid()
+});
+
+/**
+ * Response Listhousephotos
+ *
+ * Successful Response
+ */
+export const zListHousePhotosResponse = z.array(zPhotoOut);
+
+export const zUploadHousePhotoBody = zBodyUploadHousePhoto;
+
+export const zUploadHousePhotoPath = z.object({
+    house_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zUploadHousePhotoResponse = zPhotoOut;
+
+export const zDeleteHousePhotoPath = z.object({
+    house_id: z.uuid(),
+    photo_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zDeleteHousePhotoResponse = z.void();

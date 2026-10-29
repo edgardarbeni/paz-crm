@@ -1,0 +1,32 @@
+meta {
+  name: Registrar reunión
+  type: http
+  seq: 13
+}
+
+post {
+  url: {{baseUrl}}/api/v1/peace-movement/houses/{{houseId}}/meetings
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "held_at": "2026-10-25T18:00:00-06:00",
+    "topic": "Mediación vecinal",
+    "member_ids": [
+      "{{memberId}}"
+    ],
+    "guests": [
+      {
+        "given_names": "Pedro",
+        "paternal_surname": "Sol",
+        "mobile": "4499998877"
+      }
+    ]
+  }
+}

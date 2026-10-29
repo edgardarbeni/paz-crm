@@ -1,0 +1,22 @@
+meta {
+  name: Reasignar crédito
+  type: http
+  seq: 14
+}
+
+post {
+  url: {{baseUrl}}/api/v1/peace-movement/houses/{{houseId}}/credit
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "member_id": "{{memberId}}",
+    "reason": "Acuerdo de la coordinación estatal"
+  }
+}

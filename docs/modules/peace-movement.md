@@ -1,6 +1,6 @@
 # Módulo: Movimiento de Paz
 
-**Estado:** fases 0a, 0b y 1 implementadas (pacificadores, metas, coordinadores de zona y alcance por rama); casas, agregados, entradas masivas y panel pendientes. ADR D-82 a D-95.
+**Estado:** fases 0a, 0b, 1 y 2 implementadas (pacificadores, metas, coordinadores de zona, alcance por rama y Casas de Paz); agregados, entradas masivas y panel pendientes. ADR D-82 a D-96.
 **Paquete propuesto:** `backend/app/modules/peace_movement` · esquema `peace_movement` · API
 `/api/v1/peace-movement`.
 **Brief:** respuestas de Darío del 2026-10-29. Las reglas que eran suposiciones quedaron
@@ -126,7 +126,11 @@ Dos metas vigentes no pueden empalmarse para el mismo nivel y estado (incluido e
 **Relacionadas:**
 - `peace_house_members`: `house_id`, `member_id`, `joined_on`, `left_on`, `source` (`enrollment` o `assignment`). Un pacificador puede integrar **varias** casas.
 - `peace_house_meetings`: `house_id`, `held_at`, `topic`, `notes`; con `peace_house_meeting_attendees` (`meeting_id`, `person_id`): pacificadores e invitados; el invitado es una persona sin CURP ni domicilio (D-92).
-- `peace_house_photos`: `house_id`, referencia al archivo del almacenamiento de la fase 0, `caption`.
+- `peace_house_photos`: `house_id`, `storage_key` del almacenamiento S3 (D-94), `content_type`, `size_bytes`, `caption`.
+- `peace_house_credit_changes`: historial de reasignaciones manuales del crédito, con motivo.
+
+`peace_house_members.source` admite además `role`: anfitrión y contacto entran solos (D-92). Ver
+[D-96](../adr/D-96-ajustes-implementacion-casas.md).
 
 ### Estadísticas e importación
 
@@ -404,7 +408,7 @@ Reglas:
 
 **Eventos:** no hay bus de eventos. `network_changes` funciona como tabla de salida (outbox) para los agregados y puede alimentar notificaciones futuras.
 
-## API (fase 1)
+## API (fases 1 y 2)
 
 Bajo `/api/v1/peace-movement`, con el alcance de pacificadores (D-83) en todas las lecturas:
 
@@ -417,6 +421,10 @@ Bajo `/api/v1/peace-movement`, con el alcance de pacificadores (D-83) en todas l
 | `POST /members/{id}/validate` · `/reject` · `/leave` | `member.validate` | Validar o rechazar pendientes y registrar salidas |
 | `POST /members/{id}/reassign` | `member.reassign` | Cambiar reclutador con toda su red |
 | `GET` / `PUT /users/{id}/branches` | `identity.user.read` / `identity.user.assign_scopes` | Alcance por rama con antiescalamiento |
+
+| `GET /houses` · `GET /houses/{id}` · `/members` · `/meetings` · `/meetings/{id}` · `/photos` | `house.read` | Búsqueda (estatus, estado, crédito pendiente, por reasignar, publicable), detalle con avance contra la meta (queda en `audit.access_log`), integrantes, reuniones y fotos con URL firmada |
+| `POST /houses` · `PATCH /houses/{id}` · `/close` · `POST`/`DELETE /houses/{id}/members` · `POST /meetings` · `POST`/`DELETE /photos` · `POST`/`DELETE /public-location-consent` | `house.write` | Abrir (crédito automático), editar y cambiar anfitrión o contacto, cerrar, integrantes, reuniones con invitados, fotos y consentimiento de ubicación publicable |
+| `POST /houses/{id}/credit` | `house.reassign_credit` | Reasignar el crédito a un Embajador o a un usuario, con motivo |
 
 Avisos de privacidad: `GET` y `POST /api/v1/people/privacy-notices` (`people.notice.manage` para
 publicar).
@@ -480,7 +488,7 @@ siguiente.
 | **0a. Bitácora** ✅ | Las cuatro escrituras Core auditadas (diferencia 1); `Person` con `__audit_masked__` (diferencia 10); `audit.access_log` y `record_access`; auditoría por lote (`record_bulk`); consulta de la bitácora con alcance (diferencia 3) | D-89, D-90, D-93 |
 | **0b. Infraestructura** ✅ | Contenedor `scheduler` (supercronic) con `purge` y `ensure-partitions` y candado consultivo; almacenamiento compatible con S3 (SeaweedFS en desarrollo, D-94); registro de módulos (`module.py`) y test de la copia de permisos del panel (diferencia 2) | D-84, D-94 |
 | **1. Pacificadores** ✅ | En `people`: `privacy_notices`, consentimientos con `notice_code` y canales nuevos, baja ARCO que marca `withdrawn`, purga sin romper nodos. Esquema `peace_movement` con `ltree`; catálogos, metas, `settings`, coordinadores de zona; `members` con historiales; alcance por rama; API y permisos | D-82, D-83, D-91, D-92, D-95 |
-| **2. Casas de Paz** | Casas con ubicación aproximada y exacta cifrada, integrantes, reuniones con invitados, fotos, crédito y consolidación | D-85, D-92 |
+| **2. Casas de Paz** ✅ | Casas con ubicación aproximada y exacta cifrada, integrantes, reuniones con invitados, fotos, crédito y consolidación | D-85, D-92, D-96 |
 | **3. Agregados** | `network_changes`, `member_network_stats`, `enrollment_daily_counts`, tarea del `scheduler`, estadísticas y reportes; semilla de 1 millón y medición de las metas de rendimiento | D-84, D-90 |
 | **4. Entradas masivas y públicas** | Inscripción pública con prueba de trabajo, carga por lotes idempotente e importación con dry-run | D-86, D-90 |
 | **5. Panel** | Pantallas de pacificadores, red, casas, validación, metas y estadísticas; página pública de inscripción | — |
