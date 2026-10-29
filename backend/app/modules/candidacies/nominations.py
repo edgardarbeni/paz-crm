@@ -15,7 +15,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any
 
-from sqlalchemy import select, text, update
+from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import col
 
@@ -807,11 +807,15 @@ async def update_members(
     if "origin_party_id" in body.model_fields_set:
         await _validate_origin_party(db, nomination, body.origin_party_id)
         formula.origin_party_id = body.origin_party_id
-    await db.execute(
-        update(FormulaMember)
-        .where(col(FormulaMember.formula_id) == formula_id, col(FormulaMember.deleted_at).is_(None))
-        .values(deleted_at=_now())
+    # ORM soft delete so the replaced members stay in the audit log (D-45).
+    retired = await db.execute(
+        select(FormulaMember).where(
+            col(FormulaMember.formula_id) == formula_id, col(FormulaMember.deleted_at).is_(None)
+        )
     )
+    for member in retired.scalars():
+        member.deleted_at = _now()
+    await db.flush()
     _add_members(db, formula_id, nomination.process_id, owner, substitute)
     await db.flush()
     await _enforce(db, actor, nomination, body.override, baseline=baseline)

@@ -286,3 +286,18 @@ class AuditEntryOut(Schema):
     entity_id: str | None
     before: dict[str, object] | None
     after: dict[str, object] | None
+
+
+class AccessEntryOut(Schema):
+    """A sensitive read (D-89): who read what, never the content."""
+
+    id: uuid.UUID
+    occurred_at: datetime
+    actor_user_id: uuid.UUID | None
+    actor_ip: IpText
+    user_agent: str | None
+    request_id: str | None
+    action: str
+    entity_table: str
+    entity_id: str | None
+    details: dict[str, object] | None

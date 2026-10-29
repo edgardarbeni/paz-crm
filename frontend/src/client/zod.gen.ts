@@ -3,6 +3,24 @@
 import * as z from 'zod';
 
 /**
+ * AccessEntryOut
+ *
+ * A sensitive read (D-89): who read what, never the content.
+ */
+export const zAccessEntryOut = z.object({
+    id: z.uuid(),
+    occurred_at: z.iso.datetime(),
+    actor_user_id: z.uuid().nullable(),
+    actor_ip: z.string().nullable(),
+    user_agent: z.string().nullable(),
+    request_id: z.string().nullable(),
+    action: z.string(),
+    entity_table: z.string(),
+    entity_id: z.string().nullable(),
+    details: z.record(z.string(), z.unknown()).nullable()
+});
+
+/**
  * AddressIn
  */
 export const zAddressIn = z.object({
@@ -129,6 +147,15 @@ export const zContactOut = z.object({
     contact_type: z.string(),
     value: z.string(),
     is_primary: z.boolean()
+});
+
+/**
+ * CursorPage[AccessEntryOut]
+ */
+export const zCursorPageAccessEntryOut = z.object({
+    items: z.array(zAccessEntryOut),
+    next_cursor: z.string().nullish(),
+    has_more: z.boolean()
 });
 
 /**
@@ -1606,6 +1633,23 @@ export const zListAuditEntriesQuery = z.object({
  * Successful Response
  */
 export const zListAuditEntriesResponse = zCursorPageAuditEntryOut;
+
+export const zListAccessEntriesQuery = z.object({
+    actor_user_id: z.uuid().nullish(),
+    action: z.string().max(50).nullish(),
+    entity_table: z.string().max(100).nullish(),
+    entity_id: z.string().max(100).nullish(),
+    occurred_from: z.iso.datetime().nullish(),
+    occurred_to: z.iso.datetime().nullish(),
+    limit: z.int().gte(1).lte(200).optional().default(50),
+    cursor: z.string().max(1024).nullish(),
+    sort: z.string().max(200).nullish()
+});
+
+/**
+ * Successful Response
+ */
+export const zListAccessEntriesResponse = zCursorPageAccessEntryOut;
 
 /**
  * Response Listframeworks

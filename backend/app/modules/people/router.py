@@ -142,8 +142,9 @@ async def create_person(
 async def get_person(
     db: SessionDep, crypto: CryptoDep, user: Reader, person_id: PersonId
 ) -> PersonOut:
-    view = await service.get_person(db, user.geo, person_id)
-    return _out(crypto, view, user.has(Perm.PERSON_READ_SENSITIVE))
+    sensitive = user.has(Perm.PERSON_READ_SENSITIVE)
+    view = await service.read_person(db, user.geo, person_id, unmasked=sensitive)
+    return _out(crypto, view, sensitive)
 
 
 @router.patch("/{person_id}", operation_id="updatePerson", summary="Actualizar persona")

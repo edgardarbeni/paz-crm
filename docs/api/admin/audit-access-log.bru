@@ -1,0 +1,21 @@
+meta {
+  name: Bitácora de lecturas sensibles
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/api/v1/audit-log/access?limit=50
+  body: none
+  auth: bearer
+}
+
+params:query {
+  limit: 50
+  ~entity_table: people.persons
+  ~entity_id: 
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}

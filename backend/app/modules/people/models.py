@@ -57,6 +57,20 @@ class Person(BusinessTable, table=True):
         CheckConstraint("sex IN ('H', 'M', 'X')", name="sex"),
         {"schema": SCHEMA},
     )
+    # The audit log is immutable and ARCO purge must leave no personal data behind, so the
+    # identifying attributes are stored as "***" (D-93). CURP and contacts are bytes and
+    # already masked.
+    __audit_masked__: ClassVar[frozenset[str]] = frozenset(
+        {
+            "given_names",
+            "paternal_surname",
+            "maternal_surname",
+            "search_name",
+            "birth_date",
+            "sex",
+            "birth_entity",
+        }
+    )
 
     given_names: str = Field(max_length=120)
     paternal_surname: str = Field(max_length=80)
@@ -108,6 +122,7 @@ class PersonAddress(BusinessTable, table=True):
         Index("ix_person_addresses_section_id", "section_id"),
         {"schema": SCHEMA},
     )
+    __audit_masked__: ClassVar[frozenset[str]] = frozenset({"postal_code"})
 
     person_id: uuid.UUID = _person_fk()
     address_type: str = Field(default="home", sa_type=Text)

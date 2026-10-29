@@ -13,10 +13,11 @@ from dataclasses import dataclass, field
 from datetime import UTC, date, datetime, timedelta
 from typing import Any
 
-from sqlalchemy import ColumnElement, delete, exists, func, or_, select, text, update
+from sqlalchemy import ColumnElement, exists, func, or_, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import col
 
+from app.core.audit import record_access
 from app.core.crypto import BlindIndexer, FieldCipher
 from app.core.db.base import pk
 from app.core.errors import BadRequestError, ConflictError, ForbiddenError, NotFoundError
@@ -314,6 +315,15 @@ async def create_person(
     return PersonView(person=person, contacts=contacts, addresses=addresses, warnings=warnings)
 
 
+async def _live[T: (PersonContact, PersonAddress)](
+    db: AsyncSession, model: type[T], person_id: uuid.UUID
+) -> list[T]:
+    rows = await db.execute(
+        select(model).where(col(model.person_id) == person_id, col(model.deleted_at).is_(None))
+    )
+    return list(rows.scalars())
+
+
 async def update_person(
     db: AsyncSession,
     crypto: Crypto,
@@ -349,25 +359,17 @@ async def update_person(
             can_accept=can_accept_incoherence,
         )
     now = datetime.now(UTC)
+    # Previous rows are retired through the ORM so each soft delete is audited (D-45).
     if body.contacts is not None:
-        await db.execute(
-            update(PersonContact)
-            .where(
-                col(PersonContact.person_id) == person_id, col(PersonContact.deleted_at).is_(None)
-            )
-            .values(deleted_at=now)
-        )
+        for contact in await _live(db, PersonContact, person_id):
+            contact.deleted_at = now
         db.add_all(_contact_rows(person_id, crypto, body.contacts))
     if body.address is not None:
         await _validate_geography(db, body.address)
         await _ensure_address_in_scope(db, geo, body.address)
-        await db.execute(
-            update(PersonAddress)
-            .where(
-                col(PersonAddress.person_id) == person_id, col(PersonAddress.deleted_at).is_(None)
-            )
-            .values(deleted_at=now, is_primary=False)
-        )
+        for address in await _live(db, PersonAddress, person_id):
+            address.deleted_at = now
+            address.is_primary = False
         db.add(_address_row(person_id, crypto, body.address))
     await db.commit()
     view = await get_person(db, geo, person_id)
@@ -406,6 +408,22 @@ async def get_person(db: AsyncSession, geo: GeoScope, person_id: uuid.UUID) -> P
         .all()
     )
     return PersonView(person=person, contacts=list(contacts), addresses=list(addresses))
+
+
+async def read_person(
+    db: AsyncSession, geo: GeoScope, person_id: uuid.UUID, *, unmasked: bool
+) -> PersonView:
+    """Detail read for the API: logged in the sensitive-read log (D-89)."""
+    view = await get_person(db, geo, person_id)
+    await record_access(
+        db,
+        action="read",
+        entity_table="people.persons",
+        entity_id=str(person_id),
+        details={"unmasked": unmasked},
+    )
+    await db.commit()
+    return view
 
 
 async def search_people(
@@ -527,9 +545,11 @@ async def purge_due(db: AsyncSession, *, today: date | None = None) -> int:
         .all()
     )
     for person_id in due:
-        await db.execute(delete(PersonContact).where(col(PersonContact.person_id) == person_id))
-        await db.execute(delete(PersonAddress).where(col(PersonAddress.person_id) == person_id))
-        await db.execute(delete(PrivacyConsent).where(col(PrivacyConsent.person_id) == person_id))
+        # ORM deletes so each removed row is audited (D-45); bytes are masked in the log.
+        for model in (PersonContact, PersonAddress, PrivacyConsent):
+            rows = await db.execute(select(model).where(col(model.person_id) == person_id))
+            for row in rows.scalars():
+                await db.delete(row)
         person = await db.get(Person, person_id)
         assert person is not None  # noqa: S101
         person.given_names = "[eliminado]"
