@@ -1,0 +1,15 @@
+meta {
+  name: Red de un pacificador
+  type: http
+  seq: 15
+}
+
+get {
+  url: {{baseUrl}}/api/v1/peace-movement/members/{{memberId}}/network?max_depth=2
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}

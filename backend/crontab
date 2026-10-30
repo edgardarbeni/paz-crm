@@ -6,3 +6,6 @@
 10 3 * * * paz audit ensure-partitions
 # ARCO: anonymize persons whose retention period ended (D-69).
 30 3 * * * paz people purge
+# Peace Movement aggregates: pending network changes every minute, full recompute nightly.
+* * * * * paz peace-movement aggregate
+45 3 * * * paz peace-movement aggregate --full

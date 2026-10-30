@@ -8,4 +8,5 @@ MODULE = ModuleSpec(
     routers=("app.modules.peace_movement.router:router",),
     permissions="app.modules.peace_movement.permissions:PeacePerm",
     setup="app.modules.peace_movement.hooks",
+    cli="app.modules.peace_movement.cli:app",
 )

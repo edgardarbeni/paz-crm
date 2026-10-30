@@ -489,3 +489,55 @@ class PeaceHousePhoto(BusinessTable, table=True):
     size_bytes: int
     caption: str | None = Field(default=None, max_length=300)
     uploaded_by_user_id: uuid.UUID | None = _fk("identity.users.id", nullable=True)
+
+
+# --- aggregates (phase 3) ---------------------------------------------------------------------
+
+
+class MemberNetworkStats(SQLModel, table=True):
+    """Precomputed counters of a member's network (no screen counts a network on the fly).
+    Derived by `aggregates.py` from `network_changes`, rebuilt nightly; not audited."""
+
+    __tablename__ = "member_network_stats"
+    __table_args__: ClassVar[dict[str, Any]] = {"schema": SCHEMA}
+    __audit__: ClassVar[bool] = False
+
+    member_id: uuid.UUID = Field(
+        foreign_key=f"{SCHEMA}.members.id", ondelete="CASCADE", primary_key=True
+    )
+    direct_active: int = 0
+    direct_pending: int = 0
+    # Active members anywhere below (the member itself excluded).
+    network_total: int = 0
+    # Active members below, per participation level code.
+    network_by_level: dict[str, int] = Field(default_factory=dict, sa_type=JSONB)
+    houses_open: int = 0
+    houses_consolidated: int = 0
+    computed_at: datetime = Field(sa_type=TZ)
+
+
+class EnrollmentDailyCount(SQLModel, table=True):
+    """Validated enrollments per day, current level and home section (growth over time and
+    geographic crosses; upper levels add up from the section)."""
+
+    __tablename__ = "enrollment_daily_counts"
+    __table_args__: ClassVar[dict[str, Any]] = {"schema": SCHEMA}
+    __audit__: ClassVar[bool] = False
+
+    day: date = Field(sa_type=Date, primary_key=True)
+    level_id: uuid.UUID = Field(foreign_key=f"{SCHEMA}.participation_levels.id", primary_key=True)
+    section_id: uuid.UUID = Field(foreign_key="geography.sections.id", primary_key=True, index=True)
+    enrollments: int
+
+
+class MemberSectionCount(SQLModel, table=True):
+    """Active members per home section and level, kept by the aggregates job; geographic
+    statistics add sections up instead of counting members on the fly."""
+
+    __tablename__ = "member_section_counts"
+    __table_args__: ClassVar[dict[str, Any]] = {"schema": SCHEMA}
+    __audit__: ClassVar[bool] = False
+
+    section_id: uuid.UUID = Field(foreign_key="geography.sections.id", primary_key=True)
+    level_id: uuid.UUID = Field(foreign_key=f"{SCHEMA}.participation_levels.id", primary_key=True)
+    active: int

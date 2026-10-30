@@ -160,6 +160,18 @@ class DirectCounts(Schema):
     hidden: int = Field(description="Reclutas directos fuera del alcance del usuario.")
 
 
+class NetworkOut(Schema):
+    """Precomputed counters of the network (they reflect changes within minutes)."""
+
+    direct_active: int
+    direct_pending: int
+    network_total: int = Field(description="Pacificadores activos en toda la red, sin él.")
+    network_by_level: dict[str, int]
+    houses_open: int
+    houses_consolidated: int
+    computed_at: datetime
+
+
 class MemberOut(Schema):
     id: uuid.UUID
     person: PersonOut
@@ -181,6 +193,9 @@ class MemberOut(Schema):
     recruit_goal: int | None = Field(description="Meta vigente del nivel en su estado.")
     progress_pct: int | None
     traffic_light: Literal["red", "yellow", "green"] | None
+    network: NetworkOut | None = Field(description="Nulo hasta el primer cálculo de agregados.")
+    house_goal: int | None = Field(description="Casas consolidadas que pide su nivel.")
+    houses_progress_pct: int | None
 
 
 class ReasonIn(Schema):
@@ -411,3 +426,31 @@ class PhotoOut(Schema):
 class LocationConsentIn(Schema):
     channel: Literal["panel", "paper"] = "paper"
     evidence_uri: Annotated[str | None, Field(max_length=500)] = None
+
+
+# --- statistics -------------------------------------------------------------------------------
+
+
+class NetworkNode(Schema):
+    member: MemberSummary
+    network: NetworkOut | None
+
+
+class NetworkPage(Schema):
+    root: NetworkNode
+    items: list[NetworkNode]
+    next_cursor: str | None
+    has_more: bool
+    hidden: int = Field(description="Integrantes de esos niveles fuera del alcance (solo total).")
+
+
+class GeoStatOut(Schema):
+    node_id: uuid.UUID
+    label: str
+    active: int
+    by_level: dict[str, int]
+
+
+class GrowthPoint(Schema):
+    day: date
+    enrollments: int

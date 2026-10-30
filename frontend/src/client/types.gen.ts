@@ -1143,9 +1143,47 @@ export type GeoNodeOut = {
 };
 
 /**
+ * GeoStatOut
+ */
+export type GeoStatOut = {
+    /**
+     * Node Id
+     */
+    node_id: string;
+    /**
+     * Label
+     */
+    label: string;
+    /**
+     * Active
+     */
+    active: number;
+    /**
+     * By Level
+     */
+    by_level: {
+        [key: string]: number;
+    };
+};
+
+/**
  * GeographicLevel
  */
 export type GeographicLevel = 'national' | 'electoral_region' | 'state' | 'federal_district' | 'local_district' | 'municipality';
+
+/**
+ * GrowthPoint
+ */
+export type GrowthPoint = {
+    /**
+     * Day
+     */
+    day: string;
+    /**
+     * Enrollments
+     */
+    enrollments: number;
+};
 
 /**
  * GuestIn
@@ -2177,6 +2215,79 @@ export type MunicipalitySettingOut = {
      * Id
      */
     id: string;
+};
+
+/**
+ * NetworkNode
+ */
+export type NetworkNode = {
+    member: MemberSummary;
+    network: NetworkOut | null;
+};
+
+/**
+ * NetworkOut
+ *
+ * Precomputed counters of the network (they reflect changes within minutes).
+ */
+export type NetworkOut = {
+    /**
+     * Direct Active
+     */
+    direct_active: number;
+    /**
+     * Direct Pending
+     */
+    direct_pending: number;
+    /**
+     * Network Total
+     *
+     * Pacificadores activos en toda la red, sin él.
+     */
+    network_total: number;
+    /**
+     * Network By Level
+     */
+    network_by_level: {
+        [key: string]: number;
+    };
+    /**
+     * Houses Open
+     */
+    houses_open: number;
+    /**
+     * Houses Consolidated
+     */
+    houses_consolidated: number;
+    /**
+     * Computed At
+     */
+    computed_at: string;
+};
+
+/**
+ * NetworkPage
+ */
+export type NetworkPage = {
+    root: NetworkNode;
+    /**
+     * Items
+     */
+    items: Array<NetworkNode>;
+    /**
+     * Next Cursor
+     */
+    next_cursor: string | null;
+    /**
+     * Has More
+     */
+    has_more: boolean;
+    /**
+     * Hidden
+     *
+     * Integrantes de esos niveles fuera del alcance (solo total).
+     */
+    hidden: number;
 };
 
 /**
@@ -4011,6 +4122,20 @@ export type AppModulesPeaceMovementSchemasMemberOut = {
      * Traffic Light
      */
     traffic_light: 'red' | 'yellow' | 'green' | null;
+    /**
+     * Nulo hasta el primer cálculo de agregados.
+     */
+    network: NetworkOut | null;
+    /**
+     * House Goal
+     *
+     * Casas consolidadas que pide su nivel.
+     */
+    house_goal: number | null;
+    /**
+     * Houses Progress Pct
+     */
+    houses_progress_pct: number | null;
 };
 
 export type GetHealthData = {
@@ -8869,3 +8994,190 @@ export type DeleteHousePhotoResponses = {
 };
 
 export type DeleteHousePhotoResponse = DeleteHousePhotoResponses[keyof DeleteHousePhotoResponses];
+
+export type GetMemberNetworkData = {
+    body?: never;
+    path: {
+        /**
+         * Member Id
+         *
+         * Id del pacificador.
+         */
+        member_id: string;
+    };
+    query?: {
+        /**
+         * Max Depth
+         */
+        max_depth?: number;
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Cursor
+         */
+        cursor?: string | null;
+        /**
+         * Sort
+         *
+         * Campos separados por coma; prefijo '-' para descendente.
+         */
+        sort?: string | null;
+    };
+    url: '/api/v1/peace-movement/members/{member_id}/network';
+};
+
+export type GetMemberNetworkErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type GetMemberNetworkError = GetMemberNetworkErrors[keyof GetMemberNetworkErrors];
+
+export type GetMemberNetworkResponses = {
+    /**
+     * Successful Response
+     */
+    200: NetworkPage;
+};
+
+export type GetMemberNetworkResponse = GetMemberNetworkResponses[keyof GetMemberNetworkResponses];
+
+export type GetPeaceGeographyStatsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Level
+         */
+        level?: string;
+        /**
+         * State Id
+         */
+        state_id?: string | null;
+        /**
+         * Municipality Id
+         */
+        municipality_id?: string | null;
+    };
+    url: '/api/v1/peace-movement/stats/geography';
+};
+
+export type GetPeaceGeographyStatsErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type GetPeaceGeographyStatsError = GetPeaceGeographyStatsErrors[keyof GetPeaceGeographyStatsErrors];
+
+export type GetPeaceGeographyStatsResponses = {
+    /**
+     * Response Getpeacegeographystats
+     *
+     * Successful Response
+     */
+    200: Array<GeoStatOut>;
+};
+
+export type GetPeaceGeographyStatsResponse = GetPeaceGeographyStatsResponses[keyof GetPeaceGeographyStatsResponses];
+
+export type GetPeaceGrowthData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * From
+         */
+        from: string;
+        /**
+         * To
+         */
+        to: string;
+        /**
+         * State Id
+         */
+        state_id?: string | null;
+        /**
+         * Level Id
+         */
+        level_id?: string | null;
+    };
+    url: '/api/v1/peace-movement/stats/growth';
+};
+
+export type GetPeaceGrowthErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type GetPeaceGrowthError = GetPeaceGrowthErrors[keyof GetPeaceGrowthErrors];
+
+export type GetPeaceGrowthResponses = {
+    /**
+     * Response Getpeacegrowth
+     *
+     * Successful Response
+     */
+    200: Array<GrowthPoint>;
+};
+
+export type GetPeaceGrowthResponse = GetPeaceGrowthResponses[keyof GetPeaceGrowthResponses];
+
+export type ExportMembersData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Status
+         */
+        status?: string | null;
+        /**
+         * State Id
+         */
+        state_id?: string | null;
+        /**
+         * Level Id
+         */
+        level_id?: string | null;
+    };
+    url: '/api/v1/peace-movement/members-export';
+};
+
+export type ExportMembersErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ExportMembersError = ExportMembersErrors[keyof ExportMembersErrors];
+
+export type ExportMembersResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};

@@ -1,6 +1,6 @@
 # Módulo: Movimiento de Paz
 
-**Estado:** fases 0a, 0b, 1 y 2 implementadas (pacificadores, metas, coordinadores de zona, alcance por rama y Casas de Paz); agregados, entradas masivas y panel pendientes. ADR D-82 a D-96.
+**Estado:** fases 0a a 3 implementadas (pacificadores, metas, coordinadores de zona, alcance por rama, Casas de Paz, agregados y estadísticas); entradas masivas y públicas y panel pendientes. ADR D-82 a D-97.
 **Paquete propuesto:** `backend/app/modules/peace_movement` · esquema `peace_movement` · API
 `/api/v1/peace-movement`.
 **Brief:** respuestas de Darío del 2026-10-29. Las reglas que eran suposiciones quedaron
@@ -136,8 +136,10 @@ Dos metas vigentes no pueden empalmarse para el mismo nivel y estado (incluido e
 
 - `member_network_stats`: por pacificador, `direct_active`, `direct_pending`, `network_total`,
   conteo por nivel en toda la red, `houses_open`, `houses_consolidated` y `computed_at`.
-- `enrollment_daily_counts`: inscripciones por día, nivel y sección, para crecimiento en el tiempo
-  y cruces por geografía (los niveles superiores se suman desde la sección).
+- `enrollment_daily_counts`: inscripciones validadas por día, nivel actual y sección, para
+  crecimiento en el tiempo (D-97).
+- `member_section_counts`: activos por sección y nivel; las estadísticas geográficas suman
+  secciones (D-97).
 - `network_changes`: bitácora de cambios pendientes de agregar (alta, validación, baja, reasignación,
   cambio de nivel, alta o baja en casa). La consume el proceso de agregados.
 - `member_import_runs` y `member_import_errors`: corridas de importación con reporte por fila,
@@ -385,6 +387,24 @@ Reglas:
    `max_depth` acotado (por defecto 1, máximo 3) para profundizar bajo demanda. Nunca devuelve una red completa.
 
 ### Metas de rendimiento
+
+**Medición del 2026-10-29** con 1,000,000 de pacificadores sintéticos (`paz peace-movement
+seed-load`, profundidad máxima 54). PostgreSQL 18 con la configuración por defecto de la imagen
+(`shared_buffers` de 128 MB), en un portátil. Los tiempos son de servicio contra la base, sin
+HTTP:
+
+| Meta | Resultado |
+|---|---|
+| Inscripción desde el panel: p95 < 500 ms | p50 5.9 ms · p95 8.8 ms (200 inscripciones con persona nueva) |
+| Detalle de un nodo con agregados e hijos directos: p95 < 200 ms | Sin restricción: p95 11.5 ms. Alcance de 4 secciones: p95 34.4 ms |
+| Red a 3 niveles | p95 9.3 ms sin restricción; 20.0 ms con alcance restringido |
+| Las estadísticas reflejan una inscripción en < 5 min | El incremental corre cada minuto: 0.68 s para 200 inscripciones (989 nodos) |
+| Reasignar un subárbol de 10,000 nodos: < 10 s | 1.1 s (10,019 nodos), más 0.35 s de agregados |
+| Estadística geográfica | 4 ms con conteos por sección (779 ms contando al vuelo, descartado) |
+| Recálculo completo nocturno | 58 a 61 s |
+| Importación: 50,000 filas en < 5 min | Pendiente: llega con la fase 4 |
+
+Metas de la ficha:
 - Inscripción desde el panel: p95 < 500 ms.
 - Detalle de un nodo con sus agregados e hijos directos: p95 < 200 ms con 1 millón de pacificadores.
 - Las estadísticas reflejan una inscripción en menos de 5 minutos.
@@ -408,7 +428,7 @@ Reglas:
 
 **Eventos:** no hay bus de eventos. `network_changes` funciona como tabla de salida (outbox) para los agregados y puede alimentar notificaciones futuras.
 
-## API (fases 1 y 2)
+## API (fases 1 a 3)
 
 Bajo `/api/v1/peace-movement`, con el alcance de pacificadores (D-83) en todas las lecturas:
 
@@ -425,6 +445,8 @@ Bajo `/api/v1/peace-movement`, con el alcance de pacificadores (D-83) en todas l
 | `GET /houses` · `GET /houses/{id}` · `/members` · `/meetings` · `/meetings/{id}` · `/photos` | `house.read` | Búsqueda (estatus, estado, crédito pendiente, por reasignar, publicable), detalle con avance contra la meta (queda en `audit.access_log`), integrantes, reuniones y fotos con URL firmada |
 | `POST /houses` · `PATCH /houses/{id}` · `/close` · `POST`/`DELETE /houses/{id}/members` · `POST /meetings` · `POST`/`DELETE /photos` · `POST`/`DELETE /public-location-consent` | `house.write` | Abrir (crédito automático), editar y cambiar anfitrión o contacto, cerrar, integrantes, reuniones con invitados, fotos y consentimiento de ubicación publicable |
 | `POST /houses/{id}/credit` | `house.reassign_credit` | Reasignar el crédito a un Embajador o a un usuario, con motivo |
+| `GET /members/{id}/network` | `member.read` | Agregados del nodo y de sus niveles inferiores (`max_depth` de 1 a 3), con los ocultos solo en total |
+| `GET /stats/geography` · `GET /stats/growth` · `GET /members-export` | `stats.read` | Activos por nivel geográfico, inscripciones por día y CSV (hasta 50,000 filas; queda en `audit.access_log`) |
 
 Avisos de privacidad: `GET` y `POST /api/v1/people/privacy-notices` (`people.notice.manage` para
 publicar).
@@ -489,7 +511,7 @@ siguiente.
 | **0b. Infraestructura** ✅ | Contenedor `scheduler` (supercronic) con `purge` y `ensure-partitions` y candado consultivo; almacenamiento compatible con S3 (SeaweedFS en desarrollo, D-94); registro de módulos (`module.py`) y test de la copia de permisos del panel (diferencia 2) | D-84, D-94 |
 | **1. Pacificadores** ✅ | En `people`: `privacy_notices`, consentimientos con `notice_code` y canales nuevos, baja ARCO que marca `withdrawn`, purga sin romper nodos. Esquema `peace_movement` con `ltree`; catálogos, metas, `settings`, coordinadores de zona; `members` con historiales; alcance por rama; API y permisos | D-82, D-83, D-91, D-92, D-95 |
 | **2. Casas de Paz** ✅ | Casas con ubicación aproximada y exacta cifrada, integrantes, reuniones con invitados, fotos, crédito y consolidación | D-85, D-92, D-96 |
-| **3. Agregados** | `network_changes`, `member_network_stats`, `enrollment_daily_counts`, tarea del `scheduler`, estadísticas y reportes; semilla de 1 millón y medición de las metas de rendimiento | D-84, D-90 |
+| **3. Agregados** ✅ | `network_changes`, `member_network_stats`, `member_section_counts`, `enrollment_daily_counts`, tarea del `scheduler`, estadísticas y reportes; semilla de 1 millón y medición de las metas de rendimiento | D-84, D-90, D-97 |
 | **4. Entradas masivas y públicas** | Inscripción pública con prueba de trabajo, carga por lotes idempotente e importación con dry-run | D-86, D-90 |
 | **5. Panel** | Pantallas de pacificadores, red, casas, validación, metas y estadísticas; página pública de inscripción | — |
 

@@ -313,6 +313,8 @@ El ejemplo usa el módulo `foo` y el recurso `item`. Cada paso indica dónde se 
        models="app.modules.foo.models",
        routers=("app.modules.foo.router:router",),
        permissions="app.modules.foo.permissions:FooPerm",
+       setup="app.modules.foo.hooks",          # opcional: ganchos en otros módulos
+       cli="app.modules.foo.cli:app",          # opcional: `paz foo …`
    )
    ```
 2. **Modelos.** Heredan de `BusinessTable` (o `ImportedMixin` si es geografía importada), con

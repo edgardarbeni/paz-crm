@@ -1,0 +1,15 @@
+meta {
+  name: Pacificadores por municipio
+  type: http
+  seq: 16
+}
+
+get {
+  url: {{baseUrl}}/api/v1/peace-movement/stats/geography?level=municipality&state_id={{stateId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
