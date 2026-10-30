@@ -61,6 +61,37 @@ export const zAddressOut = z.object({
 });
 
 /**
+ * AppointmentKind
+ */
+export const zAppointmentKind = z.enum([
+    'elected',
+    'designated',
+    'acting',
+    'delegate'
+]);
+
+/**
+ * AppointmentIn
+ */
+export const zAppointmentIn = z.object({
+    person_id: z.uuid(),
+    kind: zAppointmentKind,
+    starts_on: z.iso.date(),
+    ends_on: z.iso.date().nullish(),
+    appointed_by: z.string().max(300).nullish(),
+    agreement_ref: z.string().max(300).nullish()
+});
+
+/**
+ * AppointmentUpdate
+ */
+export const zAppointmentUpdate = z.object({
+    ends_on: z.iso.date().nullish(),
+    appointed_by: z.string().max(300).nullish(),
+    agreement_ref: z.string().max(300).nullish()
+});
+
+/**
  * AuditEntryOut
  */
 export const zAuditEntryOut = z.object({
@@ -309,6 +340,15 @@ export const zDeletionOut = z.object({
 });
 
 /**
+ * DerivedChoiceIn
+ */
+export const zDerivedChoiceIn = z.object({
+    source_position_type_id: z.uuid(),
+    starts_on: z.iso.date(),
+    agreement_ref: z.string().max(300).nullish()
+});
+
+/**
  * DirectCounts
  */
 export const zDirectCounts = z.object({
@@ -332,6 +372,26 @@ export const zElectionLevel = z.enum(['federal', 'local']);
  * ElectionRegime
  */
 export const zElectionRegime = z.enum(['party_based', 'normative_system']);
+
+/**
+ * EndReason
+ */
+export const zEndReason = z.enum([
+    'term_end',
+    'resignation',
+    'removal',
+    'death',
+    'other'
+]);
+
+/**
+ * AppointmentEndIn
+ */
+export const zAppointmentEndIn = z.object({
+    ended_on: z.iso.date(),
+    reason: zEndReason,
+    notes: z.string().max(500).nullish()
+});
 
 /**
  * FieldViolation
@@ -1754,6 +1814,25 @@ export const zRoleSummary = z.object({
 });
 
 /**
+ * AppointmentOut
+ */
+export const zAppointmentOut = z.object({
+    id: z.uuid(),
+    position_id: z.uuid(),
+    person: zPersonSummary,
+    kind: zAppointmentKind,
+    appointed_by: z.string().nullable(),
+    agreement_ref: z.string().nullable(),
+    starts_on: z.iso.date(),
+    ends_on: z.iso.date().nullable(),
+    ended_on: z.iso.date().nullable(),
+    end_reason: zEndReason.nullable(),
+    end_notes: z.string().nullable(),
+    role: zRoleSummary.nullable(),
+    current: z.boolean()
+});
+
+/**
  * CoordinationPositionTypeOut
  */
 export const zCoordinationPositionTypeOut = z.object({
@@ -1992,6 +2071,22 @@ export const zPositionTypeOut = z.object({
 });
 
 /**
+ * SeatOut
+ */
+export const zSeatOut = z.object({
+    id: z.uuid(),
+    body_id: z.uuid(),
+    position_type: zPositionTypeRef,
+    region_number: z.int().nullable(),
+    is_derived: z.boolean(),
+    vacant_since: z.iso.date().nullable(),
+    current: zAppointmentOut.nullable(),
+    derived_from: zPositionTypeRef.nullable(),
+    derived_holder: zPersonSummary.nullable(),
+    choice_pending: z.boolean()
+});
+
+/**
  * SessionOut
  */
 export const zSessionOut = z.object({
@@ -2164,6 +2259,29 @@ export const zCursorPageBodyOut = z.object({
     items: z.array(zBodyOut),
     next_cursor: z.string().nullish(),
     has_more: z.boolean()
+});
+
+/**
+ * PersonAppointmentOut
+ */
+export const zPersonAppointmentOut = z.object({
+    id: z.uuid(),
+    position_id: z.uuid(),
+    person: zPersonSummary,
+    kind: zAppointmentKind,
+    appointed_by: z.string().nullable(),
+    agreement_ref: z.string().nullable(),
+    starts_on: z.iso.date(),
+    ends_on: z.iso.date().nullable(),
+    ended_on: z.iso.date().nullable(),
+    end_reason: zEndReason.nullable(),
+    end_notes: z.string().nullable(),
+    role: zRoleSummary.nullable(),
+    current: z.boolean(),
+    position_type: zPositionTypeRef,
+    body: zBodyTypeRef,
+    body_id: z.uuid(),
+    territory: z.string()
 });
 
 /**
@@ -3974,3 +4092,84 @@ export const zDissolveBodyPath = z.object({
  * Successful Response
  */
 export const zDissolveBodyResponse = zBodyOut;
+
+export const zListBodyPositionsPath = z.object({
+    body_id: z.uuid()
+});
+
+/**
+ * Response Listbodypositions
+ *
+ * Successful Response
+ */
+export const zListBodyPositionsResponse = z.array(zSeatOut);
+
+export const zListPositionAppointmentsPath = z.object({
+    position_id: z.uuid()
+});
+
+/**
+ * Response Listpositionappointments
+ *
+ * Successful Response
+ */
+export const zListPositionAppointmentsResponse = z.array(zAppointmentOut);
+
+export const zAppointBody = zAppointmentIn;
+
+export const zAppointPath = z.object({
+    position_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zAppointResponse = zAppointmentOut;
+
+export const zUpdateAppointmentBody = zAppointmentUpdate;
+
+export const zUpdateAppointmentPath = z.object({
+    appointment_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zUpdateAppointmentResponse = zAppointmentOut;
+
+export const zEndAppointmentBody = zAppointmentEndIn;
+
+export const zEndAppointmentPath = z.object({
+    appointment_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zEndAppointmentResponse = zAppointmentOut;
+
+export const zChooseDerivedSourceBody = zDerivedChoiceIn;
+
+export const zChooseDerivedSourcePath = z.object({
+    position_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zChooseDerivedSourceResponse = zPositionTypeRef;
+
+export const zListPersonAppointmentsPath = z.object({
+    person_id: z.uuid()
+});
+
+export const zListPersonAppointmentsQuery = z.object({
+    current_only: z.boolean().optional().default(true)
+});
+
+/**
+ * Response Listpersonappointments
+ *
+ * Successful Response
+ */
+export const zListPersonAppointmentsResponse = z.array(zPersonAppointmentOut);

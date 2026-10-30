@@ -155,6 +155,9 @@ uv run paz --help                    # CLI de operación
     `position-types` (cargos nuevos sin migración), `incompatibilities` y `bodies` (los
     nacionales y estatales ya instalados; instalación y disolución de comités distritales y
     municipales).
+  - Asientos y nombramientos (D-108): `bodies/{id}/positions`, `positions/{id}/appointments`,
+    `appointments/{id}/end`, `positions/{id}/derived-choice` (Presídium) y
+    `people/{id}/appointments`; solo se nombra en niveles inferiores al propio.
 - **Errores.** Siempre RFC 9457 (`application/problem+json`): `type` es `urn:pazos:problem:<code>`
   e incluye `request_id`.
 - **Paginación.** Por cursor (`app.core.pagination`): `limit` ≤ 200, `cursor` opaco y `sort`

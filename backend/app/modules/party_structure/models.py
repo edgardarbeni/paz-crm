@@ -1,5 +1,5 @@
 """Party structure (schema `party_structure`): the statutory catalog of bodies and positions,
-and the bodies installed in each territory. See docs/modules/party-structure.md and D-101..D-107.
+and the bodies installed in each territory. See docs/modules/party-structure.md and D-101..D-108.
 
 Territory of a body (D-107):
 - national bodies have none;
@@ -37,6 +37,21 @@ class ScopeRule(StrEnum):
 class DistrictKind(StrEnum):
     FEDERAL = "federal"
     LOCAL = "local"
+
+
+class AppointmentKind(StrEnum):
+    ELECTED = "elected"
+    DESIGNATED = "designated"
+    ACTING = "acting"  # encargado de despacho
+    DELEGATE = "delegate"  # Delegación Estatal en funciones de Presidencia (D-107)
+
+
+class EndReason(StrEnum):
+    TERM_END = "term_end"
+    RESIGNATION = "resignation"
+    REMOVAL = "removal"
+    DEATH = "death"
+    OTHER = "other"
 
 
 class CoordinationKind(StrEnum):
@@ -114,6 +129,8 @@ class PositionType(BusinessTable, table=True):
     default_role_id: uuid.UUID | None = _fk("identity.roles.id", nullable=True, ondelete="SET NULL")  # type: ignore[assignment]
     # Derived positions (Presídium) take the holder of another position; see derivations.
     is_derived: bool = False
+    # Proposed length of a `delegate` appointment; NULL = the position takes no delegates.
+    delegate_months: int | None = Field(default=None, sa_type=SmallInteger)
     sort_order: int = 0
 
 
@@ -233,3 +250,88 @@ class Body(BusinessTable, table=True):
     installation_agreement: str | None = Field(default=None, max_length=300)
     dissolved_on: date | None = Field(default=None, sa_type=Date)
     dissolution_agreement: str | None = Field(default=None, max_length=300)
+
+
+# --- seats and appointments (phase 2, D-108) --------------------------------------------------
+
+
+class Position(BusinessTable, table=True):
+    """A seat that is held: a position type in a body. Circumscription positions have one seat
+    per circumscription (`region_number`, stable across frameworks like the state code)."""
+
+    __tablename__ = "positions"
+    __table_args__ = (
+        CheckConstraint("region_number IS NULL OR region_number > 0", name="region_number"),
+        Index(
+            "uq_positions_seat",
+            "body_id",
+            "position_type_id",
+            text("coalesce(region_number, 0)"),
+            unique=True,
+            postgresql_where=text("deleted_at IS NULL"),
+        ),
+        {"schema": SCHEMA},
+    )
+
+    body_id: uuid.UUID = _fk(f"{SCHEMA}.bodies.id")  # type: ignore[assignment]
+    position_type_id: uuid.UUID = _fk(f"{SCHEMA}.position_types.id")  # type: ignore[assignment]
+    region_number: int | None = Field(default=None, sa_type=SmallInteger)
+    vacant_since: date | None = Field(default=None, sa_type=Date)
+
+
+class Appointment(BusinessTable, table=True):
+    """Who holds a seat and for which period. Never deleted: ending it keeps the history."""
+
+    __tablename__ = "appointments"
+    __table_args__ = (
+        _in("kind", AppointmentKind, "kind"),
+        _in("end_reason", EndReason, "end_reason"),
+        CheckConstraint("ends_on IS NULL OR ends_on >= starts_on", name="period"),
+        CheckConstraint("ended_on IS NULL OR ended_on >= starts_on", name="ended"),
+        CheckConstraint("(ended_on IS NULL) = (end_reason IS NULL)", name="end_reason_set"),
+        # At most one current appointment per seat.
+        Index(
+            "uq_appointments_current",
+            "position_id",
+            unique=True,
+            postgresql_where=text("ended_on IS NULL AND deleted_at IS NULL"),
+        ),
+        {"schema": SCHEMA},
+    )
+
+    position_id: uuid.UUID = _fk(f"{SCHEMA}.positions.id")  # type: ignore[assignment]
+    person_id: uuid.UUID = _fk("people.persons.id")  # type: ignore[assignment]
+    kind: AppointmentKind = Field(sa_type=Text)
+    appointed_by: str | None = Field(default=None, max_length=300)
+    agreement_ref: str | None = Field(default=None, max_length=300)
+    starts_on: date = Field(sa_type=Date)
+    ends_on: date | None = Field(default=None, sa_type=Date)
+    ended_on: date | None = Field(default=None, sa_type=Date)
+    end_reason: EndReason | None = Field(default=None, sa_type=Text)
+    end_notes: str | None = Field(default=None, max_length=500)
+    # Access to the system (phase 3, D-104): decided per appointment.
+    grants_access: bool = False
+    role_id: uuid.UUID | None = _fk("identity.roles.id", nullable=True, ondelete="SET NULL")  # type: ignore[assignment]
+
+
+class DerivedChoice(BusinessTable, table=True):
+    """For a derived seat with several possible sources, which one holds it in each period
+    (Vicepresidencia del Presídium nacional, D-105)."""
+
+    __tablename__ = "derived_choices"
+    __table_args__ = (
+        CheckConstraint("ends_on IS NULL OR ends_on >= starts_on", name="period"),
+        Index(
+            "uq_derived_choices_current",
+            "position_id",
+            unique=True,
+            postgresql_where=text("ends_on IS NULL AND deleted_at IS NULL"),
+        ),
+        {"schema": SCHEMA},
+    )
+
+    position_id: uuid.UUID = _fk(f"{SCHEMA}.positions.id")  # type: ignore[assignment]
+    source_position_type_id: uuid.UUID = _fk(f"{SCHEMA}.position_types.id")  # type: ignore[assignment]
+    starts_on: date = Field(sa_type=Date)
+    ends_on: date | None = Field(default=None, sa_type=Date)
+    agreement_ref: str | None = Field(default=None, max_length=300)

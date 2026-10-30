@@ -1,0 +1,32 @@
+meta {
+  name: Nombrar al titular de un asiento
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}/api/v1/party-structure/positions/{{positionId}}/appointments
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "person_id": "{{personId}}",
+    "kind": "elected",
+    "starts_on": "2026-11-01",
+    "appointed_by": "Congreso Estatal",
+    "agreement_ref": "CE/005/2026"
+  }
+}
+
+docs {
+  kind: elected, designated, acting (encargado de despacho) o delegate (solo la Presidencia del
+  Consejo Directivo Estatal, 6 meses). ends_on vacío = se propone con el periodo del cargo.
+  409 si el asiento está ocupado, si la persona tiene un cargo incompatible o si excede los
+  periodos consecutivos. Los asientos de un órgano salen de GET /bodies/{id}/positions.
+}

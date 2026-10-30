@@ -175,6 +175,121 @@ export type Ancestors = {
 };
 
 /**
+ * AppointmentEndIn
+ */
+export type AppointmentEndIn = {
+    /**
+     * Ended On
+     */
+    ended_on: string;
+    reason: EndReason;
+    /**
+     * Notes
+     */
+    notes?: string | null;
+};
+
+/**
+ * AppointmentIn
+ */
+export type AppointmentIn = {
+    /**
+     * Person Id
+     *
+     * Persona registrada con CURP.
+     */
+    person_id: string;
+    kind: AppointmentKind;
+    /**
+     * Starts On
+     */
+    starts_on: string;
+    /**
+     * Ends On
+     *
+     * Vacío: se propone con el periodo del cargo.
+     */
+    ends_on?: string | null;
+    /**
+     * Appointed By
+     */
+    appointed_by?: string | null;
+    /**
+     * Agreement Ref
+     */
+    agreement_ref?: string | null;
+};
+
+/**
+ * AppointmentKind
+ */
+export type AppointmentKind = 'elected' | 'designated' | 'acting' | 'delegate';
+
+/**
+ * AppointmentOut
+ */
+export type AppointmentOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Position Id
+     */
+    position_id: string;
+    person: PersonSummary;
+    kind: AppointmentKind;
+    /**
+     * Appointed By
+     */
+    appointed_by: string | null;
+    /**
+     * Agreement Ref
+     */
+    agreement_ref: string | null;
+    /**
+     * Starts On
+     */
+    starts_on: string;
+    /**
+     * Ends On
+     */
+    ends_on: string | null;
+    /**
+     * Ended On
+     */
+    ended_on: string | null;
+    end_reason: EndReason | null;
+    /**
+     * End Notes
+     */
+    end_notes: string | null;
+    role: RoleSummary | null;
+    /**
+     * Current
+     */
+    current: boolean;
+};
+
+/**
+ * AppointmentUpdate
+ */
+export type AppointmentUpdate = {
+    /**
+     * Ends On
+     */
+    ends_on?: string | null;
+    /**
+     * Appointed By
+     */
+    appointed_by?: string | null;
+    /**
+     * Agreement Ref
+     */
+    agreement_ref?: string | null;
+};
+
+/**
  * AttendeeOut
  */
 export type AttendeeOut = {
@@ -1229,6 +1344,24 @@ export type DeletionOut = {
 };
 
 /**
+ * DerivedChoiceIn
+ */
+export type DerivedChoiceIn = {
+    /**
+     * Source Position Type Id
+     */
+    source_position_type_id: string;
+    /**
+     * Starts On
+     */
+    starts_on: string;
+    /**
+     * Agreement Ref
+     */
+    agreement_ref?: string | null;
+};
+
+/**
  * DirectCounts
  */
 export type DirectCounts = {
@@ -1266,6 +1399,11 @@ export type ElectionLevel = 'federal' | 'local';
  * ElectionRegime
  */
 export type ElectionRegime = 'party_based' | 'normative_system';
+
+/**
+ * EndReason
+ */
+export type EndReason = 'term_end' | 'resignation' | 'removal' | 'death' | 'other';
 
 /**
  * EnrollmentIn
@@ -3619,6 +3757,62 @@ export type PermissionOut = {
 };
 
 /**
+ * PersonAppointmentOut
+ */
+export type PersonAppointmentOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Position Id
+     */
+    position_id: string;
+    person: PersonSummary;
+    kind: AppointmentKind;
+    /**
+     * Appointed By
+     */
+    appointed_by: string | null;
+    /**
+     * Agreement Ref
+     */
+    agreement_ref: string | null;
+    /**
+     * Starts On
+     */
+    starts_on: string;
+    /**
+     * Ends On
+     */
+    ends_on: string | null;
+    /**
+     * Ended On
+     */
+    ended_on: string | null;
+    end_reason: EndReason | null;
+    /**
+     * End Notes
+     */
+    end_notes: string | null;
+    role: RoleSummary | null;
+    /**
+     * Current
+     */
+    current: boolean;
+    position_type: PositionTypeRef;
+    body: BodyTypeRef;
+    /**
+     * Body Id
+     */
+    body_id: string;
+    /**
+     * Territory
+     */
+    territory: string;
+};
+
+/**
  * PersonCreate
  */
 export type PersonCreate = {
@@ -4698,6 +4892,47 @@ export type ScopeOut = {
  * ScopeRule
  */
 export type ScopeRule = 'body_territory' | 'circumscription' | 'national';
+
+/**
+ * SeatOut
+ */
+export type SeatOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Body Id
+     */
+    body_id: string;
+    position_type: PositionTypeRef;
+    /**
+     * Region Number
+     *
+     * Circunscripción, en las Secretarías de Circunscripción.
+     */
+    region_number: number | null;
+    /**
+     * Is Derived
+     */
+    is_derived: boolean;
+    /**
+     * Vacant Since
+     */
+    vacant_since: string | null;
+    current: AppointmentOut | null;
+    /**
+     * En un cargo derivado, de qué cargo toma hoy a su titular.
+     */
+    derived_from: PositionTypeRef | null;
+    derived_holder: PersonSummary | null;
+    /**
+     * Choice Pending
+     *
+     * Cargo derivado con varias opciones sin elegir para el periodo vigente.
+     */
+    choice_pending: boolean;
+};
 
 /**
  * SessionOut
@@ -10968,3 +11203,252 @@ export type DissolveBodyResponses = {
 };
 
 export type DissolveBodyResponse = DissolveBodyResponses[keyof DissolveBodyResponses];
+
+export type ListBodyPositionsData = {
+    body?: never;
+    path: {
+        /**
+         * Body Id
+         */
+        body_id: string;
+    };
+    query?: never;
+    url: '/api/v1/party-structure/bodies/{body_id}/positions';
+};
+
+export type ListBodyPositionsErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ListBodyPositionsError = ListBodyPositionsErrors[keyof ListBodyPositionsErrors];
+
+export type ListBodyPositionsResponses = {
+    /**
+     * Response Listbodypositions
+     *
+     * Successful Response
+     */
+    200: Array<SeatOut>;
+};
+
+export type ListBodyPositionsResponse = ListBodyPositionsResponses[keyof ListBodyPositionsResponses];
+
+export type ListPositionAppointmentsData = {
+    body?: never;
+    path: {
+        /**
+         * Position Id
+         */
+        position_id: string;
+    };
+    query?: never;
+    url: '/api/v1/party-structure/positions/{position_id}/appointments';
+};
+
+export type ListPositionAppointmentsErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ListPositionAppointmentsError = ListPositionAppointmentsErrors[keyof ListPositionAppointmentsErrors];
+
+export type ListPositionAppointmentsResponses = {
+    /**
+     * Response Listpositionappointments
+     *
+     * Successful Response
+     */
+    200: Array<AppointmentOut>;
+};
+
+export type ListPositionAppointmentsResponse = ListPositionAppointmentsResponses[keyof ListPositionAppointmentsResponses];
+
+export type AppointData = {
+    body: AppointmentIn;
+    path: {
+        /**
+         * Position Id
+         */
+        position_id: string;
+    };
+    query?: never;
+    url: '/api/v1/party-structure/positions/{position_id}/appointments';
+};
+
+export type AppointErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type AppointError = AppointErrors[keyof AppointErrors];
+
+export type AppointResponses = {
+    /**
+     * Successful Response
+     */
+    201: AppointmentOut;
+};
+
+export type AppointResponse = AppointResponses[keyof AppointResponses];
+
+export type UpdateAppointmentData = {
+    body: AppointmentUpdate;
+    path: {
+        /**
+         * Appointment Id
+         */
+        appointment_id: string;
+    };
+    query?: never;
+    url: '/api/v1/party-structure/appointments/{appointment_id}';
+};
+
+export type UpdateAppointmentErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type UpdateAppointmentError = UpdateAppointmentErrors[keyof UpdateAppointmentErrors];
+
+export type UpdateAppointmentResponses = {
+    /**
+     * Successful Response
+     */
+    200: AppointmentOut;
+};
+
+export type UpdateAppointmentResponse = UpdateAppointmentResponses[keyof UpdateAppointmentResponses];
+
+export type EndAppointmentData = {
+    body: AppointmentEndIn;
+    path: {
+        /**
+         * Appointment Id
+         */
+        appointment_id: string;
+    };
+    query?: never;
+    url: '/api/v1/party-structure/appointments/{appointment_id}/end';
+};
+
+export type EndAppointmentErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type EndAppointmentError = EndAppointmentErrors[keyof EndAppointmentErrors];
+
+export type EndAppointmentResponses = {
+    /**
+     * Successful Response
+     */
+    200: AppointmentOut;
+};
+
+export type EndAppointmentResponse = EndAppointmentResponses[keyof EndAppointmentResponses];
+
+export type ChooseDerivedSourceData = {
+    body: DerivedChoiceIn;
+    path: {
+        /**
+         * Position Id
+         */
+        position_id: string;
+    };
+    query?: never;
+    url: '/api/v1/party-structure/positions/{position_id}/derived-choice';
+};
+
+export type ChooseDerivedSourceErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ChooseDerivedSourceError = ChooseDerivedSourceErrors[keyof ChooseDerivedSourceErrors];
+
+export type ChooseDerivedSourceResponses = {
+    /**
+     * Successful Response
+     */
+    200: PositionTypeRef;
+};
+
+export type ChooseDerivedSourceResponse = ChooseDerivedSourceResponses[keyof ChooseDerivedSourceResponses];
+
+export type ListPersonAppointmentsData = {
+    body?: never;
+    path: {
+        /**
+         * Person Id
+         */
+        person_id: string;
+    };
+    query?: {
+        /**
+         * Current Only
+         */
+        current_only?: boolean;
+    };
+    url: '/api/v1/party-structure/people/{person_id}/appointments';
+};
+
+export type ListPersonAppointmentsErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ListPersonAppointmentsError = ListPersonAppointmentsErrors[keyof ListPersonAppointmentsErrors];
+
+export type ListPersonAppointmentsResponses = {
+    /**
+     * Response Listpersonappointments
+     *
+     * Successful Response
+     */
+    200: Array<PersonAppointmentOut>;
+};
+
+export type ListPersonAppointmentsResponse = ListPersonAppointmentsResponses[keyof ListPersonAppointmentsResponses];

@@ -8,11 +8,14 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from app.modules.identity.schemas import RoleSummary
 from app.modules.party_structure.models import (
+    AppointmentKind,
     CoordinationKind,
     DistrictKind,
+    EndReason,
     ScopeRule,
     TerritorialLevel,
 )
+from app.modules.people.schemas import PersonSummary
 
 
 class Schema(BaseModel):
@@ -180,3 +183,77 @@ class BodyInstallIn(Schema):
 class BodyDissolveIn(Schema):
     dissolved_on: date
     dissolution_agreement: str = Field(min_length=2, max_length=300)
+
+
+# --- seats and appointments (phase 2) ---------------------------------------------------------
+
+
+class AppointmentIn(Schema):
+    person_id: uuid.UUID = Field(description="Persona registrada con CURP.")
+    kind: AppointmentKind
+    starts_on: date
+    ends_on: date | None = Field(
+        default=None, description="Vacío: se propone con el periodo del cargo."
+    )
+    appointed_by: str | None = Field(default=None, max_length=300)
+    agreement_ref: str | None = Field(default=None, max_length=300)
+
+
+class AppointmentUpdate(Schema):
+    ends_on: date | None = None
+    appointed_by: str | None = Field(default=None, max_length=300)
+    agreement_ref: str | None = Field(default=None, max_length=300)
+
+
+class AppointmentEndIn(Schema):
+    ended_on: date
+    reason: EndReason
+    notes: str | None = Field(default=None, max_length=500)
+
+
+class AppointmentOut(Schema):
+    id: uuid.UUID
+    position_id: uuid.UUID
+    person: PersonSummary
+    kind: AppointmentKind
+    appointed_by: str | None
+    agreement_ref: str | None
+    starts_on: date
+    ends_on: date | None
+    ended_on: date | None
+    end_reason: EndReason | None
+    end_notes: str | None
+    role: RoleSummary | None
+    current: bool
+
+
+class PersonAppointmentOut(AppointmentOut):
+    position_type: PositionTypeRef
+    body: BodyTypeRef
+    body_id: uuid.UUID
+    territory: str
+
+
+class SeatOut(Schema):
+    id: uuid.UUID
+    body_id: uuid.UUID
+    position_type: PositionTypeRef
+    region_number: int | None = Field(
+        description="Circunscripción, en las Secretarías de Circunscripción."
+    )
+    is_derived: bool
+    vacant_since: date | None
+    current: AppointmentOut | None
+    derived_from: PositionTypeRef | None = Field(
+        description="En un cargo derivado, de qué cargo toma hoy a su titular."
+    )
+    derived_holder: PersonSummary | None
+    choice_pending: bool = Field(
+        description="Cargo derivado con varias opciones sin elegir para el periodo vigente."
+    )
+
+
+class DerivedChoiceIn(Schema):
+    source_position_type_id: uuid.UUID
+    starts_on: date
+    agreement_ref: str | None = Field(default=None, max_length=300)

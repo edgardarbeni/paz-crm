@@ -21,6 +21,20 @@ from tests.integration.geography.conftest import (  # noqa: F401 - re-exported f
 
 API = "/api/v1/party-structure"
 
+# The seats of migration 0020 (idempotent).
+SEATS = """
+INSERT INTO party_structure.positions (body_id, position_type_id, region_number)
+SELECT b.id, p.id, r.n FROM party_structure.bodies b
+JOIN party_structure.position_types p ON p.body_type_id = b.body_type_id AND p.deleted_at IS NULL
+CROSS JOIN LATERAL (
+  SELECT generate_series(1, 5) AS n WHERE p.scope_rule = 'circumscription'
+  UNION ALL SELECT NULL WHERE p.scope_rule <> 'circumscription'
+) r
+WHERE b.deleted_at IS NULL AND b.dissolved_on IS NULL AND NOT EXISTS (
+  SELECT 1 FROM party_structure.positions x WHERE x.body_id = b.id
+  AND x.position_type_id = p.id AND coalesce(x.region_number, 0) = coalesce(r.n, 0))
+"""
+
 __all__ = ["API", "Geo"]
 
 
@@ -31,6 +45,13 @@ async def clean_party_structure(
 ) -> None:
     async with owner_engine.begin() as connection:
         for sql in (
+            "DELETE FROM party_structure.derived_choices",
+            "DELETE FROM party_structure.appointments",
+            "DELETE FROM party_structure.positions p USING party_structure.bodies b "
+            "WHERE b.id = p.body_id AND b.framework_id IS NOT NULL",
+            "DELETE FROM party_structure.positions p USING party_structure.position_types t "
+            "WHERE t.id = p.position_type_id AND t.code LIKE 'test%'",
+            "UPDATE party_structure.positions SET vacant_since = NULL",
             "DELETE FROM party_structure.bodies WHERE framework_id IS NOT NULL",
             "DELETE FROM party_structure.position_incompatibilities",
             "DELETE FROM party_structure.position_derivations d USING "
@@ -59,3 +80,4 @@ async def clean_party_structure(
                     "generate_series(1, 32) s(code) WHERE b.territorial_level = 'state'"
                 )
             )
+        await connection.execute(text(SEATS))
