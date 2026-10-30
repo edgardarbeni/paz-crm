@@ -1,0 +1,27 @@
+meta {
+  name: Cambiar el territorio de una coordinación
+  type: http
+  seq: 12
+}
+
+put {
+  url: {{baseUrl}}/api/v1/party-structure/coordinations/{{coordinationId}}/territory
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "node_ids": ["{{sectionId1}}", "{{sectionId3}}"],
+    "on": "2026-12-01"
+  }
+}
+
+docs {
+  Lista completa del territorio nuevo: lo que sale queda con removed_on y lo nuevo con added_on.
+  El alcance de los titulares con acceso se ajusta solo.
+}

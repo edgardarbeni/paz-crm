@@ -10741,110 +10741,6 @@
         }
       }
     },
-    "/api/v1/party-structure/coordination-position-types": {
-      "get": {
-        "tags": [
-          "party-structure"
-        ],
-        "summary": "Cargos del equipo de las coordinaciones territoriales",
-        "operationId": "listCoordinationPositionTypes",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/CoordinationPositionTypeOut"
-                  },
-                  "type": "array",
-                  "title": "Response Listcoordinationpositiontypes"
-                }
-              }
-            }
-          },
-          "4XX": {
-            "description": "Error del cliente (RFC 9457)",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem"
-                }
-              }
-            }
-          },
-          "5XX": {
-            "description": "Error del servidor (RFC 9457)",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ]
-      },
-      "post": {
-        "tags": [
-          "party-structure"
-        ],
-        "summary": "Agregar un cargo de coordinación",
-        "operationId": "createCoordinationPositionType",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CoordinationPositionTypeIn"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CoordinationPositionTypeOut"
-                }
-              }
-            }
-          },
-          "4XX": {
-            "description": "Error del cliente (RFC 9457)",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem"
-                }
-              }
-            }
-          },
-          "5XX": {
-            "description": "Error del servidor (RFC 9457)",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ]
-      }
-    },
     "/api/v1/party-structure/bodies": {
       "get": {
         "tags": [
@@ -11749,6 +11645,398 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AppointmentOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/party-structure/coordinations": {
+      "post": {
+        "tags": [
+          "party-structure"
+        ],
+        "summary": "Crear una coordinación territorial",
+        "description": "Federal: distritos federales de cualquier estado (las de varios estados solo las crea el nivel nacional). Local: distritos locales de un estado. Seccional: secciones de un estado. Un distrito o sección pertenece a lo más a una coordinación vigente de su tipo.",
+        "operationId": "createCoordination",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CoordinationIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoordinationOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "party-structure"
+        ],
+        "summary": "Coordinaciones en tu alcance",
+        "operationId": "listCoordinations",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/CoordinationKind"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Kind"
+            }
+          },
+          {
+            "name": "state_code",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 32,
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "State Code"
+            }
+          },
+          {
+            "name": "include_closed",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Include Closed"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 1024
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 200
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Campos separados por coma; prefijo '-' para descendente.",
+              "examples": [
+                "-created_at,name"
+              ],
+              "title": "Sort"
+            },
+            "description": "Campos separados por coma; prefijo '-' para descendente."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CursorPage_CoordinationOut_"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/party-structure/coordinations/{coordination_id}": {
+      "get": {
+        "tags": [
+          "party-structure"
+        ],
+        "summary": "Detalle de una coordinación y su territorio",
+        "operationId": "getCoordination",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "coordination_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Coordination Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoordinationOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/party-structure/coordinations/{coordination_id}/territory": {
+      "put": {
+        "tags": [
+          "party-structure"
+        ],
+        "summary": "Cambiar el territorio (recalcula el alcance de sus titulares)",
+        "operationId": "setCoordinationTerritory",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "coordination_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Coordination Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TerritoryIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoordinationOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/party-structure/coordinations/{coordination_id}/close": {
+      "post": {
+        "tags": [
+          "party-structure"
+        ],
+        "summary": "Cerrar una coordinación (libera su territorio)",
+        "operationId": "closeCoordination",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "coordination_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Coordination Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CoordinationCloseIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoordinationOut"
                 }
               }
             }
@@ -13085,6 +13373,18 @@
           "body_type": {
             "$ref": "#/components/schemas/BodyTypeRef"
           },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name",
+            "description": "Nombre de una coordinación territorial."
+          },
           "state_code": {
             "anyOf": [
               {
@@ -13219,6 +13519,7 @@
         "required": [
           "id",
           "body_type",
+          "name",
           "state_code",
           "territory",
           "framework_id",
@@ -13344,6 +13645,16 @@
             "type": "integer",
             "title": "Sort Order"
           },
+          "coordination_kind": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CoordinationKind"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "positions": {
             "items": {
               "$ref": "#/components/schemas/PositionTypeOut"
@@ -13363,6 +13674,7 @@
           "statutory_basis",
           "description",
           "sort_order",
+          "coordination_kind",
           "positions"
         ],
         "title": "BodyTypeOut"
@@ -13875,26 +14187,37 @@
         ],
         "title": "ContactOut"
       },
-      "CoordinationKind": {
-        "type": "string",
-        "enum": [
-          "federal",
-          "local",
-          "sectional"
+      "CoordinationCloseIn": {
+        "properties": {
+          "closed_on": {
+            "type": "string",
+            "format": "date",
+            "title": "Closed On"
+          },
+          "agreement": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agreement"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "closed_on"
         ],
-        "title": "CoordinationKind"
+        "title": "CoordinationCloseIn"
       },
-      "CoordinationPositionTypeIn": {
+      "CoordinationIn": {
         "properties": {
           "kind": {
             "$ref": "#/components/schemas/CoordinationKind"
-          },
-          "code": {
-            "type": "string",
-            "maxLength": 80,
-            "minLength": 2,
-            "pattern": "^[a-z0-9_]+$",
-            "title": "Code"
           },
           "name": {
             "type": "string",
@@ -13902,34 +14225,56 @@
             "minLength": 2,
             "title": "Name"
           },
-          "default_role_id": {
+          "node_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "maxItems": 5000,
+            "minItems": 1,
+            "title": "Node Ids",
+            "description": "Distritos federales (federal, de cualquier estado), distritos locales (local) o secciones (sectional), de un solo estado salvo en las federales."
+          },
+          "created_on": {
+            "type": "string",
+            "format": "date",
+            "title": "Created On"
+          },
+          "agreement": {
             "anyOf": [
               {
                 "type": "string",
-                "format": "uuid"
+                "maxLength": 300
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Default Role Id"
-          },
-          "sort_order": {
-            "type": "integer",
-            "title": "Sort Order",
-            "default": 0
+            "title": "Agreement"
           }
         },
         "additionalProperties": false,
         "type": "object",
         "required": [
           "kind",
-          "code",
-          "name"
+          "name",
+          "node_ids",
+          "created_on"
         ],
-        "title": "CoordinationPositionTypeIn"
+        "title": "CoordinationIn"
       },
-      "CoordinationPositionTypeOut": {
+      "CoordinationKind": {
+        "type": "string",
+        "enum": [
+          "federal",
+          "local",
+          "sectional"
+        ],
+        "title": "CoordinationKind",
+        "description": "Territory of a coordination: federal districts (of any states), local districts or\nsections (of one state)."
+      },
+      "CoordinationOut": {
         "properties": {
           "id": {
             "type": "string",
@@ -13939,27 +14284,71 @@
           "kind": {
             "$ref": "#/components/schemas/CoordinationKind"
           },
-          "code": {
-            "type": "string",
-            "title": "Code"
-          },
           "name": {
             "type": "string",
             "title": "Name"
           },
-          "default_role": {
+          "state_code": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/RoleSummary"
+                "type": "integer"
               },
               {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "State Code",
+            "description": "Vacío: coordinación federal de varios estados."
           },
-          "sort_order": {
-            "type": "integer",
-            "title": "Sort Order"
+          "territory": {
+            "items": {
+              "$ref": "#/components/schemas/TerritoryNode"
+            },
+            "type": "array",
+            "title": "Territory"
+          },
+          "created_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created On"
+          },
+          "agreement": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agreement"
+          },
+          "closed_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Closed On"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "closed"
+            ],
+            "title": "Status"
           }
         },
         "additionalProperties": false,
@@ -13967,12 +14356,15 @@
         "required": [
           "id",
           "kind",
-          "code",
           "name",
-          "default_role",
-          "sort_order"
+          "state_code",
+          "territory",
+          "created_on",
+          "agreement",
+          "closed_on",
+          "status"
         ],
-        "title": "CoordinationPositionTypeOut"
+        "title": "CoordinationOut"
       },
       "CreditIn": {
         "properties": {
@@ -14112,6 +14504,39 @@
           "has_more"
         ],
         "title": "CursorPage[BodyOut]"
+      },
+      "CursorPage_CoordinationOut_": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CoordinationOut"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor",
+            "description": "Pasar en `cursor` para obtener la siguiente página."
+          },
+          "has_more": {
+            "type": "boolean",
+            "title": "Has More"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "has_more"
+        ],
+        "title": "CursorPage[CoordinationOut]"
       },
       "CursorPage_GeoNodeOut_": {
         "properties": {
@@ -21822,9 +22247,57 @@
           "national",
           "state",
           "district",
-          "municipal"
+          "municipal",
+          "coordination"
         ],
         "title": "TerritorialLevel"
+      },
+      "TerritoryIn": {
+        "properties": {
+          "node_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "maxItems": 5000,
+            "minItems": 1,
+            "title": "Node Ids"
+          },
+          "on": {
+            "type": "string",
+            "format": "date",
+            "title": "On",
+            "description": "Fecha del cambio: alta de lo nuevo y baja de lo que sale."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "node_ids",
+          "on"
+        ],
+        "title": "TerritoryIn"
+      },
+      "TerritoryNode": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "label"
+        ],
+        "title": "TerritoryNode"
       },
       "TokenScope": {
         "type": "string",

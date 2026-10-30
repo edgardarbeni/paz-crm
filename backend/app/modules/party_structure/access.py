@@ -33,6 +33,7 @@ from app.modules.identity.services.grants import (
 )
 from app.modules.identity.services.sessions import revoke_user_sessions
 from app.modules.party_structure import appointments as seats
+from app.modules.party_structure import coordinations
 from app.modules.party_structure.appointments import Level, Seat
 from app.modules.party_structure.models import Appointment, EndReason, PersonAccount
 from app.modules.people.models import Person
@@ -56,6 +57,10 @@ async def seat_scopes(db: AsyncSession, seat: Seat) -> list[ScopeSpec]:
             db, "electoral_regions", "region_number", seat.position.region_number
         )
         return [(ScopeLevel.ELECTORAL_REGION, region)]
+    if seat.body_type.coordination_kind is not None:
+        coordination = await coordinations.coordination_of_seat(db, seat)
+        assert coordination is not None  # noqa: S101
+        return await coordinations.scopes_of(db, coordination)
     body = seat.body
     for column, level in (
         ("municipality_id", ScopeLevel.MUNICIPALITY),

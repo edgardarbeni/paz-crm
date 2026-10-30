@@ -298,7 +298,18 @@ export const zContactOut = z.object({
 });
 
 /**
+ * CoordinationCloseIn
+ */
+export const zCoordinationCloseIn = z.object({
+    closed_on: z.iso.date(),
+    agreement: z.string().max(300).nullish()
+});
+
+/**
  * CoordinationKind
+ *
+ * Territory of a coordination: federal districts (of any states), local districts or
+ * sections (of one state).
  */
 export const zCoordinationKind = z.enum([
     'federal',
@@ -307,14 +318,14 @@ export const zCoordinationKind = z.enum([
 ]);
 
 /**
- * CoordinationPositionTypeIn
+ * CoordinationIn
  */
-export const zCoordinationPositionTypeIn = z.object({
+export const zCoordinationIn = z.object({
     kind: zCoordinationKind,
-    code: z.string().min(2).max(80).regex(/^[a-z0-9_]+$/),
     name: z.string().min(2).max(200),
-    default_role_id: z.uuid().nullish(),
-    sort_order: z.int().optional().default(0)
+    node_ids: z.array(z.uuid()).min(1).max(5000),
+    created_on: z.iso.date(),
+    agreement: z.string().max(300).nullish()
 });
 
 /**
@@ -1848,18 +1859,6 @@ export const zAppointmentOut = z.object({
 });
 
 /**
- * CoordinationPositionTypeOut
- */
-export const zCoordinationPositionTypeOut = z.object({
-    id: z.uuid(),
-    kind: zCoordinationKind,
-    code: z.string(),
-    name: z.string(),
-    default_role: zRoleSummary.nullable(),
-    sort_order: z.int()
-});
-
-/**
  * RoleUpdateRequest
  */
 export const zRoleUpdateRequest = z.object({
@@ -2206,7 +2205,8 @@ export const zTerritorialLevel = z.enum([
     'national',
     'state',
     'district',
-    'municipal'
+    'municipal',
+    'coordination'
 ]);
 
 /**
@@ -2234,6 +2234,7 @@ export const zBodyTypeOut = z.object({
     statutory_basis: z.string().nullable(),
     description: z.string().nullable(),
     sort_order: z.int(),
+    coordination_kind: zCoordinationKind.nullable(),
     positions: z.array(zPositionTypeOut)
 });
 
@@ -2253,6 +2254,7 @@ export const zBodyTypeRef = z.object({
 export const zBodyOut = z.object({
     id: z.uuid(),
     body_type: zBodyTypeRef,
+    name: z.string().nullable(),
     state_code: z.int().nullable(),
     territory: z.string(),
     framework_id: z.uuid().nullable(),
@@ -2300,6 +2302,46 @@ export const zPersonAppointmentOut = z.object({
     body: zBodyTypeRef,
     body_id: z.uuid(),
     territory: z.string()
+});
+
+/**
+ * TerritoryIn
+ */
+export const zTerritoryIn = z.object({
+    node_ids: z.array(z.uuid()).min(1).max(5000),
+    on: z.iso.date()
+});
+
+/**
+ * TerritoryNode
+ */
+export const zTerritoryNode = z.object({
+    id: z.uuid(),
+    label: z.string()
+});
+
+/**
+ * CoordinationOut
+ */
+export const zCoordinationOut = z.object({
+    id: z.uuid(),
+    kind: zCoordinationKind,
+    name: z.string(),
+    state_code: z.int().nullable(),
+    territory: z.array(zTerritoryNode),
+    created_on: z.iso.date().nullable(),
+    agreement: z.string().nullable(),
+    closed_on: z.iso.date().nullable(),
+    status: z.enum(['active', 'closed'])
+});
+
+/**
+ * CursorPage[CoordinationOut]
+ */
+export const zCursorPageCoordinationOut = z.object({
+    items: z.array(zCoordinationOut),
+    next_cursor: z.string().nullish(),
+    has_more: z.boolean()
 });
 
 /**
@@ -4055,20 +4097,6 @@ export const zRemoveIncompatibilityPath = z.object({
  */
 export const zRemoveIncompatibilityResponse = z.void();
 
-/**
- * Response Listcoordinationpositiontypes
- *
- * Successful Response
- */
-export const zListCoordinationPositionTypesResponse = z.array(zCoordinationPositionTypeOut);
-
-export const zCreateCoordinationPositionTypeBody = zCoordinationPositionTypeIn;
-
-/**
- * Successful Response
- */
-export const zCreateCoordinationPositionTypeResponse = zCoordinationPositionTypeOut;
-
 export const zListBodiesQuery = z.object({
     level: zTerritorialLevel.nullish(),
     body_type_id: z.uuid().nullish(),
@@ -4211,3 +4239,55 @@ export const zGrantAppointmentAccessPath = z.object({
  * Successful Response
  */
 export const zGrantAppointmentAccessResponse = zAppointmentOut;
+
+export const zListCoordinationsQuery = z.object({
+    kind: zCoordinationKind.nullish(),
+    state_code: z.int().gte(1).lte(32).nullish(),
+    include_closed: z.boolean().optional().default(false),
+    limit: z.int().gte(1).lte(200).optional().default(50),
+    cursor: z.string().max(1024).nullish(),
+    sort: z.string().max(200).nullish()
+});
+
+/**
+ * Successful Response
+ */
+export const zListCoordinationsResponse = zCursorPageCoordinationOut;
+
+export const zCreateCoordinationBody = zCoordinationIn;
+
+/**
+ * Successful Response
+ */
+export const zCreateCoordinationResponse = zCoordinationOut;
+
+export const zGetCoordinationPath = z.object({
+    coordination_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zGetCoordinationResponse = zCoordinationOut;
+
+export const zSetCoordinationTerritoryBody = zTerritoryIn;
+
+export const zSetCoordinationTerritoryPath = z.object({
+    coordination_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zSetCoordinationTerritoryResponse = zCoordinationOut;
+
+export const zCloseCoordinationBody = zCoordinationCloseIn;
+
+export const zCloseCoordinationPath = z.object({
+    coordination_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zCloseCoordinationResponse = zCoordinationOut;

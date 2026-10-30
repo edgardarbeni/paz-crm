@@ -92,6 +92,7 @@ class Seat:
             TerritorialLevel.STATE: Level.STATE,
             TerritorialLevel.DISTRICT: Level.LOCAL,
             TerritorialLevel.MUNICIPAL: Level.LOCAL,
+            TerritorialLevel.COORDINATION: Level.COORDINATION,
         }[TerritorialLevel(self.body_type.territorial_level)]
 
 
@@ -200,6 +201,19 @@ async def ensure_seat_within(db: AsyncSession, geo: GeoScope, seat: Seat) -> Non
         assert seat.position.region_number is not None  # noqa: S101 - one seat per region
         node = await node_of(db, "electoral_regions", "region_number", seat.position.region_number)
         await ensure_node_within(db, geo, ScopeLevel.ELECTORAL_REGION, node)
+        return
+    if seat.body_type.coordination_kind is not None:
+        from app.modules.party_structure import coordinations  # noqa: PLC0415 - cycle
+
+        coordination = await coordinations.coordination_of_seat(db, seat)
+        assert coordination is not None  # noqa: S101
+        if seat.body.state_code is None:  # spans several states: national level only
+            raise ForbiddenError(
+                "Solo el nivel nacional administra coordinaciones de varios estados."
+            )
+        nodes = await coordinations.current_nodes(db, coordination)
+        if not await coordinations.nodes_within(db, geo, coordination.kind, nodes):
+            raise ForbiddenError("La coordinación está fuera de tu alcance.")
         return
     body = seat.body
     for column, level in (

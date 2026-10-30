@@ -46,6 +46,9 @@ async def clean_party_structure(
     async with owner_engine.begin() as connection:
         for sql in (
             "DELETE FROM party_structure.person_accounts",
+            "DELETE FROM party_structure.coordination_federal_districts",
+            "DELETE FROM party_structure.coordination_local_districts",
+            "DELETE FROM party_structure.coordination_sections",
             "DELETE FROM party_structure.derived_choices",
             "DELETE FROM party_structure.appointments",
             "DELETE FROM party_structure.positions p USING party_structure.bodies b "
@@ -61,7 +64,6 @@ async def clean_party_structure(
             "DELETE FROM party_structure.position_types p USING party_structure.body_types b "
             "WHERE b.id = p.body_type_id AND (p.code LIKE 'test%' OR b.code LIKE 'test%')",
             "DELETE FROM party_structure.body_types WHERE code LIKE 'test%'",
-            "DELETE FROM party_structure.coordination_position_types WHERE code LIKE 'test%'",
         ):
             await connection.execute(text(sql))
         seeded = (

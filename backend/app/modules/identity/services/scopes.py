@@ -213,14 +213,28 @@ async def grant_scopes(db: AsyncSession, grant_id: uuid.UUID) -> list[UserGrantS
 
 
 async def rebuild_grant_sections(db: AsyncSession, grant_id: uuid.UUID) -> int:
-    """Recomputes `user_grant_sections` from `user_grant_scopes` (caller commits)."""
+    """Recomputes `user_grant_sections` from `user_grant_scopes` (caller commits). Section scopes
+    go in one statement, so a sectional coordination of 1,000 sections stays cheap."""
     await db.execute(delete(UserGrantSection).where(col(UserGrantSection.grant_id) == grant_id))
     scopes = await grant_scopes(db, grant_id)
     if any(scope.scope_level == ScopeLevel.NATIONAL for scope in scopes):
         return 0  # national: unrestricted, nothing to materialize
     total = 0
+    sections = [s.section_id for s in scopes if s.scope_level == ScopeLevel.SECTION]
+    if sections:
+        result = await db.execute(
+            text(
+                "INSERT INTO identity.user_grant_sections (grant_id, section_id) "
+                "SELECT :grant, id FROM geography.sections WHERE id = ANY(:ids) AND is_active "
+                "ON CONFLICT DO NOTHING"
+            ),
+            {"grant": grant_id, "ids": sections},
+        )
+        total += result.rowcount  # type: ignore[attr-defined]
     for scope in scopes:
         level = ScopeLevel(scope.scope_level)
+        if level == ScopeLevel.SECTION:
+            continue
         node = getattr(scope, SCOPE_COLUMNS[level])
         result = await db.execute(
             text(

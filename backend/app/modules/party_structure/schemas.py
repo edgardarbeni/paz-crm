@@ -62,6 +62,7 @@ class BodyTypeOut(Schema):
     statutory_basis: str | None
     description: str | None
     sort_order: int
+    coordination_kind: CoordinationKind | None
     positions: list[PositionTypeOut]
 
 
@@ -125,23 +126,6 @@ class IncompatibilityOut(Schema):
     notes: str | None
 
 
-class CoordinationPositionTypeIn(Schema):
-    kind: CoordinationKind
-    code: str = Code
-    name: str = Name
-    default_role_id: uuid.UUID | None = None
-    sort_order: int = 0
-
-
-class CoordinationPositionTypeOut(Schema):
-    id: uuid.UUID
-    kind: CoordinationKind
-    code: str
-    name: str
-    default_role: RoleSummary | None
-    sort_order: int
-
-
 # --- bodies -----------------------------------------------------------------------------------
 
 
@@ -155,6 +139,7 @@ class BodyTypeRef(Schema):
 class BodyOut(Schema):
     id: uuid.UUID
     body_type: BodyTypeRef
+    name: str | None = Field(description="Nombre de una coordinación territorial.")
     state_code: int | None
     territory: str = Field(description="Nombre del territorio en el marco activo.")
     framework_id: uuid.UUID | None
@@ -279,3 +264,48 @@ class DerivedChoiceIn(Schema):
     source_position_type_id: uuid.UUID
     starts_on: date
     agreement_ref: str | None = Field(default=None, max_length=300)
+
+
+# --- territorial coordinations (phase 4) ------------------------------------------------------
+
+
+class CoordinationIn(Schema):
+    kind: CoordinationKind
+    name: str = Name
+    node_ids: list[uuid.UUID] = Field(
+        min_length=1,
+        max_length=5000,
+        description=(
+            "Distritos federales (federal, de cualquier estado), distritos locales (local) o "
+            "secciones (sectional), de un solo estado salvo en las federales."
+        ),
+    )
+    created_on: date
+    agreement: str | None = Field(default=None, max_length=300)
+
+
+class TerritoryIn(Schema):
+    node_ids: list[uuid.UUID] = Field(min_length=1, max_length=5000)
+    on: date = Field(description="Fecha del cambio: alta de lo nuevo y baja de lo que sale.")
+
+
+class CoordinationCloseIn(Schema):
+    closed_on: date
+    agreement: str | None = Field(default=None, max_length=300)
+
+
+class TerritoryNode(Schema):
+    id: uuid.UUID
+    label: str
+
+
+class CoordinationOut(Schema):
+    id: uuid.UUID
+    kind: CoordinationKind
+    name: str
+    state_code: int | None = Field(description="Vacío: coordinación federal de varios estados.")
+    territory: list[TerritoryNode]
+    created_on: date | None
+    agreement: str | None
+    closed_on: date | None
+    status: Literal["active", "closed"]

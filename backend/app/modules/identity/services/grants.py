@@ -135,6 +135,24 @@ async def replace_scopes(db: AsyncSession, grant: UserGrant, scopes: list[ScopeS
     await rebuild_grant_sections(db, grant.id)
 
 
+async def sync_scopes(db: AsyncSession, grant: UserGrant, scopes: list[ScopeSpec]) -> None:
+    """Like `replace_scopes`, but only adds and removes what changed (large territories such as
+    a sectional coordination's sections; caller commits)."""
+    assert grant.id is not None  # noqa: S101 - persisted
+    wanted = set(scopes)
+    current = {scope_key(scope): scope for scope in await grant_scopes(db, grant.id)}
+    for key, scope in current.items():
+        if key not in wanted:
+            await db.delete(scope)
+    for level, node in wanted - set(current):
+        values: dict[str, object] = {"grant_id": grant.id, "scope_level": level}
+        if node is not None:
+            values[SCOPE_COLUMNS[level]] = node
+        db.add(UserGrantScope(**values))  # type: ignore[arg-type]
+    await db.flush()
+    await rebuild_grant_sections(db, grant.id)
+
+
 async def remove_grant(db: AsyncSession, grant: UserGrant) -> None:
     """ORM deletes (not the FK cascade) so the removed scopes stay in the audit log (D-45)."""
     assert grant.id is not None  # noqa: S101 - persisted

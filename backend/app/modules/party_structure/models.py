@@ -26,6 +26,7 @@ class TerritorialLevel(StrEnum):
     STATE = "state"
     DISTRICT = "district"
     MUNICIPAL = "municipal"
+    COORDINATION = "coordination"  # territorial coordinations (D-110)
 
 
 class ScopeRule(StrEnum):
@@ -55,6 +56,9 @@ class EndReason(StrEnum):
 
 
 class CoordinationKind(StrEnum):
+    """Territory of a coordination: federal districts (of any states), local districts or
+    sections (of one state)."""
+
     FEDERAL = "federal"
     LOCAL = "local"
     SECTIONAL = "sectional"
@@ -93,6 +97,8 @@ class BodyType(BusinessTable, table=True):
     statutory_basis: str | None = Field(default=None, max_length=300)
     description: str | None = Field(default=None, max_length=500)
     sort_order: int = 0
+    # Territorial coordinations (D-110): federal (federal districts), local or sectional.
+    coordination_kind: CoordinationKind | None = Field(default=None, sa_type=Text)
 
 
 class PositionType(BusinessTable, table=True):
@@ -175,29 +181,6 @@ class PositionIncompatibility(BusinessTable, table=True):
     notes: str | None = Field(default=None, max_length=500)
 
 
-class CoordinationPositionType(BusinessTable, table=True):
-    """Positions of a territorial coordination's team: always the coordinator, plus others."""
-
-    __tablename__ = "coordination_position_types"
-    __table_args__ = (
-        _in("kind", CoordinationKind, "kind"),
-        Index(
-            "uq_coordination_position_types_kind_code",
-            "kind",
-            "code",
-            unique=True,
-            postgresql_where=text("deleted_at IS NULL"),
-        ),
-        {"schema": SCHEMA},
-    )
-
-    kind: CoordinationKind = Field(sa_type=Text)
-    code: str = Field(max_length=80)
-    name: str = Field(max_length=200)
-    default_role_id: uuid.UUID | None = _fk("identity.roles.id", nullable=True, ondelete="SET NULL")  # type: ignore[assignment]
-    sort_order: int = 0
-
-
 # --- installed bodies -------------------------------------------------------------------------
 
 
@@ -214,8 +197,8 @@ class Body(BusinessTable, table=True):
             name="one_node",
         ),
         CheckConstraint(
-            "(municipality_id IS NULL AND federal_district_id IS NULL "
-            "AND local_district_id IS NULL) = (framework_id IS NULL)",
+            "num_nonnulls(municipality_id, federal_district_id, local_district_id) = 0 "
+            "OR framework_id IS NOT NULL",
             name="node_has_framework",
         ),
         CheckConstraint(
@@ -232,7 +215,8 @@ class Body(BusinessTable, table=True):
                 "'00000000-0000-0000-0000-000000000000'::uuid)"
             ),
             unique=True,
-            postgresql_where=text("dissolved_on IS NULL AND deleted_at IS NULL"),
+            # Coordinations are named and may be several per territory.
+            postgresql_where=text("dissolved_on IS NULL AND deleted_at IS NULL AND name IS NULL"),
         ),
         {"schema": SCHEMA},
     )
@@ -250,6 +234,8 @@ class Body(BusinessTable, table=True):
     installation_agreement: str | None = Field(default=None, max_length=300)
     dissolved_on: date | None = Field(default=None, sa_type=Date)
     dissolution_agreement: str | None = Field(default=None, max_length=300)
+    # Territorial coordinations are named («Coordinación seccional Centro»).
+    name: str | None = Field(default=None, max_length=200)
 
 
 # --- seats and appointments (phase 2, D-108) --------------------------------------------------
@@ -363,3 +349,55 @@ class PersonAccount(BusinessTable, table=True):
 
     person_id: uuid.UUID = _fk("people.persons.id")  # type: ignore[assignment]
     user_id: uuid.UUID = _fk("identity.users.id", ondelete="CASCADE")  # type: ignore[assignment]
+
+
+# --- territory of the coordinations (phase 4, D-110) -----------------------------------------
+
+
+def _territory_index(name: str, column: str) -> Index:
+    """A node belongs to at most one current coordination (of its kind: one table per kind)."""
+    return Index(
+        name,
+        column,
+        unique=True,
+        postgresql_where=text("removed_on IS NULL AND deleted_at IS NULL"),
+    )
+
+
+class CoordinationFederalDistrict(BusinessTable, table=True):
+    __tablename__ = "coordination_federal_districts"
+    __table_args__ = (
+        _territory_index("uq_coordination_federal_districts_current", "federal_district_id"),
+        {"schema": SCHEMA},
+    )
+
+    coordination_id: uuid.UUID = _fk(f"{SCHEMA}.bodies.id")  # type: ignore[assignment]
+    federal_district_id: uuid.UUID = _fk("geography.federal_districts.id")  # type: ignore[assignment]
+    added_on: date = Field(sa_type=Date)
+    removed_on: date | None = Field(default=None, sa_type=Date)
+
+
+class CoordinationLocalDistrict(BusinessTable, table=True):
+    __tablename__ = "coordination_local_districts"
+    __table_args__ = (
+        _territory_index("uq_coordination_local_districts_current", "local_district_id"),
+        {"schema": SCHEMA},
+    )
+
+    coordination_id: uuid.UUID = _fk(f"{SCHEMA}.bodies.id")  # type: ignore[assignment]
+    local_district_id: uuid.UUID = _fk("geography.local_districts.id")  # type: ignore[assignment]
+    added_on: date = Field(sa_type=Date)
+    removed_on: date | None = Field(default=None, sa_type=Date)
+
+
+class CoordinationSection(BusinessTable, table=True):
+    __tablename__ = "coordination_sections"
+    __table_args__ = (
+        _territory_index("uq_coordination_sections_current", "section_id"),
+        {"schema": SCHEMA},
+    )
+
+    coordination_id: uuid.UUID = _fk(f"{SCHEMA}.bodies.id")  # type: ignore[assignment]
+    section_id: uuid.UUID = _fk("geography.sections.id")  # type: ignore[assignment]
+    added_on: date = Field(sa_type=Date)
+    removed_on: date | None = Field(default=None, sa_type=Date)

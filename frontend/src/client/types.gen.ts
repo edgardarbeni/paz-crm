@@ -598,6 +598,12 @@ export type BodyOut = {
     id: string;
     body_type: BodyTypeRef;
     /**
+     * Name
+     *
+     * Nombre de una coordinación territorial.
+     */
+    name: string | null;
+    /**
      * State Code
      */
     state_code: number | null;
@@ -710,6 +716,7 @@ export type BodyTypeOut = {
      * Sort Order
      */
     sort_order: number;
+    coordination_kind: CoordinationKind | null;
     /**
      * Positions
      */
@@ -1023,55 +1030,91 @@ export type ContactOut = {
 };
 
 /**
- * CoordinationKind
+ * CoordinationCloseIn
  */
-export type CoordinationKind = 'federal' | 'local' | 'sectional';
+export type CoordinationCloseIn = {
+    /**
+     * Closed On
+     */
+    closed_on: string;
+    /**
+     * Agreement
+     */
+    agreement?: string | null;
+};
 
 /**
- * CoordinationPositionTypeIn
+ * CoordinationIn
  */
-export type CoordinationPositionTypeIn = {
+export type CoordinationIn = {
     kind: CoordinationKind;
-    /**
-     * Code
-     */
-    code: string;
     /**
      * Name
      */
     name: string;
     /**
-     * Default Role Id
+     * Node Ids
+     *
+     * Distritos federales (federal, de cualquier estado), distritos locales (local) o secciones (sectional), de un solo estado salvo en las federales.
      */
-    default_role_id?: string | null;
+    node_ids: Array<string>;
     /**
-     * Sort Order
+     * Created On
      */
-    sort_order?: number;
+    created_on: string;
+    /**
+     * Agreement
+     */
+    agreement?: string | null;
 };
 
 /**
- * CoordinationPositionTypeOut
+ * CoordinationKind
+ *
+ * Territory of a coordination: federal districts (of any states), local districts or
+ * sections (of one state).
  */
-export type CoordinationPositionTypeOut = {
+export type CoordinationKind = 'federal' | 'local' | 'sectional';
+
+/**
+ * CoordinationOut
+ */
+export type CoordinationOut = {
     /**
      * Id
      */
     id: string;
     kind: CoordinationKind;
     /**
-     * Code
-     */
-    code: string;
-    /**
      * Name
      */
     name: string;
-    default_role: RoleSummary | null;
     /**
-     * Sort Order
+     * State Code
+     *
+     * Vacío: coordinación federal de varios estados.
      */
-    sort_order: number;
+    state_code: number | null;
+    /**
+     * Territory
+     */
+    territory: Array<TerritoryNode>;
+    /**
+     * Created On
+     */
+    created_on: string | null;
+    /**
+     * Agreement
+     */
+    agreement: string | null;
+    /**
+     * Closed On
+     */
+    closed_on: string | null;
+    /**
+     * Status
+     */
+    status: 'active' | 'closed';
 };
 
 /**
@@ -1140,6 +1183,26 @@ export type CursorPageBodyOut = {
      * Items
      */
     items: Array<BodyOut>;
+    /**
+     * Next Cursor
+     *
+     * Pasar en `cursor` para obtener la siguiente página.
+     */
+    next_cursor?: string | null;
+    /**
+     * Has More
+     */
+    has_more: boolean;
+};
+
+/**
+ * CursorPage[CoordinationOut]
+ */
+export type CursorPageCoordinationOut = {
+    /**
+     * Items
+     */
+    items: Array<CoordinationOut>;
     /**
      * Next Cursor
      *
@@ -5166,7 +5229,37 @@ export type SubstitutionIn = {
 /**
  * TerritorialLevel
  */
-export type TerritorialLevel = 'national' | 'state' | 'district' | 'municipal';
+export type TerritorialLevel = 'national' | 'state' | 'district' | 'municipal' | 'coordination';
+
+/**
+ * TerritoryIn
+ */
+export type TerritoryIn = {
+    /**
+     * Node Ids
+     */
+    node_ids: Array<string>;
+    /**
+     * On
+     *
+     * Fecha del cambio: alta de lo nuevo y baja de lo que sale.
+     */
+    on: string;
+};
+
+/**
+ * TerritoryNode
+ */
+export type TerritoryNode = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Label
+     */
+    label: string;
+};
 
 /**
  * TokenScope
@@ -11042,66 +11135,6 @@ export type RemoveIncompatibilityResponses = {
 
 export type RemoveIncompatibilityResponse = RemoveIncompatibilityResponses[keyof RemoveIncompatibilityResponses];
 
-export type ListCoordinationPositionTypesData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/v1/party-structure/coordination-position-types';
-};
-
-export type ListCoordinationPositionTypesErrors = {
-    /**
-     * Error del cliente (RFC 9457)
-     */
-    '4XX': Problem;
-    /**
-     * Error del servidor (RFC 9457)
-     */
-    '5XX': Problem;
-};
-
-export type ListCoordinationPositionTypesError = ListCoordinationPositionTypesErrors[keyof ListCoordinationPositionTypesErrors];
-
-export type ListCoordinationPositionTypesResponses = {
-    /**
-     * Response Listcoordinationpositiontypes
-     *
-     * Successful Response
-     */
-    200: Array<CoordinationPositionTypeOut>;
-};
-
-export type ListCoordinationPositionTypesResponse = ListCoordinationPositionTypesResponses[keyof ListCoordinationPositionTypesResponses];
-
-export type CreateCoordinationPositionTypeData = {
-    body: CoordinationPositionTypeIn;
-    path?: never;
-    query?: never;
-    url: '/api/v1/party-structure/coordination-position-types';
-};
-
-export type CreateCoordinationPositionTypeErrors = {
-    /**
-     * Error del cliente (RFC 9457)
-     */
-    '4XX': Problem;
-    /**
-     * Error del servidor (RFC 9457)
-     */
-    '5XX': Problem;
-};
-
-export type CreateCoordinationPositionTypeError = CreateCoordinationPositionTypeErrors[keyof CreateCoordinationPositionTypeErrors];
-
-export type CreateCoordinationPositionTypeResponses = {
-    /**
-     * Successful Response
-     */
-    201: CoordinationPositionTypeOut;
-};
-
-export type CreateCoordinationPositionTypeResponse = CreateCoordinationPositionTypeResponses[keyof CreateCoordinationPositionTypeResponses];
-
 export type ListBodiesData = {
     body?: never;
     path?: never;
@@ -11575,3 +11608,190 @@ export type GrantAppointmentAccessResponses = {
 };
 
 export type GrantAppointmentAccessResponse = GrantAppointmentAccessResponses[keyof GrantAppointmentAccessResponses];
+
+export type ListCoordinationsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Kind
+         */
+        kind?: CoordinationKind | null;
+        /**
+         * State Code
+         */
+        state_code?: number | null;
+        /**
+         * Include Closed
+         */
+        include_closed?: boolean;
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Cursor
+         */
+        cursor?: string | null;
+        /**
+         * Sort
+         *
+         * Campos separados por coma; prefijo '-' para descendente.
+         */
+        sort?: string | null;
+    };
+    url: '/api/v1/party-structure/coordinations';
+};
+
+export type ListCoordinationsErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ListCoordinationsError = ListCoordinationsErrors[keyof ListCoordinationsErrors];
+
+export type ListCoordinationsResponses = {
+    /**
+     * Successful Response
+     */
+    200: CursorPageCoordinationOut;
+};
+
+export type ListCoordinationsResponse = ListCoordinationsResponses[keyof ListCoordinationsResponses];
+
+export type CreateCoordinationData = {
+    body: CoordinationIn;
+    path?: never;
+    query?: never;
+    url: '/api/v1/party-structure/coordinations';
+};
+
+export type CreateCoordinationErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type CreateCoordinationError = CreateCoordinationErrors[keyof CreateCoordinationErrors];
+
+export type CreateCoordinationResponses = {
+    /**
+     * Successful Response
+     */
+    201: CoordinationOut;
+};
+
+export type CreateCoordinationResponse = CreateCoordinationResponses[keyof CreateCoordinationResponses];
+
+export type GetCoordinationData = {
+    body?: never;
+    path: {
+        /**
+         * Coordination Id
+         */
+        coordination_id: string;
+    };
+    query?: never;
+    url: '/api/v1/party-structure/coordinations/{coordination_id}';
+};
+
+export type GetCoordinationErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type GetCoordinationError = GetCoordinationErrors[keyof GetCoordinationErrors];
+
+export type GetCoordinationResponses = {
+    /**
+     * Successful Response
+     */
+    200: CoordinationOut;
+};
+
+export type GetCoordinationResponse = GetCoordinationResponses[keyof GetCoordinationResponses];
+
+export type SetCoordinationTerritoryData = {
+    body: TerritoryIn;
+    path: {
+        /**
+         * Coordination Id
+         */
+        coordination_id: string;
+    };
+    query?: never;
+    url: '/api/v1/party-structure/coordinations/{coordination_id}/territory';
+};
+
+export type SetCoordinationTerritoryErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type SetCoordinationTerritoryError = SetCoordinationTerritoryErrors[keyof SetCoordinationTerritoryErrors];
+
+export type SetCoordinationTerritoryResponses = {
+    /**
+     * Successful Response
+     */
+    200: CoordinationOut;
+};
+
+export type SetCoordinationTerritoryResponse = SetCoordinationTerritoryResponses[keyof SetCoordinationTerritoryResponses];
+
+export type CloseCoordinationData = {
+    body: CoordinationCloseIn;
+    path: {
+        /**
+         * Coordination Id
+         */
+        coordination_id: string;
+    };
+    query?: never;
+    url: '/api/v1/party-structure/coordinations/{coordination_id}/close';
+};
+
+export type CloseCoordinationErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type CloseCoordinationError = CloseCoordinationErrors[keyof CloseCoordinationErrors];
+
+export type CloseCoordinationResponses = {
+    /**
+     * Successful Response
+     */
+    200: CoordinationOut;
+};
+
+export type CloseCoordinationResponse = CloseCoordinationResponses[keyof CloseCoordinationResponses];

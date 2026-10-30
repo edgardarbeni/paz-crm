@@ -19,14 +19,14 @@ from app.modules.identity.dependencies import CurrentUser, permission
 from app.modules.identity.permissions import Perm
 from app.modules.identity.schemas import RoleSummary
 from app.modules.identity.services.scopes import GeoScope
-from app.modules.party_structure import access, appointments, service
+from app.modules.party_structure import access, appointments, coordinations, service
 from app.modules.party_structure.appointments import Seat
 from app.modules.party_structure.models import (
     Appointment,
     AppointmentKind,
     Body,
     BodyType,
-    CoordinationPositionType,
+    CoordinationKind,
     EndReason,
     PositionType,
     TerritorialLevel,
@@ -45,8 +45,9 @@ from app.modules.party_structure.schemas import (
     BodyTypeOut,
     BodyTypeRef,
     BodyTypeUpdate,
-    CoordinationPositionTypeIn,
-    CoordinationPositionTypeOut,
+    CoordinationCloseIn,
+    CoordinationIn,
+    CoordinationOut,
     DerivedChoiceIn,
     IncompatibilityIn,
     IncompatibilityOut,
@@ -56,6 +57,8 @@ from app.modules.party_structure.schemas import (
     PositionTypeRef,
     PositionTypeUpdate,
     SeatOut,
+    TerritoryIn,
+    TerritoryNode,
 )
 from app.modules.people.models import Person
 from app.modules.people.views import CryptoDep, person_summary
@@ -218,48 +221,6 @@ async def remove_incompatibility(
     db: SessionDep, _: CatalogManager, incompatibility_id: uuid.UUID
 ) -> None:
     await service.remove_incompatibility(db, incompatibility_id)
-
-
-async def _coordination_out(
-    db: AsyncSession, rows: list[CoordinationPositionType]
-) -> list[CoordinationPositionTypeOut]:
-    roles = await service.roles_by_id(db, {r.default_role_id for r in rows if r.default_role_id})
-    return [
-        CoordinationPositionTypeOut.model_validate(
-            {
-                **_fields(r, CoordinationPositionTypeOut),
-                "default_role": RoleSummary.model_validate(roles[r.default_role_id])
-                if r.default_role_id in roles
-                else None,
-            }
-        )
-        for r in rows
-    ]
-
-
-@router.get(
-    "/coordination-position-types",
-    operation_id="listCoordinationPositionTypes",
-    summary="Cargos del equipo de las coordinaciones territoriales",
-)
-async def list_coordination_position_types(
-    db: SessionDep, _: BodyReader
-) -> list[CoordinationPositionTypeOut]:
-    return await _coordination_out(db, await service.coordination_position_types(db))
-
-
-@router.post(
-    "/coordination-position-types",
-    operation_id="createCoordinationPositionType",
-    summary="Agregar un cargo de coordinación",
-    status_code=status.HTTP_201_CREATED,
-)
-async def create_coordination_position_type(
-    db: SessionDep, user: CatalogManager, body: CoordinationPositionTypeIn
-) -> CoordinationPositionTypeOut:
-    row = await service.create_coordination_position_type(db, user.access, body)
-    [out] = await _coordination_out(db, [row])
-    return out
 
 
 # --- bodies -----------------------------------------------------------------------------------
@@ -665,3 +626,136 @@ async def revoke_appointment_access(
     await db.commit()
     [out] = await _appointments_out(db, crypto, user, [appointment])
     return out
+
+
+# --- territorial coordinations (phase 4) ------------------------------------------------------
+
+CoordinationReader = Annotated[CurrentUser, permission(StructurePerm.COORDINATION_READ)]
+CoordinationWriter = Annotated[CurrentUser, permission(StructurePerm.COORDINATION_WRITE)]
+
+
+async def _coordination_out(
+    db: AsyncSession, coordination: coordinations.Coordination
+) -> CoordinationOut:
+    body = coordination.body
+    return CoordinationOut(
+        id=pk(body),
+        kind=coordination.kind,
+        name=body.name or "",
+        state_code=body.state_code,
+        territory=[
+            TerritoryNode(id=node, label=label)
+            for node, label in await coordinations.territory(db, coordination)
+        ],
+        created_on=body.installed_on,
+        agreement=body.installation_agreement,
+        closed_on=body.dissolved_on,
+        status="closed" if body.dissolved_on else "active",
+    )
+
+
+@router.post(
+    "/coordinations",
+    operation_id="createCoordination",
+    summary="Crear una coordinación territorial",
+    description=(
+        "Federal: distritos federales de cualquier estado (las de varios estados solo las crea "
+        "el nivel nacional). Local: distritos locales de un estado. Seccional: secciones de un "
+        "estado. Un distrito o sección pertenece a lo más a una coordinación vigente de su tipo."
+    ),
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_coordination(
+    db: SessionDep, user: CoordinationWriter, body: CoordinationIn
+) -> CoordinationOut:
+    created = await coordinations.create(
+        db,
+        user_id=user.id,
+        access=user.access,
+        kind=CoordinationKind(body.kind),
+        name=body.name,
+        node_ids=body.node_ids,
+        created_on=body.created_on,
+        agreement=body.agreement,
+    )
+    return await _coordination_out(db, await coordinations.load(db, pk(created)))
+
+
+@router.get(
+    "/coordinations", operation_id="listCoordinations", summary="Coordinaciones en tu alcance"
+)
+async def list_coordinations(
+    db: SessionDep,
+    user: CoordinationReader,
+    params: Annotated[PageParams, Depends(page_params)],
+    kind: CoordinationKind | None = None,
+    state_code: Annotated[int | None, Query(ge=1, le=32)] = None,
+    include_closed: bool = False,
+) -> CursorPage[CoordinationOut]:
+    body_type_id = pk(await coordinations.body_type_of(db, kind)) if kind else None
+    page = await service.list_bodies(
+        db,
+        user.geo,
+        params,
+        level=TerritorialLevel.COORDINATION,
+        body_type_id=body_type_id,
+        state_code=state_code,
+        include_dissolved=include_closed,
+    )
+    return CursorPage[CoordinationOut](
+        items=[
+            await _coordination_out(db, await coordinations.load(db, pk(b))) for b in page.items
+        ],
+        next_cursor=page.next_cursor,
+        has_more=page.has_more,
+    )
+
+
+@router.get(
+    "/coordinations/{coordination_id}",
+    operation_id="getCoordination",
+    summary="Detalle de una coordinación y su territorio",
+)
+async def get_coordination(
+    db: SessionDep, user: CoordinationReader, coordination_id: uuid.UUID
+) -> CoordinationOut:
+    await service.visible_body(db, user.geo, coordination_id)
+    return await _coordination_out(db, await coordinations.load(db, coordination_id))
+
+
+@router.put(
+    "/coordinations/{coordination_id}/territory",
+    operation_id="setCoordinationTerritory",
+    summary="Cambiar el territorio (recalcula el alcance de sus titulares)",
+)
+async def set_coordination_territory(
+    db: SessionDep, user: CoordinationWriter, coordination_id: uuid.UUID, body: TerritoryIn
+) -> CoordinationOut:
+    changed = await coordinations.set_territory(
+        db,
+        user_id=user.id,
+        access=user.access,
+        coordination_id=coordination_id,
+        node_ids=body.node_ids,
+        on=body.on,
+    )
+    return await _coordination_out(db, changed)
+
+
+@router.post(
+    "/coordinations/{coordination_id}/close",
+    operation_id="closeCoordination",
+    summary="Cerrar una coordinación (libera su territorio)",
+)
+async def close_coordination(
+    db: SessionDep, user: CoordinationWriter, coordination_id: uuid.UUID, body: CoordinationCloseIn
+) -> CoordinationOut:
+    closed = await coordinations.close(
+        db,
+        user_id=user.id,
+        access=user.access,
+        coordination_id=coordination_id,
+        closed_on=body.closed_on,
+        agreement=body.agreement,
+    )
+    return await _coordination_out(db, closed)

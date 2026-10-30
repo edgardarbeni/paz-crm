@@ -2,8 +2,9 @@
 
 **Estado:** en implementación. Fases 0 (concesiones en `identity`, [D-106](../adr/D-106-ajustes-implementacion-concesiones.md)) 1 (catálogo y
 órganos, [D-107](../adr/D-107-catalogo-y-organos.md)) 2 (asientos y nombramientos,
-[D-108](../adr/D-108-asientos-nombramientos.md)) y 3 (acceso por nombramiento,
-[D-109](../adr/D-109-acceso-por-nombramiento.md)) listas.
+[D-108](../adr/D-108-asientos-nombramientos.md)) 3 (acceso por nombramiento,
+[D-109](../adr/D-109-acceso-por-nombramiento.md)) y 4 (coordinaciones territoriales,
+[D-110](../adr/D-110-coordinaciones-territoriales.md)) listas.
 **Paquete propuesto:** `backend/app/modules/party_structure` · esquema `party_structure` · API
 `/api/v1/party-structure`.
 **Brief:** respuestas de Darío del 2026-10-30 y catálogo estatutario [`cargos_paz.md`](../reference/cargos_paz.md). Lo marcado
@@ -283,7 +284,7 @@ permiso de lectura.
 | 1 | Catálogo estatutario sembrado de `cargos_paz.md`, órganos, instalación y disolución (D-107) | Lista |
 | 2 | Asientos, nombramientos, periodos consecutivos, Presídium, incompatibilidades y administración delegada (D-108) | Lista |
 | 3 | Acceso por nombramiento: vínculo persona ↔ cuenta, invitación, `mfa_required`, revocación (D-104, D-109) | Lista |
-| 4 | Coordinaciones territoriales: exclusividad y recálculo de alcance | |
+| 4 | Coordinaciones territoriales: exclusividad y recálculo de alcance (D-110) | Lista |
 | 5 | Cambio de marco y bandeja de territorio por resolver (D-102, D-105) | |
 | 6 | Movimiento de Paz: crédito a quien abre o a un asiento, bandeja de casas y retiro de zonas (D-103) | |
 | 7 | Panel de la estructura y de las bandejas | |
@@ -307,6 +308,9 @@ y una ADR difieren, manda la ADR.**
   delegada (el nivel de una concesión manual es el de su alcance).
 - [D-109](../adr/D-109-acceso-por-nombramiento.md): cuenta de la persona, concesión con el
   territorio del asiento, TOTP pegajoso, revocación y vencimiento diario.
+- [D-110](../adr/D-110-coordinaciones-territoriales.md): las coordinaciones son órganos de tres
+  tipos fijos (cambia la tabla `coordination_position_types` de esta ficha por cargos de esos
+  tipos), con territorio exclusivo y concesiones que lo siguen.
 - [D-105](../adr/D-105-reglas-estructura-confirmadas.md): respuestas a las preguntas abiertas.
   - Sin incompatibilidades iniciales.
   - El orden de niveles para administrar.
