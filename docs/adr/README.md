@@ -176,6 +176,18 @@ plantean alternativas; el 2026-10-29 se aceptó la opción recomendada de cada u
 | [D-99](D-99-panel-movimiento-paz.md) | Panel del Movimiento de Paz (fase 5) | Aceptada |
 | [D-100](D-100-sin-portal-todo-en-panel-o-app.md) | Sin portal de pacificadores: la App y el panel (reemplaza D-87) | Aceptada |
 
+## Estructura del partido
+
+Decisiones derivadas de la ficha [party-structure.md](../modules/party-structure.md). Plantean
+alternativas y están pendientes de aprobación.
+
+| D | Tema | Estado |
+|---|---|---|
+| [D-101](D-101-concesiones-rol-alcance.md) | Concesiones (rol, alcance) (reemplaza D-34 en el modelo del alcance; amplía D-52 y D-83) | Propuesta |
+| [D-102](D-102-cambio-marco-estructura.md) | Cambio de marco geográfico en la estructura del partido (precisa D-63) | Propuesta |
+| [D-103](D-103-credito-casas-estructura.md) | Crédito de las Casas de Paz a asientos de estructura (reemplaza en parte D-92 y D-96) | Propuesta |
+| [D-104](D-104-cuentas-acceso-por-nombramiento.md) | Cuentas y acceso originados en nombramientos (amplía D-33, D-35 y D-52) | Propuesta |
+
 ## Suposiciones vigentes
 
 - El ID de origen de colonia en la BGD es estable entre cortes ([D-10](D-10-llave-natural-colonia.md)/[D-58](D-58-verificaciones-llave-colonia-fuentes-importador.md): único y consistente con el catálogo dentro del corte; la estabilidad entre cortes queda por verificar).
