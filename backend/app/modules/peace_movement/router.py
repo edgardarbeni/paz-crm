@@ -2,17 +2,19 @@
 (docs/modules/peace-movement.md). Everything is limited by the member scope (D-83)."""
 
 import uuid
+from datetime import date
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, File, Form, Path, Query, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, Path, Query, Response, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db.session import SessionDep
+from app.core.errors import BadRequestError
 from app.core.pagination import CursorPage, PageParams, page_params
 from app.core.storage import ObjectStorage, StorageDep
 from app.modules.identity.dependencies import CurrentUser, permission
 from app.modules.identity.permissions import Perm
-from app.modules.peace_movement import catalog, houses, members, scope
+from app.modules.peace_movement import catalog, houses, members, scope, stats
 from app.modules.peace_movement.models import (
     Member,
     PeaceHouse,
@@ -29,6 +31,8 @@ from app.modules.peace_movement.schemas import (
     CreditIn,
     DirectCounts,
     EnrollmentIn,
+    GeoStatOut,
+    GrowthPoint,
     HouseAddressOut,
     HouseGoalIn,
     HouseGoalOut,
@@ -50,6 +54,9 @@ from app.modules.peace_movement.schemas import (
     MemberHistory,
     MemberOut,
     MemberSummary,
+    NetworkNode,
+    NetworkOut,
+    NetworkPage,
     PhotoOut,
     ReasonIn,
     ReassignIn,
@@ -226,6 +233,10 @@ async def _member_out(
     member, view = await members.read_member(db, user.geo, member_id, unmasked=sensitive)
     counts = await members.direct_counts(db, user.geo, member)
     goal, pct, light = await members.progress(db, member, counts["active"])
+    network = await stats.network_stats(db, member)
+    house_goal, houses_pct = await members.houses_progress(
+        db, member, network.houses_consolidated if network else 0
+    )
     recruiter = None
     if member.recruited_by_member_id is not None:
         parent = await db.get(Member, member.recruited_by_member_id)
@@ -252,6 +263,9 @@ async def _member_out(
         recruit_goal=goal,
         progress_pct=pct,
         traffic_light=light,
+        network=NetworkOut.model_validate(network) if network else None,
+        house_goal=house_goal,
+        houses_progress_pct=houses_pct,
     )
 
 
@@ -790,3 +804,123 @@ async def delete_photo(
     db: SessionDep, storage: StorageDep, user: HouseWriter, house_id: HouseId, photo_id: uuid.UUID
 ) -> None:
     await houses.delete_photo(db, storage, _actor(user), house_id, photo_id)
+
+
+# --- statistics -------------------------------------------------------------------------------
+
+StatsReader = Annotated[CurrentUser, permission(PeacePerm.STATS_READ)]
+GeoLevel = Annotated[
+    str,
+    Query(pattern="^(state|municipality|federal_district|local_district|section)$"),
+]
+MAX_GROWTH_DAYS = 1100
+
+
+@router.get(
+    "/members/{member_id}/network",
+    operation_id="getMemberNetwork",
+    summary="Red de un pacificador: agregados y niveles inferiores (máximo 3)",
+)
+async def get_network(
+    db: SessionDep,
+    crypto: CryptoDep,
+    user: Reader,
+    member_id: MemberId,
+    params: Annotated[PageParams, Depends(page_params)],
+    max_depth: Annotated[int, Query(ge=1, le=stats.MAX_NETWORK_DEPTH)] = 1,
+) -> NetworkPage:
+    root, page, hidden = await stats.descendants(
+        db, user.geo, member_id, params, max_depth=max_depth
+    )
+    sensitive = user.has(Perm.PERSON_READ_SENSITIVE)
+    counters = await stats.stats_of(db, [root, *page.items])
+    summaries = await _summaries(db, crypto, [root, *page.items], sensitive)
+
+    def node(summary: MemberSummary) -> NetworkNode:
+        found = counters.get(summary.id)
+        return NetworkNode(
+            member=summary, network=NetworkOut.model_validate(found) if found else None
+        )
+
+    return NetworkPage(
+        root=node(summaries[0]),
+        items=[node(s) for s in summaries[1:]],
+        next_cursor=page.next_cursor,
+        has_more=page.has_more,
+        hidden=hidden,
+    )
+
+
+@router.get(
+    "/stats/geography",
+    operation_id="getPeaceGeographyStats",
+    summary="Pacificadores activos por nivel geográfico (dentro del alcance)",
+)
+async def geography_stats(
+    db: SessionDep,
+    user: StatsReader,
+    level: GeoLevel = "state",
+    state_id: uuid.UUID | None = None,
+    municipality_id: uuid.UUID | None = None,
+) -> list[GeoStatOut]:
+    rows = await stats.by_geography(
+        db, user.geo, level=level, state_id=state_id, municipality_id=municipality_id
+    )
+    return [GeoStatOut.model_validate(row, from_attributes=True) for row in rows]
+
+
+@router.get(
+    "/stats/growth",
+    operation_id="getPeaceGrowth",
+    summary="Inscripciones validadas por día (dentro del alcance)",
+)
+async def growth(
+    db: SessionDep,
+    user: StatsReader,
+    date_from: Annotated[date, Query(alias="from")],
+    date_to: Annotated[date, Query(alias="to")],
+    state_id: uuid.UUID | None = None,
+    level_id: uuid.UUID | None = None,
+) -> list[GrowthPoint]:
+    if date_to < date_from or (date_to - date_from).days > MAX_GROWTH_DAYS:
+        raise BadRequestError(
+            f"El periodo debe ir hacia adelante y durar hasta {MAX_GROWTH_DAYS} días."
+        )
+    rows = await stats.growth(
+        db, user.geo, date_from=date_from, date_to=date_to, state_id=state_id, level_id=level_id
+    )
+    return [GrowthPoint(day=day, enrollments=count) for day, count in rows]
+
+
+@router.get(
+    "/members-export",
+    operation_id="exportMembers",
+    summary="Exportar pacificadores a CSV (queda en la bitácora de lecturas)",
+    response_class=Response,
+    responses={200: {"content": {"text/csv": {}}}},
+)
+async def export_members(
+    db: SessionDep,
+    crypto: CryptoDep,
+    user: StatsReader,
+    status_: Annotated[
+        str | None,
+        Query(alias="status", pattern="^(pending_validation|active|rejected|left|withdrawn)$"),
+    ] = None,
+    state_id: uuid.UUID | None = None,
+    level_id: uuid.UUID | None = None,
+) -> Response:
+    content = await stats.export_members(
+        db,
+        crypto,
+        user.geo,
+        sensitive=user.has(Perm.PERSON_READ_SENSITIVE),
+        status=status_,
+        state_id=state_id,
+        level_id=level_id,
+    )
+    return Response(
+        content=content,
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": 'attachment; filename="pacificadores.csv"'},
+    )

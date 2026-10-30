@@ -362,8 +362,19 @@ def keys_generate() -> None:
     typer.echo(generate_key())
 
 
+def mount_module_clis() -> None:
+    """Adds the commands each module declares in `module.py` (`ModuleSpec.cli`)."""
+    from app.core.modules import module_clis  # noqa: PLC0415
+
+    mounted = {group.name for group in cli.registered_groups}
+    for name, app in module_clis():
+        if name not in mounted:
+            cli.add_typer(app, name=name)
+
+
 def main() -> None:
     from app.core.modules import setup_modules  # noqa: PLC0415
 
     setup_modules()
+    mount_module_clis()
     cli()

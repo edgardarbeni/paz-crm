@@ -337,6 +337,16 @@ export const zCursorPageGeoNodeOut = z.object({
 });
 
 /**
+ * GeoStatOut
+ */
+export const zGeoStatOut = z.object({
+    node_id: z.uuid(),
+    label: z.string(),
+    active: z.int(),
+    by_level: z.record(z.string(), z.int())
+});
+
+/**
  * GeographicLevel
  */
 export const zGeographicLevel = z.enum([
@@ -347,6 +357,14 @@ export const zGeographicLevel = z.enum([
     'local_district',
     'municipality'
 ]);
+
+/**
+ * GrowthPoint
+ */
+export const zGrowthPoint = z.object({
+    day: z.iso.date(),
+    enrollments: z.int()
+});
 
 /**
  * GuestIn
@@ -679,6 +697,21 @@ export const zMunicipalitySettingOut = z.object({
     rp_councilor_count: z.int().gte(0).lte(100).optional().default(0),
     syndic_count: z.int().gte(0).lte(10).optional().default(0),
     id: z.uuid()
+});
+
+/**
+ * NetworkOut
+ *
+ * Precomputed counters of the network (they reflect changes within minutes).
+ */
+export const zNetworkOut = z.object({
+    direct_active: z.int(),
+    direct_pending: z.int(),
+    network_total: z.int(),
+    network_by_level: z.record(z.string(), z.int()),
+    houses_open: z.int(),
+    houses_consolidated: z.int(),
+    computed_at: z.iso.datetime()
 });
 
 /**
@@ -1080,6 +1113,25 @@ export const zHouseMemberOut = z.object({
     member: zMemberSummary,
     joined_on: z.iso.date(),
     source: z.string()
+});
+
+/**
+ * NetworkNode
+ */
+export const zNetworkNode = z.object({
+    member: zMemberSummary,
+    network: zNetworkOut.nullable()
+});
+
+/**
+ * NetworkPage
+ */
+export const zNetworkPage = z.object({
+    root: zNetworkNode,
+    items: z.array(zNetworkNode),
+    next_cursor: z.string().nullable(),
+    has_more: z.boolean(),
+    hidden: z.int()
 });
 
 /**
@@ -1864,7 +1916,10 @@ export const zAppModulesPeaceMovementSchemasMemberOut = z.object({
         'red',
         'yellow',
         'green'
-    ]).nullable()
+    ]).nullable(),
+    network: zNetworkOut.nullable(),
+    house_goal: z.int().nullable(),
+    houses_progress_pct: z.int().nullable()
 });
 
 /**
@@ -3212,3 +3267,52 @@ export const zDeleteHousePhotoPath = z.object({
  * Successful Response
  */
 export const zDeleteHousePhotoResponse = z.void();
+
+export const zGetMemberNetworkPath = z.object({
+    member_id: z.uuid()
+});
+
+export const zGetMemberNetworkQuery = z.object({
+    max_depth: z.int().gte(1).lte(3).optional().default(1),
+    limit: z.int().gte(1).lte(200).optional().default(50),
+    cursor: z.string().max(1024).nullish(),
+    sort: z.string().max(200).nullish()
+});
+
+/**
+ * Successful Response
+ */
+export const zGetMemberNetworkResponse = zNetworkPage;
+
+export const zGetPeaceGeographyStatsQuery = z.object({
+    level: z.string().regex(/^(state|municipality|federal_district|local_district|section)$/).optional().default('state'),
+    state_id: z.uuid().nullish(),
+    municipality_id: z.uuid().nullish()
+});
+
+/**
+ * Response Getpeacegeographystats
+ *
+ * Successful Response
+ */
+export const zGetPeaceGeographyStatsResponse = z.array(zGeoStatOut);
+
+export const zGetPeaceGrowthQuery = z.object({
+    from: z.iso.date(),
+    to: z.iso.date(),
+    state_id: z.uuid().nullish(),
+    level_id: z.uuid().nullish()
+});
+
+/**
+ * Response Getpeacegrowth
+ *
+ * Successful Response
+ */
+export const zGetPeaceGrowthResponse = z.array(zGrowthPoint);
+
+export const zExportMembersQuery = z.object({
+    status: z.string().regex(/^(pending_validation|active|rejected|left|withdrawn)$/).nullish(),
+    state_id: z.uuid().nullish(),
+    level_id: z.uuid().nullish()
+});

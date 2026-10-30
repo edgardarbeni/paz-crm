@@ -1,0 +1,15 @@
+meta {
+  name: Exportar pacificadores (CSV)
+  type: http
+  seq: 18
+}
+
+get {
+  url: {{baseUrl}}/api/v1/peace-movement/members-export?status=active&state_id={{stateId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}

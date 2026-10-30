@@ -1,0 +1,15 @@
+meta {
+  name: Crecimiento por día
+  type: http
+  seq: 17
+}
+
+get {
+  url: {{baseUrl}}/api/v1/peace-movement/stats/growth?from=2026-10-01&to=2026-10-31
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}

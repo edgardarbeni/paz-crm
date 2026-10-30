@@ -9352,6 +9352,427 @@
           }
         }
       }
+    },
+    "/api/v1/peace-movement/members/{member_id}/network": {
+      "get": {
+        "tags": [
+          "peace-movement"
+        ],
+        "summary": "Red de un pacificador: agregados y niveles inferiores (máximo 3)",
+        "operationId": "getMemberNetwork",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "member_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Id del pacificador.",
+              "title": "Member Id"
+            },
+            "description": "Id del pacificador."
+          },
+          {
+            "name": "max_depth",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 3,
+              "minimum": 1,
+              "default": 1,
+              "title": "Max Depth"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 1024
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 200
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Campos separados por coma; prefijo '-' para descendente.",
+              "examples": [
+                "-created_at,name"
+              ],
+              "title": "Sort"
+            },
+            "description": "Campos separados por coma; prefijo '-' para descendente."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NetworkPage"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/peace-movement/stats/geography": {
+      "get": {
+        "tags": [
+          "peace-movement"
+        ],
+        "summary": "Pacificadores activos por nivel geográfico (dentro del alcance)",
+        "operationId": "getPeaceGeographyStats",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "level",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^(state|municipality|federal_district|local_district|section)$",
+              "default": "state",
+              "title": "Level"
+            }
+          },
+          {
+            "name": "state_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "State Id"
+            }
+          },
+          {
+            "name": "municipality_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Municipality Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GeoStatOut"
+                  },
+                  "title": "Response Getpeacegeographystats"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/peace-movement/stats/growth": {
+      "get": {
+        "tags": [
+          "peace-movement"
+        ],
+        "summary": "Inscripciones validadas por día (dentro del alcance)",
+        "operationId": "getPeaceGrowth",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "title": "From"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "title": "To"
+            }
+          },
+          {
+            "name": "state_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "State Id"
+            }
+          },
+          {
+            "name": "level_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Level Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GrowthPoint"
+                  },
+                  "title": "Response Getpeacegrowth"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/peace-movement/members-export": {
+      "get": {
+        "tags": [
+          "peace-movement"
+        ],
+        "summary": "Exportar pacificadores a CSV (queda en la bitácora de lecturas)",
+        "operationId": "exportMembers",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^(pending_validation|active|rejected|left|withdrawn)$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "state_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "State Id"
+            }
+          },
+          {
+            "name": "level_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Level Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "text/csv": {}
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -11639,6 +12060,39 @@
         ],
         "title": "GeoNodeOut"
       },
+      "GeoStatOut": {
+        "properties": {
+          "node_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Node Id"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "active": {
+            "type": "integer",
+            "title": "Active"
+          },
+          "by_level": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "By Level"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "node_id",
+          "label",
+          "active",
+          "by_level"
+        ],
+        "title": "GeoStatOut"
+      },
       "GeographicLevel": {
         "type": "string",
         "enum": [
@@ -11650,6 +12104,26 @@
           "municipality"
         ],
         "title": "GeographicLevel"
+      },
+      "GrowthPoint": {
+        "properties": {
+          "day": {
+            "type": "string",
+            "format": "date",
+            "title": "Day"
+          },
+          "enrollments": {
+            "type": "integer",
+            "title": "Enrollments"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "day",
+          "enrollments"
+        ],
+        "title": "GrowthPoint"
       },
       "GuestIn": {
         "properties": {
@@ -13587,6 +14061,124 @@
           "id"
         ],
         "title": "MunicipalitySettingOut"
+      },
+      "NetworkNode": {
+        "properties": {
+          "member": {
+            "$ref": "#/components/schemas/MemberSummary"
+          },
+          "network": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NetworkOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "member",
+          "network"
+        ],
+        "title": "NetworkNode"
+      },
+      "NetworkOut": {
+        "properties": {
+          "direct_active": {
+            "type": "integer",
+            "title": "Direct Active"
+          },
+          "direct_pending": {
+            "type": "integer",
+            "title": "Direct Pending"
+          },
+          "network_total": {
+            "type": "integer",
+            "title": "Network Total",
+            "description": "Pacificadores activos en toda la red, sin él."
+          },
+          "network_by_level": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Network By Level"
+          },
+          "houses_open": {
+            "type": "integer",
+            "title": "Houses Open"
+          },
+          "houses_consolidated": {
+            "type": "integer",
+            "title": "Houses Consolidated"
+          },
+          "computed_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Computed At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "direct_active",
+          "direct_pending",
+          "network_total",
+          "network_by_level",
+          "houses_open",
+          "houses_consolidated",
+          "computed_at"
+        ],
+        "title": "NetworkOut",
+        "description": "Precomputed counters of the network (they reflect changes within minutes)."
+      },
+      "NetworkPage": {
+        "properties": {
+          "root": {
+            "$ref": "#/components/schemas/NetworkNode"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/NetworkNode"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          },
+          "has_more": {
+            "type": "boolean",
+            "title": "Has More"
+          },
+          "hidden": {
+            "type": "integer",
+            "title": "Hidden",
+            "description": "Integrantes de esos niveles fuera del alcance (solo total)."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "root",
+          "items",
+          "next_cursor",
+          "has_more",
+          "hidden"
+        ],
+        "title": "NetworkPage"
       },
       "NodeRef": {
         "properties": {
@@ -17038,6 +17630,40 @@
               }
             ],
             "title": "Traffic Light"
+          },
+          "network": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NetworkOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Nulo hasta el primer cálculo de agregados."
+          },
+          "house_goal": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "House Goal",
+            "description": "Casas consolidadas que pide su nivel."
+          },
+          "houses_progress_pct": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Houses Progress Pct"
           }
         },
         "additionalProperties": false,
@@ -17062,7 +17688,10 @@
           "direct",
           "recruit_goal",
           "progress_pct",
-          "traffic_light"
+          "traffic_light",
+          "network",
+          "house_goal",
+          "houses_progress_pct"
         ],
         "title": "MemberOut"
       }

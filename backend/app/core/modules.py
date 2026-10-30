@@ -34,6 +34,8 @@ class ModuleSpec:
     permissions: str | None = None
     # Dotted module imported once at startup to register hooks in other modules (e.g. people).
     setup: str | None = None
+    # "package.module:attribute" of a Typer app mounted as `paz <name with dashes>`.
+    cli: str | None = None
 
 
 def _resolve(reference: str) -> Any:
@@ -77,6 +79,15 @@ def setup_modules() -> None:
 
 def api_routers() -> list[APIRouter]:
     return [_resolve(ref) for spec in installed_modules() for ref in spec.routers]
+
+
+def module_clis() -> list[tuple[str, Any]]:
+    """(command name, Typer app) of every module that declares one."""
+    return [
+        (spec.name.replace("_", "-"), _resolve(spec.cli))
+        for spec in installed_modules()
+        if spec.cli
+    ]
 
 
 @cache

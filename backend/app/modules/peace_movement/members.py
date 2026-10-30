@@ -459,9 +459,10 @@ async def follow_address(db: AsyncSession, person_id: uuid.UUID, address: Person
         return
     state_id, section_id = await _home(db, address)
     for member in members:
+        old_section = member.section_id
         member.state_id = state_id
         member.section_id = section_id
-        db.add(_change("moved_home", member, member.path))
+        db.add(_change("moved_home", member, member.path, old_section_id=str(old_section)))
     await db.flush()
 
 
@@ -611,3 +612,13 @@ async def progress(
     pct = active_recruits * 100 // goal.recruit_goal
     settings = await catalog.get_settings(db)
     return goal.recruit_goal, pct, catalog.traffic_light(settings, pct)
+
+
+async def houses_progress(
+    db: AsyncSession, member: Member, consolidated: int
+) -> tuple[int | None, int | None]:
+    """(house goal, %) for levels that ask for consolidated houses (Ambassador, D-92)."""
+    goal = await catalog.level_goal_for(db, member.level_id, member.state_id)
+    if goal is None or not goal.house_goal:
+        return None, None
+    return goal.house_goal, consolidated * 100 // goal.house_goal

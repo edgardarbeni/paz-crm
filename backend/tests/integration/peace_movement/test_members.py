@@ -278,7 +278,9 @@ async def test_reassign_moves_the_whole_subtree(  # noqa: PLR0917
     bulk = (
         await rows(
             owner_engine,
-            "SELECT after FROM audit.audit_log WHERE action = 'member_subtree_moved'",
+            "SELECT after FROM audit.audit_log WHERE action = 'member_subtree_moved' "
+            "AND after->>'member_id' = :b",
+            b=b["id"],
         )
     )[0]["after"]
     assert bulk["count"] == 2

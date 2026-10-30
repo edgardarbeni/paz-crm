@@ -33,6 +33,7 @@ from app.modules.peace_movement.models import (
     HouseStatus,
     Member,
     MemberStatus,
+    NetworkChange,
     ParticipationLevel,
     PeaceHouse,
     PeaceHouseCreditChange,
@@ -186,11 +187,27 @@ async def _ensure_member_row(
         await db.flush()
 
 
+async def house_changed(db: AsyncSession, *member_ids: uuid.UUID | None) -> None:
+    """Outbox entry for the house counters of the credited members (aggregates, phase 3)."""
+    for member_id in {m for m in member_ids if m is not None}:
+        member = await db.get(Member, member_id)
+        if member is not None:
+            db.add(
+                NetworkChange(
+                    kind="house_changed",
+                    member_id=member_id,
+                    paths=[member.path],
+                    created_at=datetime.now(UTC),
+                )
+            )
+
+
 async def sync_status(db: AsyncSession, house: PeaceHouse) -> None:
     """Consolidated while current members reach the goal in force in the house's state; back to
     open if they drop below it (D-92). The first consolidation date is kept."""
     if house.status not in CURRENT_HOUSE_STATUSES:
         return
+    before = house.status
     count = len(await current_members(db, pk(house)))
     goal = await catalog.house_goal_for(db, house.state_id)
     reached = goal is not None and count >= goal.member_goal
@@ -201,6 +218,8 @@ async def sync_status(db: AsyncSession, house: PeaceHouse) -> None:
     elif not reached and house.status == HouseStatus.CONSOLIDATED:
         house.status = HouseStatus.OPEN
         house.consolidated_on = None
+    if house.status != before:
+        await house_changed(db, house.credited_member_id)
     await db.flush()
 
 
@@ -288,6 +307,7 @@ async def open_house(
         )
     await db.flush()
     await sync_status(db, house)
+    await house_changed(db, credited_member)
     await db.commit()
     return house
 
@@ -335,6 +355,7 @@ async def close_house(
     house.closed_on = date.today()
     house.consolidated_on = None
     house.status_reason = reason
+    await house_changed(db, house.credited_member_id)
     await db.commit()
     return house
 
@@ -371,6 +392,7 @@ async def reassign_credit(
             reason=body.reason,
         )
     )
+    await house_changed(db, house.credited_member_id, to_member)
     house.credited_member_id = to_member
     house.credited_user_id = to_user
     await db.commit()
