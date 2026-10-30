@@ -29,7 +29,7 @@ from app.modules.identity.security.tokens import (
     hash_opaque_token,
     new_opaque_token,
 )
-from app.modules.identity.services.access import Access, Grant, ensure_can_grant
+from app.modules.identity.services.access import Access, Grant, RoleInfo, ensure_can_grant
 from app.modules.identity.services.scopes import geo_for
 from tests.support import make_settings
 
@@ -200,7 +200,12 @@ def _role(**kwargs: Any) -> Role:
 
 
 def _grant(role: Role, permissions: set[str], *, national: bool = False) -> Grant:
-    return Grant(id=uuid.uuid4(), role=role, permissions=frozenset(permissions), national=national)
+    return Grant(
+        id=uuid.uuid4(),
+        role=RoleInfo.of(role),
+        permissions=frozenset(permissions),
+        national=national,
+    )
 
 
 def test_access_rules() -> None:

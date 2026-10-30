@@ -335,3 +335,31 @@ class DerivedChoice(BusinessTable, table=True):
     starts_on: date = Field(sa_type=Date)
     ends_on: date | None = Field(default=None, sa_type=Date)
     agreement_ref: str | None = Field(default=None, max_length=300)
+
+
+# --- access from appointments (phase 3, D-104) ------------------------------------------------
+
+
+class PersonAccount(BusinessTable, table=True):
+    """The account of a person who holds positions: one per person and per account. Lives here
+    so `identity` does not depend on `people` (D-104)."""
+
+    __tablename__ = "person_accounts"
+    __table_args__ = (
+        Index(
+            "uq_person_accounts_person",
+            "person_id",
+            unique=True,
+            postgresql_where=text("deleted_at IS NULL"),
+        ),
+        Index(
+            "uq_person_accounts_user",
+            "user_id",
+            unique=True,
+            postgresql_where=text("deleted_at IS NULL"),
+        ),
+        {"schema": SCHEMA},
+    )
+
+    person_id: uuid.UUID = _fk("people.persons.id")  # type: ignore[assignment]
+    user_id: uuid.UUID = _fk("identity.users.id", ondelete="CASCADE")  # type: ignore[assignment]

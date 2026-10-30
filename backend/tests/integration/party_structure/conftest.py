@@ -45,6 +45,7 @@ async def clean_party_structure(
 ) -> None:
     async with owner_engine.begin() as connection:
         for sql in (
+            "DELETE FROM party_structure.person_accounts",
             "DELETE FROM party_structure.derived_choices",
             "DELETE FROM party_structure.appointments",
             "DELETE FROM party_structure.positions p USING party_structure.bodies b "

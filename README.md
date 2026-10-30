@@ -158,6 +158,9 @@ uv run paz --help                    # CLI de operación
   - Asientos y nombramientos (D-108): `bodies/{id}/positions`, `positions/{id}/appointments`,
     `appointments/{id}/end`, `positions/{id}/derived-choice` (Presídium) y
     `people/{id}/appointments`; solo se nombra en niveles inferiores al propio.
+  - Acceso por nombramiento (D-109): `access` al nombrar o `POST /appointments/{id}/access`
+    (invitación, TOTP obligatorio, concesión con el territorio del asiento); se retira al
+    terminar y cada noche `paz party-structure expire` termina los vencidos.
 - **Errores.** Siempre RFC 9457 (`application/problem+json`): `type` es `urn:pazos:problem:<code>`
   e incluye `request_id`.
 - **Paginación.** Por cursor (`app.core.pagination`): `limit` ≤ 200, `cursor` opaco y `sort`

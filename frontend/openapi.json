@@ -11651,6 +11651,130 @@
           }
         }
       }
+    },
+    "/api/v1/party-structure/appointments/{appointment_id}/access": {
+      "post": {
+        "tags": [
+          "party-structure"
+        ],
+        "summary": "Dar acceso al sistema al titular (invitación y TOTP obligatorio)",
+        "operationId": "grantAppointmentAccess",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "appointment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Appointment Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccessIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppointmentOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "party-structure"
+        ],
+        "summary": "Quitar el acceso que da un nombramiento (sigue vigente el cargo)",
+        "operationId": "revokeAppointmentAccess",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "appointment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Appointment Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppointmentOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -11760,6 +11884,39 @@
         ],
         "title": "AccessEntryOut",
         "description": "A sensitive read (D-89): who read what, never the content."
+      },
+      "AccessIn": {
+        "properties": {
+          "email": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "email"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "role_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Role Id",
+            "description": "Vacío: el rol por defecto del cargo."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "AccessIn",
+        "description": "Access to the system for the holder (D-104). The account is the person's: it is reused if\nit exists; if not, `email` is required and an invitation is sent."
       },
       "AddressIn": {
         "properties": {
@@ -12167,6 +12324,17 @@
               }
             ],
             "title": "Agreement Ref"
+          },
+          "access": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AccessIn"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Dar acceso al sistema. Si quien nombra no puede darlo, el nombramiento se registra sin acceso y `access_pending` dice por qué (D-104)."
           }
         },
         "additionalProperties": false,
@@ -12291,6 +12459,35 @@
           "current": {
             "type": "boolean",
             "title": "Current"
+          },
+          "has_access": {
+            "type": "boolean",
+            "title": "Has Access"
+          },
+          "user_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Id",
+            "description": "Cuenta de la persona, si el cargo da acceso."
+          },
+          "access_pending": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Access Pending",
+            "description": "Por qué no se dio el acceso pedido al nombrar."
           }
         },
         "additionalProperties": false,
@@ -12308,7 +12505,9 @@
           "end_reason",
           "end_notes",
           "role",
-          "current"
+          "current",
+          "has_access",
+          "user_id"
         ],
         "title": "AppointmentOut"
       },
@@ -18993,6 +19192,35 @@
             "type": "boolean",
             "title": "Current"
           },
+          "has_access": {
+            "type": "boolean",
+            "title": "Has Access"
+          },
+          "user_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Id",
+            "description": "Cuenta de la persona, si el cargo da acceso."
+          },
+          "access_pending": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Access Pending",
+            "description": "Por qué no se dio el acceso pedido al nombrar."
+          },
           "position_type": {
             "$ref": "#/components/schemas/PositionTypeRef"
           },
@@ -19025,6 +19253,8 @@
           "end_notes",
           "role",
           "current",
+          "has_access",
+          "user_id",
           "position_type",
           "body",
           "body_id",

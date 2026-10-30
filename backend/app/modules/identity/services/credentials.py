@@ -219,6 +219,10 @@ async def _issue_invitation(
     return invitation, message
 
 
+# Public for modules that create accounts (party structure, D-104).
+issue_invitation = _issue_invitation
+
+
 async def _valid_invitation(db: AsyncSession, token: str) -> tuple[UserInvitation, User]:
     invitation = await repo.invitation_by_hash(db, hash_opaque_token(token))
     now = utcnow()

@@ -4,7 +4,7 @@ import uuid
 from datetime import date
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 from app.modules.identity.schemas import RoleSummary
 from app.modules.party_structure.models import (
@@ -188,6 +188,16 @@ class BodyDissolveIn(Schema):
 # --- seats and appointments (phase 2) ---------------------------------------------------------
 
 
+class AccessIn(Schema):
+    """Access to the system for the holder (D-104). The account is the person's: it is reused if
+    it exists; if not, `email` is required and an invitation is sent."""
+
+    email: EmailStr | None = None
+    role_id: uuid.UUID | None = Field(
+        default=None, description="Vacío: el rol por defecto del cargo."
+    )
+
+
 class AppointmentIn(Schema):
     person_id: uuid.UUID = Field(description="Persona registrada con CURP.")
     kind: AppointmentKind
@@ -197,6 +207,13 @@ class AppointmentIn(Schema):
     )
     appointed_by: str | None = Field(default=None, max_length=300)
     agreement_ref: str | None = Field(default=None, max_length=300)
+    access: AccessIn | None = Field(
+        default=None,
+        description=(
+            "Dar acceso al sistema. Si quien nombra no puede darlo, el nombramiento se registra "
+            "sin acceso y `access_pending` dice por qué (D-104)."
+        ),
+    )
 
 
 class AppointmentUpdate(Schema):
@@ -225,6 +242,11 @@ class AppointmentOut(Schema):
     end_notes: str | None
     role: RoleSummary | None
     current: bool
+    has_access: bool
+    user_id: uuid.UUID | None = Field(description="Cuenta de la persona, si el cargo da acceso.")
+    access_pending: str | None = Field(
+        default=None, description="Por qué no se dio el acceso pedido al nombrar."
+    )
 
 
 class PersonAppointmentOut(AppointmentOut):

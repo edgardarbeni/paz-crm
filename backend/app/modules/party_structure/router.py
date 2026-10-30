@@ -3,7 +3,7 @@
 import uuid
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, BackgroundTasks, Depends, Query, status
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,12 +11,15 @@ from sqlmodel import SQLModel, col
 
 from app.core.db.base import pk
 from app.core.db.session import SessionDep
+from app.core.errors import BadRequestError, ConflictError, ForbiddenError, NotFoundError
+from app.core.mail import send_safely
 from app.core.pagination import CursorPage, PageParams, page_params
+from app.modules.identity.container import IdentityServices, ServicesDep
 from app.modules.identity.dependencies import CurrentUser, permission
 from app.modules.identity.permissions import Perm
 from app.modules.identity.schemas import RoleSummary
 from app.modules.identity.services.scopes import GeoScope
-from app.modules.party_structure import appointments, service
+from app.modules.party_structure import access, appointments, service
 from app.modules.party_structure.appointments import Seat
 from app.modules.party_structure.models import (
     Appointment,
@@ -30,6 +33,7 @@ from app.modules.party_structure.models import (
 )
 from app.modules.party_structure.permissions import StructurePerm
 from app.modules.party_structure.schemas import (
+    AccessIn,
     AppointmentEndIn,
     AppointmentIn,
     AppointmentOut,
@@ -351,6 +355,7 @@ async def _appointments_out(
     db: AsyncSession, crypto: CryptoDep, user: CurrentUser, rows: list[Appointment]
 ) -> list[AppointmentOut]:
     persons = await _persons(db, {r.person_id for r in rows})
+    accounts = {r.id: await access.user_of_appointment(db, pk(r)) for r in rows}
     roles = await service.roles_by_id(db, {r.role_id for r in rows if r.role_id})
     sensitive = await user.holds_within(db, Perm.PERSON_READ_SENSITIVE)
     return [
@@ -362,6 +367,8 @@ async def _appointments_out(
                 if r.role_id in roles
                 else None,
                 "current": r.ended_on is None,
+                "has_access": accounts[r.id] is not None,
+                "user_id": accounts[r.id],
             }
         )
         for r in rows
@@ -447,6 +454,8 @@ async def list_position_appointments(
 async def appoint(
     db: SessionDep,
     crypto: CryptoDep,
+    services: ServicesDep,
+    background: BackgroundTasks,
     user: AppointmentWriter,
     position_id: uuid.UUID,
     body: AppointmentIn,
@@ -463,8 +472,44 @@ async def appoint(
         appointed_by=body.appointed_by,
         agreement_ref=body.agreement_ref,
     )
-    [out] = await _appointments_out(db, crypto, user, [created])
-    return out
+    pending = None
+    created_id = pk(created)
+    if body.access is not None:
+        pending = await _try_access(db, services, background, user, created_id, body.access)
+    # Reloaded: a refused access rolls back the session, which expires loaded objects.
+    reloaded = await db.get(Appointment, created_id, populate_existing=True)
+    assert reloaded is not None  # noqa: S101 - committed above
+    [out] = await _appointments_out(db, crypto, user, [reloaded])
+    return out.model_copy(update={"access_pending": pending})
+
+
+async def _try_access(
+    db: AsyncSession,
+    services: IdentityServices,
+    background: BackgroundTasks,
+    user: CurrentUser,
+    appointment_id: uuid.UUID,
+    body: AccessIn,
+) -> str | None:
+    """D-104 point 5: the appointment stands even if its author cannot grant the access."""
+    if not user.has(StructurePerm.APPOINTMENT_GRANT_ACCESS):
+        return "Sin permiso para dar acceso: lo debe otorgar quien tenga ese permiso."
+    try:
+        result = await access.grant_access(
+            db,
+            services,
+            actor_id=user.id,
+            actor=user.access,
+            appointment_id=appointment_id,
+            email=body.email,
+            role_id=body.role_id,
+        )
+    except (ForbiddenError, BadRequestError, ConflictError) as error:
+        await db.rollback()
+        return error.detail
+    if result.invitation is not None:
+        background.add_task(send_safely, services.mailer, result.invitation)
+    return None
 
 
 @router.patch(
@@ -569,3 +614,54 @@ async def list_person_appointments(
         )
         for r, out in zip(rows, base, strict=True)
     ]
+
+
+AccessGranter = Annotated[CurrentUser, permission(StructurePerm.APPOINTMENT_GRANT_ACCESS)]
+
+
+@router.post(
+    "/appointments/{appointment_id}/access",
+    operation_id="grantAppointmentAccess",
+    summary="Dar acceso al sistema al titular (invitación y TOTP obligatorio)",
+)
+async def grant_appointment_access(
+    db: SessionDep,
+    crypto: CryptoDep,
+    services: ServicesDep,
+    background: BackgroundTasks,
+    user: AccessGranter,
+    appointment_id: uuid.UUID,
+    body: AccessIn,
+) -> AppointmentOut:
+    result = await access.grant_access(
+        db,
+        services,
+        actor_id=user.id,
+        actor=user.access,
+        appointment_id=appointment_id,
+        email=body.email,
+        role_id=body.role_id,
+    )
+    if result.invitation is not None:
+        background.add_task(send_safely, services.mailer, result.invitation)
+    [out] = await _appointments_out(db, crypto, user, [result.appointment])
+    return out
+
+
+@router.delete(
+    "/appointments/{appointment_id}/access",
+    operation_id="revokeAppointmentAccess",
+    summary="Quitar el acceso que da un nombramiento (sigue vigente el cargo)",
+)
+async def revoke_appointment_access(
+    db: SessionDep, crypto: CryptoDep, user: AccessGranter, appointment_id: uuid.UUID
+) -> AppointmentOut:
+    appointment = await db.get(Appointment, appointment_id)
+    if appointment is None or appointment.deleted_at is not None:
+        raise NotFoundError("Nombramiento no encontrado.")
+    seat = await appointments.load_seat(db, appointment.position_id)
+    await appointments.ensure_can_administer(db, user.id, user.access, seat)
+    await access.revoke_access(db, appointment)
+    await db.commit()
+    [out] = await _appointments_out(db, crypto, user, [appointment])
+    return out

@@ -59,6 +59,9 @@ class User(BusinessTable, table=True):
     locked_until: datetime | None = Field(default=None, sa_type=TZ)
     last_login_at: datetime | None = Field(default=None, sa_type=TZ)
     password_changed_at: datetime | None = Field(default=None, sa_type=TZ)
+    # Sticky TOTP requirement for accounts that come from a party position (D-104): it stays even
+    # if the role later stops requiring it.
+    mfa_required: bool = Field(default=False, sa_column_kwargs={"server_default": text("false")})
 
 
 class Role(BusinessTable, table=True):
