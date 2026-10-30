@@ -188,6 +188,7 @@ cambios.
 | [D-102](D-102-cambio-marco-estructura.md) | Cambio de marco geográfico en la estructura del partido (amplía D-41, punto 7) | Aceptada |
 | [D-103](D-103-credito-casas-estructura.md) | Crédito de las Casas de Paz a asientos de estructura (reemplaza en parte D-92 y D-96) | Aceptada |
 | [D-104](D-104-cuentas-acceso-por-nombramiento.md) | Cuentas y acceso originados en nombramientos (amplía D-33, D-35 y D-52) | Aceptada |
+| [D-105](D-105-reglas-estructura-confirmadas.md) | Reglas de la estructura del partido confirmadas (precisa D-103 y D-104) | Aceptada |
 
 ## Suposiciones vigentes
 

@@ -18,7 +18,7 @@ sistema limitado al territorio que le corresponde a cada cargo**. La estructura 
    federales (grupos de distritos federales), locales (grupos de distritos locales) y
    seccionales (grupos de secciones).
 
-Ambas ramas pueden **abrir o enlazar Casas de Paz** que no abrió un Embajador o un Constructor de Paz.
+Ambas ramas pueden **abrir o enlazar Casas de Paz** que no tienen crédito de un integrante del MP (D-103).
 
 | Usuario | Qué hace |
 |---|---|
@@ -172,7 +172,7 @@ nunca a ambos; para Secretarías de Circunscripción guarda además `circumscrip
   **abrir** una casa o **enlazar** una de la bandeja de casas por enlazar, **sin importar la geografía**.
 - El crédito queda en el **asiento** (`positions`), no en la persona: si cambia el titular, el nuevo lo hereda.
 - Si la persona tiene varios cargos, elige con cuál asiento abre o enlaza.
-- Una casa tiene **un solo crédito**: no se enlaza a estructura una casa acreditada a un Embajador o Constructor.
+- Una casa tiene **un solo crédito**: no se enlaza a estructura una casa acreditada a un integrante activo del MP (D-103).
 
 ## Cambios al Movimiento de Paz
 
@@ -182,7 +182,7 @@ lo registre. `peace-movement.md` se actualiza al implementar, no antes.
 
 | Hoy (D-92) | Cambia a |
 |---|---|
-| Cualquier pacificador abre una casa y el crédito se busca hacia arriba hasta el primer Embajador | Si la abre un **Embajador o un Constructor**, el crédito es suyo. Si la abre un Pacificador, Promotor o Mensajero, queda con **crédito pendiente** en la bandeja de casas por enlazar; ya no se busca en la cadena |
+| Cualquier pacificador abre una casa y el crédito se busca hacia arriba hasta el primer Embajador | **Quien la abre** se lleva el crédito, sea del nivel que sea; ya no se busca en la cadena (D-103) |
 | Sin Embajador, el crédito va al coordinador de la zona que cubre la sección | Se eliminan `zone_coordinators`, `zone_coordinator_nodes` y `zone_coordinator_sections`. Las casas pendientes las abre o enlaza **cualquier asiento** de estructura |
 | `credited_member_id` / `credited_user_id` | `credited_member_id` / `credited_position_id` (FK a `party_structure.positions`); a lo más uno |
 | Solo el Embajador tiene meta de casas | El **Constructor** tiene meta de casas: semilla nacional de **1**, ajustable por estado en `level_goals.house_goal`, medida con casas consolidadas |
@@ -270,7 +270,7 @@ permiso de lectura.
 **Casas de Paz**
 - Un titular de cualquier cargo vigente abre una casa en cualquier estado y el crédito queda en su asiento.
 - Al cambiar el titular del asiento, el crédito permanece en el asiento.
-- No se puede enlazar a estructura una casa acreditada a un Embajador o Constructor.
+- No se puede enlazar a estructura una casa acreditada a un integrante activo del MP.
 
 ## Plan sugerido
 
@@ -282,13 +282,26 @@ permiso de lectura.
 6. Cambios al Movimiento de Paz: crédito a asientos, retiro de coordinadores de zona, meta de casas del Constructor y migración de datos.
 7. Panel.
 
-## Preguntas abiertas
+## Decisiones
 
-1. ¿Qué pares de cargos son incompatibles? Se cargan desde el panel, pero conviene una lista inicial.
-2. ¿Es correcta la migración propuesta para las casas acreditadas hoy a coordinadores de zona?
-3. ¿El orden de niveles para la administración delegada es el propuesto?
-4. ¿Qué roles base debe tener la estructura además de los actuales?
-5. Al cambiar de marco, ¿los comités distritales instalados sobre distritos que desaparecen se disuelven o se migran?
+Las marcas [ADR] y [SUPUESTO] de esta ficha quedaron resueltas el 2026-10-30. **Donde esta ficha
+y una ADR difieren, manda la ADR.**
+- [D-101](../adr/D-101-concesiones-rol-alcance.md): concesiones (rol, alcance) con alcance por
+  permiso.
+- [D-102](../adr/D-102-cambio-marco-estructura.md): cambio de marco con remapeo automático y una
+  bandeja de territorio por resolver.
+- [D-103](../adr/D-103-credito-casas-estructura.md): crédito de casas. **Cambia esta ficha:**
+  cualquier integrante activo del MP que abre una casa se lleva el crédito; la reasignación va a
+  cualquier integrante activo o a un asiento.
+- [D-104](../adr/D-104-cuentas-acceso-por-nombramiento.md): cuentas y acceso por nombramiento
+  (vínculo con la persona en el módulo, TOTP pegajoso, sesiones y antiescalamiento).
+- [D-105](../adr/D-105-reglas-estructura-confirmadas.md): respuestas a las preguntas abiertas.
+  - Sin incompatibilidades iniciales.
+  - El orden de niveles para administrar.
+  - Dos roles base.
+  - Los comités sin distrito van a la bandeja.
+  - La baja del acreditado manda la casa a la bandeja.
+  - Presídium, periodos consecutivos y primer periodo transitorio.
 
 ## Fuera de alcance
 
