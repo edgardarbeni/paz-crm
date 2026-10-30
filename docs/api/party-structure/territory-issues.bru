@@ -1,0 +1,30 @@
+meta {
+  name: Resolver territorio pendiente tras un cambio de marco
+  type: http
+  seq: 13
+}
+
+post {
+  url: {{baseUrl}}/api/v1/party-structure/territory-issues/{{issueId}}/resolve
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "action": "reassign",
+    "node_id": "{{municipalityId}}",
+    "on": "2026-11-01",
+    "notes": "Equivalente en el marco nuevo"
+  }
+}
+
+docs {
+  GET /territory-issues lista los pendientes (include_resolved=true para el historial).
+  Comité sin territorio: reassign (node_id del marco activo) o dissolve. Coordinación que perdió
+  territorio: accept o close. Solo el nivel nacional.
+}

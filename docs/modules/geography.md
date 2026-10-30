@@ -172,3 +172,7 @@ No emite eventos asíncronos; todo ocurre dentro de la transacción de la import
 - Lanzar importaciones desde el panel (solo se consultan; DT-20).
 - Circunscripciones plurinominales locales ([D-08](../adr/D-08-diputaciones-locales-rp.md)).
 - Históricos electorales y resultados por sección (módulos futuros del brief).
+
+**Extensión al activar un marco ([D-111](../adr/D-111-cambio-de-marco-estructura.md)).** Los
+módulos con datos atados a nodos se registran con `frameworks.on_framework_activated(hook)` y
+remapean sus datos en la misma transacción. Hoy lo usa la estructura del partido.

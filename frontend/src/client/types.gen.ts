@@ -2618,6 +2618,37 @@ export type InvitationTokenRequest = {
 };
 
 /**
+ * IssueKind
+ */
+export type IssueKind = 'committee_without_territory' | 'coordination_nodes_removed';
+
+/**
+ * IssueResolveIn
+ */
+export type IssueResolveIn = {
+    /**
+     * Action
+     *
+     * Comité sin territorio: reassign (con node_id del marco activo) o dissolve. Coordinación con territorio perdido: accept (se queda con el que tiene) o close.
+     */
+    action: 'reassign' | 'dissolve' | 'accept' | 'close';
+    /**
+     * Node Id
+     */
+    node_id?: string | null;
+    /**
+     * On
+     *
+     * Fecha de la disolución o del cierre.
+     */
+    on: string;
+    /**
+     * Notes
+     */
+    notes?: string | null;
+};
+
+/**
  * LevelChangeIn
  */
 export type LevelChangeIn = {
@@ -2781,6 +2812,20 @@ export type LoginRequest = {
      * Device Label
      */
     device_label?: string | null;
+};
+
+/**
+ * LostNode
+ */
+export type LostNode = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Label
+     */
+    label: string;
 };
 
 /**
@@ -5245,6 +5290,44 @@ export type TerritoryIn = {
      * Fecha del cambio: alta de lo nuevo y baja de lo que sale.
      */
     on: string;
+};
+
+/**
+ * TerritoryIssueOut
+ */
+export type TerritoryIssueOut = {
+    /**
+     * Id
+     */
+    id: string;
+    body: BodyOut;
+    kind: IssueKind;
+    /**
+     * Framework Id
+     */
+    framework_id: string;
+    /**
+     * Detected On
+     */
+    detected_on: string;
+    /**
+     * Lost
+     *
+     * Lo que no tuvo equivalente en el marco nuevo.
+     */
+    lost: Array<LostNode>;
+    /**
+     * Resolved At
+     */
+    resolved_at: string | null;
+    /**
+     * Resolution
+     */
+    resolution: string | null;
+    /**
+     * Resolution Notes
+     */
+    resolution_notes: string | null;
 };
 
 /**
@@ -11795,3 +11878,73 @@ export type CloseCoordinationResponses = {
 };
 
 export type CloseCoordinationResponse = CloseCoordinationResponses[keyof CloseCoordinationResponses];
+
+export type ListTerritoryIssuesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Include Resolved
+         */
+        include_resolved?: boolean;
+    };
+    url: '/api/v1/party-structure/territory-issues';
+};
+
+export type ListTerritoryIssuesErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ListTerritoryIssuesError = ListTerritoryIssuesErrors[keyof ListTerritoryIssuesErrors];
+
+export type ListTerritoryIssuesResponses = {
+    /**
+     * Response Listterritoryissues
+     *
+     * Successful Response
+     */
+    200: Array<TerritoryIssueOut>;
+};
+
+export type ListTerritoryIssuesResponse = ListTerritoryIssuesResponses[keyof ListTerritoryIssuesResponses];
+
+export type ResolveTerritoryIssueData = {
+    body: IssueResolveIn;
+    path: {
+        /**
+         * Issue Id
+         */
+        issue_id: string;
+    };
+    query?: never;
+    url: '/api/v1/party-structure/territory-issues/{issue_id}/resolve';
+};
+
+export type ResolveTerritoryIssueErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ResolveTerritoryIssueError = ResolveTerritoryIssueErrors[keyof ResolveTerritoryIssueErrors];
+
+export type ResolveTerritoryIssueResponses = {
+    /**
+     * Successful Response
+     */
+    200: TerritoryIssueOut;
+};
+
+export type ResolveTerritoryIssueResponse = ResolveTerritoryIssueResponses[keyof ResolveTerritoryIssueResponses];

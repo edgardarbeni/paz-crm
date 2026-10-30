@@ -231,6 +231,8 @@ def geo_activate(
         typer.echo(f"Alcances remapeados: {report.remapped}")
         typer.echo(f"Alcances eliminados (sin equivalente): {report.removed}")
         typer.echo(f"Concesiones recalculadas: {report.grants_rebuilt}")
+        for module, counts in report.modules.items():
+            typer.echo(f"{module}: {counts}")
 
     asyncio.run(run())
 

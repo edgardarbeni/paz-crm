@@ -137,6 +137,18 @@ async def current_nodes(db: AsyncSession, coordination: Coordination) -> list[uu
     return list(rows.scalars())
 
 
+async def current_rows(db: AsyncSession, coordination: Coordination) -> list[Any]:
+    spec = KINDS[coordination.kind]
+    rows = await db.execute(
+        select(spec.model).where(
+            spec.model.coordination_id == pk(coordination.body),
+            spec.model.removed_on.is_(None),
+            spec.model.deleted_at.is_(None),
+        )
+    )
+    return list(rows.scalars())
+
+
 async def territory(db: AsyncSession, coordination: Coordination) -> list[tuple[uuid.UUID, str]]:
     spec = KINDS[coordination.kind]
     nodes = await current_nodes(db, coordination)

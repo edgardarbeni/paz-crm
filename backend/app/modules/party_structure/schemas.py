@@ -1,7 +1,7 @@
 """DTOs of the party structure (API)."""
 
 import uuid
-from datetime import date
+from datetime import date, datetime
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
@@ -12,6 +12,7 @@ from app.modules.party_structure.models import (
     CoordinationKind,
     DistrictKind,
     EndReason,
+    IssueKind,
     ScopeRule,
     TerritorialLevel,
 )
@@ -309,3 +310,35 @@ class CoordinationOut(Schema):
     agreement: str | None
     closed_on: date | None
     status: Literal["active", "closed"]
+
+
+# --- framework changes (phase 5) --------------------------------------------------------------
+
+
+class LostNode(Schema):
+    id: uuid.UUID
+    label: str
+
+
+class TerritoryIssueOut(Schema):
+    id: uuid.UUID
+    body: BodyOut
+    kind: IssueKind
+    framework_id: uuid.UUID
+    detected_on: date
+    lost: list[LostNode] = Field(description="Lo que no tuvo equivalente en el marco nuevo.")
+    resolved_at: datetime | None
+    resolution: str | None
+    resolution_notes: str | None
+
+
+class IssueResolveIn(Schema):
+    action: Literal["reassign", "dissolve", "accept", "close"] = Field(
+        description=(
+            "Comité sin territorio: reassign (con node_id del marco activo) o dissolve. "
+            "Coordinación con territorio perdido: accept (se queda con el que tiene) o close."
+        )
+    )
+    node_id: uuid.UUID | None = None
+    on: date = Field(description="Fecha de la disolución o del cierre.")
+    notes: str | None = Field(default=None, max_length=500)
