@@ -37,7 +37,7 @@ primero en su ficha de `docs/modules/`.
 | Geografía electoral | `app/modules/geography` | Implementado | [geography.md](docs/modules/geography.md) |
 | Personas (base del futuro padrón) | `app/modules/people` | Implementado | [people.md](docs/modules/people.md) |
 | Candidaturas | `app/modules/candidacies` | Implementado | [candidacies.md](docs/modules/candidacies.md) |
-| Movimiento de Paz (pacificadores, Casas de Paz, metas) | `app/modules/peace_movement` | En construcción: fases 0a a 3 implementadas (pacificadores, Casas de Paz, agregados) | [peace-movement.md](docs/modules/peace-movement.md) |
+| Movimiento de Paz (pacificadores, Casas de Paz, metas) | `app/modules/peace_movement` | En construcción: fases 0a a 4 implementadas en la API; falta el panel (fase 5) | [peace-movement.md](docs/modules/peace-movement.md) |
 
 Módulos futuros nombrados en el brief, todavía sin ficha:
 - padrón de militancia y afiliación al partido (aparte del Movimiento de Paz);

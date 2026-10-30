@@ -9,6 +9,9 @@ Table models are audited by default. Class-level knobs:
 
 Bytes values (ciphertexts, blind indexes) are always masked.
 
+A session may skip whole tables with ``session.info["audit_skip_tables"] = {"schema.table"}``:
+bulk paths (imports) audit them with one `record_bulk` entry per batch instead (D-90).
+
 Writes issued as Core statements (``update(...)``, ``insert(...)``) bypass this hook; services
 must use the ORM for audited writes or call `record_audit` explicitly.
 """
@@ -30,8 +33,10 @@ def _state(obj: object) -> InstanceState[Any]:
     return cast(InstanceState[Any], inspect(obj))
 
 
-def _is_audited(obj: object) -> bool:
-    return bool(getattr(type(obj), "__audit__", True)) and hasattr(type(obj), "__table__")
+def _is_audited(obj: object, skipped: frozenset[str] = frozenset()) -> bool:
+    if not (getattr(type(obj), "__audit__", True) and hasattr(type(obj), "__table__")):
+        return False
+    return not skipped or _entity(obj)[0] not in skipped
 
 
 def _masked(obj: object) -> frozenset[str]:
@@ -85,9 +90,10 @@ def _audit_after_flush(session: Session, _: UOWTransaction) -> None:
     # In after_flush the new/dirty/deleted collections and attribute history still describe
     # the flush that just happened, while primary keys are already populated.
     connection = session.connection()
+    skipped: frozenset[str] = frozenset(session.info.get("audit_skip_tables", ()))
 
     for obj in session.new:
-        if _is_audited(obj):
+        if _is_audited(obj, skipped):
             table, entity_id = _entity(obj)
             append_sync(
                 connection,
@@ -98,7 +104,7 @@ def _audit_after_flush(session: Session, _: UOWTransaction) -> None:
             )
 
     for obj in session.dirty:
-        if not _is_audited(obj) or not session.is_modified(obj, include_collections=False):
+        if not _is_audited(obj, skipped) or not session.is_modified(obj, include_collections=False):
             continue
         before, after = _changes(obj)
         if not set(after) - _ignored(obj):
@@ -121,7 +127,7 @@ def _audit_after_flush(session: Session, _: UOWTransaction) -> None:
         )
 
     for obj in session.deleted:
-        if _is_audited(obj):
+        if _is_audited(obj, skipped):
             table, entity_id = _entity(obj)
             append_sync(
                 connection,

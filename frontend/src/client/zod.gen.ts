@@ -79,6 +79,41 @@ export const zAuditEntryOut = z.object({
 });
 
 /**
+ * BatchItemOut
+ */
+export const zBatchItemOut = z.object({
+    client_id: z.uuid(),
+    status: z.enum([
+        'accepted',
+        'duplicate',
+        'error'
+    ]),
+    member_id: z.uuid().nullish(),
+    error_code: z.string().nullish(),
+    error: z.string().nullish()
+});
+
+/**
+ * BatchOut
+ */
+export const zBatchOut = z.object({
+    accepted: z.int(),
+    duplicates: z.int(),
+    errors: z.int(),
+    items: z.array(zBatchItemOut)
+});
+
+/**
+ * Body_queueMemberImport
+ */
+export const zBodyQueueMemberImport = z.object({
+    file: z.string(),
+    evidence_uri: z.string().min(3).max(500),
+    dry_run: z.boolean().optional().default(true),
+    default_level_id: z.uuid().nullish()
+});
+
+/**
  * Body_uploadHousePhoto
  */
 export const zBodyUploadHousePhoto = z.object({
@@ -91,6 +126,17 @@ export const zBodyUploadHousePhoto = z.object({
  */
 export const zBranchesIn = z.object({
     member_ids: z.array(z.uuid()).max(100)
+});
+
+/**
+ * ChallengeOut
+ */
+export const zChallengeOut = z.object({
+    algorithm: z.string(),
+    challenge: z.string(),
+    salt: z.string(),
+    signature: z.string(),
+    max_number: z.int()
 });
 
 /**
@@ -650,6 +696,50 @@ export const zCursorPageMeetingSummary = z.object({
 });
 
 /**
+ * MemberImportErrorOut
+ */
+export const zMemberImportErrorOut = z.object({
+    row_number: z.int(),
+    code: z.string(),
+    detail: z.string()
+});
+
+/**
+ * CursorPage[MemberImportErrorOut]
+ */
+export const zCursorPageMemberImportErrorOut = z.object({
+    items: z.array(zMemberImportErrorOut),
+    next_cursor: z.string().nullish(),
+    has_more: z.boolean()
+});
+
+/**
+ * MemberImportRunOut
+ */
+export const zMemberImportRunOut = z.object({
+    id: z.uuid(),
+    filename: z.string(),
+    dry_run: z.boolean(),
+    status: z.string(),
+    total_rows: z.int(),
+    accepted_rows: z.int(),
+    error_rows: z.int(),
+    created_at: z.iso.datetime(),
+    started_at: z.iso.datetime().nullable(),
+    finished_at: z.iso.datetime().nullable(),
+    failure: z.string().nullable()
+});
+
+/**
+ * CursorPage[MemberImportRunOut]
+ */
+export const zCursorPageMemberImportRunOut = z.object({
+    items: z.array(zMemberImportRunOut),
+    next_cursor: z.string().nullish(),
+    has_more: z.boolean()
+});
+
+/**
  * MfaRequiredResponse
  */
 export const zMfaRequiredResponse = z.object({
@@ -857,6 +947,16 @@ export const zNoticeOut = z.object({
 });
 
 /**
+ * NoticeView
+ */
+export const zNoticeView = z.object({
+    code: z.string(),
+    version: z.string(),
+    title: z.string(),
+    body: z.string()
+});
+
+/**
  * OfficeTypeUpdate
  *
  * Code, levels, principle and kind are fixed once created (nominations depend on them).
@@ -981,6 +1081,36 @@ export const zPersonCreate = z.object({
     accept_curp_incoherence: z.boolean().optional().default(false),
     contacts: z.array(zContactIn).max(10).optional(),
     address: zAddressIn.nullish()
+});
+
+/**
+ * BatchItemIn
+ */
+export const zBatchItemIn = z.object({
+    person_id: z.uuid().nullish(),
+    person: zPersonCreate.nullish(),
+    level_id: z.uuid(),
+    recruiter_member_id: z.uuid().nullish(),
+    origin: z.enum([
+        'recruiter',
+        'structure',
+        'event',
+        'campaign'
+    ]).optional().default('recruiter'),
+    origin_detail: z.string().max(300).nullish(),
+    consent: zConsentCapture,
+    house_id: z.uuid().nullish(),
+    client_id: z.uuid(),
+    captured_at: z.iso.datetime(),
+    capture_longitude: z.number().gte(-180).lte(180).nullish(),
+    capture_latitude: z.number().gte(-90).lte(90).nullish()
+});
+
+/**
+ * BatchIn
+ */
+export const zBatchIn = z.object({
+    items: z.array(zBatchItemIn).min(1).max(500)
 });
 
 /**
@@ -1266,6 +1396,65 @@ export const zProcessUpdate = z.object({
     name: z.string().min(2).max(200).nullish(),
     election_date: z.iso.date().nullish(),
     status: zProcessStatus.nullish()
+});
+
+/**
+ * ProofIn
+ */
+export const zProofIn = z.object({
+    challenge: z.string().regex(/^[0-9a-f]{64}$/),
+    salt: z.string().min(10).max(200),
+    number: z.int().gte(0).lte(10000000),
+    signature: z.string().regex(/^[0-9a-f]{64}$/)
+});
+
+/**
+ * PublicEnrollmentOut
+ */
+export const zPublicEnrollmentOut = z.object({
+    status: z.literal('received').optional().default('received'),
+    message: z.string().optional().default('Recibimos tu inscripción. Una persona del Movimiento de Paz la revisará pronto.')
+});
+
+/**
+ * PublicFormOut
+ *
+ * Everything the public enrollment page needs, without revealing who invited.
+ */
+export const zPublicFormOut = z.object({
+    notice: zNoticeView,
+    levels: z.array(zLevelOut),
+    challenge: zChallengeOut
+});
+
+/**
+ * PublicPersonIn
+ */
+export const zPublicPersonIn = z.object({
+    given_names: z.string().min(1).max(120),
+    paternal_surname: z.string().min(1).max(80),
+    maternal_surname: z.string().min(1).max(80).nullish(),
+    curp: z.string().length(18),
+    mobile: z.string().min(10).max(20),
+    email: z.string().max(150).nullish(),
+    street: z.string().max(200).nullish(),
+    exterior_number: z.string().max(30).nullish(),
+    postal_code: z.string().regex(/^\d{5}$/).nullish(),
+    state_code: z.int().gte(1).lte(32),
+    section_number: z.int().gte(1).lte(9999)
+});
+
+/**
+ * PublicEnrollmentIn
+ */
+export const zPublicEnrollmentIn = z.object({
+    referral_code: z.string().min(8).max(32),
+    person: zPublicPersonIn,
+    level_id: z.uuid(),
+    notice_version: z.string().min(1).max(50),
+    accepts_notice: z.boolean(),
+    proof: zProofIn,
+    website: z.string().max(200).nullish()
 });
 
 /**
@@ -1918,6 +2107,8 @@ export const zAppModulesPeaceMovementSchemasMemberOut = z.object({
         'green'
     ]).nullable(),
     network: zNetworkOut.nullable(),
+    requested_house_id: z.uuid().nullish(),
+    intake: z.record(z.string(), z.unknown()).nullish(),
     house_goal: z.int().nullable(),
     houses_progress_pct: z.int().nullable()
 });
@@ -3316,3 +3507,68 @@ export const zExportMembersQuery = z.object({
     state_id: z.uuid().nullish(),
     level_id: z.uuid().nullish()
 });
+
+export const zSubmitMemberBatchBody = zBatchIn;
+
+/**
+ * Successful Response
+ */
+export const zSubmitMemberBatchResponse = zBatchOut;
+
+export const zListMemberImportsQuery = z.object({
+    limit: z.int().gte(1).lte(200).optional().default(50),
+    cursor: z.string().max(1024).nullish(),
+    sort: z.string().max(200).nullish()
+});
+
+/**
+ * Successful Response
+ */
+export const zListMemberImportsResponse = zCursorPageMemberImportRunOut;
+
+export const zQueueMemberImportBody = zBodyQueueMemberImport;
+
+/**
+ * Successful Response
+ */
+export const zQueueMemberImportResponse = zMemberImportRunOut;
+
+export const zGetMemberImportPath = z.object({
+    run_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zGetMemberImportResponse = zMemberImportRunOut;
+
+export const zListMemberImportErrorsPath = z.object({
+    run_id: z.uuid()
+});
+
+export const zListMemberImportErrorsQuery = z.object({
+    limit: z.int().gte(1).lte(200).optional().default(50),
+    cursor: z.string().max(1024).nullish(),
+    sort: z.string().max(200).nullish()
+});
+
+/**
+ * Successful Response
+ */
+export const zListMemberImportErrorsResponse = zCursorPageMemberImportErrorOut;
+
+export const zGetPublicEnrollmentFormPath = z.object({
+    referral_code: z.string().min(8).max(32)
+});
+
+/**
+ * Successful Response
+ */
+export const zGetPublicEnrollmentFormResponse = zPublicFormOut;
+
+export const zPublicEnrollBody = zPublicEnrollmentIn;
+
+/**
+ * Successful Response
+ */
+export const zPublicEnrollResponse = zPublicEnrollmentOut;

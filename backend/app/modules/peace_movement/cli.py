@@ -53,6 +53,52 @@ def aggregate(
     )
 
 
+IMPORT_JOB = "peace_movement.imports"
+
+
+@app.command("process-imports")
+def process_imports(
+    limit: Annotated[int, typer.Option(min=1, max=100, help="Importaciones por corrida.")] = 5,
+) -> None:
+    """Procesa las importaciones en cola (tarea programada)."""
+    from app.core.crypto import build_blind_indexer, build_field_cipher  # noqa: PLC0415
+    from app.core.storage import build_storage  # noqa: PLC0415
+    from app.modules.peace_movement.intake import process_next_import  # noqa: PLC0415
+    from app.modules.people.service import Crypto  # noqa: PLC0415
+
+    settings = get_settings()
+    storage = build_storage(settings)
+    if storage is None:
+        typer.echo("PAZ_STORAGE_ENDPOINT no está configurado; no hay importaciones que leer.")
+        return
+    crypto = Crypto(cipher=build_field_cipher(settings), indexer=build_blind_indexer(settings))
+
+    async def run() -> list[str] | None:
+        engine = build_engine(settings)
+        try:
+            async with exclusive_job(engine, IMPORT_JOB) as acquired:
+                if not acquired:
+                    return None
+                done: list[str] = []
+                for _ in range(limit):
+                    result = await process_next_import(build_sessionmaker(engine), storage, crypto)
+                    if result is None:
+                        break
+                    done.append(
+                        f"{result.filename}: {result.status} · {result.accepted_rows} aceptadas · "
+                        f"{result.error_rows} con error"
+                    )
+                return done
+        finally:
+            await engine.dispose()
+
+    done = asyncio.run(run())
+    if done is None:
+        typer.echo("Otra ejecución está en curso; no se hizo nada.")
+        return
+    typer.echo("\n".join(done) if done else "Sin importaciones en cola.")
+
+
 # --- load seed (development only) -------------------------------------------------------------
 
 LEVEL_WEIGHTS = {
