@@ -5,7 +5,7 @@ import { expect, type Page } from "@playwright/test";
 export interface Seed {
   password: string;
   users: Record<
-    "login" | "enroll" | "capture" | "substitute" | "scoped" | "geography",
+    "login" | "enroll" | "capture" | "substitute" | "scoped" | "geography" | "peace",
     { email: string; totp_secret: string | null }
   >;
   process_id: string;
@@ -14,6 +14,13 @@ export interface Seed {
   substitute_candidate: { id: string; name: string };
   nominations: { local_district_1: string; local_district_2: string };
   seeded_formula: { owner: string; substitute: string };
+  peace: {
+    root: { id: string; name: string; code: string };
+    recruits: string[];
+    pending: { id: string; name: string };
+    next_curp: string;
+    public_curp: string;
+  };
 }
 
 export const seed: Seed = JSON.parse(

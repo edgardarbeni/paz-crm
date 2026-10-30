@@ -740,6 +740,31 @@ export const zCursorPageMemberImportRunOut = z.object({
 });
 
 /**
+ * MemberOut
+ */
+export const zMemberOut = z.object({
+    person_id: z.uuid(),
+    full_name: z.string(),
+    sex: z.string().nullable()
+});
+
+/**
+ * FormulaOut
+ */
+export const zFormulaOut = z.object({
+    id: z.uuid(),
+    office_type_id: z.uuid(),
+    office_code: z.string(),
+    position: z.int(),
+    status: zFormulaStatus,
+    origin_party_id: z.uuid().nullable(),
+    replaces_formula_id: z.uuid().nullable(),
+    substitution_reason: z.string().nullable(),
+    owner: zMemberOut.nullable(),
+    substitute: zMemberOut.nullable()
+});
+
+/**
  * MfaRequiredResponse
  */
 export const zMfaRequiredResponse = z.object({
@@ -1265,6 +1290,43 @@ export const zNetworkPage = z.object({
 });
 
 /**
+ * PeaceMemberOut
+ */
+export const zPeaceMemberOut = z.object({
+    id: z.uuid(),
+    person: zPersonOut,
+    level_id: z.uuid(),
+    status: z.string(),
+    status_reason: z.string().nullable(),
+    origin: z.string(),
+    origin_detail: z.string().nullable(),
+    channel: z.string(),
+    enrolled_on: z.iso.date(),
+    left_on: z.iso.date().nullable(),
+    recruited_by: zMemberSummary.nullable(),
+    referral_code: z.string(),
+    referral_url: z.string(),
+    referral_qr_svg: z.string(),
+    depth: z.int(),
+    state_id: z.uuid(),
+    section_id: z.uuid(),
+    validated_at: z.iso.datetime().nullable(),
+    direct: zDirectCounts,
+    recruit_goal: z.int().nullable(),
+    progress_pct: z.int().nullable(),
+    traffic_light: z.enum([
+        'red',
+        'yellow',
+        'green'
+    ]).nullable(),
+    network: zNetworkOut.nullable(),
+    requested_house_id: z.uuid().nullish(),
+    intake: z.record(z.string(), z.unknown()).nullish(),
+    house_goal: z.int().nullable(),
+    houses_progress_pct: z.int().nullable()
+});
+
+/**
  * PersonUpdate
  */
 export const zPersonUpdate = z.object({
@@ -1417,13 +1479,22 @@ export const zPublicEnrollmentOut = z.object({
 });
 
 /**
+ * PublicLevelOut
+ */
+export const zPublicLevelOut = z.object({
+    id: z.uuid(),
+    name: z.string(),
+    recruit_goal: z.int().nullable()
+});
+
+/**
  * PublicFormOut
  *
  * Everything the public enrollment page needs, without revealing who invited.
  */
 export const zPublicFormOut = z.object({
     notice: zNoticeView,
-    levels: z.array(zLevelOut),
+    levels: z.array(zPublicLevelOut),
     challenge: zChallengeOut
 });
 
@@ -1981,6 +2052,28 @@ export const zViolationOut = z.object({
 });
 
 /**
+ * NominationOut
+ */
+export const zNominationOut = z.object({
+    id: z.uuid(),
+    process_id: z.uuid(),
+    office_type_id: z.uuid(),
+    office_code: z.string(),
+    geographic_level: zGeographicLevel,
+    node_id: z.uuid().nullable(),
+    party_id: z.uuid().nullable(),
+    coalition_id: z.uuid().nullable(),
+    status: zNominationStatus,
+    created_at: z.iso.datetime(),
+    notes: z.string().nullable(),
+    editable: z.boolean(),
+    complete: z.boolean(),
+    slots: z.array(zSlotOut),
+    formulas: z.array(zFormulaOut),
+    warnings: z.array(zViolationOut).optional()
+});
+
+/**
  * ZoneNodeIn
  */
 export const zZoneNodeIn = z.object({
@@ -2024,93 +2117,12 @@ export const zZoneNodeOut = z.object({
 export const zZoneCoordinatorOut = z.object({
     id: z.uuid(),
     user_id: z.uuid(),
+    user_name: z.string(),
     state_id: z.uuid(),
     valid_from: z.iso.date(),
     valid_to: z.iso.date().nullable(),
     nodes: z.array(zZoneNodeOut),
     section_count: z.int()
-});
-
-/**
- * MemberOut
- */
-export const zAppModulesCandidaciesSchemasMemberOut = z.object({
-    person_id: z.uuid(),
-    full_name: z.string(),
-    sex: z.string().nullable()
-});
-
-/**
- * FormulaOut
- */
-export const zFormulaOut = z.object({
-    id: z.uuid(),
-    office_type_id: z.uuid(),
-    office_code: z.string(),
-    position: z.int(),
-    status: zFormulaStatus,
-    origin_party_id: z.uuid().nullable(),
-    replaces_formula_id: z.uuid().nullable(),
-    substitution_reason: z.string().nullable(),
-    owner: zAppModulesCandidaciesSchemasMemberOut.nullable(),
-    substitute: zAppModulesCandidaciesSchemasMemberOut.nullable()
-});
-
-/**
- * NominationOut
- */
-export const zNominationOut = z.object({
-    id: z.uuid(),
-    process_id: z.uuid(),
-    office_type_id: z.uuid(),
-    office_code: z.string(),
-    geographic_level: zGeographicLevel,
-    node_id: z.uuid().nullable(),
-    party_id: z.uuid().nullable(),
-    coalition_id: z.uuid().nullable(),
-    status: zNominationStatus,
-    created_at: z.iso.datetime(),
-    notes: z.string().nullable(),
-    editable: z.boolean(),
-    complete: z.boolean(),
-    slots: z.array(zSlotOut),
-    formulas: z.array(zFormulaOut),
-    warnings: z.array(zViolationOut).optional()
-});
-
-/**
- * MemberOut
- */
-export const zAppModulesPeaceMovementSchemasMemberOut = z.object({
-    id: z.uuid(),
-    person: zPersonOut,
-    level_id: z.uuid(),
-    status: z.string(),
-    status_reason: z.string().nullable(),
-    origin: z.string(),
-    origin_detail: z.string().nullable(),
-    channel: z.string(),
-    enrolled_on: z.iso.date(),
-    left_on: z.iso.date().nullable(),
-    recruited_by: zMemberSummary.nullable(),
-    referral_code: z.string(),
-    depth: z.int(),
-    state_id: z.uuid(),
-    section_id: z.uuid(),
-    validated_at: z.iso.datetime().nullable(),
-    direct: zDirectCounts,
-    recruit_goal: z.int().nullable(),
-    progress_pct: z.int().nullable(),
-    traffic_light: z.enum([
-        'red',
-        'yellow',
-        'green'
-    ]).nullable(),
-    network: zNetworkOut.nullable(),
-    requested_house_id: z.uuid().nullish(),
-    intake: z.record(z.string(), z.unknown()).nullish(),
-    house_goal: z.int().nullable(),
-    houses_progress_pct: z.int().nullable()
 });
 
 /**
@@ -3159,7 +3171,7 @@ export const zEnrollMemberBody = zEnrollmentIn;
 /**
  * Successful Response
  */
-export const zEnrollMemberResponse = zAppModulesPeaceMovementSchemasMemberOut;
+export const zEnrollMemberResponse = zPeaceMemberOut;
 
 export const zGetMemberPath = z.object({
     member_id: z.uuid()
@@ -3168,7 +3180,7 @@ export const zGetMemberPath = z.object({
 /**
  * Successful Response
  */
-export const zGetMemberResponse = zAppModulesPeaceMovementSchemasMemberOut;
+export const zGetMemberResponse = zPeaceMemberOut;
 
 export const zListMemberChildrenPath = z.object({
     member_id: z.uuid()
@@ -3201,7 +3213,7 @@ export const zValidateMemberPath = z.object({
 /**
  * Successful Response
  */
-export const zValidateMemberResponse = zAppModulesPeaceMovementSchemasMemberOut;
+export const zValidateMemberResponse = zPeaceMemberOut;
 
 export const zRejectMemberBody = zReasonIn;
 
@@ -3212,7 +3224,7 @@ export const zRejectMemberPath = z.object({
 /**
  * Successful Response
  */
-export const zRejectMemberResponse = zAppModulesPeaceMovementSchemasMemberOut;
+export const zRejectMemberResponse = zPeaceMemberOut;
 
 export const zMemberLeavesBody = zReasonIn;
 
@@ -3223,7 +3235,7 @@ export const zMemberLeavesPath = z.object({
 /**
  * Successful Response
  */
-export const zMemberLeavesResponse = zAppModulesPeaceMovementSchemasMemberOut;
+export const zMemberLeavesResponse = zPeaceMemberOut;
 
 export const zChangeMemberLevelBody = zLevelChangeIn;
 
@@ -3234,7 +3246,7 @@ export const zChangeMemberLevelPath = z.object({
 /**
  * Successful Response
  */
-export const zChangeMemberLevelResponse = zAppModulesPeaceMovementSchemasMemberOut;
+export const zChangeMemberLevelResponse = zPeaceMemberOut;
 
 export const zReassignMemberBody = zReassignIn;
 
@@ -3245,7 +3257,7 @@ export const zReassignMemberPath = z.object({
 /**
  * Successful Response
  */
-export const zReassignMemberResponse = zAppModulesPeaceMovementSchemasMemberOut;
+export const zReassignMemberResponse = zPeaceMemberOut;
 
 export const zListUserBranchesPath = z.object({
     user_id: z.uuid()

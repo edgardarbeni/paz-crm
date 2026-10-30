@@ -10,14 +10,14 @@ from app.core.context import get_context
 from app.core.db.session import SessionDep
 from app.core.redis import RedisDep
 from app.modules.identity.container import ServicesDep
-from app.modules.peace_movement import intake
+from app.modules.peace_movement import catalog, intake
 from app.modules.peace_movement.schemas import (
     ChallengeOut,
-    LevelOut,
     NoticeView,
     PublicEnrollmentIn,
     PublicEnrollmentOut,
     PublicFormOut,
+    PublicLevelOut,
 )
 from app.modules.people.views import CryptoDep
 
@@ -37,9 +37,17 @@ def _key(request: Request) -> bytes:
 )
 async def get_form(request: Request, db: SessionDep, referral_code: ReferralCode) -> PublicFormOut:
     notice, levels, challenge = await intake.public_form(db, _key(request), referral_code)
+    goals = {
+        goal.level_id: goal.recruit_goal
+        for goal in await catalog.list_level_goals(db)
+        if goal.state_id is None
+    }
     return PublicFormOut(
         notice=NoticeView.model_validate(notice, from_attributes=True),
-        levels=[LevelOut.model_validate(level) for level in levels],
+        levels=[
+            PublicLevelOut(id=level.id, name=level.name, recruit_goal=goals.get(level.id))  # type: ignore[arg-type]
+            for level in levels
+        ],
         challenge=ChallengeOut(
             algorithm=challenge.algorithm,
             challenge=challenge.challenge,

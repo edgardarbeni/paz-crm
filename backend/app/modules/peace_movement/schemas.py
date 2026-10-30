@@ -94,6 +94,7 @@ class ZoneCoordinatorIn(Schema):
 class ZoneCoordinatorOut(Schema):
     id: uuid.UUID
     user_id: uuid.UUID
+    user_name: str
     state_id: uuid.UUID
     valid_from: date
     valid_to: date | None
@@ -172,7 +173,7 @@ class NetworkOut(Schema):
     computed_at: datetime
 
 
-class MemberOut(Schema):
+class PeaceMemberOut(Schema):
     id: uuid.UUID
     person: PersonOut
     level_id: uuid.UUID
@@ -185,6 +186,8 @@ class MemberOut(Schema):
     left_on: date | None
     recruited_by: MemberSummary | None
     referral_code: str
+    referral_url: str = Field(description="Página pública de inscripción con su código.")
+    referral_qr_svg: str = Field(description="QR del enlace como data URI SVG.")
     depth: int
     state_id: uuid.UUID
     section_id: uuid.UUID
@@ -482,11 +485,17 @@ class NoticeView(Schema):
     body: str
 
 
+class PublicLevelOut(Schema):
+    id: uuid.UUID
+    name: str
+    recruit_goal: int | None = Field(description="Meta nacional de reclutas del nivel.")
+
+
 class PublicFormOut(Schema):
     """Everything the public enrollment page needs, without revealing who invited."""
 
     notice: NoticeView
-    levels: list[LevelOut]
+    levels: list[PublicLevelOut]
     challenge: ChallengeOut
 
 

@@ -49,6 +49,8 @@ async def test_enroll_builds_the_pyramid(  # noqa: PLR0917
     assert top["recruited_by"] is None
     assert top["person"]["curp"]  # the person was created with the member
     assert len(top["referral_code"]) >= 16
+    assert top["referral_url"] == f"https://panel.test/inscripcion/{top['referral_code']}"
+    assert top["referral_qr_svg"].startswith("data:image/svg+xml")
 
     child = await enroll(client, root, levels, geo.sections[103], recruiter=top["id"])
     grandchild = await enroll(client, root, levels, geo.sections[104], recruiter=child["id"])

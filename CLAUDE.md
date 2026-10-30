@@ -15,7 +15,8 @@ resultados electorales. Sus prioridades son:
 - infraestructura de alto rendimiento.
 
 **Estado:** el MVP está completo (fases A–E, D-77). Desde entonces se agregaron la identidad
-visual (D-78) y la búsqueda geográfica por nombre (D-79). Cada módulo nuevo se especifica
+visual (D-78), la búsqueda geográfica por nombre (D-79) y el módulo Movimiento de Paz (D-82 a
+D-99). Cada módulo nuevo se especifica
 primero en su ficha de `docs/modules/`.
 
 ## Documentación
@@ -37,7 +38,7 @@ primero en su ficha de `docs/modules/`.
 | Geografía electoral | `app/modules/geography` | Implementado | [geography.md](docs/modules/geography.md) |
 | Personas (base del futuro padrón) | `app/modules/people` | Implementado | [people.md](docs/modules/people.md) |
 | Candidaturas | `app/modules/candidacies` | Implementado | [candidacies.md](docs/modules/candidacies.md) |
-| Movimiento de Paz (pacificadores, Casas de Paz, metas) | `app/modules/peace_movement` | En construcción: fases 0a a 4 implementadas en la API; falta el panel (fase 5) | [peace-movement.md](docs/modules/peace-movement.md) |
+| Movimiento de Paz (pacificadores, Casas de Paz, metas) | `app/modules/peace_movement` | Implementado (API y panel) | [peace-movement.md](docs/modules/peace-movement.md) |
 
 Módulos futuros nombrados en el brief, todavía sin ficha:
 - padrón de militancia y afiliación al partido (aparte del Movimiento de Paz);

@@ -1,6 +1,6 @@
 # Módulo: Movimiento de Paz
 
-**Estado:** fases 0a a 4 implementadas en la API (pacificadores, metas, coordinadores de zona, alcance por rama, Casas de Paz, agregados, inscripción pública, carga por lotes e importación); panel pendiente. ADR D-82 a D-98.
+**Estado:** implementado (fases 0a a 5: API y panel). Pendientes de entregas posteriores: portal de pacificadores, app de campo y mapa público. ADR D-82 a D-99.
 **Paquete propuesto:** `backend/app/modules/peace_movement` · esquema `peace_movement` · API
 `/api/v1/peace-movement`.
 **Brief:** respuestas de Darío del 2026-10-29. Las reglas que eran suposiciones quedaron
@@ -520,7 +520,7 @@ siguiente.
 | **2. Casas de Paz** ✅ | Casas con ubicación aproximada y exacta cifrada, integrantes, reuniones con invitados, fotos, crédito y consolidación | D-85, D-92, D-96 |
 | **3. Agregados** ✅ | `network_changes`, `member_network_stats`, `member_section_counts`, `enrollment_daily_counts`, tarea del `scheduler`, estadísticas y reportes; semilla de 1 millón y medición de las metas de rendimiento | D-84, D-90, D-97 |
 | **4. Entradas masivas y públicas** ✅ | Inscripción pública con prueba de trabajo, carga por lotes idempotente e importación con dry-run | D-86, D-90, D-98 |
-| **5. Panel** | Pantallas de pacificadores, red, casas, validación, metas y estadísticas; página pública de inscripción | — |
+| **5. Panel** ✅ | Pantallas de pacificadores, red, casas, validación, metas y estadísticas; página pública de inscripción | D-99 |
 
 ## Preguntas abiertas
 
