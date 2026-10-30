@@ -19,7 +19,7 @@ def _positions(catalog: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
 
 async def test_seed_follows_the_statute(client: AsyncClient, root: dict[str, str]) -> None:
     catalog = await _catalog(client, root)
-    assert len(catalog) == 17
+    assert len(catalog) == 20  # 17 statutory + 3 coordination types (D-110)
     levels = {code: body["territorial_level"] for code, body in catalog.items()}
     assert sorted(levels.values()).count("national") == 10
     assert sorted(levels.values()).count("state") == 5
@@ -28,7 +28,7 @@ async def test_seed_follows_the_statute(client: AsyncClient, root: dict[str, str
     assert catalog["state_board"]["requires_installation"] is False
 
     positions = _positions(catalog)
-    assert len(positions) == 88
+    assert len(positions) == 91
     circumscription = positions["cdn_circumscription_secretary"]
     assert circumscription["scope_rule"] == "circumscription"
     assert circumscription["statutory_basis"] == "Arts. 30, 36, 42, 70 y 83"
@@ -52,17 +52,23 @@ async def test_seed_follows_the_statute(client: AsyncClient, root: dict[str, str
     derived = [p for p in positions.values() if p["is_derived"]]
     assert len(derived) == 6
     assert all(p["default_role"] is None for p in derived)
-    assert {p["default_role"]["code"] for p in positions.values() if not p["is_derived"]} == {
-        "territorial_leader"
-    }
+    assert {
+        p["default_role"]["code"]
+        for code, p in positions.items()
+        if not p["is_derived"] and not code.endswith("_coordinator")
+    } == {"territorial_leader"}
 
-    coordination = (await client.get(f"{API}/coordination-position-types", headers=root)).json()
-    assert {(c["kind"], c["code"]) for c in coordination} == {
-        ("federal", "coordinator"),
-        ("local", "coordinator"),
-        ("sectional", "coordinator"),
+    coordination = {
+        body["coordination_kind"]: [p["code"] for p in body["positions"]]
+        for body in catalog.values()
+        if body["territorial_level"] == "coordination"
     }
-    assert {c["default_role"]["code"] for c in coordination} == {"territorial_coordinator"}
+    assert coordination == {
+        "federal": ["federal_coordinator"],
+        "local": ["local_coordinator"],
+        "sectional": ["sectional_coordinator"],
+    }
+    assert positions["sectional_coordinator"]["default_role"]["code"] == "territorial_coordinator"
     assert (await client.get(f"{API}/incompatibilities", headers=root)).json() == []
 
 
@@ -154,12 +160,22 @@ async def test_catalog_management(client: AsyncClient, root: dict[str, str], sco
     assert removed.status_code == 204
     assert (await client.get(f"{API}/incompatibilities", headers=root)).json() == []
 
-    coordination = await client.post(
-        f"{API}/coordination-position-types",
+    team = await client.post(
+        f"{API}/position-types",
         headers=root,
-        json={"kind": "sectional", "code": "test_liaison", "name": "Enlace seccional"},
+        json={
+            "body_type_id": (await _catalog(client, root))["sectional_coordination"]["id"],
+            "code": "test_liaison",
+            "name": "Enlace seccional",
+        },
     )
-    assert coordination.status_code == 201, coordination.text
+    assert team.status_code == 201, team.text
+    fixed = await client.post(
+        f"{API}/body-types",
+        headers=root,
+        json={"code": "test_coordination", "name": "Equis", "territorial_level": "coordination"},
+    )
+    assert fixed.status_code == 400
 
     # Reading the catalog is not managing it.
     _, viewer = await scoped(("viewer",), [{"level": "national"}])

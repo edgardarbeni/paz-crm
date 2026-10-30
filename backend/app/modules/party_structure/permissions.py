@@ -10,3 +10,5 @@ class StructurePerm(StrEnum):
     APPOINTMENT_READ = "party_structure.appointment.read"
     APPOINTMENT_WRITE = "party_structure.appointment.write"
     APPOINTMENT_GRANT_ACCESS = "party_structure.appointment.grant_access"
+    COORDINATION_READ = "party_structure.coordination.read"
+    COORDINATION_WRITE = "party_structure.coordination.write"

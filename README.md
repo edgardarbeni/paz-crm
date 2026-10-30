@@ -161,6 +161,9 @@ uv run paz --help                    # CLI de operación
   - Acceso por nombramiento (D-109): `access` al nombrar o `POST /appointments/{id}/access`
     (invitación, TOTP obligatorio, concesión con el territorio del asiento); se retira al
     terminar y cada noche `paz party-structure expire` termina los vencidos.
+  - Coordinaciones territoriales (D-110): `/api/v1/party-structure/coordinations` (federales,
+    locales y seccionales; territorio exclusivo; el alcance de sus titulares sigue al
+    territorio).
 - **Errores.** Siempre RFC 9457 (`application/problem+json`): `type` es `urn:pazos:problem:<code>`
   e incluye `request_id`.
 - **Paginación.** Por cursor (`app.core.pagination`): `limit` ≤ 200, `cursor` opaco y `sort`

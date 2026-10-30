@@ -193,6 +193,7 @@ cambios.
 | [D-107](D-107-catalogo-y-organos.md) | Catálogo estatutario y órganos instalados (fase 1) | Aceptada |
 | [D-108](D-108-asientos-nombramientos.md) | Asientos y nombramientos (fase 2; precisa D-105) | Aceptada |
 | [D-109](D-109-acceso-por-nombramiento.md) | Acceso al sistema por nombramiento (fase 3; detalla D-104) | Aceptada |
+| [D-110](D-110-coordinaciones-territoriales.md) | Coordinaciones territoriales (fase 4) | Aceptada |
 
 ## Suposiciones vigentes
 

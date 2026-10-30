@@ -1,0 +1,31 @@
+meta {
+  name: Crear una coordinación seccional
+  type: http
+  seq: 11
+}
+
+post {
+  url: {{baseUrl}}/api/v1/party-structure/coordinations
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "kind": "sectional",
+    "name": "Coordinación seccional Centro",
+    "node_ids": ["{{sectionId1}}", "{{sectionId2}}"],
+    "created_on": "2026-11-01"
+  }
+}
+
+docs {
+  kind: federal (distritos federales, de cualquier estado), local (distritos locales de un
+  estado) o sectional (secciones de un estado). 409 si un nodo ya es de otra coordinación vigente
+  del mismo tipo; 422 si una local o seccional cruza estados. Sus asientos: GET
+  /bodies/{id}/positions.
+}

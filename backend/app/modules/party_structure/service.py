@@ -30,8 +30,6 @@ from app.modules.party_structure.appointments import ensure_seats, ensure_seats_
 from app.modules.party_structure.models import (
     Body,
     BodyType,
-    CoordinationKind,
-    CoordinationPositionType,
     DistrictKind,
     PositionDerivation,
     PositionIncompatibility,
@@ -43,7 +41,6 @@ from app.modules.party_structure.schemas import (
     BodyInstallIn,
     BodyTypeIn,
     BodyTypeUpdate,
-    CoordinationPositionTypeIn,
     IncompatibilityIn,
     PositionTypeIn,
     PositionTypeUpdate,
@@ -130,6 +127,10 @@ async def _default_role(
 
 
 async def create_body_type(db: AsyncSession, body: BodyTypeIn) -> BodyType:
+    if body.territorial_level == TerritorialLevel.COORDINATION:
+        raise BadRequestError(
+            "Los tres tipos de coordinación territorial son fijos; agrega cargos a su equipo."
+        )
     body_type = BodyType(**body.model_dump())
     db.add(body_type)
     await _flush_unique(db, "un tipo de órgano")
@@ -239,31 +240,6 @@ async def remove_incompatibility(db: AsyncSession, incompatibility_id: uuid.UUID
     await db.commit()
 
 
-async def coordination_position_types(db: AsyncSession) -> list[CoordinationPositionType]:
-    rows = await db.execute(
-        select(CoordinationPositionType)
-        .where(_alive(CoordinationPositionType))
-        .order_by(col(CoordinationPositionType.kind), col(CoordinationPositionType.sort_order))
-    )
-    return list(rows.scalars())
-
-
-async def create_coordination_position_type(
-    db: AsyncSession, actor: Access, body: CoordinationPositionTypeIn
-) -> CoordinationPositionType:
-    row = CoordinationPositionType(
-        kind=CoordinationKind(body.kind),
-        code=body.code,
-        name=body.name,
-        default_role_id=await _default_role(db, actor, body.default_role_id),
-        sort_order=body.sort_order,
-    )
-    db.add(row)
-    await _flush_unique(db, "un cargo de coordinación")
-    await db.commit()
-    return row
-
-
 # --- bodies -----------------------------------------------------------------------------------
 
 _NODE_LEVEL = {
@@ -275,6 +251,24 @@ _NODE_LEVEL = {
     ),
     "local_district_id": (ScopeLevel.LOCAL_DISTRICT, "local_districts", "local_district_id"),
 }
+
+
+_COORDINATION_TERRITORY = (
+    ("coordination_federal_districts", "federal_district_id", "s.federal_district_id"),
+    ("coordination_local_districts", "local_district_id", "s.local_district_id"),
+    ("coordination_sections", "section_id", "s.id"),
+)
+
+
+def _coordination_clauses(geo: GeoScope) -> str:
+    """A coordination (D-110) is visible when one of its current nodes touches the scope."""
+    return " OR ".join(
+        f"EXISTS (SELECT 1 FROM party_structure.{table} t "  # noqa: S608 - fixed tables
+        f"JOIN geography.sections s ON {link} = t.{column} WHERE t.coordination_id = b.id "
+        "AND t.removed_on IS NULL AND t.deleted_at IS NULL AND s.is_active "
+        f"AND {geo.section_sql('s.id')})"
+        for table, column, link in _COORDINATION_TERRITORY
+    )
 
 
 def visible_filter(geo: GeoScope) -> ColumnElement[bool] | None:
@@ -293,7 +287,7 @@ def visible_filter(geo: GeoScope) -> ColumnElement[bool] | None:
         "JOIN geography.states st ON st.id = s.state_id JOIN geography.geographic_frameworks f "
         "ON f.id = st.framework_id AND f.is_active AND f.deleted_at IS NULL "
         f"WHERE st.state_code = b.state_code AND s.is_active AND {geo.section_sql('s.id')}) "
-        f"OR {node_clauses}))"
+        f"OR {node_clauses} OR {_coordination_clauses(geo)}))"
     ).bindparams(**geo.sql_params)  # type: ignore[return-value]
 
 
@@ -380,6 +374,8 @@ def _expected_columns(level: TerritorialLevel) -> tuple[str, ...]:
 
 async def install_body(db: AsyncSession, geo: GeoScope, body: BodyInstallIn) -> Body:
     body_type = await _body_type(db, body.body_type_id)
+    if body_type.coordination_kind is not None:
+        raise BadRequestError("Las coordinaciones se crean en /party-structure/coordinations.")
     if not body_type.requires_installation:
         raise BadRequestError(
             "Los órganos nacionales y estatales ya están instalados; solo se instalan los "
@@ -429,6 +425,8 @@ async def dissolve_body(
 ) -> Body:
     found = await visible_body(db, geo, body_id)
     body_type = await _body_type(db, found.body_type_id)
+    if body_type.coordination_kind is not None:
+        raise BadRequestError("Las coordinaciones se cierran en /party-structure/coordinations.")
     if not body_type.requires_installation:
         raise ConflictError("Los órganos nacionales y estatales no se disuelven.")
     if found.dissolved_on is not None:
@@ -475,6 +473,10 @@ async def territory_names(db: AsyncSession, bodies: Sequence[Body]) -> dict[uuid
         if ids:
             nodes.update(dict((await db.execute(text(sql), {"ids": ids})).all()))
     for b in bodies:
+        if b.name is not None:  # coordination: its name and state
+            state = states.get(b.state_code or 0) if b.state_code else "Varios estados"
+            names[pk(b)] = f"{b.name}, {state}" if state else b.name
+            continue
         node = b.municipality_id or b.federal_district_id or b.local_district_id
         state = states.get(b.state_code or 0, f"Estado {b.state_code}") if b.state_code else None
         if node is not None:
