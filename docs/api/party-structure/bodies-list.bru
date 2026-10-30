@@ -1,0 +1,21 @@
+meta {
+  name: Órganos en tu alcance
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/v1/party-structure/bodies?level=state&state_code=1
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+docs {
+  Filtros: level (national, state, district, municipal), body_type_id, state_code (1-32) e
+  include_dissolved. Los nacionales los ve cualquiera con lectura; los demás, si su territorio
+  toca tu alcance.
+}

@@ -104,6 +104,38 @@ export const zBatchOut = z.object({
 });
 
 /**
+ * BodyDissolveIn
+ */
+export const zBodyDissolveIn = z.object({
+    dissolved_on: z.iso.date(),
+    dissolution_agreement: z.string().min(2).max(300)
+});
+
+/**
+ * BodyInstallIn
+ *
+ * Registers the installation of a district or municipal body (agreement of the CDN).
+ */
+export const zBodyInstallIn = z.object({
+    body_type_id: z.uuid(),
+    municipality_id: z.uuid().nullish(),
+    federal_district_id: z.uuid().nullish(),
+    local_district_id: z.uuid().nullish(),
+    installed_on: z.iso.date(),
+    installation_agreement: z.string().min(2).max(300)
+});
+
+/**
+ * BodyTypeUpdate
+ */
+export const zBodyTypeUpdate = z.object({
+    name: z.string().min(2).max(200),
+    statutory_basis: z.string().max(300).nullish(),
+    description: z.string().max(500).nullish(),
+    sort_order: z.int().optional().default(0)
+});
+
+/**
  * Body_queueMemberImport
  */
 export const zBodyQueueMemberImport = z.object({
@@ -223,6 +255,26 @@ export const zContactOut = z.object({
 });
 
 /**
+ * CoordinationKind
+ */
+export const zCoordinationKind = z.enum([
+    'federal',
+    'local',
+    'sectional'
+]);
+
+/**
+ * CoordinationPositionTypeIn
+ */
+export const zCoordinationPositionTypeIn = z.object({
+    kind: zCoordinationKind,
+    code: z.string().min(2).max(80).regex(/^[a-z0-9_]+$/),
+    name: z.string().min(2).max(200),
+    default_role_id: z.uuid().nullish(),
+    sort_order: z.int().optional().default(0)
+});
+
+/**
  * CreditIn
  */
 export const zCreditIn = z.object({
@@ -265,6 +317,11 @@ export const zDirectCounts = z.object({
     total: z.int(),
     hidden: z.int()
 });
+
+/**
+ * DistrictKind
+ */
+export const zDistrictKind = z.enum(['federal', 'local']);
 
 /**
  * ElectionLevel
@@ -580,6 +637,15 @@ export const zCursorPageImportRunOut = z.object({
     items: z.array(zImportRunOut),
     next_cursor: z.string().nullish(),
     has_more: z.boolean()
+});
+
+/**
+ * IncompatibilityIn
+ */
+export const zIncompatibilityIn = z.object({
+    position_type_a_id: z.uuid(),
+    position_type_b_id: z.uuid(),
+    notes: z.string().max(500).nullish()
 });
 
 /**
@@ -1375,6 +1441,39 @@ export const zPhotoOut = z.object({
 });
 
 /**
+ * PositionTypeRef
+ */
+export const zPositionTypeRef = z.object({
+    id: z.uuid(),
+    code: z.string(),
+    name: z.string()
+});
+
+/**
+ * IncompatibilityOut
+ */
+export const zIncompatibilityOut = z.object({
+    id: z.uuid(),
+    position_type_a: zPositionTypeRef,
+    position_type_b: zPositionTypeRef,
+    notes: z.string().nullable()
+});
+
+/**
+ * PositionTypeUpdate
+ */
+export const zPositionTypeUpdate = z.object({
+    name: z.string().min(2).max(200),
+    electing_body: z.string().max(300).nullish(),
+    term_years: z.int().gte(1).lte(20).nullish(),
+    term_months: z.int().gte(1).lte(240).nullish(),
+    max_consecutive_terms: z.int().gte(1).lte(20).nullish(),
+    statutory_basis: z.string().max(300).nullish(),
+    default_role_id: z.uuid().nullish(),
+    sort_order: z.int().optional().default(0)
+});
+
+/**
  * Principle
  */
 export const zPrinciple = z.enum(['mr', 'rp']);
@@ -1650,7 +1749,20 @@ export const zRolePermissionsRequest = z.object({
 export const zRoleSummary = z.object({
     id: z.uuid(),
     code: z.string(),
-    name: z.string()
+    name: z.string(),
+    grants_all: z.boolean().optional().default(false)
+});
+
+/**
+ * CoordinationPositionTypeOut
+ */
+export const zCoordinationPositionTypeOut = z.object({
+    id: z.uuid(),
+    kind: zCoordinationKind,
+    code: z.string(),
+    name: z.string(),
+    default_role: zRoleSummary.nullable(),
+    sort_order: z.int()
 });
 
 /**
@@ -1833,6 +1945,53 @@ export const zGrantOut = z.object({
 });
 
 /**
+ * ScopeRule
+ */
+export const zScopeRule = z.enum([
+    'body_territory',
+    'circumscription',
+    'national'
+]);
+
+/**
+ * PositionTypeIn
+ */
+export const zPositionTypeIn = z.object({
+    body_type_id: z.uuid(),
+    code: z.string().min(2).max(80).regex(/^[a-z0-9_]+$/),
+    name: z.string().min(2).max(200),
+    scope_rule: zScopeRule.optional().default('body_territory'),
+    electing_body: z.string().max(300).nullish(),
+    term_years: z.int().gte(1).lte(20).nullish(),
+    term_months: z.int().gte(1).lte(240).nullish(),
+    max_consecutive_terms: z.int().gte(1).lte(20).nullish(),
+    statutory_basis: z.string().max(300).nullish(),
+    default_role_id: z.uuid().nullish(),
+    derived_from: z.array(z.uuid()).max(10).optional(),
+    sort_order: z.int().optional().default(0)
+});
+
+/**
+ * PositionTypeOut
+ */
+export const zPositionTypeOut = z.object({
+    id: z.uuid(),
+    body_type_id: z.uuid(),
+    code: z.string(),
+    name: z.string(),
+    scope_rule: zScopeRule,
+    electing_body: z.string().nullable(),
+    term_years: z.int().nullable(),
+    term_months: z.int().nullable(),
+    max_consecutive_terms: z.int().nullable(),
+    statutory_basis: z.string().nullable(),
+    default_role: zRoleSummary.nullable(),
+    is_derived: z.boolean(),
+    derived_from: z.array(zPositionTypeRef),
+    sort_order: z.int()
+});
+
+/**
  * SessionOut
  */
 export const zSessionOut = z.object({
@@ -1928,6 +2087,83 @@ export const zSubstitutionIn = z.object({
     substitute_person_id: z.uuid().nullish(),
     reason: z.string().min(5).max(500),
     override: zOverride.nullish()
+});
+
+/**
+ * TerritorialLevel
+ */
+export const zTerritorialLevel = z.enum([
+    'national',
+    'state',
+    'district',
+    'municipal'
+]);
+
+/**
+ * BodyTypeIn
+ */
+export const zBodyTypeIn = z.object({
+    code: z.string().min(2).max(80).regex(/^[a-z0-9_]+$/),
+    name: z.string().min(2).max(200),
+    territorial_level: zTerritorialLevel,
+    requires_installation: z.boolean().optional().default(false),
+    statutory_basis: z.string().max(300).nullish(),
+    description: z.string().max(500).nullish(),
+    sort_order: z.int().optional().default(0)
+});
+
+/**
+ * BodyTypeOut
+ */
+export const zBodyTypeOut = z.object({
+    id: z.uuid(),
+    code: z.string(),
+    name: z.string(),
+    territorial_level: zTerritorialLevel,
+    requires_installation: z.boolean(),
+    statutory_basis: z.string().nullable(),
+    description: z.string().nullable(),
+    sort_order: z.int(),
+    positions: z.array(zPositionTypeOut)
+});
+
+/**
+ * BodyTypeRef
+ */
+export const zBodyTypeRef = z.object({
+    id: z.uuid(),
+    code: z.string(),
+    name: z.string(),
+    territorial_level: zTerritorialLevel
+});
+
+/**
+ * BodyOut
+ */
+export const zBodyOut = z.object({
+    id: z.uuid(),
+    body_type: zBodyTypeRef,
+    state_code: z.int().nullable(),
+    territory: z.string(),
+    framework_id: z.uuid().nullable(),
+    municipality_id: z.uuid().nullable(),
+    federal_district_id: z.uuid().nullable(),
+    local_district_id: z.uuid().nullable(),
+    district_kind: zDistrictKind.nullable(),
+    installed_on: z.iso.date().nullable(),
+    installation_agreement: z.string().nullable(),
+    dissolved_on: z.iso.date().nullable(),
+    dissolution_agreement: z.string().nullable(),
+    status: z.enum(['installed', 'dissolved'])
+});
+
+/**
+ * CursorPage[BodyOut]
+ */
+export const zCursorPageBodyOut = z.object({
+    items: z.array(zBodyOut),
+    next_cursor: z.string().nullish(),
+    has_more: z.boolean()
 });
 
 /**
@@ -3616,3 +3852,125 @@ export const zPublicEnrollBody = zPublicEnrollmentIn;
  * Successful Response
  */
 export const zPublicEnrollResponse = zPublicEnrollmentOut;
+
+/**
+ * Response Getstructurecatalog
+ *
+ * Successful Response
+ */
+export const zGetStructureCatalogResponse = z.array(zBodyTypeOut);
+
+export const zCreateBodyTypeBody = zBodyTypeIn;
+
+/**
+ * Successful Response
+ */
+export const zCreateBodyTypeResponse = zBodyTypeOut;
+
+export const zUpdateBodyTypeBody = zBodyTypeUpdate;
+
+export const zUpdateBodyTypePath = z.object({
+    body_type_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zUpdateBodyTypeResponse = zBodyTypeRef;
+
+export const zCreatePositionTypeBody = zPositionTypeIn;
+
+/**
+ * Successful Response
+ */
+export const zCreatePositionTypeResponse = zPositionTypeOut;
+
+export const zUpdatePositionTypeBody = zPositionTypeUpdate;
+
+export const zUpdatePositionTypePath = z.object({
+    position_type_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zUpdatePositionTypeResponse = zPositionTypeOut;
+
+/**
+ * Response Listincompatibilities
+ *
+ * Successful Response
+ */
+export const zListIncompatibilitiesResponse = z.array(zIncompatibilityOut);
+
+export const zAddIncompatibilityBody = zIncompatibilityIn;
+
+/**
+ * Successful Response
+ */
+export const zAddIncompatibilityResponse = zIncompatibilityOut;
+
+export const zRemoveIncompatibilityPath = z.object({
+    incompatibility_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zRemoveIncompatibilityResponse = z.void();
+
+/**
+ * Response Listcoordinationpositiontypes
+ *
+ * Successful Response
+ */
+export const zListCoordinationPositionTypesResponse = z.array(zCoordinationPositionTypeOut);
+
+export const zCreateCoordinationPositionTypeBody = zCoordinationPositionTypeIn;
+
+/**
+ * Successful Response
+ */
+export const zCreateCoordinationPositionTypeResponse = zCoordinationPositionTypeOut;
+
+export const zListBodiesQuery = z.object({
+    level: zTerritorialLevel.nullish(),
+    body_type_id: z.uuid().nullish(),
+    state_code: z.int().gte(1).lte(32).nullish(),
+    include_dissolved: z.boolean().optional().default(false),
+    limit: z.int().gte(1).lte(200).optional().default(50),
+    cursor: z.string().max(1024).nullish(),
+    sort: z.string().max(200).nullish()
+});
+
+/**
+ * Successful Response
+ */
+export const zListBodiesResponse = zCursorPageBodyOut;
+
+export const zInstallBodyBody = zBodyInstallIn;
+
+/**
+ * Successful Response
+ */
+export const zInstallBodyResponse = zBodyOut;
+
+export const zGetBodyPath = z.object({
+    body_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zGetBodyResponse = zBodyOut;
+
+export const zDissolveBodyBody = zBodyDissolveIn;
+
+export const zDissolveBodyPath = z.object({
+    body_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zDissolveBodyResponse = zBodyOut;

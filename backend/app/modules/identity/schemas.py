@@ -75,6 +75,7 @@ class RoleSummary(Schema):
     id: uuid.UUID
     code: str
     name: str
+    grants_all: bool = Field(default=False, description="Superadministrador: todo, sin alcance.")
 
 
 class ScopeIn(Schema):

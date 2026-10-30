@@ -1,0 +1,23 @@
+meta {
+  name: Registrar cargos incompatibles
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/v1/party-structure/incompatibilities
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "position_type_a_id": "{{positionTypeA}}",
+    "position_type_b_id": "{{positionTypeB}}",
+    "notes": "Acuerdo de jurídico"
+  }
+}

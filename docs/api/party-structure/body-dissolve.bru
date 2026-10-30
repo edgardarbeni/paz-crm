@@ -1,0 +1,22 @@
+meta {
+  name: Disolver un comité
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/api/v1/party-structure/bodies/{{bodyId}}/dissolve
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "dissolved_on": "2026-12-01",
+    "dissolution_agreement": "CDN/020/2026"
+  }
+}
