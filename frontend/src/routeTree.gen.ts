@@ -46,6 +46,7 @@ import { Route as AppGeographyImportsIndexRouteImport } from './routes/_app/geog
 import { Route as AppGeographyImportsRunIdRouteImport } from './routes/_app/geography/imports/$runId'
 import { Route as AppPeaceMovementHousesIndexRouteImport } from './routes/_app/peace-movement/houses/index'
 import { Route as AppPeaceMovementHousesHouseIdRouteImport } from './routes/_app/peace-movement/houses/$houseId'
+import { Route as AppPeaceMovementHousesMapRouteImport } from './routes/_app/peace-movement/houses/map'
 import { Route as AppPeaceMovementHousesNewRouteImport } from './routes/_app/peace-movement/houses/new'
 import { Route as AppPeaceMovementMembersIndexRouteImport } from './routes/_app/peace-movement/members/index'
 import { Route as AppPeaceMovementMembersMemberIdRouteImport } from './routes/_app/peace-movement/members/$memberId'
@@ -242,6 +243,12 @@ const AppPeaceMovementHousesHouseIdRoute =
     path: '/peace-movement/houses/$houseId',
     getParentRoute: () => AppRoute,
   } as any)
+const AppPeaceMovementHousesMapRoute =
+  AppPeaceMovementHousesMapRouteImport.update({
+    id: '/peace-movement/houses/map',
+    path: '/peace-movement/houses/map',
+    getParentRoute: () => AppRoute,
+  } as any)
 const AppPeaceMovementHousesNewRoute =
   AppPeaceMovementHousesNewRouteImport.update({
     id: '/peace-movement/houses/new',
@@ -302,6 +309,7 @@ export interface FileRoutesByFullPath {
   '/geography/$level/$nodeId': typeof AppGeographyLevelNodeIdRoute
   '/geography/imports/$runId': typeof AppGeographyImportsRunIdRoute
   '/peace-movement/houses/$houseId': typeof AppPeaceMovementHousesHouseIdRoute
+  '/peace-movement/houses/map': typeof AppPeaceMovementHousesMapRoute
   '/peace-movement/houses/new': typeof AppPeaceMovementHousesNewRoute
   '/peace-movement/members/$memberId': typeof AppPeaceMovementMembersMemberIdRoute
   '/peace-movement/members/new': typeof AppPeaceMovementMembersNewRoute
@@ -344,6 +352,7 @@ export interface FileRoutesByTo {
   '/geography/$level/$nodeId': typeof AppGeographyLevelNodeIdRoute
   '/geography/imports/$runId': typeof AppGeographyImportsRunIdRoute
   '/peace-movement/houses/$houseId': typeof AppPeaceMovementHousesHouseIdRoute
+  '/peace-movement/houses/map': typeof AppPeaceMovementHousesMapRoute
   '/peace-movement/houses/new': typeof AppPeaceMovementHousesNewRoute
   '/peace-movement/members/$memberId': typeof AppPeaceMovementMembersMemberIdRoute
   '/peace-movement/members/new': typeof AppPeaceMovementMembersNewRoute
@@ -388,6 +397,7 @@ export interface FileRoutesById {
   '/_app/geography/$level/$nodeId': typeof AppGeographyLevelNodeIdRoute
   '/_app/geography/imports/$runId': typeof AppGeographyImportsRunIdRoute
   '/_app/peace-movement/houses/$houseId': typeof AppPeaceMovementHousesHouseIdRoute
+  '/_app/peace-movement/houses/map': typeof AppPeaceMovementHousesMapRoute
   '/_app/peace-movement/houses/new': typeof AppPeaceMovementHousesNewRoute
   '/_app/peace-movement/members/$memberId': typeof AppPeaceMovementMembersMemberIdRoute
   '/_app/peace-movement/members/new': typeof AppPeaceMovementMembersNewRoute
@@ -432,6 +442,7 @@ export interface FileRouteTypes {
     | '/geography/$level/$nodeId'
     | '/geography/imports/$runId'
     | '/peace-movement/houses/$houseId'
+    | '/peace-movement/houses/map'
     | '/peace-movement/houses/new'
     | '/peace-movement/members/$memberId'
     | '/peace-movement/members/new'
@@ -474,6 +485,7 @@ export interface FileRouteTypes {
     | '/geography/$level/$nodeId'
     | '/geography/imports/$runId'
     | '/peace-movement/houses/$houseId'
+    | '/peace-movement/houses/map'
     | '/peace-movement/houses/new'
     | '/peace-movement/members/$memberId'
     | '/peace-movement/members/new'
@@ -517,6 +529,7 @@ export interface FileRouteTypes {
     | '/_app/geography/$level/$nodeId'
     | '/_app/geography/imports/$runId'
     | '/_app/peace-movement/houses/$houseId'
+    | '/_app/peace-movement/houses/map'
     | '/_app/peace-movement/houses/new'
     | '/_app/peace-movement/members/$memberId'
     | '/_app/peace-movement/members/new'
@@ -796,6 +809,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPeaceMovementHousesHouseIdRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/peace-movement/houses/map': {
+      id: '/_app/peace-movement/houses/map'
+      path: '/peace-movement/houses/map'
+      fullPath: '/peace-movement/houses/map'
+      preLoaderRoute: typeof AppPeaceMovementHousesMapRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/peace-movement/houses/new': {
       id: '/_app/peace-movement/houses/new'
       path: '/peace-movement/houses/new'
@@ -856,6 +876,7 @@ interface AppRouteChildren {
   AppGeographyLevelNodeIdRoute: typeof AppGeographyLevelNodeIdRoute
   AppGeographyImportsRunIdRoute: typeof AppGeographyImportsRunIdRoute
   AppPeaceMovementHousesHouseIdRoute: typeof AppPeaceMovementHousesHouseIdRoute
+  AppPeaceMovementHousesMapRoute: typeof AppPeaceMovementHousesMapRoute
   AppPeaceMovementHousesNewRoute: typeof AppPeaceMovementHousesNewRoute
   AppPeaceMovementMembersMemberIdRoute: typeof AppPeaceMovementMembersMemberIdRoute
   AppPeaceMovementMembersNewRoute: typeof AppPeaceMovementMembersNewRoute
@@ -893,6 +914,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppGeographyLevelNodeIdRoute: AppGeographyLevelNodeIdRoute,
   AppGeographyImportsRunIdRoute: AppGeographyImportsRunIdRoute,
   AppPeaceMovementHousesHouseIdRoute: AppPeaceMovementHousesHouseIdRoute,
+  AppPeaceMovementHousesMapRoute: AppPeaceMovementHousesMapRoute,
   AppPeaceMovementHousesNewRoute: AppPeaceMovementHousesNewRoute,
   AppPeaceMovementMembersMemberIdRoute: AppPeaceMovementMembersMemberIdRoute,
   AppPeaceMovementMembersNewRoute: AppPeaceMovementMembersNewRoute,

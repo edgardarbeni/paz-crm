@@ -12,6 +12,7 @@ import {
   ListChecks,
   type LucideIcon,
   Map as MapIcon,
+  MapPinHouse,
   MapPinned,
   ScrollText,
   Settings2,
@@ -70,6 +71,12 @@ export const NAV: NavSection[] = [
         to: "/peace-movement/houses",
         label: "Casas de Paz",
         icon: House,
+        perm: Perm.PEACE_HOUSE_READ,
+      },
+      {
+        to: "/peace-movement/houses/map",
+        label: "Mapa de casas",
+        icon: MapPinHouse,
         perm: Perm.PEACE_HOUSE_READ,
       },
       {

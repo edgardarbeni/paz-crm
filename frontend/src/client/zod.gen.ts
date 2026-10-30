@@ -476,6 +476,17 @@ export const zHouseGoalOut = z.object({
 });
 
 /**
+ * HouseMapOut
+ *
+ * GeoJSON FeatureCollection of the visible houses (approximate points).
+ */
+export const zHouseMapOut = z.object({
+    type: z.literal('FeatureCollection').optional().default('FeatureCollection'),
+    features: z.array(z.record(z.string(), z.unknown())),
+    truncated: z.boolean()
+});
+
+/**
  * HouseMemberIn
  */
 export const zHouseMemberIn = z.object({
@@ -3155,6 +3166,7 @@ export const zSearchMembersQuery = z.object({
     level_id: z.uuid().nullish(),
     state_id: z.uuid().nullish(),
     recruiter_id: z.uuid().nullish(),
+    person_id: z.uuid().nullish(),
     q: z.string().min(2).max(100).nullish(),
     limit: z.int().gte(1).lte(200).optional().default(50),
     cursor: z.string().max(1024).nullish(),
@@ -3306,6 +3318,16 @@ export const zOpenPeaceHouseBody = zHouseIn;
  * Successful Response
  */
 export const zOpenPeaceHouseResponse = zHouseOut;
+
+export const zGetPeaceHousesMapQuery = z.object({
+    status: z.string().regex(/^(open|consolidated|closed)$/).nullish(),
+    state_id: z.uuid().nullish()
+});
+
+/**
+ * Successful Response
+ */
+export const zGetPeaceHousesMapResponse = zHouseMapOut;
 
 export const zGetPeaceHousePath = z.object({
     house_id: z.uuid()

@@ -191,6 +191,9 @@ El script usa una base desechable con la geografía sintética de los tests
 - **Movimiento de Paz (D-99):** menú propio (pacificadores, validación, casas, estadísticas,
   importación y configuración), ramas en la ficha de cada usuario y la página pública
   `/inscripcion/{código}` (el QR de cada pacificador apunta ahí, con `PAZ_PUBLIC_BASE_URL`).
+  Con D-100 se suman el mapa de casas, la participación en el MP en la ficha de cada persona,
+  la pestaña «Lecturas sensibles» de la bitácora y el aviso de pendientes en el inicio. No hay
+  portal de pacificadores: lo que haga el pacificador irá en la App.
 - **Mapa (D-72):** MapLibre con las teselas MVT de la API sobre OpenFreeMap. Para cambiar de
   proveedor se usan `VITE_MAP_STYLE_URL` y `PAZ_MAP_TILES_ORIGIN` (CSP de producción).
 

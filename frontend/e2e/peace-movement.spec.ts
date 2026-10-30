@@ -1,7 +1,9 @@
 import { expect, test } from "@playwright/test";
 import { login, pickWithKeyboard, seed } from "./support";
 
-test("Movimiento de Paz: validar, inscribir desde el panel y ver la red", async ({ page }) => {
+test("Movimiento de Paz: validar, inscribir, ver la red y las integraciones del panel", async ({
+  page,
+}) => {
   await login(page, "peace");
 
   // The validation queue lists the pending enrollment; validating it removes it.
@@ -33,6 +35,29 @@ test("Movimiento de Paz: validar, inscribir desde el panel y ver la red", async 
   // Back at the Ambassador: the new recruit is listed among her direct recruits.
   await page.getByRole("link", { name: seed.peace.root.name }).click();
   await expect(page.getByRole("table", { name: "Reclutas directos" })).toContainText("Wendy Nueva");
+
+  // The person's profile shows their Peace Movement membership and links to it.
+  await page.goto(`/people/${seed.peace.root.person_id}`);
+  const card = page.locator('[data-slot="card"]').filter({
+    has: page.getByRole("heading", { name: "Movimiento de Paz" }),
+  });
+  await expect(card).toContainText("Activo");
+  await expect(page.getByRole("link", { name: "Inscribir en el Movimiento de Paz" })).toHaveCount(
+    0,
+  );
+  await card.getByRole("link", { name: "Embajador de Paz" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: seed.peace.root.name })).toBeVisible();
+
+  // Opening the member profile is a sensitive read (D-89), listed in its own audit tab.
+  await page.goto("/audit");
+  await page.getByRole("tab", { name: "Lecturas sensibles" }).click();
+  await expect(page.getByRole("table", { name: "Lecturas sensibles" })).toContainText("Consulta");
+
+  // The houses map lives in the panel (D-100).
+  await page.goto("/peace-movement/houses");
+  await page.getByRole("link", { name: "Ver mapa" }).click();
+  await expect(page.getByRole("heading", { name: "Mapa de Casas de Paz" })).toBeVisible();
+  await expect(page.getByText(/\d+ casas/)).toBeVisible();
 });
 
 test("la página pública de inscripción resuelve la verificación y recibe la inscripción", async ({

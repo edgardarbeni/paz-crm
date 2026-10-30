@@ -15,7 +15,7 @@ export interface Seed {
   nominations: { local_district_1: string; local_district_2: string };
   seeded_formula: { owner: string; substitute: string };
   peace: {
-    root: { id: string; name: string; code: string };
+    root: { id: string; person_id: string; name: string; code: string };
     recruits: string[];
     pending: { id: string; name: string };
     next_curp: string;

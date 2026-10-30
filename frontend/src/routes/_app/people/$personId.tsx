@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PersonMembership } from "@/features/peace-movement/person-membership";
 import { CURP_ENTITY_NAMES } from "@/features/people/entities";
 import { PersonForm } from "@/features/people/person-form";
 import { Perm } from "@/lib/auth/permissions";
@@ -99,6 +100,7 @@ function PersonPage() {
         ) : (
           <PersonSummaryCard person={p} />
         )}
+        <PersonMembership personId={personId} />
         <Consents personId={personId} />
       </div>
     </section>

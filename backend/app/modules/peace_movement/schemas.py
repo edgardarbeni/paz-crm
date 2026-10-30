@@ -585,3 +585,11 @@ class MemberImportErrorOut(Schema):
     row_number: int
     code: str
     detail: str
+
+
+class HouseMapOut(Schema):
+    """GeoJSON FeatureCollection of the visible houses (approximate points)."""
+
+    type: Literal["FeatureCollection"] = "FeatureCollection"
+    features: list[dict[str, object]]
+    truncated: bool = Field(description="Hay más casas que las devueltas; acota por estado.")

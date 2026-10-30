@@ -3,7 +3,11 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
-import { enrollMemberMutation, getMemberOptions } from "@/client/@tanstack/react-query.gen";
+import {
+  enrollMemberMutation,
+  getMemberOptions,
+  getPersonOptions,
+} from "@/client/@tanstack/react-query.gen";
 import { searchPeople } from "@/client/sdk.gen";
 import type { EnrollmentIn, PersonCreate } from "@/client/types.gen";
 import { AsyncCombobox, type ComboItem } from "@/components/async-combobox";
@@ -24,7 +28,7 @@ import {
 import { PersonForm } from "@/features/people/person-form";
 
 export const Route = createFileRoute("/_app/peace-movement/members/new")({
-  validateSearch: z.object({ recruiter: z.string().optional() }),
+  validateSearch: z.object({ recruiter: z.string().optional(), person: z.string().optional() }),
   component: EnrollPage,
 });
 
@@ -41,7 +45,11 @@ interface Membership {
 }
 
 function EnrollPage() {
-  const { recruiter: recruiterId } = Route.useSearch();
+  const { recruiter: recruiterId, person: personId } = Route.useSearch();
+  const presetPerson = useQuery({
+    ...getPersonOptions({ path: { person_id: personId ?? "" } }),
+    enabled: !!personId,
+  });
   const navigate = useNavigate();
   const { levels } = useLevels();
   const presetRecruiter = useQuery({
@@ -57,8 +65,11 @@ function EnrollPage() {
     evidenceUri: "",
     house: null,
   });
-  const [mode, setMode] = useState<"new" | "existing">("new");
-  const [existing, setExisting] = useState<ComboItem | null>(null);
+  const [mode, setMode] = useState<"new" | "existing">(personId ? "existing" : "new");
+  const [picked, setExisting] = useState<ComboItem | null>(null);
+  const existing =
+    picked ??
+    (presetPerson.data ? { id: presetPerson.data.id, label: presetPerson.data.full_name } : null);
   const recruiter =
     membership.recruiter ??
     (presetRecruiter.data

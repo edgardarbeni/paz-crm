@@ -47,19 +47,54 @@ interface GeoMapProps {
   /** Node to outline (e.g. while pointing at it in a list); drawn only where its layer has tiles. */
   hovered?: { layer: LayerId; id: string } | null;
   onClick?: (lngLat: { lng: number; lat: number }) => void;
+  /** Point features (e.g. Peace Houses), clustered; `properties.status` picks the color. */
+  points?: PointCollection | null;
+  /** Click on a single point: its properties. */
+  onPointClick?: (properties: Record<string, unknown>) => void;
+  /** Fit the camera to the points when they change. */
+  fitPoints?: boolean;
   className?: string;
 }
+
+export interface PointCollection {
+  type: "FeatureCollection";
+  features: { type: "Feature"; geometry: unknown; properties: Record<string, unknown> }[];
+}
+
+const POINT_COLORS: maplibregl.ExpressionSpecification = [
+  "match",
+  ["get", "status"],
+  "consolidated",
+  "#682575",
+  "open",
+  "#d97706",
+  "closed",
+  "#94a3b8",
+  "#0f766e",
+];
 
 /**
  * MapLibre viewer over the API's vector tiles (MVT, D-19). Tiles carry the bearer token via
  * transformRequest, so each user only receives what their scope allows.
  */
-export function GeoMap({ visible, highlight, bbox, hovered, onClick, className }: GeoMapProps) {
+export function GeoMap({
+  visible,
+  highlight,
+  bbox,
+  hovered,
+  onClick,
+  points,
+  onPointClick,
+  fitPoints,
+  className,
+}: GeoMapProps) {
   const container = useRef<HTMLElement>(null);
   const map = useRef<maplibregl.Map | null>(null);
   const [ready, setReady] = useState(false);
   const clickRef = useRef(onClick);
   clickRef.current = onClick;
+  const pointClickRef = useRef(onPointClick);
+  pointClickRef.current = onPointClick;
 
   useEffect(() => {
     if (!container.current) return;
@@ -135,6 +170,70 @@ export function GeoMap({ visible, highlight, bbox, hovered, onClick, className }
           layout: { visibility: "none", "line-join": "round" },
         });
       }
+      instance.addSource("points", {
+        type: "geojson",
+        data: { type: "FeatureCollection", features: [] },
+        cluster: true,
+        clusterRadius: 40,
+        clusterMaxZoom: 13,
+      });
+      instance.addLayer({
+        id: "points-cluster",
+        type: "circle",
+        source: "points",
+        filter: ["has", "point_count"],
+        paint: {
+          "circle-color": "#682575",
+          "circle-opacity": 0.85,
+          "circle-radius": ["step", ["get", "point_count"], 14, 10, 18, 100, 24],
+          "circle-stroke-color": "#ffffff",
+          "circle-stroke-width": 2,
+        },
+      });
+      instance.addLayer({
+        id: "points-count",
+        type: "symbol",
+        source: "points",
+        filter: ["has", "point_count"],
+        layout: { "text-field": ["get", "point_count_abbreviated"], "text-size": 12 },
+        paint: { "text-color": "#ffffff" },
+      });
+      instance.addLayer({
+        id: "points-single",
+        type: "circle",
+        source: "points",
+        filter: ["!", ["has", "point_count"]],
+        paint: {
+          "circle-color": POINT_COLORS,
+          "circle-radius": 7,
+          "circle-stroke-color": "#ffffff",
+          "circle-stroke-width": 2,
+        },
+      });
+      instance.on("click", "points-cluster", (event) => {
+        const feature = event.features?.[0];
+        const source = instance.getSource("points") as maplibregl.GeoJSONSource;
+        const clusterId = feature?.properties?.cluster_id;
+        if (feature && clusterId != null) {
+          source.getClusterExpansionZoom(clusterId).then((zoom) => {
+            const [lng, lat] = (feature.geometry as unknown as { coordinates: [number, number] })
+              .coordinates;
+            instance.easeTo({ center: [lng, lat], zoom });
+          });
+        }
+      });
+      instance.on("click", "points-single", (event) => {
+        const properties = event.features?.[0]?.properties;
+        if (properties) pointClickRef.current?.(properties);
+      });
+      for (const layer of ["points-cluster", "points-single"]) {
+        instance.on("mouseenter", layer, () => {
+          instance.getCanvas().style.cursor = "pointer";
+        });
+        instance.on("mouseleave", layer, () => {
+          instance.getCanvas().style.cursor = "";
+        });
+      }
       setReady(true);
     });
     instance.on("click", (event: maplibregl.MapMouseEvent) => clickRef.current?.(event.lngLat));
@@ -182,6 +281,22 @@ export function GeoMap({ visible, highlight, bbox, hovered, onClick, className }
       );
     }
   }, [ready, highlight, bbox]);
+
+  useEffect(() => {
+    const instance = map.current;
+    if (!instance || !ready) return;
+    const source = instance.getSource("points") as maplibregl.GeoJSONSource | undefined;
+    const data = points ?? { type: "FeatureCollection", features: [] };
+    source?.setData(data as maplibregl.GeoJSONSourceSpecification["data"]);
+    if (fitPoints && points?.features.length) {
+      const bounds = new maplibregl.LngLatBounds();
+      for (const feature of points.features) {
+        const [lng, lat] = (feature.geometry as { coordinates: [number, number] }).coordinates;
+        bounds.extend([lng, lat]);
+      }
+      instance.fitBounds(bounds, { padding: 48, maxZoom: 15, duration: 0 });
+    }
+  }, [ready, points, fitPoints]);
 
   useEffect(() => {
     const instance = map.current;

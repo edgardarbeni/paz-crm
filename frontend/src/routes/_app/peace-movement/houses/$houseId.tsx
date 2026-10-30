@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ImagePlus, Plus, Trash2, UserMinus } from "lucide-react";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
   addHouseMeetingMutation,
@@ -33,6 +33,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { GeoMap, type PointCollection } from "@/features/geography/geo-map";
 import { HOUSE_MEMBER_SOURCE, WEEKDAYS } from "@/features/peace-movement/labels";
 import {
   Facts,
@@ -191,10 +192,47 @@ function HousePage() {
               />
             </CardContent>
           </Card>
+          <HouseLocationMap
+            longitude={address.longitude ?? h.approx_longitude}
+            latitude={address.latitude ?? h.approx_latitude}
+            status={h.status}
+          />
           <LocationConsent house={h} editable={can(Perm.PEACE_HOUSE_WRITE)} onDone={update} />
         </aside>
       </div>
     </section>
+  );
+}
+
+function HouseLocationMap({
+  longitude,
+  latitude,
+  status,
+}: {
+  longitude: number;
+  latitude: number;
+  status: string;
+}) {
+  const points = useMemo<PointCollection>(
+    () => ({
+      type: "FeatureCollection",
+      features: [
+        {
+          type: "Feature",
+          geometry: { type: "Point", coordinates: [longitude, latitude] },
+          properties: { status },
+        },
+      ],
+    }),
+    [longitude, latitude, status],
+  );
+  return (
+    <GeoMap
+      visible={["states", "municipalities", "sections"]}
+      points={points}
+      fitPoints
+      className="h-56 w-full rounded-lg border"
+    />
   );
 }
 

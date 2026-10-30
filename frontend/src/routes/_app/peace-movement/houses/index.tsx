@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Plus } from "lucide-react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { Map as MapIcon, Plus } from "lucide-react";
 import { z } from "zod";
 import { searchPeaceHousesOptions } from "@/client/@tanstack/react-query.gen";
 import type { HouseSummary } from "@/client/types.gen";
@@ -94,11 +94,18 @@ function HousesPage() {
         title="Casas de Paz"
         description="Puntos de encuentro georreferenciados. Una casa se consolida al llegar a la meta de integrantes de su estado."
         actions={
-          write ? (
-            <Button onClick={() => navigate({ to: "/peace-movement/houses/new" })}>
-              <Plus aria-hidden /> Abrir casa
+          <>
+            <Button asChild variant="outline">
+              <Link to="/peace-movement/houses/map">
+                <MapIcon aria-hidden /> Ver mapa
+              </Link>
             </Button>
-          ) : null
+            {write ? (
+              <Button onClick={() => navigate({ to: "/peace-movement/houses/new" })}>
+                <Plus aria-hidden /> Abrir casa
+              </Button>
+            ) : null}
+          </>
         }
       />
       <div className="mb-4 flex flex-wrap items-end gap-3">

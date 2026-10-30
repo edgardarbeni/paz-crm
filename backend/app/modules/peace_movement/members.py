@@ -609,6 +609,7 @@ async def search_members(
     level_id: uuid.UUID | None = None,
     state_id: uuid.UUID | None = None,
     recruiter_id: uuid.UUID | None = None,
+    person_id: uuid.UUID | None = None,
     q: str | None = None,
 ) -> CursorPage[Member]:
     statement = select(Member).where(*_visible(geo))
@@ -620,6 +621,8 @@ async def search_members(
         statement = statement.where(col(Member.state_id) == state_id)
     if recruiter_id:
         statement = statement.where(col(Member.recruited_by_member_id) == recruiter_id)
+    if person_id:
+        statement = statement.where(col(Member.person_id) == person_id)
     if q:
         term = q.strip().lower()
         statement = statement.join(Person, col(Person.id) == col(Member.person_id)).where(

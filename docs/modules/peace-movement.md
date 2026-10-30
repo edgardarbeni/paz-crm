@@ -1,6 +1,6 @@
 # Módulo: Movimiento de Paz
 
-**Estado:** implementado (fases 0a a 5: API y panel). Pendientes de entregas posteriores: portal de pacificadores, app de campo y mapa público. ADR D-82 a D-99.
+**Estado:** implementado (fases 0a a 5: API y panel). Pendiente de una entrega posterior: la App (Flutter). No hay portal de pacificadores; el mapa de casas vive en el panel (D-100). ADR D-82 a D-100.
 **Paquete propuesto:** `backend/app/modules/peace_movement` · esquema `peace_movement` · API
 `/api/v1/peace-movement`.
 **Brief:** respuestas de Darío del 2026-10-29. Las reglas que eran suposiciones quedaron
@@ -26,8 +26,7 @@ El módulo resuelve tres cosas:
 | `capturist` | Inscribe pacificadores y registra casas, integrantes y reuniones | Esta |
 | `viewer` | Consulta | Esta |
 | Persona sin cuenta | Se inscribe con el enlace o QR de un pacificador; queda pendiente de validar | Esta |
-| Pacificador con cuenta | Portal propio: inscribe y ve su red | **Posterior** (requisitos abajo) |
-| Brigadista en campo | App Flutter con captura sin conexión | **Posterior** (requisitos abajo; el backend deja la API) |
+| Pacificador o brigadista | **App** (Flutter): captura sin conexión, ve su red y su avance, inscribe y comparte su enlace | **Posterior** (requisitos abajo; el backend deja la API). Sin portal aparte ([D-100](../adr/D-100-sin-portal-todo-en-panel-o-app.md)) |
 
 No se crean roles nuevos: los roles existentes reciben permisos `peace_movement.*`.
 
@@ -314,7 +313,7 @@ Son dos cosas distintas:
   3. si ninguna zona la cubre, queda con crédito pendiente para asignarlo a mano.
 
   El crédito se fija al abrir la casa y solo un coordinator puede reasignarlo, con motivo; no se recalcula si después alguien asciende o cambia una zona (D-92).
-- La ubicación exacta solo es publicable con el consentimiento expreso del anfitrión. El mapa público es una entrega posterior; esta versión solo guarda el consentimiento.
+- La ubicación exacta solo es publicable con el consentimiento expreso del anfitrión. El mapa de casas del panel muestra el punto aproximado (D-100); el consentimiento queda listo para cuando la App o una salida pública muestren la ubicación exacta.
 
 ## Permisos y alcance
 
@@ -460,20 +459,15 @@ publicar).
 
 ## Requisitos de entregas posteriores (no implementar ahora)
 
-### Portal de pacificadores
-- Acceso con correo y contraseña, separado del panel, sin TOTP obligatorio. **[ADR]** ([D-87](../adr/D-87-cuentas-portal-pacificadores.md)) si estas
-  cuentas viven en `identity` como otro tipo de usuario o en un dominio de autenticación aparte.
-- Ve a sus reclutas directos con nombre y celular; de los niveles inferiores, solo totales.
-- Inscribe reclutas, que quedan `pending_validation`.
-- Ve su avance contra meta, sus casas y su enlace y QR.
-- Endpoints `/me/...` limitados a su propia red; nunca reutiliza permisos del panel.
+### App (Flutter)
+Una sola App para pacificadores y brigadistas; no hay portal aparte (D-100).
 
-### App de campo (Flutter)
 - Captura sin conexión: almacenamiento local cifrado en el dispositivo y sincronización con el endpoint de carga por lotes.
 - Cada registro con UUID generado en el dispositivo, sello de tiempo y coordenadas de captura.
 - Conflictos: el servidor es la autoridad; la app muestra el resultado por registro (aceptado, duplicado, error).
 - Autenticación del dispositivo y del brigadista, revocable. **[ADR]** ([D-88](../adr/D-88-autenticacion-dispositivos-campo.md))
 - Validación de CURP en el dispositivo con las mismas reglas del backend.
+- Para el pacificador: ver a sus reclutas directos (de los niveles inferiores, solo totales), su avance contra la meta y sus casas; inscribir reclutas (quedan `pending_validation`); compartir su enlace y QR. Endpoints `/me/...` limitados a su propia red, sin reutilizar permisos del panel. La autenticación se decide al diseñar la App.
 
 ## Criterios de aceptación
 
@@ -532,8 +526,7 @@ Quedan pendientes de jurídico:
 
 ## Fuera de alcance
 
-- Portal de pacificadores y app de campo en Flutter (solo requisitos y API general en esta versión).
-- Mapa público de Casas de Paz.
+- La App en Flutter (solo requisitos y API general en esta versión).
 - Padrón de militancia o afiliación al partido (módulo aparte; una persona puede estar en ambos).
 - Notificaciones (SMS, WhatsApp, correo) a pacificadores.
 - Ascenso automático de nivel al cumplir la meta.
