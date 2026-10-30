@@ -188,6 +188,9 @@ El script usa una base desechable con la geografía sintética de los tests
   CURP se valida en línea con la misma regla que el backend.
 - **Identidad visual (D-78):** morado PAZ `#682575` y blanco con Montserrat autoalojada; los
   tokens de color están en `frontend/src/index.css` y el logotipo en `components/brand/logo.tsx`.
+- **Movimiento de Paz (D-99):** menú propio (pacificadores, validación, casas, estadísticas,
+  importación y configuración), ramas en la ficha de cada usuario y la página pública
+  `/inscripcion/{código}` (el QR de cada pacificador apunta ahí, con `PAZ_PUBLIC_BASE_URL`).
 - **Mapa (D-72):** MapLibre con las teselas MVT de la API sobre OpenFreeMap. Para cambiar de
   proveedor se usan `VITE_MAP_STYLE_URL` y `PAZ_MAP_TILES_ORIGIN` (CSP de producción).
 

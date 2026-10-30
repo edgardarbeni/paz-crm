@@ -7329,7 +7329,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__modules__peace_movement__schemas__MemberOut"
+                  "$ref": "#/components/schemas/PeaceMemberOut"
                 }
               }
             }
@@ -7389,7 +7389,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__modules__peace_movement__schemas__MemberOut"
+                  "$ref": "#/components/schemas/PeaceMemberOut"
                 }
               }
             }
@@ -7620,7 +7620,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__modules__peace_movement__schemas__MemberOut"
+                  "$ref": "#/components/schemas/PeaceMemberOut"
                 }
               }
             }
@@ -7690,7 +7690,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__modules__peace_movement__schemas__MemberOut"
+                  "$ref": "#/components/schemas/PeaceMemberOut"
                 }
               }
             }
@@ -7760,7 +7760,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__modules__peace_movement__schemas__MemberOut"
+                  "$ref": "#/components/schemas/PeaceMemberOut"
                 }
               }
             }
@@ -7830,7 +7830,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__modules__peace_movement__schemas__MemberOut"
+                  "$ref": "#/components/schemas/PeaceMemberOut"
                 }
               }
             }
@@ -7900,7 +7900,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__modules__peace_movement__schemas__MemberOut"
+                  "$ref": "#/components/schemas/PeaceMemberOut"
                 }
               }
             }
@@ -12375,7 +12375,7 @@
           "owner": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/app__modules__candidacies__schemas__MemberOut"
+                "$ref": "#/components/schemas/MemberOut"
               },
               {
                 "type": "null"
@@ -12385,7 +12385,7 @@
           "substitute": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/app__modules__candidacies__schemas__MemberOut"
+                "$ref": "#/components/schemas/MemberOut"
               },
               {
                 "type": "null"
@@ -14788,6 +14788,38 @@
         ],
         "title": "MemberImportRunOut"
       },
+      "MemberOut": {
+        "properties": {
+          "person_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Person Id"
+          },
+          "full_name": {
+            "type": "string",
+            "title": "Full Name"
+          },
+          "sex": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sex"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "person_id",
+          "full_name",
+          "sex"
+        ],
+        "title": "MemberOut"
+      },
       "MemberSummary": {
         "properties": {
           "id": {
@@ -16053,6 +16085,256 @@
         ],
         "title": "PasswordResetRequest"
       },
+      "PeaceMemberOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "person": {
+            "$ref": "#/components/schemas/PersonOut"
+          },
+          "level_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Level Id"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "status_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status Reason"
+          },
+          "origin": {
+            "type": "string",
+            "title": "Origin"
+          },
+          "origin_detail": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Origin Detail"
+          },
+          "channel": {
+            "type": "string",
+            "title": "Channel"
+          },
+          "enrolled_on": {
+            "type": "string",
+            "format": "date",
+            "title": "Enrolled On"
+          },
+          "left_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Left On"
+          },
+          "recruited_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MemberSummary"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "referral_code": {
+            "type": "string",
+            "title": "Referral Code"
+          },
+          "referral_url": {
+            "type": "string",
+            "title": "Referral Url",
+            "description": "Página pública de inscripción con su código."
+          },
+          "referral_qr_svg": {
+            "type": "string",
+            "title": "Referral Qr Svg",
+            "description": "QR del enlace como data URI SVG."
+          },
+          "depth": {
+            "type": "integer",
+            "title": "Depth"
+          },
+          "state_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "State Id"
+          },
+          "section_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Section Id"
+          },
+          "validated_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Validated At"
+          },
+          "direct": {
+            "$ref": "#/components/schemas/DirectCounts"
+          },
+          "recruit_goal": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recruit Goal",
+            "description": "Meta vigente del nivel en su estado."
+          },
+          "progress_pct": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Progress Pct"
+          },
+          "traffic_light": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "red",
+                  "yellow",
+                  "green"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Traffic Light"
+          },
+          "network": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NetworkOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Nulo hasta el primer cálculo de agregados."
+          },
+          "requested_house_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested House Id",
+            "description": "Casa que eligió en una inscripción pendiente."
+          },
+          "intake": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Intake",
+            "description": "Lo que envió una inscripción pública para una persona ya registrada (solo con people.person.read_sensitive), para compararlo al validar."
+          },
+          "house_goal": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "House Goal",
+            "description": "Casas consolidadas que pide su nivel."
+          },
+          "houses_progress_pct": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Houses Progress Pct"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "person",
+          "level_id",
+          "status",
+          "status_reason",
+          "origin",
+          "origin_detail",
+          "channel",
+          "enrolled_on",
+          "left_on",
+          "recruited_by",
+          "referral_code",
+          "referral_url",
+          "referral_qr_svg",
+          "depth",
+          "state_id",
+          "section_id",
+          "validated_at",
+          "direct",
+          "recruit_goal",
+          "progress_pct",
+          "traffic_light",
+          "network",
+          "house_goal",
+          "houses_progress_pct"
+        ],
+        "title": "PeaceMemberOut"
+      },
       "PermissionOut": {
         "properties": {
           "id": {
@@ -17174,7 +17456,7 @@
           },
           "levels": {
             "items": {
-              "$ref": "#/components/schemas/LevelOut"
+              "$ref": "#/components/schemas/PublicLevelOut"
             },
             "type": "array",
             "title": "Levels"
@@ -17192,6 +17474,39 @@
         ],
         "title": "PublicFormOut",
         "description": "Everything the public enrollment page needs, without revealing who invited."
+      },
+      "PublicLevelOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "recruit_goal": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recruit Goal",
+            "description": "Meta nacional de reclutas del nivel."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "recruit_goal"
+        ],
+        "title": "PublicLevelOut"
       },
       "PublicPersonIn": {
         "properties": {
@@ -18603,6 +18918,10 @@
             "format": "uuid",
             "title": "User Id"
           },
+          "user_name": {
+            "type": "string",
+            "title": "User Name"
+          },
           "state_id": {
             "type": "string",
             "format": "uuid",
@@ -18642,6 +18961,7 @@
         "required": [
           "id",
           "user_id",
+          "user_name",
           "state_id",
           "valid_from",
           "valid_to",
@@ -18703,276 +19023,6 @@
           "node_id"
         ],
         "title": "ZoneNodeOut"
-      },
-      "app__modules__candidacies__schemas__MemberOut": {
-        "properties": {
-          "person_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Person Id"
-          },
-          "full_name": {
-            "type": "string",
-            "title": "Full Name"
-          },
-          "sex": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Sex"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "person_id",
-          "full_name",
-          "sex"
-        ],
-        "title": "MemberOut"
-      },
-      "app__modules__peace_movement__schemas__MemberOut": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "person": {
-            "$ref": "#/components/schemas/PersonOut"
-          },
-          "level_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Level Id"
-          },
-          "status": {
-            "type": "string",
-            "title": "Status"
-          },
-          "status_reason": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Status Reason"
-          },
-          "origin": {
-            "type": "string",
-            "title": "Origin"
-          },
-          "origin_detail": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Origin Detail"
-          },
-          "channel": {
-            "type": "string",
-            "title": "Channel"
-          },
-          "enrolled_on": {
-            "type": "string",
-            "format": "date",
-            "title": "Enrolled On"
-          },
-          "left_on": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Left On"
-          },
-          "recruited_by": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/MemberSummary"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "referral_code": {
-            "type": "string",
-            "title": "Referral Code"
-          },
-          "depth": {
-            "type": "integer",
-            "title": "Depth"
-          },
-          "state_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "State Id"
-          },
-          "section_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Section Id"
-          },
-          "validated_at": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Validated At"
-          },
-          "direct": {
-            "$ref": "#/components/schemas/DirectCounts"
-          },
-          "recruit_goal": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Recruit Goal",
-            "description": "Meta vigente del nivel en su estado."
-          },
-          "progress_pct": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Progress Pct"
-          },
-          "traffic_light": {
-            "anyOf": [
-              {
-                "type": "string",
-                "enum": [
-                  "red",
-                  "yellow",
-                  "green"
-                ]
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Traffic Light"
-          },
-          "network": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/NetworkOut"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Nulo hasta el primer cálculo de agregados."
-          },
-          "requested_house_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Requested House Id",
-            "description": "Casa que eligió en una inscripción pendiente."
-          },
-          "intake": {
-            "anyOf": [
-              {
-                "additionalProperties": true,
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Intake",
-            "description": "Lo que envió una inscripción pública para una persona ya registrada (solo con people.person.read_sensitive), para compararlo al validar."
-          },
-          "house_goal": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "House Goal",
-            "description": "Casas consolidadas que pide su nivel."
-          },
-          "houses_progress_pct": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Houses Progress Pct"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "id",
-          "person",
-          "level_id",
-          "status",
-          "status_reason",
-          "origin",
-          "origin_detail",
-          "channel",
-          "enrolled_on",
-          "left_on",
-          "recruited_by",
-          "referral_code",
-          "depth",
-          "state_id",
-          "section_id",
-          "validated_at",
-          "direct",
-          "recruit_goal",
-          "progress_pct",
-          "traffic_light",
-          "network",
-          "house_goal",
-          "houses_progress_pct"
-        ],
-        "title": "MemberOut"
       }
     },
     "securitySchemes": {

@@ -45,10 +45,16 @@ export function PersonForm({
   person,
   error,
   onSubmit,
+  submitLabel = "Guardar persona",
+  beforeSubmit,
 }: {
   person?: PersonOut;
   error: unknown;
   onSubmit: (body: PersonCreate | PersonUpdate) => Promise<unknown>;
+  /** Text of the submit button (e.g. "Inscribir" when the form is part of an enrollment). */
+  submitLabel?: string;
+  /** Extra fields shown before the submit button, inside the same form. */
+  beforeSubmit?: React.ReactNode;
 }) {
   const can = useCan();
   const sensitive = can(Perm.PERSON_READ_SENSITIVE);
@@ -403,8 +409,9 @@ export function PersonForm({
           )}
         </CardContent>
       </Card>
+      {beforeSubmit}
       <form.AppForm>
-        <form.SubmitButton className="justify-self-start">Guardar persona</form.SubmitButton>
+        <form.SubmitButton className="justify-self-start">{submitLabel}</form.SubmitButton>
       </form.AppForm>
     </form>
   );

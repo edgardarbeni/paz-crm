@@ -48,8 +48,12 @@ from app.modules.identity.models import (
 from app.modules.identity.security.passwords import Passwords
 from app.modules.identity.services.auth import TOTP_CONTEXT
 from app.modules.identity.services.scopes import GeoScope, rebuild_scope_sections
-from app.modules.people.schemas import PersonCreate
-from app.modules.people.service import Crypto, create_person
+from app.modules.peace_movement import aggregates, members
+from app.modules.peace_movement.models import EnrollmentChannel, MemberStatus
+from app.modules.peace_movement.schemas import ConsentCapture, EnrollmentIn
+from app.modules.people import curp as curp_rules
+from app.modules.people.schemas import AddressIn, PersonCreate
+from app.modules.people.service import Crypto, create_person, publish_notice
 from tests.fixtures.bgd import build_catalogs, build_state
 
 PASSWORD = "e2e-contrasena-segura-2026"
@@ -61,6 +65,7 @@ USERS: dict[str, tuple[tuple[str, ...], bool]] = {
     "substitute": (("superadmin",), True),
     "scoped": (("coordinator",), True),
     "geography": (("superadmin",), True),
+    "peace": (("superadmin",), True),
 }
 PEOPLE = [
     ("Ana", "Ramírez", "M"), ("Beatriz", "Soto", "M"), ("Carla", "Núñez", "M"), ("Diana", "Ortiz", "M"),
@@ -249,6 +254,7 @@ async def seed() -> dict[str, Any]:  # noqa: PLR0915 - one linear script
                 substitute_person_id=uuid.UUID(substitute_person["id"]),
             ),
         )
+        result["peace"] = await _seed_peace_movement(db, crypto, user_ids["peace"], geo)
         result.update(
             process_id=str(process.id),
             municipality_1=str(geo["municipalities"][1]),
@@ -259,6 +265,81 @@ async def seed() -> dict[str, Any]:  # noqa: PLR0915 - one linear script
         )
     await engine.dispose()
     return result
+
+
+def _curp(index: int) -> str:
+    """Valid CURP of a man born in Aguascalientes on January (index + 1), 1990."""
+    prefix = f"MOPA9001{index + 1:02d}HASRZS0"
+    return prefix + curp_rules.check_digit(prefix)
+
+
+async def _seed_peace_movement(
+    db: AsyncSession, crypto: Crypto, user_id: uuid.UUID, geo: dict[str, Any]
+) -> dict[str, Any]:
+    """A sample notice, a small pyramid (an Ambassador with recruits), one pending enrollment
+    and an open Peace House."""
+    await publish_notice(
+        db,
+        code="peace_movement",
+        version="e2e",
+        title="Aviso de privacidad del Movimiento de Paz (ejemplo)",
+        body="Texto de ejemplo del aviso para las pruebas de extremo a extremo del panel.",
+        is_sample=True,
+    )
+    sections = await _ids(db, "SELECT section_number, id FROM geography.sections")
+    levels: dict[str, uuid.UUID] = dict(
+        (await db.execute(text("SELECT code, id FROM peace_movement.participation_levels"))).all()
+    )
+    actor = members.Actor(user_id=user_id, geo=GeoScope(user_id=user_id, unrestricted=True))
+    people = [
+        ("Rosa", "Embajadora"),
+        ("Tomás", "Recluta"),
+        ("Úrsula", "Recluta"),
+        ("Víctor", "Pendiente"),
+    ]
+    created: list[Any] = []
+    for index, (given, surname) in enumerate(people):
+        recruiter = created[0].id if created else None
+        body = EnrollmentIn(
+            person=PersonCreate(
+                given_names=given,
+                paternal_surname=surname,
+                maternal_surname="E2E",
+                curp=_curp(index),
+                address=AddressIn(street="Calle de la Paz", section_id=sections[101 + index]),
+            ),
+            level_id=levels["peace_ambassador" if index == 0 else "pacifier"],
+            recruiter_member_id=recruiter,
+            origin="recruiter" if recruiter else "structure",
+            consent=ConsentCapture(),
+        )
+        status = MemberStatus.PENDING_VALIDATION if surname == "Pendiente" else MemberStatus.ACTIVE
+        created.append(
+            await members.enroll(
+                db,
+                crypto,
+                actor,
+                body,
+                channel=EnrollmentChannel.PANEL
+                if status == MemberStatus.ACTIVE
+                else EnrollmentChannel.FIELD_APP,
+                status=status,
+            )
+        )
+    root, first, second, pending = created
+    await db.execute(
+        text("UPDATE peace_movement.members SET channel = 'referral_link' WHERE id = :id"),
+        {"id": pending.id},
+    )
+    await db.commit()
+    await aggregates.rebuild_all(db)  # the scheduler is not running in E2E
+    return {
+        "root": {"id": str(root.id), "name": "Rosa Embajadora E2E", "code": root.referral_code},
+        "recruits": [str(first.id), str(second.id)],
+        "pending": {"id": str(pending.id), "name": "Víctor Pendiente E2E"},
+        "next_curp": _curp(10),
+        "public_curp": _curp(11),
+    }
 
 
 if __name__ == "__main__":

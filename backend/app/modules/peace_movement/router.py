@@ -5,7 +5,19 @@ import uuid
 from datetime import date
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, File, Form, Path, Query, Response, UploadFile, status
+import segno
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    Form,
+    Path,
+    Query,
+    Request,
+    Response,
+    UploadFile,
+    status,
+)
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db.session import SessionDep
@@ -13,6 +25,7 @@ from app.core.errors import BadRequestError
 from app.core.pagination import CursorPage, PageParams, page_params
 from app.core.storage import ObjectStorage, StorageDep
 from app.modules.identity.dependencies import CurrentUser, permission
+from app.modules.identity.models import User
 from app.modules.identity.permissions import Perm
 from app.modules.peace_movement import catalog, houses, intake, members, scope, stats
 from app.modules.peace_movement.models import (
@@ -56,11 +69,11 @@ from app.modules.peace_movement.schemas import (
     MemberHistory,
     MemberImportErrorOut,
     MemberImportRunOut,
-    MemberOut,
     MemberSummary,
     NetworkNode,
     NetworkOut,
     NetworkPage,
+    PeaceMemberOut,
     PhotoOut,
     ReasonIn,
     ReassignIn,
@@ -87,6 +100,25 @@ ScopeAssigner = Annotated[CurrentUser, permission(Perm.USER_ASSIGN_SCOPES)]
 MemberId = Annotated[uuid.UUID, Path(description="Id del pacificador.")]
 StateFilter = Annotated[uuid.UUID | None, Query(description="Estado (incluye la meta nacional).")]
 History = Annotated[bool, Query(description="Incluir metas o vigencias ya cerradas.")]
+
+
+PUBLIC_ENROLLMENT_PATH = "/inscripcion/"
+
+
+def public_base(request: Request) -> str:
+    """Panel URL for links meant for people outside it (PAZ_PUBLIC_BASE_URL)."""
+    return str(request.app.state.settings.public_base_url).rstrip("/")
+
+
+PublicBase = Annotated[str, Depends(public_base)]
+
+
+def referral_url(base: str, code: str) -> str:
+    return f"{base}{PUBLIC_ENROLLMENT_PATH}{code}"
+
+
+def referral_qr(url: str) -> str:
+    return str(segno.make(url, error="m").svg_data_uri(scale=4, border=2))
 
 
 def _actor(user: CurrentUser) -> members.Actor:
@@ -155,9 +187,11 @@ async def update_settings(db: SessionDep, _: GoalManager, body: SettingsIn) -> S
 
 async def _zone_out(db: AsyncSession, zone: ZoneCoordinator) -> ZoneCoordinatorOut:
     nodes, count = await catalog.zone_details(db, zone.id)  # type: ignore[arg-type]
+    user = await db.get(User, zone.user_id)
     return ZoneCoordinatorOut(
         id=zone.id,
         user_id=zone.user_id,
+        user_name=user.full_name if user else "—",
         state_id=zone.state_id,
         valid_from=zone.valid_from,
         valid_to=zone.valid_to,
@@ -231,8 +265,8 @@ async def _summaries(
 
 
 async def _member_out(
-    db: AsyncSession, crypto: CryptoDep, user: CurrentUser, member_id: uuid.UUID
-) -> MemberOut:
+    db: AsyncSession, crypto: CryptoDep, user: CurrentUser, base: str, member_id: uuid.UUID
+) -> PeaceMemberOut:
     sensitive = user.has(Perm.PERSON_READ_SENSITIVE)
     member, view = await members.read_member(db, user.geo, member_id, unmasked=sensitive)
     counts = await members.direct_counts(db, user.geo, member)
@@ -246,7 +280,7 @@ async def _member_out(
         parent = await db.get(Member, member.recruited_by_member_id)
         if parent is not None:
             recruiter = (await _summaries(db, crypto, [parent], sensitive))[0]
-    return MemberOut(
+    return PeaceMemberOut(
         id=member.id,
         person=person_out(crypto, view, sensitive),
         level_id=member.level_id,
@@ -259,6 +293,8 @@ async def _member_out(
         left_on=member.left_on,
         recruited_by=recruiter,
         referral_code=member.referral_code,
+        referral_url=referral_url(base, member.referral_code),
+        referral_qr_svg=referral_qr(referral_url(base, member.referral_code)),
         depth=member.depth,
         state_id=member.state_id,
         section_id=member.section_id,
@@ -313,17 +349,17 @@ async def search_members(
     status_code=status.HTTP_201_CREATED,
 )
 async def enroll_member(
-    db: SessionDep, crypto: CryptoDep, user: Writer, body: EnrollmentIn
-) -> MemberOut:
+    db: SessionDep, crypto: CryptoDep, base: PublicBase, user: Writer, body: EnrollmentIn
+) -> PeaceMemberOut:
     member = await members.enroll(db, crypto, _actor(user), body)
-    return await _member_out(db, crypto, user, member.id)  # type: ignore[arg-type]
+    return await _member_out(db, crypto, user, base, member.id)  # type: ignore[arg-type]
 
 
 @router.get("/members/{member_id}", operation_id="getMember", summary="Detalle de pacificador")
 async def get_member(
-    db: SessionDep, crypto: CryptoDep, user: Reader, member_id: MemberId
-) -> MemberOut:
-    return await _member_out(db, crypto, user, member_id)
+    db: SessionDep, crypto: CryptoDep, base: PublicBase, user: Reader, member_id: MemberId
+) -> PeaceMemberOut:
+    return await _member_out(db, crypto, user, base, member_id)
 
 
 @router.get(
@@ -364,10 +400,10 @@ async def get_history(db: SessionDep, user: Reader, member_id: MemberId) -> Memb
     summary="Validar inscripción pendiente",
 )
 async def validate_member(
-    db: SessionDep, crypto: CryptoDep, user: Validator, member_id: MemberId
-) -> MemberOut:
+    db: SessionDep, crypto: CryptoDep, base: PublicBase, user: Validator, member_id: MemberId
+) -> PeaceMemberOut:
     await members.validate(db, _actor(user), member_id)
-    return await _member_out(db, crypto, user, member_id)
+    return await _member_out(db, crypto, user, base, member_id)
 
 
 @router.post(
@@ -376,10 +412,15 @@ async def validate_member(
     summary="Rechazar inscripción pendiente",
 )
 async def reject_member(
-    db: SessionDep, crypto: CryptoDep, user: Validator, member_id: MemberId, body: ReasonIn
-) -> MemberOut:
+    db: SessionDep,
+    crypto: CryptoDep,
+    base: PublicBase,
+    user: Validator,
+    member_id: MemberId,
+    body: ReasonIn,
+) -> PeaceMemberOut:
     await members.reject(db, _actor(user), member_id, body.reason)
-    return await _member_out(db, crypto, user, member_id)
+    return await _member_out(db, crypto, user, base, member_id)
 
 
 @router.post(
@@ -388,10 +429,15 @@ async def reject_member(
     summary="Registrar que el pacificador deja el movimiento",
 )
 async def leave(
-    db: SessionDep, crypto: CryptoDep, user: Validator, member_id: MemberId, body: ReasonIn
-) -> MemberOut:
+    db: SessionDep,
+    crypto: CryptoDep,
+    base: PublicBase,
+    user: Validator,
+    member_id: MemberId,
+    body: ReasonIn,
+) -> PeaceMemberOut:
     await members.leave(db, _actor(user), member_id, body.reason)
-    return await _member_out(db, crypto, user, member_id)
+    return await _member_out(db, crypto, user, base, member_id)
 
 
 @router.post(
@@ -400,10 +446,15 @@ async def leave(
     summary="Cambiar el nivel de participación",
 )
 async def change_level(
-    db: SessionDep, crypto: CryptoDep, user: Writer, member_id: MemberId, body: LevelChangeIn
-) -> MemberOut:
+    db: SessionDep,
+    crypto: CryptoDep,
+    base: PublicBase,
+    user: Writer,
+    member_id: MemberId,
+    body: LevelChangeIn,
+) -> PeaceMemberOut:
     await members.change_level(db, _actor(user), member_id, body.level_id, body.reason)
-    return await _member_out(db, crypto, user, member_id)
+    return await _member_out(db, crypto, user, base, member_id)
 
 
 @router.post(
@@ -412,10 +463,15 @@ async def change_level(
     summary="Cambiar el reclutador (mueve toda su red)",
 )
 async def reassign(
-    db: SessionDep, crypto: CryptoDep, user: Reassigner, member_id: MemberId, body: ReassignIn
-) -> MemberOut:
+    db: SessionDep,
+    crypto: CryptoDep,
+    base: PublicBase,
+    user: Reassigner,
+    member_id: MemberId,
+    body: ReassignIn,
+) -> PeaceMemberOut:
     await members.reassign(db, _actor(user), member_id, body.recruiter_member_id, body.reason)
-    return await _member_out(db, crypto, user, member_id)
+    return await _member_out(db, crypto, user, base, member_id)
 
 
 # --- branch scopes ----------------------------------------------------------------------------

@@ -1115,8 +1115,8 @@ export type FormulaOut = {
      * Substitution Reason
      */
     substitution_reason: string | null;
-    owner: AppModulesCandidaciesSchemasMemberOut | null;
-    substitute: AppModulesCandidaciesSchemasMemberOut | null;
+    owner: MemberOut | null;
+    substitute: MemberOut | null;
 };
 
 /**
@@ -2350,6 +2350,24 @@ export type MemberImportRunOut = {
 };
 
 /**
+ * MemberOut
+ */
+export type MemberOut = {
+    /**
+     * Person Id
+     */
+    person_id: string;
+    /**
+     * Full Name
+     */
+    full_name: string;
+    /**
+     * Sex
+     */
+    sex: string | null;
+};
+
+/**
  * MemberSummary
  */
 export type MemberSummary = {
@@ -3041,6 +3059,125 @@ export type PasswordResetRequest = {
 };
 
 /**
+ * PeaceMemberOut
+ */
+export type PeaceMemberOut = {
+    /**
+     * Id
+     */
+    id: string;
+    person: PersonOut;
+    /**
+     * Level Id
+     */
+    level_id: string;
+    /**
+     * Status
+     */
+    status: string;
+    /**
+     * Status Reason
+     */
+    status_reason: string | null;
+    /**
+     * Origin
+     */
+    origin: string;
+    /**
+     * Origin Detail
+     */
+    origin_detail: string | null;
+    /**
+     * Channel
+     */
+    channel: string;
+    /**
+     * Enrolled On
+     */
+    enrolled_on: string;
+    /**
+     * Left On
+     */
+    left_on: string | null;
+    recruited_by: MemberSummary | null;
+    /**
+     * Referral Code
+     */
+    referral_code: string;
+    /**
+     * Referral Url
+     *
+     * Página pública de inscripción con su código.
+     */
+    referral_url: string;
+    /**
+     * Referral Qr Svg
+     *
+     * QR del enlace como data URI SVG.
+     */
+    referral_qr_svg: string;
+    /**
+     * Depth
+     */
+    depth: number;
+    /**
+     * State Id
+     */
+    state_id: string;
+    /**
+     * Section Id
+     */
+    section_id: string;
+    /**
+     * Validated At
+     */
+    validated_at: string | null;
+    direct: DirectCounts;
+    /**
+     * Recruit Goal
+     *
+     * Meta vigente del nivel en su estado.
+     */
+    recruit_goal: number | null;
+    /**
+     * Progress Pct
+     */
+    progress_pct: number | null;
+    /**
+     * Traffic Light
+     */
+    traffic_light: 'red' | 'yellow' | 'green' | null;
+    /**
+     * Nulo hasta el primer cálculo de agregados.
+     */
+    network: NetworkOut | null;
+    /**
+     * Requested House Id
+     *
+     * Casa que eligió en una inscripción pendiente.
+     */
+    requested_house_id?: string | null;
+    /**
+     * Intake
+     *
+     * Lo que envió una inscripción pública para una persona ya registrada (solo con people.person.read_sensitive), para compararlo al validar.
+     */
+    intake?: {
+        [key: string]: unknown;
+    } | null;
+    /**
+     * House Goal
+     *
+     * Casas consolidadas que pide su nivel.
+     */
+    house_goal: number | null;
+    /**
+     * Houses Progress Pct
+     */
+    houses_progress_pct: number | null;
+};
+
+/**
  * PermissionOut
  */
 export type PermissionOut = {
@@ -3611,8 +3748,28 @@ export type PublicFormOut = {
     /**
      * Levels
      */
-    levels: Array<LevelOut>;
+    levels: Array<PublicLevelOut>;
     challenge: ChallengeOut;
+};
+
+/**
+ * PublicLevelOut
+ */
+export type PublicLevelOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Recruit Goal
+     *
+     * Meta nacional de reclutas del nivel.
+     */
+    recruit_goal: number | null;
 };
 
 /**
@@ -4413,6 +4570,10 @@ export type ZoneCoordinatorOut = {
      */
     user_id: string;
     /**
+     * User Name
+     */
+    user_name: string;
+    /**
      * State Id
      */
     state_id: string;
@@ -4460,131 +4621,6 @@ export type ZoneNodeOut = {
      * Node Id
      */
     node_id: string;
-};
-
-/**
- * MemberOut
- */
-export type AppModulesCandidaciesSchemasMemberOut = {
-    /**
-     * Person Id
-     */
-    person_id: string;
-    /**
-     * Full Name
-     */
-    full_name: string;
-    /**
-     * Sex
-     */
-    sex: string | null;
-};
-
-/**
- * MemberOut
- */
-export type AppModulesPeaceMovementSchemasMemberOut = {
-    /**
-     * Id
-     */
-    id: string;
-    person: PersonOut;
-    /**
-     * Level Id
-     */
-    level_id: string;
-    /**
-     * Status
-     */
-    status: string;
-    /**
-     * Status Reason
-     */
-    status_reason: string | null;
-    /**
-     * Origin
-     */
-    origin: string;
-    /**
-     * Origin Detail
-     */
-    origin_detail: string | null;
-    /**
-     * Channel
-     */
-    channel: string;
-    /**
-     * Enrolled On
-     */
-    enrolled_on: string;
-    /**
-     * Left On
-     */
-    left_on: string | null;
-    recruited_by: MemberSummary | null;
-    /**
-     * Referral Code
-     */
-    referral_code: string;
-    /**
-     * Depth
-     */
-    depth: number;
-    /**
-     * State Id
-     */
-    state_id: string;
-    /**
-     * Section Id
-     */
-    section_id: string;
-    /**
-     * Validated At
-     */
-    validated_at: string | null;
-    direct: DirectCounts;
-    /**
-     * Recruit Goal
-     *
-     * Meta vigente del nivel en su estado.
-     */
-    recruit_goal: number | null;
-    /**
-     * Progress Pct
-     */
-    progress_pct: number | null;
-    /**
-     * Traffic Light
-     */
-    traffic_light: 'red' | 'yellow' | 'green' | null;
-    /**
-     * Nulo hasta el primer cálculo de agregados.
-     */
-    network: NetworkOut | null;
-    /**
-     * Requested House Id
-     *
-     * Casa que eligió en una inscripción pendiente.
-     */
-    requested_house_id?: string | null;
-    /**
-     * Intake
-     *
-     * Lo que envió una inscripción pública para una persona ya registrada (solo con people.person.read_sensitive), para compararlo al validar.
-     */
-    intake?: {
-        [key: string]: unknown;
-    } | null;
-    /**
-     * House Goal
-     *
-     * Casas consolidadas que pide su nivel.
-     */
-    house_goal: number | null;
-    /**
-     * Houses Progress Pct
-     */
-    houses_progress_pct: number | null;
 };
 
 export type GetHealthData = {
@@ -8392,7 +8428,7 @@ export type EnrollMemberResponses = {
     /**
      * Successful Response
      */
-    201: AppModulesPeaceMovementSchemasMemberOut;
+    201: PeaceMemberOut;
 };
 
 export type EnrollMemberResponse = EnrollMemberResponses[keyof EnrollMemberResponses];
@@ -8428,7 +8464,7 @@ export type GetMemberResponses = {
     /**
      * Successful Response
      */
-    200: AppModulesPeaceMovementSchemasMemberOut;
+    200: PeaceMemberOut;
 };
 
 export type GetMemberResponse = GetMemberResponses[keyof GetMemberResponses];
@@ -8551,7 +8587,7 @@ export type ValidateMemberResponses = {
     /**
      * Successful Response
      */
-    200: AppModulesPeaceMovementSchemasMemberOut;
+    200: PeaceMemberOut;
 };
 
 export type ValidateMemberResponse = ValidateMemberResponses[keyof ValidateMemberResponses];
@@ -8587,7 +8623,7 @@ export type RejectMemberResponses = {
     /**
      * Successful Response
      */
-    200: AppModulesPeaceMovementSchemasMemberOut;
+    200: PeaceMemberOut;
 };
 
 export type RejectMemberResponse = RejectMemberResponses[keyof RejectMemberResponses];
@@ -8623,7 +8659,7 @@ export type MemberLeavesResponses = {
     /**
      * Successful Response
      */
-    200: AppModulesPeaceMovementSchemasMemberOut;
+    200: PeaceMemberOut;
 };
 
 export type MemberLeavesResponse = MemberLeavesResponses[keyof MemberLeavesResponses];
@@ -8659,7 +8695,7 @@ export type ChangeMemberLevelResponses = {
     /**
      * Successful Response
      */
-    200: AppModulesPeaceMovementSchemasMemberOut;
+    200: PeaceMemberOut;
 };
 
 export type ChangeMemberLevelResponse = ChangeMemberLevelResponses[keyof ChangeMemberLevelResponses];
@@ -8695,7 +8731,7 @@ export type ReassignMemberResponses = {
     /**
      * Successful Response
      */
-    200: AppModulesPeaceMovementSchemasMemberOut;
+    200: PeaceMemberOut;
 };
 
 export type ReassignMemberResponse = ReassignMemberResponses[keyof ReassignMemberResponses];

@@ -20,12 +20,18 @@ import { Route as AppAccountRouteImport } from './routes/_app/account'
 import { Route as AppAuditRouteImport } from './routes/_app/audit'
 import { Route as AppOfficeTypesRouteImport } from './routes/_app/office-types'
 import { Route as AppPartiesRouteImport } from './routes/_app/parties'
+import { Route as InscripcionCodeRouteImport } from './routes/inscripcion/$code'
 import { Route as AppGeographyIndexRouteImport } from './routes/_app/geography/index'
 import { Route as AppGeographyLocateRouteImport } from './routes/_app/geography/locate'
 import { Route as AppGeographyMapRouteImport } from './routes/_app/geography/map'
 import { Route as AppNominationsIndexRouteImport } from './routes/_app/nominations/index'
 import { Route as AppNominationsNominationIdRouteImport } from './routes/_app/nominations/$nominationId'
 import { Route as AppNominationsNewRouteImport } from './routes/_app/nominations/new'
+import { Route as AppPeaceMovementIndexRouteImport } from './routes/_app/peace-movement/index'
+import { Route as AppPeaceMovementImportsRouteImport } from './routes/_app/peace-movement/imports'
+import { Route as AppPeaceMovementSettingsRouteImport } from './routes/_app/peace-movement/settings'
+import { Route as AppPeaceMovementStatsRouteImport } from './routes/_app/peace-movement/stats'
+import { Route as AppPeaceMovementValidationRouteImport } from './routes/_app/peace-movement/validation'
 import { Route as AppPeopleIndexRouteImport } from './routes/_app/people/index'
 import { Route as AppPeoplePersonIdRouteImport } from './routes/_app/people/$personId'
 import { Route as AppPeopleNewRouteImport } from './routes/_app/people/new'
@@ -38,6 +44,12 @@ import { Route as AppUsersUserIdRouteImport } from './routes/_app/users/$userId'
 import { Route as AppGeographyLevelNodeIdRouteImport } from './routes/_app/geography/$level/$nodeId'
 import { Route as AppGeographyImportsIndexRouteImport } from './routes/_app/geography/imports/index'
 import { Route as AppGeographyImportsRunIdRouteImport } from './routes/_app/geography/imports/$runId'
+import { Route as AppPeaceMovementHousesIndexRouteImport } from './routes/_app/peace-movement/houses/index'
+import { Route as AppPeaceMovementHousesHouseIdRouteImport } from './routes/_app/peace-movement/houses/$houseId'
+import { Route as AppPeaceMovementHousesNewRouteImport } from './routes/_app/peace-movement/houses/new'
+import { Route as AppPeaceMovementMembersIndexRouteImport } from './routes/_app/peace-movement/members/index'
+import { Route as AppPeaceMovementMembersMemberIdRouteImport } from './routes/_app/peace-movement/members/$memberId'
+import { Route as AppPeaceMovementMembersNewRouteImport } from './routes/_app/peace-movement/members/new'
 
 const AppRoute = AppRouteImport.update({
   id: '/_app',
@@ -93,6 +105,11 @@ const AppPartiesRoute = AppPartiesRouteImport.update({
   path: '/parties',
   getParentRoute: () => AppRoute,
 } as any)
+const InscripcionCodeRoute = InscripcionCodeRouteImport.update({
+  id: '/inscripcion/$code',
+  path: '/inscripcion/$code',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppGeographyIndexRoute = AppGeographyIndexRouteImport.update({
   id: '/geography/',
   path: '/geography/',
@@ -124,6 +141,33 @@ const AppNominationsNewRoute = AppNominationsNewRouteImport.update({
   path: '/nominations/new',
   getParentRoute: () => AppRoute,
 } as any)
+const AppPeaceMovementIndexRoute = AppPeaceMovementIndexRouteImport.update({
+  id: '/peace-movement/',
+  path: '/peace-movement/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPeaceMovementImportsRoute = AppPeaceMovementImportsRouteImport.update({
+  id: '/peace-movement/imports',
+  path: '/peace-movement/imports',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPeaceMovementSettingsRoute =
+  AppPeaceMovementSettingsRouteImport.update({
+    id: '/peace-movement/settings',
+    path: '/peace-movement/settings',
+    getParentRoute: () => AppRoute,
+  } as any)
+const AppPeaceMovementStatsRoute = AppPeaceMovementStatsRouteImport.update({
+  id: '/peace-movement/stats',
+  path: '/peace-movement/stats',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPeaceMovementValidationRoute =
+  AppPeaceMovementValidationRouteImport.update({
+    id: '/peace-movement/validation',
+    path: '/peace-movement/validation',
+    getParentRoute: () => AppRoute,
+  } as any)
 const AppPeopleIndexRoute = AppPeopleIndexRouteImport.update({
   id: '/people/',
   path: '/people/',
@@ -186,6 +230,42 @@ const AppGeographyImportsRunIdRoute =
     path: '/geography/imports/$runId',
     getParentRoute: () => AppRoute,
   } as any)
+const AppPeaceMovementHousesIndexRoute =
+  AppPeaceMovementHousesIndexRouteImport.update({
+    id: '/peace-movement/houses/',
+    path: '/peace-movement/houses/',
+    getParentRoute: () => AppRoute,
+  } as any)
+const AppPeaceMovementHousesHouseIdRoute =
+  AppPeaceMovementHousesHouseIdRouteImport.update({
+    id: '/peace-movement/houses/$houseId',
+    path: '/peace-movement/houses/$houseId',
+    getParentRoute: () => AppRoute,
+  } as any)
+const AppPeaceMovementHousesNewRoute =
+  AppPeaceMovementHousesNewRouteImport.update({
+    id: '/peace-movement/houses/new',
+    path: '/peace-movement/houses/new',
+    getParentRoute: () => AppRoute,
+  } as any)
+const AppPeaceMovementMembersIndexRoute =
+  AppPeaceMovementMembersIndexRouteImport.update({
+    id: '/peace-movement/members/',
+    path: '/peace-movement/members/',
+    getParentRoute: () => AppRoute,
+  } as any)
+const AppPeaceMovementMembersMemberIdRoute =
+  AppPeaceMovementMembersMemberIdRouteImport.update({
+    id: '/peace-movement/members/$memberId',
+    path: '/peace-movement/members/$memberId',
+    getParentRoute: () => AppRoute,
+  } as any)
+const AppPeaceMovementMembersNewRoute =
+  AppPeaceMovementMembersNewRouteImport.update({
+    id: '/peace-movement/members/new',
+    path: '/peace-movement/members/new',
+    getParentRoute: () => AppRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
@@ -198,10 +278,15 @@ export interface FileRoutesByFullPath {
   '/audit': typeof AppAuditRoute
   '/office-types': typeof AppOfficeTypesRoute
   '/parties': typeof AppPartiesRoute
+  '/inscripcion/$code': typeof InscripcionCodeRoute
   '/geography/locate': typeof AppGeographyLocateRoute
   '/geography/map': typeof AppGeographyMapRoute
   '/nominations/$nominationId': typeof AppNominationsNominationIdRoute
   '/nominations/new': typeof AppNominationsNewRoute
+  '/peace-movement/imports': typeof AppPeaceMovementImportsRoute
+  '/peace-movement/settings': typeof AppPeaceMovementSettingsRoute
+  '/peace-movement/stats': typeof AppPeaceMovementStatsRoute
+  '/peace-movement/validation': typeof AppPeaceMovementValidationRoute
   '/people/$personId': typeof AppPeoplePersonIdRoute
   '/people/new': typeof AppPeopleNewRoute
   '/processes/$processId': typeof AppProcessesProcessIdRoute
@@ -209,13 +294,20 @@ export interface FileRoutesByFullPath {
   '/users/$userId': typeof AppUsersUserIdRoute
   '/geography/': typeof AppGeographyIndexRoute
   '/nominations/': typeof AppNominationsIndexRoute
+  '/peace-movement/': typeof AppPeaceMovementIndexRoute
   '/people/': typeof AppPeopleIndexRoute
   '/processes/': typeof AppProcessesIndexRoute
   '/roles/': typeof AppRolesIndexRoute
   '/users/': typeof AppUsersIndexRoute
   '/geography/$level/$nodeId': typeof AppGeographyLevelNodeIdRoute
   '/geography/imports/$runId': typeof AppGeographyImportsRunIdRoute
+  '/peace-movement/houses/$houseId': typeof AppPeaceMovementHousesHouseIdRoute
+  '/peace-movement/houses/new': typeof AppPeaceMovementHousesNewRoute
+  '/peace-movement/members/$memberId': typeof AppPeaceMovementMembersMemberIdRoute
+  '/peace-movement/members/new': typeof AppPeaceMovementMembersNewRoute
   '/geography/imports/': typeof AppGeographyImportsIndexRoute
+  '/peace-movement/houses/': typeof AppPeaceMovementHousesIndexRoute
+  '/peace-movement/members/': typeof AppPeaceMovementMembersIndexRoute
 }
 export interface FileRoutesByTo {
   '/accept-invitation': typeof AcceptInvitationRoute
@@ -227,11 +319,16 @@ export interface FileRoutesByTo {
   '/audit': typeof AppAuditRoute
   '/office-types': typeof AppOfficeTypesRoute
   '/parties': typeof AppPartiesRoute
+  '/inscripcion/$code': typeof InscripcionCodeRoute
   '/': typeof AppIndexRoute
   '/geography/locate': typeof AppGeographyLocateRoute
   '/geography/map': typeof AppGeographyMapRoute
   '/nominations/$nominationId': typeof AppNominationsNominationIdRoute
   '/nominations/new': typeof AppNominationsNewRoute
+  '/peace-movement/imports': typeof AppPeaceMovementImportsRoute
+  '/peace-movement/settings': typeof AppPeaceMovementSettingsRoute
+  '/peace-movement/stats': typeof AppPeaceMovementStatsRoute
+  '/peace-movement/validation': typeof AppPeaceMovementValidationRoute
   '/people/$personId': typeof AppPeoplePersonIdRoute
   '/people/new': typeof AppPeopleNewRoute
   '/processes/$processId': typeof AppProcessesProcessIdRoute
@@ -239,13 +336,20 @@ export interface FileRoutesByTo {
   '/users/$userId': typeof AppUsersUserIdRoute
   '/geography': typeof AppGeographyIndexRoute
   '/nominations': typeof AppNominationsIndexRoute
+  '/peace-movement': typeof AppPeaceMovementIndexRoute
   '/people': typeof AppPeopleIndexRoute
   '/processes': typeof AppProcessesIndexRoute
   '/roles': typeof AppRolesIndexRoute
   '/users': typeof AppUsersIndexRoute
   '/geography/$level/$nodeId': typeof AppGeographyLevelNodeIdRoute
   '/geography/imports/$runId': typeof AppGeographyImportsRunIdRoute
+  '/peace-movement/houses/$houseId': typeof AppPeaceMovementHousesHouseIdRoute
+  '/peace-movement/houses/new': typeof AppPeaceMovementHousesNewRoute
+  '/peace-movement/members/$memberId': typeof AppPeaceMovementMembersMemberIdRoute
+  '/peace-movement/members/new': typeof AppPeaceMovementMembersNewRoute
   '/geography/imports': typeof AppGeographyImportsIndexRoute
+  '/peace-movement/houses': typeof AppPeaceMovementHousesIndexRoute
+  '/peace-movement/members': typeof AppPeaceMovementMembersIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -259,11 +363,16 @@ export interface FileRoutesById {
   '/_app/audit': typeof AppAuditRoute
   '/_app/office-types': typeof AppOfficeTypesRoute
   '/_app/parties': typeof AppPartiesRoute
+  '/inscripcion/$code': typeof InscripcionCodeRoute
   '/_app/': typeof AppIndexRoute
   '/_app/geography/locate': typeof AppGeographyLocateRoute
   '/_app/geography/map': typeof AppGeographyMapRoute
   '/_app/nominations/$nominationId': typeof AppNominationsNominationIdRoute
   '/_app/nominations/new': typeof AppNominationsNewRoute
+  '/_app/peace-movement/imports': typeof AppPeaceMovementImportsRoute
+  '/_app/peace-movement/settings': typeof AppPeaceMovementSettingsRoute
+  '/_app/peace-movement/stats': typeof AppPeaceMovementStatsRoute
+  '/_app/peace-movement/validation': typeof AppPeaceMovementValidationRoute
   '/_app/people/$personId': typeof AppPeoplePersonIdRoute
   '/_app/people/new': typeof AppPeopleNewRoute
   '/_app/processes/$processId': typeof AppProcessesProcessIdRoute
@@ -271,13 +380,20 @@ export interface FileRoutesById {
   '/_app/users/$userId': typeof AppUsersUserIdRoute
   '/_app/geography/': typeof AppGeographyIndexRoute
   '/_app/nominations/': typeof AppNominationsIndexRoute
+  '/_app/peace-movement/': typeof AppPeaceMovementIndexRoute
   '/_app/people/': typeof AppPeopleIndexRoute
   '/_app/processes/': typeof AppProcessesIndexRoute
   '/_app/roles/': typeof AppRolesIndexRoute
   '/_app/users/': typeof AppUsersIndexRoute
   '/_app/geography/$level/$nodeId': typeof AppGeographyLevelNodeIdRoute
   '/_app/geography/imports/$runId': typeof AppGeographyImportsRunIdRoute
+  '/_app/peace-movement/houses/$houseId': typeof AppPeaceMovementHousesHouseIdRoute
+  '/_app/peace-movement/houses/new': typeof AppPeaceMovementHousesNewRoute
+  '/_app/peace-movement/members/$memberId': typeof AppPeaceMovementMembersMemberIdRoute
+  '/_app/peace-movement/members/new': typeof AppPeaceMovementMembersNewRoute
   '/_app/geography/imports/': typeof AppGeographyImportsIndexRoute
+  '/_app/peace-movement/houses/': typeof AppPeaceMovementHousesIndexRoute
+  '/_app/peace-movement/members/': typeof AppPeaceMovementMembersIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -292,10 +408,15 @@ export interface FileRouteTypes {
     | '/audit'
     | '/office-types'
     | '/parties'
+    | '/inscripcion/$code'
     | '/geography/locate'
     | '/geography/map'
     | '/nominations/$nominationId'
     | '/nominations/new'
+    | '/peace-movement/imports'
+    | '/peace-movement/settings'
+    | '/peace-movement/stats'
+    | '/peace-movement/validation'
     | '/people/$personId'
     | '/people/new'
     | '/processes/$processId'
@@ -303,13 +424,20 @@ export interface FileRouteTypes {
     | '/users/$userId'
     | '/geography/'
     | '/nominations/'
+    | '/peace-movement/'
     | '/people/'
     | '/processes/'
     | '/roles/'
     | '/users/'
     | '/geography/$level/$nodeId'
     | '/geography/imports/$runId'
+    | '/peace-movement/houses/$houseId'
+    | '/peace-movement/houses/new'
+    | '/peace-movement/members/$memberId'
+    | '/peace-movement/members/new'
     | '/geography/imports/'
+    | '/peace-movement/houses/'
+    | '/peace-movement/members/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/accept-invitation'
@@ -321,11 +449,16 @@ export interface FileRouteTypes {
     | '/audit'
     | '/office-types'
     | '/parties'
+    | '/inscripcion/$code'
     | '/'
     | '/geography/locate'
     | '/geography/map'
     | '/nominations/$nominationId'
     | '/nominations/new'
+    | '/peace-movement/imports'
+    | '/peace-movement/settings'
+    | '/peace-movement/stats'
+    | '/peace-movement/validation'
     | '/people/$personId'
     | '/people/new'
     | '/processes/$processId'
@@ -333,13 +466,20 @@ export interface FileRouteTypes {
     | '/users/$userId'
     | '/geography'
     | '/nominations'
+    | '/peace-movement'
     | '/people'
     | '/processes'
     | '/roles'
     | '/users'
     | '/geography/$level/$nodeId'
     | '/geography/imports/$runId'
+    | '/peace-movement/houses/$houseId'
+    | '/peace-movement/houses/new'
+    | '/peace-movement/members/$memberId'
+    | '/peace-movement/members/new'
     | '/geography/imports'
+    | '/peace-movement/houses'
+    | '/peace-movement/members'
   id:
     | '__root__'
     | '/_app'
@@ -352,11 +492,16 @@ export interface FileRouteTypes {
     | '/_app/audit'
     | '/_app/office-types'
     | '/_app/parties'
+    | '/inscripcion/$code'
     | '/_app/'
     | '/_app/geography/locate'
     | '/_app/geography/map'
     | '/_app/nominations/$nominationId'
     | '/_app/nominations/new'
+    | '/_app/peace-movement/imports'
+    | '/_app/peace-movement/settings'
+    | '/_app/peace-movement/stats'
+    | '/_app/peace-movement/validation'
     | '/_app/people/$personId'
     | '/_app/people/new'
     | '/_app/processes/$processId'
@@ -364,13 +509,20 @@ export interface FileRouteTypes {
     | '/_app/users/$userId'
     | '/_app/geography/'
     | '/_app/nominations/'
+    | '/_app/peace-movement/'
     | '/_app/people/'
     | '/_app/processes/'
     | '/_app/roles/'
     | '/_app/users/'
     | '/_app/geography/$level/$nodeId'
     | '/_app/geography/imports/$runId'
+    | '/_app/peace-movement/houses/$houseId'
+    | '/_app/peace-movement/houses/new'
+    | '/_app/peace-movement/members/$memberId'
+    | '/_app/peace-movement/members/new'
     | '/_app/geography/imports/'
+    | '/_app/peace-movement/houses/'
+    | '/_app/peace-movement/members/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -380,6 +532,7 @@ export interface RootRouteChildren {
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  InscripcionCodeRoute: typeof InscripcionCodeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -461,6 +614,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPartiesRouteImport
       parentRoute: typeof AppRoute
     }
+    '/inscripcion/$code': {
+      id: '/inscripcion/$code'
+      path: '/inscripcion/$code'
+      fullPath: '/inscripcion/$code'
+      preLoaderRoute: typeof InscripcionCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_app/geography/': {
       id: '/_app/geography/'
       path: '/geography'
@@ -501,6 +661,41 @@ declare module '@tanstack/react-router' {
       path: '/nominations/new'
       fullPath: '/nominations/new'
       preLoaderRoute: typeof AppNominationsNewRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/peace-movement/': {
+      id: '/_app/peace-movement/'
+      path: '/peace-movement'
+      fullPath: '/peace-movement/'
+      preLoaderRoute: typeof AppPeaceMovementIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/peace-movement/imports': {
+      id: '/_app/peace-movement/imports'
+      path: '/peace-movement/imports'
+      fullPath: '/peace-movement/imports'
+      preLoaderRoute: typeof AppPeaceMovementImportsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/peace-movement/settings': {
+      id: '/_app/peace-movement/settings'
+      path: '/peace-movement/settings'
+      fullPath: '/peace-movement/settings'
+      preLoaderRoute: typeof AppPeaceMovementSettingsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/peace-movement/stats': {
+      id: '/_app/peace-movement/stats'
+      path: '/peace-movement/stats'
+      fullPath: '/peace-movement/stats'
+      preLoaderRoute: typeof AppPeaceMovementStatsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/peace-movement/validation': {
+      id: '/_app/peace-movement/validation'
+      path: '/peace-movement/validation'
+      fullPath: '/peace-movement/validation'
+      preLoaderRoute: typeof AppPeaceMovementValidationRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/people/': {
@@ -587,6 +782,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppGeographyImportsRunIdRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/peace-movement/houses/': {
+      id: '/_app/peace-movement/houses/'
+      path: '/peace-movement/houses'
+      fullPath: '/peace-movement/houses/'
+      preLoaderRoute: typeof AppPeaceMovementHousesIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/peace-movement/houses/$houseId': {
+      id: '/_app/peace-movement/houses/$houseId'
+      path: '/peace-movement/houses/$houseId'
+      fullPath: '/peace-movement/houses/$houseId'
+      preLoaderRoute: typeof AppPeaceMovementHousesHouseIdRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/peace-movement/houses/new': {
+      id: '/_app/peace-movement/houses/new'
+      path: '/peace-movement/houses/new'
+      fullPath: '/peace-movement/houses/new'
+      preLoaderRoute: typeof AppPeaceMovementHousesNewRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/peace-movement/members/': {
+      id: '/_app/peace-movement/members/'
+      path: '/peace-movement/members'
+      fullPath: '/peace-movement/members/'
+      preLoaderRoute: typeof AppPeaceMovementMembersIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/peace-movement/members/$memberId': {
+      id: '/_app/peace-movement/members/$memberId'
+      path: '/peace-movement/members/$memberId'
+      fullPath: '/peace-movement/members/$memberId'
+      preLoaderRoute: typeof AppPeaceMovementMembersMemberIdRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/peace-movement/members/new': {
+      id: '/_app/peace-movement/members/new'
+      path: '/peace-movement/members/new'
+      fullPath: '/peace-movement/members/new'
+      preLoaderRoute: typeof AppPeaceMovementMembersNewRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
@@ -600,6 +837,10 @@ interface AppRouteChildren {
   AppGeographyMapRoute: typeof AppGeographyMapRoute
   AppNominationsNominationIdRoute: typeof AppNominationsNominationIdRoute
   AppNominationsNewRoute: typeof AppNominationsNewRoute
+  AppPeaceMovementImportsRoute: typeof AppPeaceMovementImportsRoute
+  AppPeaceMovementSettingsRoute: typeof AppPeaceMovementSettingsRoute
+  AppPeaceMovementStatsRoute: typeof AppPeaceMovementStatsRoute
+  AppPeaceMovementValidationRoute: typeof AppPeaceMovementValidationRoute
   AppPeoplePersonIdRoute: typeof AppPeoplePersonIdRoute
   AppPeopleNewRoute: typeof AppPeopleNewRoute
   AppProcessesProcessIdRoute: typeof AppProcessesProcessIdRoute
@@ -607,13 +848,20 @@ interface AppRouteChildren {
   AppUsersUserIdRoute: typeof AppUsersUserIdRoute
   AppGeographyIndexRoute: typeof AppGeographyIndexRoute
   AppNominationsIndexRoute: typeof AppNominationsIndexRoute
+  AppPeaceMovementIndexRoute: typeof AppPeaceMovementIndexRoute
   AppPeopleIndexRoute: typeof AppPeopleIndexRoute
   AppProcessesIndexRoute: typeof AppProcessesIndexRoute
   AppRolesIndexRoute: typeof AppRolesIndexRoute
   AppUsersIndexRoute: typeof AppUsersIndexRoute
   AppGeographyLevelNodeIdRoute: typeof AppGeographyLevelNodeIdRoute
   AppGeographyImportsRunIdRoute: typeof AppGeographyImportsRunIdRoute
+  AppPeaceMovementHousesHouseIdRoute: typeof AppPeaceMovementHousesHouseIdRoute
+  AppPeaceMovementHousesNewRoute: typeof AppPeaceMovementHousesNewRoute
+  AppPeaceMovementMembersMemberIdRoute: typeof AppPeaceMovementMembersMemberIdRoute
+  AppPeaceMovementMembersNewRoute: typeof AppPeaceMovementMembersNewRoute
   AppGeographyImportsIndexRoute: typeof AppGeographyImportsIndexRoute
+  AppPeaceMovementHousesIndexRoute: typeof AppPeaceMovementHousesIndexRoute
+  AppPeaceMovementMembersIndexRoute: typeof AppPeaceMovementMembersIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -626,6 +874,10 @@ const AppRouteChildren: AppRouteChildren = {
   AppGeographyMapRoute: AppGeographyMapRoute,
   AppNominationsNominationIdRoute: AppNominationsNominationIdRoute,
   AppNominationsNewRoute: AppNominationsNewRoute,
+  AppPeaceMovementImportsRoute: AppPeaceMovementImportsRoute,
+  AppPeaceMovementSettingsRoute: AppPeaceMovementSettingsRoute,
+  AppPeaceMovementStatsRoute: AppPeaceMovementStatsRoute,
+  AppPeaceMovementValidationRoute: AppPeaceMovementValidationRoute,
   AppPeoplePersonIdRoute: AppPeoplePersonIdRoute,
   AppPeopleNewRoute: AppPeopleNewRoute,
   AppProcessesProcessIdRoute: AppProcessesProcessIdRoute,
@@ -633,13 +885,20 @@ const AppRouteChildren: AppRouteChildren = {
   AppUsersUserIdRoute: AppUsersUserIdRoute,
   AppGeographyIndexRoute: AppGeographyIndexRoute,
   AppNominationsIndexRoute: AppNominationsIndexRoute,
+  AppPeaceMovementIndexRoute: AppPeaceMovementIndexRoute,
   AppPeopleIndexRoute: AppPeopleIndexRoute,
   AppProcessesIndexRoute: AppProcessesIndexRoute,
   AppRolesIndexRoute: AppRolesIndexRoute,
   AppUsersIndexRoute: AppUsersIndexRoute,
   AppGeographyLevelNodeIdRoute: AppGeographyLevelNodeIdRoute,
   AppGeographyImportsRunIdRoute: AppGeographyImportsRunIdRoute,
+  AppPeaceMovementHousesHouseIdRoute: AppPeaceMovementHousesHouseIdRoute,
+  AppPeaceMovementHousesNewRoute: AppPeaceMovementHousesNewRoute,
+  AppPeaceMovementMembersMemberIdRoute: AppPeaceMovementMembersMemberIdRoute,
+  AppPeaceMovementMembersNewRoute: AppPeaceMovementMembersNewRoute,
   AppGeographyImportsIndexRoute: AppGeographyImportsIndexRoute,
+  AppPeaceMovementHousesIndexRoute: AppPeaceMovementHousesIndexRoute,
+  AppPeaceMovementMembersIndexRoute: AppPeaceMovementMembersIndexRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
@@ -651,6 +910,7 @@ const rootRouteChildren: RootRouteChildren = {
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  InscripcionCodeRoute: InscripcionCodeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

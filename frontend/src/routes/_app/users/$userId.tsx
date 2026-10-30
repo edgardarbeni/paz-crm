@@ -29,6 +29,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScopesEditor } from "@/features/identity/scopes-editor";
 import { SessionsTable } from "@/features/identity/sessions-table";
+import { BranchesEditor } from "@/features/peace-movement/branches-editor";
 import { Perm } from "@/lib/auth/permissions";
 import { useCan } from "@/lib/auth/use-me";
 import { formatDateTime, USER_STATUS } from "@/lib/labels";
@@ -136,6 +137,18 @@ function UserPage() {
             <ScopesEditor userId={userId} editable={can(Perm.USER_ASSIGN_SCOPES)} />
           </CardContent>
         </Card>
+        {can(Perm.PEACE_MEMBER_READ) ? (
+          <Card>
+            <CardHeader>
+              <CardTitle>
+                <h2>Ramas del Movimiento de Paz</h2>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <BranchesEditor userId={userId} editable={can(Perm.USER_ASSIGN_SCOPES)} />
+            </CardContent>
+          </Card>
+        ) : null}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>
