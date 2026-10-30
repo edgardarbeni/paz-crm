@@ -1,6 +1,6 @@
 # D-104 · Cuentas y acceso originados en nombramientos (amplía D-33, D-35 y D-52)
 
-- **Estado:** Propuesta (2026-10-30)
+- **Estado:** Aceptada (2026-10-30)
 - **Área:** Identidad, acceso y auditoría · Estructura del partido
 
 Reglas para que un nombramiento con `grants_access` produzca una concesión

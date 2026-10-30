@@ -75,7 +75,7 @@ separado en archivos sin cambiar su texto; solo se actualizaron las rutas de los
 | D | Tema | Estado |
 |---|---|---|
 | [D-33](D-33-roles-iniciales.md) | Roles iniciales | Aceptada |
-| [D-34](D-34-alcance-geografico.md) | Alcance geográfico | Aceptada |
+| [D-34](D-34-alcance-geografico.md) | Alcance geográfico | Aceptada (modelo reemplazado por D-101) |
 | [D-35](D-35-alta-usuarios-correo.md) | Alta de usuarios y correo | Aceptada |
 | [D-36](D-36-auditoria-importaciones.md) | Auditoría de importaciones | Aceptada |
 | [D-37](D-37-bitacora-inmutable.md) | Bitácora inmutable | Aceptada (detallada por D-45) |
@@ -113,7 +113,7 @@ separado en archivos sin cambiar su texto; solo se actualizaron las rutas de los
 | [D-49](D-49-defensa-login.md) | Defensa del login | Aceptada |
 | [D-50](D-50-contrasenas.md) | Contraseñas | Aceptada |
 | [D-51](D-51-segundo-factor.md) | Segundo factor | Aceptada |
-| [D-52](D-52-reglas-rbac.md) | Reglas de RBAC | Aceptada |
+| [D-52](D-52-reglas-rbac.md) | Reglas de RBAC | Aceptada (ampliada por D-101 y D-104) |
 | [D-53](D-53-ajustes-auditoria-automatica.md) | Ajustes a la auditoría automática | Aceptada |
 | [D-54](D-54-ajustes-modelo-identidad.md) | Ajustes al modelo de identidad (sobre `data-model.md` §2) | Aceptada |
 | [D-55](D-55-correo-arranque.md) | Correo y arranque | Aceptada |
@@ -157,7 +157,7 @@ plantean alternativas; el 2026-10-29 se aceptó la opción recomendada de cada u
 | D | Tema | Estado |
 |---|---|---|
 | [D-82](D-82-consentimiento-aviso-movimiento-paz.md) | Consentimiento del aviso del Movimiento de Paz (amplía D-69) | Aceptada |
-| [D-83](D-83-alcance-por-rama.md) | Alcance por rama (amplía D-34 y D-66) | Aceptada |
+| [D-83](D-83-alcance-por-rama.md) | Alcance por rama (amplía D-34 y D-66) | Aceptada (ampliada por D-101) |
 | [D-84](D-84-tareas-periodicas.md) | Tareas periódicas y en segundo plano | Aceptada |
 | [D-85](D-85-ubicacion-casas-paz.md) | Precisión de la ubicación de las Casas de Paz | Aceptada |
 | [D-86](D-86-proteccion-bots-inscripcion-publica.md) | Protección contra bots en la inscripción pública | Aceptada |
@@ -166,11 +166,11 @@ plantean alternativas; el 2026-10-29 se aceptó la opción recomendada de cada u
 | [D-89](D-89-bitacora-lecturas.md) | Bitácora de lecturas sensibles (amplía D-37 y D-45) | Aceptada |
 | [D-90](D-90-auditoria-escrituras-masivas.md) | Auditoría de escrituras masivas (amplía D-36 y D-45) | Aceptada |
 | [D-91](D-91-jerarquia-reclutamiento-ltree.md) | Jerarquía de reclutamiento con `ltree` | Aceptada |
-| [D-92](D-92-reglas-negocio-movimiento-paz.md) | Reglas de negocio del Movimiento de Paz confirmadas | Aceptada |
+| [D-92](D-92-reglas-negocio-movimiento-paz.md) | Reglas de negocio del Movimiento de Paz confirmadas | Aceptada (crédito de casas reemplazado por D-103) |
 | [D-93](D-93-bitacora-alcance-y-enmascarado.md) | Bitácora: alcance de consulta, enmascarado de personas y escrituras Core (detalla D-37 y D-45) | Aceptada |
 | [D-94](D-94-infraestructura-scheduler-s3-modulos.md) | Infraestructura: scheduler, S3 de desarrollo y registro de módulos (detalla D-38 y D-84) | Aceptada |
 | [D-95](D-95-ajustes-implementacion-pacificadores.md) | Ajustes de implementación de la fase 1 del Movimiento de Paz (pacificadores) | Aceptada |
-| [D-96](D-96-ajustes-implementacion-casas.md) | Ajustes de implementación de la fase 2 del Movimiento de Paz (Casas de Paz) | Aceptada |
+| [D-96](D-96-ajustes-implementacion-casas.md) | Ajustes de implementación de la fase 2 del Movimiento de Paz (Casas de Paz) | Aceptada (crédito reemplazado por D-103) |
 | [D-97](D-97-agregados-red-movimiento-paz.md) | Agregados de la red del Movimiento de Paz (fase 3) | Aceptada |
 | [D-98](D-98-entradas-masivas-publicas.md) | Entradas públicas y masivas del Movimiento de Paz (fase 4; precisa D-90) | Aceptada |
 | [D-99](D-99-panel-movimiento-paz.md) | Panel del Movimiento de Paz (fase 5) | Aceptada |
@@ -178,15 +178,16 @@ plantean alternativas; el 2026-10-29 se aceptó la opción recomendada de cada u
 
 ## Estructura del partido
 
-Decisiones derivadas de la ficha [party-structure.md](../modules/party-structure.md). Plantean
-alternativas y están pendientes de aprobación.
+Decisiones derivadas de la ficha [party-structure.md](../modules/party-structure.md). El
+2026-10-30 se aceptó la opción recomendada de D-101 y D-102 y todo D-104; D-103 se aceptó con
+cambios.
 
 | D | Tema | Estado |
 |---|---|---|
-| [D-101](D-101-concesiones-rol-alcance.md) | Concesiones (rol, alcance) (reemplaza D-34 en el modelo del alcance; amplía D-52 y D-83) | Propuesta |
-| [D-102](D-102-cambio-marco-estructura.md) | Cambio de marco geográfico en la estructura del partido (amplía D-41, punto 7) | Propuesta |
-| [D-103](D-103-credito-casas-estructura.md) | Crédito de las Casas de Paz a asientos de estructura (reemplaza en parte D-92 y D-96) | Propuesta |
-| [D-104](D-104-cuentas-acceso-por-nombramiento.md) | Cuentas y acceso originados en nombramientos (amplía D-33, D-35 y D-52) | Propuesta |
+| [D-101](D-101-concesiones-rol-alcance.md) | Concesiones (rol, alcance) (reemplaza D-34 en el modelo del alcance; amplía D-52 y D-83) | Aceptada |
+| [D-102](D-102-cambio-marco-estructura.md) | Cambio de marco geográfico en la estructura del partido (amplía D-41, punto 7) | Aceptada |
+| [D-103](D-103-credito-casas-estructura.md) | Crédito de las Casas de Paz a asientos de estructura (reemplaza en parte D-92 y D-96) | Aceptada |
+| [D-104](D-104-cuentas-acceso-por-nombramiento.md) | Cuentas y acceso originados en nombramientos (amplía D-33, D-35 y D-52) | Aceptada |
 
 ## Suposiciones vigentes
 

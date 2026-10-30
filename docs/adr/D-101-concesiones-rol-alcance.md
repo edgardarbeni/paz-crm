@@ -1,6 +1,6 @@
 # D-101 · Concesiones (rol, alcance) (reemplaza D-34 en el modelo del alcance; amplía D-52 y D-83)
 
-- **Estado:** Propuesta (2026-10-30)
+- **Estado:** Aceptada (2026-10-30: opción A, concesiones con alcance por permiso)
 - **Área:** Identidad, acceso y auditoría · Estructura del partido
 
 ## Contexto

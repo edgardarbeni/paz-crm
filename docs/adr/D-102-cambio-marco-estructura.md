@@ -1,6 +1,6 @@
 # D-102 · Cambio de marco geográfico en la estructura del partido (amplía D-41, punto 7)
 
-- **Estado:** Propuesta (2026-10-30)
+- **Estado:** Aceptada (2026-10-30: opción A, remapeo automático y bandeja)
 - **Área:** Estructura del partido · Geografía electoral
 
 ## Contexto

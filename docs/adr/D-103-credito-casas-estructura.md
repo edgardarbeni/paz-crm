@@ -1,6 +1,6 @@
 # D-103 · Crédito de las Casas de Paz a asientos de estructura (reemplaza en parte D-92 y D-96)
 
-- **Estado:** Propuesta (2026-10-30)
+- **Estado:** Aceptada (2026-10-30, con cambios de Darío a la ficha)
 - **Área:** Movimiento de Paz · Estructura del partido
 
 Reemplaza los puntos «Coordinadores por zona» y «Sin zona» de
@@ -8,10 +8,15 @@ Reemplaza los puntos «Coordinadores por zona» y «Sin zona» de
 [D-96](D-96-ajustes-implementacion-casas.md). Se mantienen el resto de D-92, que el crédito se
 fija al abrir o enlazar, y la reasignación con motivo e historial.
 
-**Regla nueva** ([party-structure.md](../modules/party-structure.md), «Cambios al Movimiento de Paz»):
-- Si abre la casa un **Embajador o un Constructor de Paz** activo, el crédito es suyo.
-- Si la abre un Pacificador, Promotor o Mensajero, queda **pendiente** en la bandeja de casas por
-  enlazar. Ya no se busca un Embajador en la cadena.
+**Regla nueva** (respuesta de Darío del 2026-10-30; cambia lo que dice
+[party-structure.md](../modules/party-structure.md), «Cambios al Movimiento de Paz»):
+- **Cualquier integrante activo del MP** que abre una casa se lleva el crédito, sea del nivel que
+  sea. Ya no se busca un Embajador en la cadena, y la ficha ya no deja pendientes las casas que
+  abre un Pacificador, Promotor o Mensajero.
+- Solo cuentan para una **meta** de casas los niveles que la tienen (Embajador y Constructor). Las
+  casas acreditadas a los demás niveles cuentan en las estadísticas.
+- La **bandeja de casas por enlazar** recibe las casas que se abren sin un integrante ni un asiento
+  que reciba el crédito, y las que quedan pendientes por la migración.
 - Cualquier **asiento** de estructura con nombramiento vigente puede abrir una casa o enlazar una
   pendiente, sin importar la geografía. El crédito es del asiento y lo hereda el siguiente titular.
 - `credited_user_id` se reemplaza por `credited_position_id`. A lo más uno de los dos créditos
@@ -23,8 +28,8 @@ fija al abrir o enlazar, y la reasignación con motivo e historial.
 
 **Permisos**
 - `peace_movement.house.link` (nuevo): abrir o enlazar con crédito a un asiento propio.
-- `peace_movement.house.reassign_credit` (existente): reasignar con motivo, ahora hacia un
-  Embajador, un Constructor o un asiento. Hoy solo acepta Embajadores.
+- `peace_movement.house.reassign_credit` (existente): reasignar con motivo, ahora hacia
+  **cualquier integrante activo** o un asiento. Hoy solo acepta Embajadores.
 
 **Migración de datos (corrige el supuesto de la ficha)**
 - Una casa acreditada a un usuario coordinador de zona pasa al asiento vigente de esa persona si
@@ -33,4 +38,8 @@ fija al abrir o enlazar, y la reasignación con motivo e historial.
   regla vigente nunca les dio crédito. El caso real son las casas de un Embajador que después
   bajó de nivel: conservan su crédito, porque D-92 lo fija al abrir.
 
-*Motivo:* el crédito de las casas sigue al cargo, no a la persona ni a una zona.
+**Pendiente de confirmar:** qué pasa con el crédito cuando el integrante acreditado se da de baja
+del MP. Por D-92 no se recalcula, así que la casa conservaría el crédito; la alternativa es que
+pase a la bandeja.
+
+*Motivo:* el crédito es de quien abre la casa (o del cargo, si la abre la estructura), no de una zona.
