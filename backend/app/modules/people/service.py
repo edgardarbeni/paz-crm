@@ -109,13 +109,12 @@ def visible_filter(geo: GeoScope) -> ColumnElement[bool] | None:
         col(PersonAddress.person_id) == col(Person.id), col(PersonAddress.deleted_at).is_(None)
     )
     in_visible_nomination = text(
-        "EXISTS (SELECT 1 FROM candidacies.formula_members fm "
+        "EXISTS (SELECT 1 FROM candidacies.formula_members fm "  # noqa: S608 - only scope SQL is interpolated
         "JOIN candidacies.formulas f ON f.id = fm.formula_id "
         "JOIN candidacies.nomination_sections ns ON ns.nomination_id = f.nomination_id "
-        "JOIN identity.user_scope_sections u ON u.section_id = ns.section_id "
-        "WHERE fm.person_id = people.persons.id AND fm.deleted_at IS NULL AND u.user_id = "
-        ":scope_user)"
-    ).bindparams(scope_user=geo.user_id)
+        "WHERE fm.person_id = people.persons.id AND fm.deleted_at IS NULL AND "
+        f"{geo.section_sql('ns.section_id')})"
+    ).bindparams(**geo.sql_params)
     return or_(in_scope_address, no_address, in_visible_nomination)
 
 
@@ -269,15 +268,7 @@ async def _ensure_address_in_scope(
 ) -> None:
     if geo.unrestricted or address is None or address.section_id is None:
         return
-    inside = (
-        await db.execute(
-            text(
-                "SELECT 1 FROM identity.user_scope_sections WHERE user_id = :u AND section_id = :s"
-            ),
-            {"u": geo.user_id, "s": address.section_id},
-        )
-    ).first()
-    if inside is None:
+    if not await geo.contains_section(db, address.section_id):
         raise ForbiddenError("No puedes registrar un domicilio fuera de tu alcance geográfico.")
 
 

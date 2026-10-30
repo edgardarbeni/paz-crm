@@ -40,6 +40,7 @@ App (Flutter, todavía sin construir). Cada módulo nuevo se especifica primero 
 | Personas (base del futuro padrón) | `app/modules/people` | Implementado | [people.md](docs/modules/people.md) |
 | Candidaturas | `app/modules/candidacies` | Implementado | [candidacies.md](docs/modules/candidacies.md) |
 | Movimiento de Paz (pacificadores, Casas de Paz, metas) | `app/modules/peace_movement` | Implementado (API y panel) | [peace-movement.md](docs/modules/peace-movement.md) |
+| Estructura del partido (cargos, nombramientos, coordinaciones territoriales) | `app/modules/party_structure` | En curso: fase 0 (concesiones en `identity`, D-101 y D-106) | [party-structure.md](docs/modules/party-structure.md) |
 
 Módulos futuros nombrados en el brief, todavía sin ficha:
 - padrón de militancia y afiliación al partido (aparte del Movimiento de Paz);

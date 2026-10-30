@@ -320,13 +320,14 @@ class MemberRecruiterChange(BusinessTable, table=True):
 
 
 class UserBranchScope(BusinessTable, table=True):
-    """Branch scope (D-83): the user sees the whole network under `member_id`, across states."""
+    """Branch scope (D-83, D-101): a grant also reaches the whole network under `member_id`,
+    across states, for that grant's Peace Movement permissions."""
 
     __tablename__ = "user_branch_scopes"
     __table_args__ = (
         Index(
-            "uq_user_branch_scopes_user_member",
-            "user_id",
+            "uq_user_branch_scopes_grant_member",
+            "grant_id",
             "member_id",
             unique=True,
             postgresql_where=text("deleted_at IS NULL"),
@@ -334,7 +335,7 @@ class UserBranchScope(BusinessTable, table=True):
         {"schema": SCHEMA},
     )
 
-    user_id: uuid.UUID = _fk("identity.users.id", ondelete="CASCADE")
+    grant_id: uuid.UUID = _fk("identity.user_grants.id", ondelete="CASCADE")
     member_id: uuid.UUID = _fk(f"{SCHEMA}.members.id")
 
 

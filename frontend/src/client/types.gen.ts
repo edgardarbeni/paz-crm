@@ -1381,6 +1381,71 @@ export type GeoStatOut = {
 export type GeographicLevel = 'national' | 'electoral_region' | 'state' | 'federal_district' | 'local_district' | 'municipality';
 
 /**
+ * GrantIn
+ */
+export type GrantIn = {
+    /**
+     * Id
+     *
+     * Concesión manual existente que se conserva; vacío para una nueva.
+     */
+    id?: string | null;
+    /**
+     * Role Id
+     */
+    role_id: string;
+    /**
+     * Scopes
+     *
+     * Sin alcance no ve nada.
+     */
+    scopes?: Array<ScopeIn>;
+};
+
+/**
+ * GrantOrigin
+ */
+export type GrantOrigin = 'manual' | 'appointment';
+
+/**
+ * GrantOut
+ *
+ * A (role, scope) pair (D-101): the role's permissions apply only inside its scopes.
+ */
+export type GrantOut = {
+    /**
+     * Id
+     */
+    id: string;
+    role: RoleSummary;
+    origin: GrantOrigin;
+    /**
+     * Source Id
+     *
+     * Nombramiento que la originó, si aplica.
+     */
+    source_id: string | null;
+    /**
+     * Scopes
+     */
+    scopes: Array<ScopeOut>;
+    /**
+     * Created At
+     */
+    created_at: string;
+};
+
+/**
+ * GrantsRequest
+ */
+export type GrantsRequest = {
+    /**
+     * Grants
+     */
+    grants: Array<GrantIn>;
+};
+
+/**
  * GrowthPoint
  */
 export type GrowthPoint = {
@@ -2190,13 +2255,13 @@ export type MeResponse = {
     /**
      * Geo Unrestricted
      *
-     * Ve todo el país (superadmin o alcance nacional).
+     * Alguna concesión ve todo el país (superadmin o alcance nacional).
      */
     geo_unrestricted: boolean;
     /**
-     * Geo Scopes
+     * Grants
      */
-    geo_scopes: Array<ScopeOut>;
+    grants: Array<GrantOut>;
 };
 
 /**
@@ -4131,16 +4196,6 @@ export type ScopeOut = {
 };
 
 /**
- * ScopesRequest
- */
-export type ScopesRequest = {
-    /**
-     * Scopes
-     */
-    scopes: Array<ScopeIn>;
-};
-
-/**
  * SessionOut
  */
 export type SessionOut = {
@@ -4485,16 +4540,6 @@ export type UserOut = {
      * Created At
      */
     created_at: string;
-};
-
-/**
- * UserRolesRequest
- */
-export type UserRolesRequest = {
-    /**
-     * Role Ids
-     */
-    role_ids: Array<string>;
 };
 
 /**
@@ -5466,40 +5511,6 @@ export type UnlockUserResponses = {
 
 export type UnlockUserResponse = UnlockUserResponses[keyof UnlockUserResponses];
 
-export type SetUserRolesData = {
-    body: UserRolesRequest;
-    path: {
-        /**
-         * User Id
-         */
-        user_id: string;
-    };
-    query?: never;
-    url: '/api/v1/users/{user_id}/roles';
-};
-
-export type SetUserRolesErrors = {
-    /**
-     * Error del cliente (RFC 9457)
-     */
-    '4XX': Problem;
-    /**
-     * Error del servidor (RFC 9457)
-     */
-    '5XX': Problem;
-};
-
-export type SetUserRolesError = SetUserRolesErrors[keyof SetUserRolesErrors];
-
-export type SetUserRolesResponses = {
-    /**
-     * Successful Response
-     */
-    200: UserOut;
-};
-
-export type SetUserRolesResponse = SetUserRolesResponses[keyof SetUserRolesResponses];
-
 export type ResendInvitationData = {
     body?: never;
     path: {
@@ -5638,7 +5649,7 @@ export type RevokeUserSessionsResponses = {
 
 export type RevokeUserSessionsResponse = RevokeUserSessionsResponses[keyof RevokeUserSessionsResponses];
 
-export type GetUserScopesData = {
+export type ListUserGrantsData = {
     body?: never;
     path: {
         /**
@@ -5647,10 +5658,10 @@ export type GetUserScopesData = {
         user_id: string;
     };
     query?: never;
-    url: '/api/v1/users/{user_id}/scopes';
+    url: '/api/v1/users/{user_id}/grants';
 };
 
-export type GetUserScopesErrors = {
+export type ListUserGrantsErrors = {
     /**
      * Error del cliente (RFC 9457)
      */
@@ -5661,21 +5672,21 @@ export type GetUserScopesErrors = {
     '5XX': Problem;
 };
 
-export type GetUserScopesError = GetUserScopesErrors[keyof GetUserScopesErrors];
+export type ListUserGrantsError = ListUserGrantsErrors[keyof ListUserGrantsErrors];
 
-export type GetUserScopesResponses = {
+export type ListUserGrantsResponses = {
     /**
-     * Response Getuserscopes
+     * Response Listusergrants
      *
      * Successful Response
      */
-    200: Array<ScopeOut>;
+    200: Array<GrantOut>;
 };
 
-export type GetUserScopesResponse = GetUserScopesResponses[keyof GetUserScopesResponses];
+export type ListUserGrantsResponse = ListUserGrantsResponses[keyof ListUserGrantsResponses];
 
-export type SetUserScopesData = {
-    body: ScopesRequest;
+export type SetUserGrantsData = {
+    body: GrantsRequest;
     path: {
         /**
          * User Id
@@ -5683,10 +5694,10 @@ export type SetUserScopesData = {
         user_id: string;
     };
     query?: never;
-    url: '/api/v1/users/{user_id}/scopes';
+    url: '/api/v1/users/{user_id}/grants';
 };
 
-export type SetUserScopesErrors = {
+export type SetUserGrantsErrors = {
     /**
      * Error del cliente (RFC 9457)
      */
@@ -5697,18 +5708,18 @@ export type SetUserScopesErrors = {
     '5XX': Problem;
 };
 
-export type SetUserScopesError = SetUserScopesErrors[keyof SetUserScopesErrors];
+export type SetUserGrantsError = SetUserGrantsErrors[keyof SetUserGrantsErrors];
 
-export type SetUserScopesResponses = {
+export type SetUserGrantsResponses = {
     /**
-     * Response Setuserscopes
+     * Response Setusergrants
      *
      * Successful Response
      */
-    200: Array<ScopeOut>;
+    200: Array<GrantOut>;
 };
 
-export type SetUserScopesResponse = SetUserScopesResponses[keyof SetUserScopesResponses];
+export type SetUserGrantsResponse = SetUserGrantsResponses[keyof SetUserGrantsResponses];
 
 export type ListRolesData = {
     body?: never;
@@ -8764,19 +8775,19 @@ export type ReassignMemberResponses = {
 
 export type ReassignMemberResponse = ReassignMemberResponses[keyof ReassignMemberResponses];
 
-export type ListUserBranchesData = {
+export type ListGrantBranchesData = {
     body?: never;
     path: {
         /**
-         * User Id
+         * Grant Id
          */
-        user_id: string;
+        grant_id: string;
     };
     query?: never;
-    url: '/api/v1/peace-movement/users/{user_id}/branches';
+    url: '/api/v1/peace-movement/grants/{grant_id}/branches';
 };
 
-export type ListUserBranchesErrors = {
+export type ListGrantBranchesErrors = {
     /**
      * Error del cliente (RFC 9457)
      */
@@ -8787,32 +8798,32 @@ export type ListUserBranchesErrors = {
     '5XX': Problem;
 };
 
-export type ListUserBranchesError = ListUserBranchesErrors[keyof ListUserBranchesErrors];
+export type ListGrantBranchesError = ListGrantBranchesErrors[keyof ListGrantBranchesErrors];
 
-export type ListUserBranchesResponses = {
+export type ListGrantBranchesResponses = {
     /**
-     * Response Listuserbranches
+     * Response Listgrantbranches
      *
      * Successful Response
      */
     200: Array<BranchOut>;
 };
 
-export type ListUserBranchesResponse = ListUserBranchesResponses[keyof ListUserBranchesResponses];
+export type ListGrantBranchesResponse = ListGrantBranchesResponses[keyof ListGrantBranchesResponses];
 
-export type SetUserBranchesData = {
+export type SetGrantBranchesData = {
     body: BranchesIn;
     path: {
         /**
-         * User Id
+         * Grant Id
          */
-        user_id: string;
+        grant_id: string;
     };
     query?: never;
-    url: '/api/v1/peace-movement/users/{user_id}/branches';
+    url: '/api/v1/peace-movement/grants/{grant_id}/branches';
 };
 
-export type SetUserBranchesErrors = {
+export type SetGrantBranchesErrors = {
     /**
      * Error del cliente (RFC 9457)
      */
@@ -8823,18 +8834,18 @@ export type SetUserBranchesErrors = {
     '5XX': Problem;
 };
 
-export type SetUserBranchesError = SetUserBranchesErrors[keyof SetUserBranchesErrors];
+export type SetGrantBranchesError = SetGrantBranchesErrors[keyof SetGrantBranchesErrors];
 
-export type SetUserBranchesResponses = {
+export type SetGrantBranchesResponses = {
     /**
-     * Response Setuserbranches
+     * Response Setgrantbranches
      *
      * Successful Response
      */
     200: Array<BranchOut>;
 };
 
-export type SetUserBranchesResponse = SetUserBranchesResponses[keyof SetUserBranchesResponses];
+export type SetGrantBranchesResponse = SetGrantBranchesResponses[keyof SetGrantBranchesResponses];
 
 export type SearchPeaceHousesData = {
     body?: never;

@@ -41,13 +41,13 @@ from app.modules.identity.models import (
     ScopeLevel,
     TotpCredential,
     User,
-    UserRole,
-    UserScope,
+    UserGrant,
     UserStatus,
 )
 from app.modules.identity.security.passwords import Passwords
 from app.modules.identity.services.auth import TOTP_CONTEXT
-from app.modules.identity.services.scopes import GeoScope, rebuild_scope_sections
+from app.modules.identity.services.grants import replace_scopes
+from app.modules.identity.services.scopes import GeoScope
 from app.modules.peace_movement import aggregates, members
 from app.modules.peace_movement.models import EnrollmentChannel, MemberStatus
 from app.modules.peace_movement.schemas import ConsentCapture, EnrollmentIn
@@ -66,6 +66,8 @@ USERS: dict[str, tuple[tuple[str, ...], bool]] = {
     "scoped": (("coordinator",), True),
     "geography": (("superadmin",), True),
     "peace": (("superadmin",), True),
+    "grants": (("superadmin",), True),
+    "target": (("viewer",), False),
 }
 PEOPLE = [
     ("Ana", "Ramírez", "M"), ("Beatriz", "Soto", "M"), ("Carla", "Núñez", "M"), ("Diana", "Ortiz", "M"),
@@ -134,7 +136,7 @@ async def seed() -> dict[str, Any]:  # noqa: PLR0915 - one linear script
                 role = await repo.role_by_code(db, code)
                 assert role is not None
                 assert role.id is not None
-                db.add(UserRole(user_id=user.id, role_id=role.id))
+                db.add(UserGrant(user_id=user.id, role_id=role.id))
             secret = None
             if with_totp:
                 secret = pyotp.random_base32(32)
@@ -148,16 +150,13 @@ async def seed() -> dict[str, Any]:  # noqa: PLR0915 - one linear script
                     )
                 )
             user_ids[key] = user.id
-            result["users"][key] = {"email": email, "totp_secret": secret}
-        db.add(
-            UserScope(
-                user_id=user_ids["scoped"],
-                scope_level=ScopeLevel.MUNICIPALITY,
-                municipality_id=geo["municipalities"][1],
-            )
-        )
+            result["users"][key] = {"email": email, "totp_secret": secret, "id": str(user.id)}
         await db.flush()
-        await rebuild_scope_sections(db, user_ids["scoped"])
+        scoped_grants = await db.execute(
+            select(UserGrant).where(UserGrant.user_id == user_ids["scoped"])  # type: ignore[arg-type]
+        )
+        for grant in scoped_grants.scalars():
+            await replace_scopes(db, grant, [(ScopeLevel.MUNICIPALITY, geo["municipalities"][1])])
         await db.commit()
 
         process = await service.create_process(

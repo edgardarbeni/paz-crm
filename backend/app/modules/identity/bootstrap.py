@@ -8,7 +8,7 @@ from app.core.context import RequestContext, set_context
 from app.core.db.session import build_engine, build_sessionmaker
 from app.core.errors import ConflictError
 from app.modules.identity import repository as repo
-from app.modules.identity.models import User, UserRole, UserStatus
+from app.modules.identity.models import User, UserGrant, UserStatus
 from app.modules.identity.security.passwords import Passwords
 from app.modules.identity.services.access import utcnow
 
@@ -37,7 +37,7 @@ async def create_superadmin(
             db.add(user)
             await db.flush()
             assert user.id is not None  # noqa: S101
-            db.add(UserRole(user_id=user.id, role_id=role.id))
+            db.add(UserGrant(user_id=user.id, role_id=role.id))  # superadmin: unrestricted
             await record_audit(
                 db,
                 action="superadmin_bootstrapped",

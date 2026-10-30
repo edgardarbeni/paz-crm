@@ -4,9 +4,9 @@ import { Plus, X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
-  listUserBranchesOptions,
-  listUserBranchesQueryKey,
-  setUserBranchesMutation,
+  listGrantBranchesOptions,
+  listGrantBranchesQueryKey,
+  setGrantBranchesMutation,
 } from "@/client/@tanstack/react-query.gen";
 import type { ComboItem } from "@/components/async-combobox";
 import { ProblemAlert } from "@/components/problem-alert";
@@ -14,15 +14,16 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { MemberPicker } from "./shared";
 
-/** Branch scope of a user (D-83): the whole network under each assigned member, across states.
- * Only a branch inside one the actor already has can be granted (anti-escalation). */
-export function BranchesEditor({ userId, editable }: { userId: string; editable: boolean }) {
+/** Branch scope of a grant (D-83, D-101): the grant's role also reaches the whole network under
+ * each assigned member, across states. Only a branch inside one the actor already has can be
+ * granted (anti-escalation). */
+export function BranchesEditor({ grantId, editable }: { grantId: string; editable: boolean }) {
   const queryClient = useQueryClient();
-  const key = listUserBranchesQueryKey({ path: { user_id: userId } });
-  const branches = useQuery(listUserBranchesOptions({ path: { user_id: userId } }));
+  const key = listGrantBranchesQueryKey({ path: { grant_id: grantId } });
+  const branches = useQuery(listGrantBranchesOptions({ path: { grant_id: grantId } }));
   const [picked, setPicked] = useState<ComboItem | null>(null);
   const save = useMutation({
-    ...setUserBranchesMutation(),
+    ...setGrantBranchesMutation(),
     onSuccess: (data) => {
       queryClient.setQueryData(key, data);
       setPicked(null);
@@ -31,7 +32,7 @@ export function BranchesEditor({ userId, editable }: { userId: string; editable:
   });
   const current = branches.data ?? [];
   const replace = (memberIds: string[]) =>
-    save.mutate({ path: { user_id: userId }, body: { member_ids: memberIds } });
+    save.mutate({ path: { grant_id: grantId }, body: { member_ids: memberIds } });
   return (
     <div className="space-y-3">
       <ProblemAlert error={branches.error ?? save.error} />
@@ -64,7 +65,7 @@ export function BranchesEditor({ userId, editable }: { userId: string; editable:
         </ul>
       ) : (
         <p className="text-sm text-muted-foreground">
-          Sin ramas: solo ve pacificadores por su alcance geográfico.
+          Sin ramas: esta concesión solo ve pacificadores por su alcance geográfico.
         </p>
       )}
       {editable ? (
@@ -76,9 +77,9 @@ export function BranchesEditor({ userId, editable }: { userId: string; editable:
           }}
         >
           <div className="grid flex-1 gap-1.5">
-            <Label htmlFor={`branch-${userId}`}>Agregar la red de un pacificador</Label>
+            <Label htmlFor={`branch-${grantId}`}>Agregar la red de un pacificador</Label>
             <MemberPicker
-              id={`branch-${userId}`}
+              id={`branch-${grantId}`}
               label="Pacificador"
               value={picked}
               onChange={setPicked}

@@ -12,7 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession
 from app.modules.geography import service
 from app.modules.identity.services.scopes import GeoScope
 from tests.fixtures.bgd import X0, Y0
-from tests.integration.conftest import Account, UserFactory, token_for
+from tests.integration.conftest import Account, UserFactory, set_scopes, token_for
 from tests.integration.geography.conftest import Importer, rows, scalar
 
 
@@ -56,10 +56,7 @@ async def _scoped_user(
 ) -> tuple[Account, dict[str, str]]:
     user = await make_user(roles=roles, with_totp=with_totp)
     if scopes:
-        response = await client.put(
-            f"/api/v1/users/{user.id}/scopes", headers=root, json={"scopes": scopes}
-        )
-        assert response.status_code == 200, response.text
+        await set_scopes(client, root, user.id, scopes)
     return user, await token_for(client, user)
 
 
@@ -470,8 +467,10 @@ async def test_section_scope_limits_every_query(
 
     me = (await client.get("/api/v1/auth/me", headers=headers)).json()
     assert me["geo_unrestricted"] is False
-    assert me["geo_scopes"] == [
-        {"id": me["geo_scopes"][0]["id"], "level": "section", "node_id": section_101}
+    [grant] = me["grants"]
+    assert grant["role"]["code"] == "viewer"
+    assert grant["scopes"] == [
+        {"id": grant["scopes"][0]["id"], "level": "section", "node_id": section_101}
     ]
 
 
@@ -513,38 +512,23 @@ async def test_scope_assignment_cannot_exceed_own_scope(
     )
     target = await make_user(roles=("viewer",))
 
-    within = await client.put(
-        f"/api/v1/users/{target.id}/scopes",
-        headers=admin_headers,
-        json={"scopes": [{"level": "section", "node_id": section_101}]},
+    await set_scopes(
+        client, admin_headers, target.id, [{"level": "section", "node_id": section_101}]
     )
-    assert within.status_code == 200
     for scope in (
         {"level": "section", "node_id": section_104},
         {"level": "state", "node_id": state},
         {"level": "national"},
     ):
-        response = await client.put(
-            f"/api/v1/users/{target.id}/scopes", headers=admin_headers, json={"scopes": [scope]}
-        )
-        assert response.status_code == 403, scope
+        await set_scopes(client, admin_headers, target.id, [scope], expect=403)
     # Nor widen their own scope.
-    own = await client.put(
-        f"/api/v1/users/{admin.id}/scopes",
-        headers=admin_headers,
-        json={"scopes": [{"level": "state", "node_id": state}]},
+    await set_scopes(
+        client, admin_headers, admin.id, [{"level": "state", "node_id": state}], expect=403
     )
-    assert own.status_code == 403
-    invalid = await client.put(
-        f"/api/v1/users/{target.id}/scopes",
-        headers=root,
-        json={"scopes": [{"level": "section", "node_id": municipality_one}]},
+    await set_scopes(
+        client, root, target.id, [{"level": "section", "node_id": municipality_one}], expect=400
     )
-    assert invalid.status_code == 400
-    missing_node = await client.put(
-        f"/api/v1/users/{target.id}/scopes", headers=root, json={"scopes": [{"level": "state"}]}
-    )
-    assert missing_node.status_code == 400
+    await set_scopes(client, root, target.id, [{"level": "state"}], expect=400)
 
 
 @pytest.mark.usefixtures("loaded")
@@ -586,8 +570,8 @@ async def test_user_administration_is_limited_by_scope(
         ).status_code == 403
         disabled = await client.post(f"/api/v1/users/{target.id}/disable", headers=admin_headers)
         assert disabled.status_code == 403
-        scopes = await client.get(f"/api/v1/users/{target.id}/scopes", headers=admin_headers)
-        assert scopes.status_code == 403
+        grants = await client.get(f"/api/v1/users/{target.id}/grants", headers=admin_headers)
+        assert grants.status_code == 403
     assert (
         await client.post(f"/api/v1/users/{inside.id}/disable", headers=admin_headers)
     ).status_code == 200

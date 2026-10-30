@@ -17,8 +17,8 @@ from app.modules.identity.container import IdentityServices
 from app.modules.identity.models import (
     PasswordResetToken,
     User,
+    UserGrant,
     UserInvitation,
-    UserRole,
     UserStatus,
 )
 from app.modules.identity.security.tokens import hash_opaque_token, new_opaque_token
@@ -175,7 +175,8 @@ async def invite_user(
     assert user.id is not None  # noqa: S101
     for role in roles:
         assert role.id is not None  # noqa: S101
-        db.add(UserRole(user_id=user.id, role_id=role.id, assigned_by_user_id=actor_id))
+        # Without scope the grant sees nothing until an admin sets it (deny by default).
+        db.add(UserGrant(user_id=user.id, role_id=role.id, assigned_by_user_id=actor_id))
     invitation, message = await _issue_invitation(db, services, user, invited_by=actor_id)
     await db.commit()
     return user, invitation, message

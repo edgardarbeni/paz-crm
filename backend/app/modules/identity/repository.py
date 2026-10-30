@@ -19,8 +19,8 @@ from app.modules.identity.models import (
     RolePermission,
     TotpCredential,
     User,
+    UserGrant,
     UserInvitation,
-    UserRole,
     UserSession,
     UserStatus,
 )
@@ -45,10 +45,15 @@ async def user_by_id(
 
 
 async def roles_of(db: AsyncSession, user_id: uuid.UUID) -> list[Role]:
+    """Distinct roles across the user's grants."""
     result = await db.execute(
         select(Role)
-        .join(UserRole, col(UserRole.role_id) == col(Role.id))
-        .where(col(UserRole.user_id) == user_id, alive(Role))
+        .where(
+            alive(Role),
+            exists().where(
+                col(UserGrant.role_id) == col(Role.id), col(UserGrant.user_id) == user_id
+            ),
+        )
         .order_by(col(Role.name))
     )
     return list(result.scalars())
@@ -61,25 +66,31 @@ async def roles_by_user(
     if not user_ids:
         return grouped
     result = await db.execute(
-        select(col(UserRole.user_id), Role)
-        .join(Role, col(UserRole.role_id) == col(Role.id))
-        .where(col(UserRole.user_id).in_(user_ids), alive(Role))
-        .order_by(col(Role.name))
+        select(col(UserGrant.user_id), Role)
+        .join(Role, col(UserGrant.role_id) == col(Role.id))
+        .where(col(UserGrant.user_id).in_(user_ids), alive(Role))
+        .distinct()
+        .order_by(col(UserGrant.user_id), col(Role.name))
     )
     for user_id, role in result.all():
         grouped[user_id].append(role)
     return grouped
 
 
-async def permission_codes_of(db: AsyncSession, user_id: uuid.UUID) -> set[str]:
+async def permission_codes_by_role(
+    db: AsyncSession, role_ids: set[uuid.UUID]
+) -> dict[uuid.UUID, set[str]]:
+    grouped: dict[uuid.UUID, set[str]] = {role_id: set() for role_id in role_ids}
+    if not role_ids:
+        return grouped
     result = await db.execute(
-        select(col(Permission.code))
-        .join(RolePermission, col(RolePermission.permission_id) == col(Permission.id))
-        .join(UserRole, col(UserRole.role_id) == col(RolePermission.role_id))
-        .join(Role, col(Role.id) == col(UserRole.role_id))
-        .where(col(UserRole.user_id) == user_id, alive(Role), alive(Permission))
+        select(col(RolePermission.role_id), col(Permission.code))
+        .join(Permission, col(Permission.id) == col(RolePermission.permission_id))
+        .where(col(RolePermission.role_id).in_(role_ids), alive(Permission))
     )
-    return set(result.scalars())
+    for role_id, code in result.all():
+        grouped[role_id].add(code)
+    return grouped
 
 
 async def permission_codes_of_role(db: AsyncSession, role_id: uuid.UUID) -> set[str]:
@@ -144,10 +155,10 @@ async def role_permission_map(db: AsyncSession) -> dict[uuid.UUID, list[str]]:
 
 async def role_user_counts(db: AsyncSession) -> dict[uuid.UUID, int]:
     result = await db.execute(
-        select(col(UserRole.role_id), func.count())
-        .join(User, col(User.id) == col(UserRole.user_id))
+        select(col(UserGrant.role_id), func.count(func.distinct(col(UserGrant.user_id))))
+        .join(User, col(User.id) == col(UserGrant.user_id))
         .where(alive(User))
-        .group_by(col(UserRole.role_id))
+        .group_by(col(UserGrant.role_id))
     )
     return {role_id: int(count) for role_id, count in result.all()}
 
@@ -155,8 +166,8 @@ async def role_user_counts(db: AsyncSession) -> dict[uuid.UUID, int]:
 async def count_active_superadmins(db: AsyncSession, *, excluding: uuid.UUID | None = None) -> int:
     statement = (
         select(func.count(func.distinct(col(User.id))))
-        .join(UserRole, col(UserRole.user_id) == col(User.id))
-        .join(Role, col(Role.id) == col(UserRole.role_id))
+        .join(UserGrant, col(UserGrant.user_id) == col(User.id))
+        .join(Role, col(Role.id) == col(UserGrant.role_id))
         .where(
             col(Role.grants_all).is_(True),
             alive(Role),
@@ -271,4 +282,4 @@ def user_search_filter(term: str) -> ColumnElement[bool]:
 
 
 def user_has_role(role_id: uuid.UUID) -> Exists:
-    return exists().where(col(UserRole.user_id) == col(User.id), col(UserRole.role_id) == role_id)
+    return exists().where(col(UserGrant.user_id) == col(User.id), col(UserGrant.role_id) == role_id)

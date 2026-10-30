@@ -122,11 +122,11 @@ def referral_qr(url: str) -> str:
     return str(segno.make(url, error="m").svg_data_uri(scale=4, border=2))
 
 
-def _actor(user: CurrentUser) -> members.Actor:
+async def _actor(db: AsyncSession, user: CurrentUser) -> members.Actor:
     return members.Actor(
         user_id=user.id,
         geo=user.geo,
-        can_accept_curp_incoherence=user.has(Perm.PERSON_READ_SENSITIVE),
+        can_accept_curp_incoherence=await user.holds_within(db, Perm.PERSON_READ_SENSITIVE),
     )
 
 
@@ -268,7 +268,7 @@ async def _summaries(
 async def _member_out(
     db: AsyncSession, crypto: CryptoDep, user: CurrentUser, base: str, member_id: uuid.UUID
 ) -> PeaceMemberOut:
-    sensitive = user.has(Perm.PERSON_READ_SENSITIVE)
+    sensitive = await user.holds_within(db, Perm.PERSON_READ_SENSITIVE)
     member, view = await members.read_member(db, user.geo, member_id, unmasked=sensitive)
     counts = await members.direct_counts(db, user.geo, member)
     goal, pct, light = await members.progress(db, member, counts["active"])
@@ -339,7 +339,9 @@ async def search_members(
         person_id=person_id,
         q=q,
     )
-    items = await _summaries(db, crypto, page.items, user.has(Perm.PERSON_READ_SENSITIVE))
+    items = await _summaries(
+        db, crypto, page.items, await user.holds_within(db, Perm.PERSON_READ_SENSITIVE)
+    )
     return CursorPage[MemberSummary](
         items=items, next_cursor=page.next_cursor, has_more=page.has_more
     )
@@ -354,7 +356,7 @@ async def search_members(
 async def enroll_member(
     db: SessionDep, crypto: CryptoDep, base: PublicBase, user: Writer, body: EnrollmentIn
 ) -> PeaceMemberOut:
-    member = await members.enroll(db, crypto, _actor(user), body)
+    member = await members.enroll(db, crypto, await _actor(db, user), body)
     return await _member_out(db, crypto, user, base, member.id)  # type: ignore[arg-type]
 
 
@@ -378,7 +380,9 @@ async def list_children(
     params: Annotated[PageParams, Depends(page_params)],
 ) -> ChildrenPage:
     page, hidden = await members.children(db, user.geo, member_id, params)
-    items = await _summaries(db, crypto, page.items, user.has(Perm.PERSON_READ_SENSITIVE))
+    items = await _summaries(
+        db, crypto, page.items, await user.holds_within(db, Perm.PERSON_READ_SENSITIVE)
+    )
     return ChildrenPage(
         items=items, next_cursor=page.next_cursor, has_more=page.has_more, hidden=hidden
     )
@@ -405,7 +409,7 @@ async def get_history(db: SessionDep, user: Reader, member_id: MemberId) -> Memb
 async def validate_member(
     db: SessionDep, crypto: CryptoDep, base: PublicBase, user: Validator, member_id: MemberId
 ) -> PeaceMemberOut:
-    await members.validate(db, _actor(user), member_id)
+    await members.validate(db, await _actor(db, user), member_id)
     return await _member_out(db, crypto, user, base, member_id)
 
 
@@ -422,7 +426,7 @@ async def reject_member(
     member_id: MemberId,
     body: ReasonIn,
 ) -> PeaceMemberOut:
-    await members.reject(db, _actor(user), member_id, body.reason)
+    await members.reject(db, await _actor(db, user), member_id, body.reason)
     return await _member_out(db, crypto, user, base, member_id)
 
 
@@ -439,7 +443,7 @@ async def leave(
     member_id: MemberId,
     body: ReasonIn,
 ) -> PeaceMemberOut:
-    await members.leave(db, _actor(user), member_id, body.reason)
+    await members.leave(db, await _actor(db, user), member_id, body.reason)
     return await _member_out(db, crypto, user, base, member_id)
 
 
@@ -456,7 +460,7 @@ async def change_level(
     member_id: MemberId,
     body: LevelChangeIn,
 ) -> PeaceMemberOut:
-    await members.change_level(db, _actor(user), member_id, body.level_id, body.reason)
+    await members.change_level(db, await _actor(db, user), member_id, body.level_id, body.reason)
     return await _member_out(db, crypto, user, base, member_id)
 
 
@@ -473,7 +477,9 @@ async def reassign(
     member_id: MemberId,
     body: ReassignIn,
 ) -> PeaceMemberOut:
-    await members.reassign(db, _actor(user), member_id, body.recruiter_member_id, body.reason)
+    await members.reassign(
+        db, await _actor(db, user), member_id, body.recruiter_member_id, body.reason
+    )
     return await _member_out(db, crypto, user, base, member_id)
 
 
@@ -481,9 +487,9 @@ async def reassign(
 
 
 async def _branches_out(
-    db: AsyncSession, crypto: CryptoDep, user_id: uuid.UUID, sensitive: bool
+    db: AsyncSession, crypto: CryptoDep, grant_id: uuid.UUID, sensitive: bool
 ) -> list[BranchOut]:
-    branches = await scope.branches_of(db, user_id)
+    branches = await scope.branches_of(db, grant_id)
     nodes = [await db.get(Member, branch.member_id) for branch in branches]
     persons = await members.people_of(db, [n for n in nodes if n is not None])
     return [
@@ -498,27 +504,34 @@ async def _branches_out(
 
 
 @router.get(
-    "/users/{user_id}/branches",
-    operation_id="listUserBranches",
-    summary="Ramas asignadas a un usuario (alcance por rama)",
+    "/grants/{grant_id}/branches",
+    operation_id="listGrantBranches",
+    summary="Ramas de una concesión (alcance por rama)",
 )
 async def list_branches(
-    db: SessionDep, crypto: CryptoDep, user: UserReader, user_id: uuid.UUID
+    db: SessionDep, crypto: CryptoDep, user: UserReader, grant_id: uuid.UUID
 ) -> list[BranchOut]:
-    return await _branches_out(db, crypto, user_id, user.has(Perm.PERSON_READ_SENSITIVE))
+    await scope.grant_in_scope(db, user.geo, grant_id)
+    sensitive = await user.holds_within(db, Perm.PERSON_READ_SENSITIVE)
+    return await _branches_out(db, crypto, grant_id, sensitive)
 
 
 @router.put(
-    "/users/{user_id}/branches",
-    operation_id="setUserBranches",
-    summary="Reemplazar las ramas de un usuario",
+    "/grants/{grant_id}/branches",
+    operation_id="setGrantBranches",
+    summary="Reemplazar las ramas de una concesión",
+    description=(
+        "Una rama amplía una concesión: su rol también alcanza la red debajo del pacificador, "
+        "aunque cruce estados (D-83, D-101)."
+    ),
 )
 async def set_branches(
-    db: SessionDep, crypto: CryptoDep, user: ScopeAssigner, user_id: uuid.UUID, body: BranchesIn
+    db: SessionDep, crypto: CryptoDep, user: ScopeAssigner, grant_id: uuid.UUID, body: BranchesIn
 ) -> list[BranchOut]:
-    await scope.set_branches(db, user.geo, user_id, body.member_ids)
+    await scope.set_branches(db, user.geo, user.access, grant_id, body.member_ids)
     await db.commit()
-    return await _branches_out(db, crypto, user_id, user.has(Perm.PERSON_READ_SENSITIVE))
+    sensitive = await user.holds_within(db, Perm.PERSON_READ_SENSITIVE)
+    return await _branches_out(db, crypto, grant_id, sensitive)
 
 
 # --- Peace Houses -----------------------------------------------------------------------------
@@ -559,7 +572,7 @@ async def _house_summaries(db: AsyncSession, items: list[PeaceHouse]) -> list[Ho
 async def _house_out(
     db: AsyncSession, crypto: CryptoDep, user: CurrentUser, house_id: uuid.UUID
 ) -> HouseOut:
-    sensitive = user.has(Perm.PERSON_READ_SENSITIVE)
+    sensitive = await user.holds_within(db, Perm.PERSON_READ_SENSITIVE)
     house = await houses.read_house(db, user.geo, house_id, unmasked=sensitive)
     summary = (await _house_summaries(db, [house]))[0]
     roles: dict[str, MemberSummary | None] = {"host": None, "contact": None}
@@ -630,7 +643,7 @@ async def search_houses(
 async def open_house(
     db: SessionDep, crypto: CryptoDep, user: HouseWriter, body: HouseIn
 ) -> HouseOut:
-    house = await houses.open_house(db, crypto, _actor(user), body)
+    house = await houses.open_house(db, crypto, await _actor(db, user), body)
     return await _house_out(db, crypto, user, house.id)  # type: ignore[arg-type]
 
 
@@ -662,7 +675,7 @@ async def get_house(
 async def update_house(
     db: SessionDep, crypto: CryptoDep, user: HouseWriter, house_id: HouseId, body: HouseUpdate
 ) -> HouseOut:
-    await houses.update_house(db, _actor(user), house_id, body)
+    await houses.update_house(db, await _actor(db, user), house_id, body)
     return await _house_out(db, crypto, user, house_id)
 
 
@@ -672,7 +685,7 @@ async def update_house(
 async def close_house(
     db: SessionDep, crypto: CryptoDep, user: HouseWriter, house_id: HouseId, body: ReasonIn
 ) -> HouseOut:
-    await houses.close_house(db, _actor(user), house_id, body.reason)
+    await houses.close_house(db, await _actor(db, user), house_id, body.reason)
     return await _house_out(db, crypto, user, house_id)
 
 
@@ -684,7 +697,7 @@ async def close_house(
 async def reassign_credit(
     db: SessionDep, crypto: CryptoDep, user: CreditManager, house_id: HouseId, body: CreditIn
 ) -> HouseOut:
-    await houses.reassign_credit(db, _actor(user), house_id, body)
+    await houses.reassign_credit(db, await _actor(db, user), house_id, body)
     return await _house_out(db, crypto, user, house_id)
 
 
@@ -701,7 +714,7 @@ async def list_house_members(
         db,
         crypto,
         [n for n in nodes.values() if n is not None],
-        user.has(Perm.PERSON_READ_SENSITIVE),
+        await user.holds_within(db, Perm.PERSON_READ_SENSITIVE),
     )
     by_id = {s.id: s for s in summaries}
     return [
@@ -720,7 +733,7 @@ async def list_house_members(
 async def add_house_member(
     db: SessionDep, crypto: CryptoDep, user: HouseWriter, house_id: HouseId, body: HouseMemberIn
 ) -> list[HouseMemberOut]:
-    await houses.add_member(db, _actor(user), house_id, body.member_id)
+    await houses.add_member(db, await _actor(db, user), house_id, body.member_id)
     return await list_house_members(db, crypto, user, house_id)
 
 
@@ -733,7 +746,7 @@ async def add_house_member(
 async def remove_house_member(
     db: SessionDep, user: HouseWriter, house_id: HouseId, member_id: MemberId
 ) -> None:
-    await houses.remove_member(db, _actor(user), house_id, member_id)
+    await houses.remove_member(db, await _actor(db, user), house_id, member_id)
 
 
 @router.post(
@@ -745,7 +758,7 @@ async def record_location_consent(
     db: SessionDep, crypto: CryptoDep, user: HouseWriter, house_id: HouseId, body: LocationConsentIn
 ) -> HouseOut:
     await houses.record_location_consent(
-        db, _actor(user), house_id, channel=body.channel, evidence_uri=body.evidence_uri
+        db, await _actor(db, user), house_id, channel=body.channel, evidence_uri=body.evidence_uri
     )
     return await _house_out(db, crypto, user, house_id)
 
@@ -758,7 +771,7 @@ async def record_location_consent(
 async def revoke_location_consent(
     db: SessionDep, crypto: CryptoDep, user: HouseWriter, house_id: HouseId
 ) -> HouseOut:
-    await houses.revoke_location_consent(db, _actor(user), house_id)
+    await houses.revoke_location_consent(db, await _actor(db, user), house_id)
     return await _house_out(db, crypto, user, house_id)
 
 
@@ -810,7 +823,7 @@ async def list_meetings(
 async def add_meeting(
     db: SessionDep, crypto: CryptoDep, user: HouseWriter, house_id: HouseId, body: MeetingIn
 ) -> MeetingOut:
-    meeting = await houses.add_meeting(db, crypto, _actor(user), house_id, body)
+    meeting = await houses.add_meeting(db, crypto, await _actor(db, user), house_id, body)
     return await get_meeting(db, crypto, user, house_id, meeting.id)  # type: ignore[arg-type]
 
 
@@ -827,7 +840,9 @@ async def get_meeting(
     return MeetingOut(
         **_meeting_summary(meeting, attendance).model_dump(),
         notes=meeting.notes,
-        attendees=_attendees(attendance, crypto, user.has(Perm.PERSON_READ_SENSITIVE)),
+        attendees=_attendees(
+            attendance, crypto, await user.holds_within(db, Perm.PERSON_READ_SENSITIVE)
+        ),
     )
 
 
@@ -867,7 +882,7 @@ async def upload_photo(
     photo = await houses.add_photo(
         db,
         storage,
-        _actor(user),
+        await _actor(db, user),
         house_id,
         data=data,
         content_type=file.content_type or "",
@@ -885,7 +900,7 @@ async def upload_photo(
 async def delete_photo(
     db: SessionDep, storage: StorageDep, user: HouseWriter, house_id: HouseId, photo_id: uuid.UUID
 ) -> None:
-    await houses.delete_photo(db, storage, _actor(user), house_id, photo_id)
+    await houses.delete_photo(db, storage, await _actor(db, user), house_id, photo_id)
 
 
 # --- statistics -------------------------------------------------------------------------------
@@ -914,7 +929,7 @@ async def get_network(
     root, page, hidden = await stats.descendants(
         db, user.geo, member_id, params, max_depth=max_depth
     )
-    sensitive = user.has(Perm.PERSON_READ_SENSITIVE)
+    sensitive = await user.holds_within(db, Perm.PERSON_READ_SENSITIVE)
     counters = await stats.stats_of(db, [root, *page.items])
     summaries = await _summaries(db, crypto, [root, *page.items], sensitive)
 
@@ -996,7 +1011,7 @@ async def export_members(
         db,
         crypto,
         user.geo,
-        sensitive=user.has(Perm.PERSON_READ_SENSITIVE),
+        sensitive=await user.holds_within(db, Perm.PERSON_READ_SENSITIVE),
         status=status_,
         state_id=state_id,
         level_id=level_id,
@@ -1019,7 +1034,7 @@ Importer = Annotated[CurrentUser, permission(PeacePerm.MEMBER_IMPORT)]
     summary="Carga por lotes de la app de campo (idempotente; quedan pendientes de validar)",
 )
 async def submit_batch(db: SessionDep, crypto: CryptoDep, user: Writer, body: BatchIn) -> BatchOut:
-    items = await intake.submit_batch(db, crypto, _actor(user), body)
+    items = await intake.submit_batch(db, crypto, await _actor(db, user), body)
     return BatchOut(
         accepted=sum(1 for i in items if i.status == "accepted"),
         duplicates=sum(1 for i in items if i.status == "duplicate"),
@@ -1049,7 +1064,7 @@ async def queue_import(
     run = await intake.queue_import(
         db,
         storage,
-        _actor(user),
+        await _actor(db, user),
         filename=file.filename or "importacion.csv",
         data=data,
         dry_run=dry_run,
@@ -1063,7 +1078,7 @@ async def queue_import(
 async def list_imports(
     db: SessionDep, user: Importer, params: Annotated[PageParams, Depends(page_params)]
 ) -> CursorPage[MemberImportRunOut]:
-    page = await intake.list_runs(db, _actor(user), params)
+    page = await intake.list_runs(db, await _actor(db, user), params)
     return CursorPage[MemberImportRunOut](
         items=[MemberImportRunOut.model_validate(run) for run in page.items],
         next_cursor=page.next_cursor,
@@ -1073,7 +1088,9 @@ async def list_imports(
 
 @router.get("/imports/{run_id}", operation_id="getMemberImport", summary="Detalle de importación")
 async def get_import(db: SessionDep, user: Importer, run_id: uuid.UUID) -> MemberImportRunOut:
-    return MemberImportRunOut.model_validate(await intake.get_run(db, _actor(user), run_id))
+    return MemberImportRunOut.model_validate(
+        await intake.get_run(db, await _actor(db, user), run_id)
+    )
 
 
 @router.get(
@@ -1085,7 +1102,7 @@ async def list_import_errors(
     run_id: uuid.UUID,
     params: Annotated[PageParams, Depends(page_params)],
 ) -> CursorPage[MemberImportErrorOut]:
-    page = await intake.run_errors(db, _actor(user), run_id, params)
+    page = await intake.run_errors(db, await _actor(db, user), run_id, params)
     return CursorPage[MemberImportErrorOut](
         items=[MemberImportErrorOut.model_validate(error) for error in page.items],
         next_cursor=page.next_cursor,

@@ -3,11 +3,18 @@
 import uuid
 from datetime import datetime
 from enum import StrEnum
-from typing import Annotated, Literal
+from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, BeforeValidator, ConfigDict, EmailStr, Field, StringConstraints
 
-from app.modules.identity.models import SCOPE_COLUMNS, ScopeLevel, UserScope, UserStatus
+from app.modules.identity.models import (
+    SCOPE_COLUMNS,
+    GrantOrigin,
+    ScopeLevel,
+    UserGrant,
+    UserGrantScope,
+    UserStatus,
+)
 from app.modules.identity.security.tokens import TokenScope
 
 Password = Annotated[str, Field(min_length=1, max_length=256)]
@@ -75,21 +82,56 @@ class ScopeIn(Schema):
     node_id: uuid.UUID | None = Field(default=None, description="Vacío para `national`.")
 
 
-class ScopesRequest(Schema):
-    scopes: list[ScopeIn] = Field(max_length=50)
-
-
 class ScopeOut(Schema):
     id: uuid.UUID
     level: ScopeLevel
     node_id: uuid.UUID | None
 
     @classmethod
-    def from_model(cls, scope: UserScope) -> "ScopeOut":
+    def from_model(cls, scope: UserGrantScope) -> "ScopeOut":
         level = ScopeLevel(scope.scope_level)
         node = getattr(scope, SCOPE_COLUMNS[level]) if level in SCOPE_COLUMNS else None
         assert scope.id is not None  # noqa: S101
         return cls(id=scope.id, level=level, node_id=node)
+
+
+class GrantOut(Schema):
+    """A (role, scope) pair (D-101): the role's permissions apply only inside its scopes."""
+
+    id: uuid.UUID
+    role: RoleSummary
+    origin: GrantOrigin
+    source_id: uuid.UUID | None = Field(description="Nombramiento que la originó, si aplica.")
+    scopes: list[ScopeOut]
+    created_at: datetime
+
+    @classmethod
+    def from_parts(cls, grant: UserGrant, role: Any, scopes: list[UserGrantScope]) -> "GrantOut":
+        assert grant.id is not None  # noqa: S101
+        assert grant.created_at is not None  # noqa: S101
+        return cls(
+            id=grant.id,
+            role=RoleSummary.model_validate(role),
+            origin=GrantOrigin(grant.origin),
+            source_id=grant.source_id,
+            scopes=[ScopeOut.from_model(scope) for scope in scopes],
+            created_at=grant.created_at,
+        )
+
+
+class GrantIn(Schema):
+    id: uuid.UUID | None = Field(
+        default=None,
+        description="Concesión manual existente que se conserva; vacío para una nueva.",
+    )
+    role_id: uuid.UUID
+    scopes: list[ScopeIn] = Field(
+        default_factory=list, max_length=50, description="Sin alcance no ve nada."
+    )
+
+
+class GrantsRequest(Schema):
+    grants: list[GrantIn] = Field(max_length=20)
 
 
 class MfaStatus(Schema):
@@ -108,8 +150,10 @@ class MeResponse(Schema):
     mfa: MfaStatus
     session_id: uuid.UUID
     scope: TokenScope
-    geo_unrestricted: bool = Field(description="Ve todo el país (superadmin o alcance nacional).")
-    geo_scopes: list[ScopeOut]
+    geo_unrestricted: bool = Field(
+        description="Alguna concesión ve todo el país (superadmin o alcance nacional)."
+    )
+    grants: list[GrantOut]
 
 
 class PasswordChangeRequest(Schema):
@@ -204,10 +248,6 @@ class UserInviteRequest(Schema):
 
 class UserUpdateRequest(Schema):
     full_name: FullName
-
-
-class UserRolesRequest(Schema):
-    role_ids: list[uuid.UUID] = Field(max_length=20)
 
 
 class UserOut(Schema):

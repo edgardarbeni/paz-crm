@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 from app.core.db.session import build_sessionmaker
 from app.modules.people.service import purge_due
 from tests.integration.candidacies.conftest import Geo, make_curp, new_person
+from tests.integration.conftest import set_scopes
 from tests.integration.geography.conftest import rows, scalar
 
 CURP = make_curp("AAXJ900101MASSXN0")
@@ -93,17 +94,15 @@ async def test_scope_removal_is_audited(
     client: AsyncClient, root: dict[str, str], scoped: Any, geo: Geo, owner_engine: AsyncEngine
 ) -> None:
     user, _ = await scoped(("viewer",), [{"level": "state", "node_id": geo.state}])
-    replaced = await client.put(
-        f"/api/v1/users/{user.id}/scopes",
-        headers=root,
-        json={"scopes": [{"level": "municipality", "node_id": geo.municipalities[1]}]},
+    replaced = await set_scopes(
+        client, root, user.id, [{"level": "municipality", "node_id": geo.municipalities[1]}]
     )
-    assert replaced.status_code == 200, replaced.text
+    [grant] = replaced.json()
     removed = await rows(
         owner_engine,
-        "SELECT before FROM audit.audit_log WHERE entity_table = 'identity.user_scopes' "
-        "AND action = 'delete' AND before->>'user_id' = :u",
-        u=str(user.id),
+        "SELECT before FROM audit.audit_log WHERE entity_table = 'identity.user_grant_scopes' "
+        "AND action = 'delete' AND before->>'grant_id' = :g",
+        g=grant["id"],
     )
     assert [r["before"]["scope_level"] for r in removed] == ["state"]
 

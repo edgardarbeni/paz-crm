@@ -1,4 +1,4 @@
-"""Member scope (D-83): geographic OR branch, anti-escalation of branches, totals outside the
+"""Member scope (D-83, D-101): geographic OR branch (per grant), anti-escalation of branches, totals outside the
 scope and the permissions of each role. The synthetic BGD has one state, so municipality 1
 plays "my state" and municipality 2 "another state"."""
 
@@ -7,6 +7,7 @@ from typing import Any
 from httpx import AsyncClient
 
 from tests.integration.candidacies.conftest import Geo
+from tests.integration.conftest import grant_of
 from tests.integration.peace_movement.conftest import API, enroll, person
 
 
@@ -60,8 +61,9 @@ async def test_branch_scope_crosses_the_geography(  # noqa: PLR0917
     branch_user, branch = await scoped(
         ("capturist",), [{"level": "municipality", "node_id": geo.municipalities[1]}]
     )
+    branches = f"{API}/grants/{await grant_of(client, root, branch_user.id)}/branches"
     granted = await client.put(
-        f"{API}/users/{branch_user.id}/branches",
+        branches,
         headers=root,
         json={"member_ids": [net["far"]["id"]]},
     )
@@ -96,13 +98,9 @@ async def test_branch_scope_crosses_the_geography(  # noqa: PLR0917
     )
     assert response.status_code == 403  # the address is outside the geographic scope
 
-    listed_branches = (
-        await client.get(f"{API}/users/{branch_user.id}/branches", headers=root)
-    ).json()
+    listed_branches = (await client.get(branches, headers=root)).json()
     assert [b["member_id"] for b in listed_branches] == [net["far"]["id"]]
-    removed = await client.put(
-        f"{API}/users/{branch_user.id}/branches", headers=root, json={"member_ids": []}
-    )
+    removed = await client.put(branches, headers=root, json={"member_ids": []})
     assert removed.json() == []
     assert (
         await client.get(f"{API}/members/{net['far_child']['id']}", headers=branch)
@@ -124,34 +122,36 @@ async def test_branch_anti_escalation(  # noqa: PLR0917
     target, _ = await scoped(
         ("capturist",), [{"level": "municipality", "node_id": geo.municipalities[1]}]
     )
+    target_branches = f"{API}/grants/{await grant_of(client, root, target.id)}/branches"
+    admin_branches = f"{API}/grants/{await grant_of(client, root, admin_user.id)}/branches"
     # The admin sees `top` through its address, but its subtree reaches municipality 2: seeing
     # the node is not enough to hand out its branch.
     denied = await client.put(
-        f"{API}/users/{target.id}/branches",
+        target_branches,
         headers=admin,
         json={"member_ids": [net["top"]["id"]]},
     )
     assert denied.status_code == 403
     # With `top`'s branch, the admin may hand out branches inside it.
     await client.put(
-        f"{API}/users/{admin_user.id}/branches",
+        admin_branches,
         headers=root,
         json={"member_ids": [net["top"]["id"]]},
     )
     allowed = await client.put(
-        f"{API}/users/{target.id}/branches",
+        target_branches,
         headers=admin,
         json={"member_ids": [net["far"]["id"]]},
     )
     assert allowed.status_code == 200, allowed.text
     outside = await client.put(
-        f"{API}/users/{target.id}/branches",
+        target_branches,
         headers=admin,
         json={"member_ids": [net["stranger"]["id"]]},
     )
     assert outside.status_code == 403
     repeated = await client.put(
-        f"{API}/users/{target.id}/branches",
+        target_branches,
         headers=admin,
         json={"member_ids": [net["far"]["id"], net["far"]["id"]]},
     )
@@ -194,7 +194,7 @@ async def test_permissions_by_role(  # noqa: PLR0917
     ).status_code == 403
     assert (
         await client.put(
-            f"{API}/users/{net['top']['id']}/branches", headers=capturist, json={"member_ids": []}
+            f"{API}/grants/{net['top']['id']}/branches", headers=capturist, json={"member_ids": []}
         )
     ).status_code == 403
     # Contacts are masked without people.person.read_sensitive (D-66).

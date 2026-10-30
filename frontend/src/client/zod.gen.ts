@@ -405,6 +405,11 @@ export const zGeographicLevel = z.enum([
 ]);
 
 /**
+ * GrantOrigin
+ */
+export const zGrantOrigin = z.enum(['manual', 'appointment']);
+
+/**
  * GrowthPoint
  */
 export const zGrowthPoint = z.object({
@@ -1789,6 +1794,22 @@ export const zScopeIn = z.object({
 });
 
 /**
+ * GrantIn
+ */
+export const zGrantIn = z.object({
+    id: z.uuid().nullish(),
+    role_id: z.uuid(),
+    scopes: z.array(zScopeIn).max(50).optional()
+});
+
+/**
+ * GrantsRequest
+ */
+export const zGrantsRequest = z.object({
+    grants: z.array(zGrantIn).max(20)
+});
+
+/**
  * ScopeOut
  */
 export const zScopeOut = z.object({
@@ -1798,10 +1819,17 @@ export const zScopeOut = z.object({
 });
 
 /**
- * ScopesRequest
+ * GrantOut
+ *
+ * A (role, scope) pair (D-101): the role's permissions apply only inside its scopes.
  */
-export const zScopesRequest = z.object({
-    scopes: z.array(zScopeIn).max(50)
+export const zGrantOut = z.object({
+    id: z.uuid(),
+    role: zRoleSummary,
+    origin: zGrantOrigin,
+    source_id: z.uuid().nullable(),
+    scopes: z.array(zScopeOut),
+    created_at: z.iso.datetime()
 });
 
 /**
@@ -1961,13 +1989,6 @@ export const zUserInviteRequest = z.object({
 });
 
 /**
- * UserRolesRequest
- */
-export const zUserRolesRequest = z.object({
-    role_ids: z.array(z.uuid()).max(20)
-});
-
-/**
  * UserStatus
  */
 export const zUserStatus = z.enum([
@@ -1991,7 +2012,7 @@ export const zMeResponse = z.object({
     session_id: z.uuid(),
     scope: zTokenScope,
     geo_unrestricted: z.boolean(),
-    geo_scopes: z.array(zScopeOut)
+    grants: z.array(zGrantOut)
 });
 
 /**
@@ -2325,17 +2346,6 @@ export const zUnlockUserPath = z.object({
  */
 export const zUnlockUserResponse = zUserOut;
 
-export const zSetUserRolesBody = zUserRolesRequest;
-
-export const zSetUserRolesPath = z.object({
-    user_id: z.uuid()
-});
-
-/**
- * Successful Response
- */
-export const zSetUserRolesResponse = zUserOut;
-
 export const zResendInvitationPath = z.object({
     user_id: z.uuid()
 });
@@ -2374,29 +2384,29 @@ export const zRevokeUserSessionsPath = z.object({
  */
 export const zRevokeUserSessionsResponse = zRevokedCount;
 
-export const zGetUserScopesPath = z.object({
+export const zListUserGrantsPath = z.object({
     user_id: z.uuid()
 });
 
 /**
- * Response Getuserscopes
+ * Response Listusergrants
  *
  * Successful Response
  */
-export const zGetUserScopesResponse = z.array(zScopeOut);
+export const zListUserGrantsResponse = z.array(zGrantOut);
 
-export const zSetUserScopesBody = zScopesRequest;
+export const zSetUserGrantsBody = zGrantsRequest;
 
-export const zSetUserScopesPath = z.object({
+export const zSetUserGrantsPath = z.object({
     user_id: z.uuid()
 });
 
 /**
- * Response Setuserscopes
+ * Response Setusergrants
  *
  * Successful Response
  */
-export const zSetUserScopesResponse = z.array(zScopeOut);
+export const zSetUserGrantsResponse = z.array(zGrantOut);
 
 /**
  * Response Listroles
@@ -3271,29 +3281,29 @@ export const zReassignMemberPath = z.object({
  */
 export const zReassignMemberResponse = zPeaceMemberOut;
 
-export const zListUserBranchesPath = z.object({
-    user_id: z.uuid()
+export const zListGrantBranchesPath = z.object({
+    grant_id: z.uuid()
 });
 
 /**
- * Response Listuserbranches
+ * Response Listgrantbranches
  *
  * Successful Response
  */
-export const zListUserBranchesResponse = z.array(zBranchOut);
+export const zListGrantBranchesResponse = z.array(zBranchOut);
 
-export const zSetUserBranchesBody = zBranchesIn;
+export const zSetGrantBranchesBody = zBranchesIn;
 
-export const zSetUserBranchesPath = z.object({
-    user_id: z.uuid()
+export const zSetGrantBranchesPath = z.object({
+    grant_id: z.uuid()
 });
 
 /**
- * Response Setuserbranches
+ * Response Setgrantbranches
  *
  * Successful Response
  */
-export const zSetUserBranchesResponse = z.array(zBranchOut);
+export const zSetGrantBranchesResponse = z.array(zBranchOut);
 
 export const zSearchPeaceHousesQuery = z.object({
     status: z.string().regex(/^(open|consolidated|closed)$/).nullish(),

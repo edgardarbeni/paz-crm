@@ -131,11 +131,8 @@ async def by_geography(
     where = ["true"]
     params: dict[str, Any] = {}
     if not geo.unrestricted:
-        where.append(
-            "EXISTS (SELECT 1 FROM identity.user_scope_sections u "
-            "WHERE u.user_id = :user AND u.section_id = c.section_id)"
-        )
-        params["user"] = geo.user_id
+        where.append(geo.section_sql("c.section_id"))
+        params.update(geo.sql_params)
     if state_id:
         where.append("s.state_id = :state")
         params["state"] = state_id
@@ -179,11 +176,8 @@ async def growth(
     where = ["d.day BETWEEN :from AND :to"]
     params: dict[str, Any] = {"from": date_from, "to": date_to}
     if not geo.unrestricted:
-        where.append(
-            "EXISTS (SELECT 1 FROM identity.user_scope_sections u "
-            "WHERE u.user_id = :user AND u.section_id = d.section_id)"
-        )
-        params["user"] = geo.user_id
+        where.append(geo.section_sql("d.section_id"))
+        params.update(geo.sql_params)
     if state_id:
         where.append("s.state_id = :state")
         params["state"] = state_id

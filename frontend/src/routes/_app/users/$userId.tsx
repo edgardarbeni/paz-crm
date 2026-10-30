@@ -1,25 +1,22 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import {
   activateUserMutation,
   disableUserMutation,
   getUserOptions,
   getUserQueryKey,
-  listRolesOptions,
   listUserSessionsOptions,
   listUserSessionsQueryKey,
   resendInvitationMutation,
   resetUserMfaMutation,
   revokeUserSessionsMutation,
-  setUserRolesMutation,
   unlockUserMutation,
   updateUserMutation,
 } from "@/client/@tanstack/react-query.gen";
 import type { UserOut } from "@/client/types.gen";
 import { ConfirmDialog } from "@/components/confirm-dialog";
-import { LabeledToggle } from "@/components/labeled-toggle";
 import { PageHeader } from "@/components/page-header";
 import { ProblemAlert } from "@/components/problem-alert";
 import { Badge } from "@/components/ui/badge";
@@ -27,9 +24,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ScopesEditor } from "@/features/identity/scopes-editor";
+import { GrantsEditor } from "@/features/identity/grants-editor";
 import { SessionsTable } from "@/features/identity/sessions-table";
-import { BranchesEditor } from "@/features/peace-movement/branches-editor";
 import { Perm } from "@/lib/auth/permissions";
 import { useCan } from "@/lib/auth/use-me";
 import { formatDateTime, USER_STATUS } from "@/lib/labels";
@@ -126,29 +122,24 @@ function UserPage() {
       <div className="space-y-6">
         <ProblemAlert error={error} />
         {can(Perm.USER_UPDATE) ? <NameCard user={u} /> : null}
-        <RolesCard user={u} editable={can(Perm.USER_ASSIGN_ROLES)} />
         <Card>
           <CardHeader>
             <CardTitle>
-              <h2>Alcance geográfico</h2>
+              <h2>Concesiones (rol y alcance)</h2>
             </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Los permisos de cada rol solo valen dentro de su alcance; un cargo no presta sus
+              permisos al territorio de otro.
+            </p>
           </CardHeader>
           <CardContent>
-            <ScopesEditor userId={userId} editable={can(Perm.USER_ASSIGN_SCOPES)} />
+            <GrantsEditor
+              userId={userId}
+              editable={can(Perm.USER_ASSIGN_ROLES) && can(Perm.USER_ASSIGN_SCOPES)}
+              showBranches={can(Perm.PEACE_MEMBER_READ)}
+            />
           </CardContent>
         </Card>
-        {can(Perm.PEACE_MEMBER_READ) ? (
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                <h2>Ramas del Movimiento de Paz</h2>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <BranchesEditor userId={userId} editable={can(Perm.USER_ASSIGN_SCOPES)} />
-            </CardContent>
-          </Card>
-        ) : null}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>
@@ -225,69 +216,6 @@ function NameCard({ user }: { user: UserOut }) {
           </Button>
         </form>
         <ProblemAlert error={update.error} />
-      </CardContent>
-    </Card>
-  );
-}
-
-function RolesCard({ user, editable }: { user: UserOut; editable: boolean }) {
-  const queryClient = useQueryClient();
-  const roles = useQuery(listRolesOptions());
-  const [selected, setSelected] = useState<string[]>(user.roles.map((r) => r.id));
-  useEffect(() => setSelected(user.roles.map((r) => r.id)), [user.roles]);
-  const save = useMutation({
-    ...setUserRolesMutation(),
-    onSuccess: (data) => {
-      queryClient.setQueryData(getUserQueryKey({ path: { user_id: user.id } }), data);
-      toast.success("Roles actualizados.");
-    },
-  });
-  const changed =
-    [...selected].sort().join() !==
-    user.roles
-      .map((r) => r.id)
-      .sort()
-      .join();
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>
-          <h2>Roles</h2>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        <ProblemAlert error={save.error} />
-        <div className="grid gap-2 sm:grid-cols-2">
-          {(roles.data ?? []).map((role) => (
-            <LabeledToggle
-              key={role.id}
-              disabled={!editable}
-              checked={selected.includes(role.id)}
-              onCheckedChange={(c) =>
-                setSelected(c ? [...selected, role.id] : selected.filter((id) => id !== role.id))
-              }
-            >
-              <span>
-                {role.name}
-                {role.description ? (
-                  <span className="block text-xs text-muted-foreground">{role.description}</span>
-                ) : null}
-              </span>
-            </LabeledToggle>
-          ))}
-        </div>
-        {editable ? (
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={!changed || save.isPending}
-            onClick={() =>
-              save.mutate({ path: { user_id: user.id }, body: { role_ids: selected } })
-            }
-          >
-            Guardar roles
-          </Button>
-        ) : null}
       </CardContent>
     </Card>
   );
