@@ -1,0 +1,23 @@
+meta {
+  name: Terminar un nombramiento
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{baseUrl}}/api/v1/party-structure/appointments/{{appointmentId}}/end
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "ended_on": "2026-12-31",
+    "reason": "resignation",
+    "notes": "Renuncia presentada al Comité Directivo Estatal"
+  }
+}

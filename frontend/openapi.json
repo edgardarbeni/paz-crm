@@ -11184,6 +11184,473 @@
           }
         }
       }
+    },
+    "/api/v1/party-structure/bodies/{body_id}/positions": {
+      "get": {
+        "tags": [
+          "party-structure"
+        ],
+        "summary": "Asientos de un órgano con su titular vigente",
+        "operationId": "listBodyPositions",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "body_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Body Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SeatOut"
+                  },
+                  "title": "Response Listbodypositions"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/party-structure/positions/{position_id}/appointments": {
+      "get": {
+        "tags": [
+          "party-structure"
+        ],
+        "summary": "Historial de nombramientos de un asiento",
+        "operationId": "listPositionAppointments",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "position_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Position Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AppointmentOut"
+                  },
+                  "title": "Response Listpositionappointments"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "party-structure"
+        ],
+        "summary": "Nombrar al titular de un asiento",
+        "description": "El asiento debe estar vacante y no ser derivado. El titular es una persona con CURP. Se rechazan los cargos incompatibles y los periodos consecutivos de más (409). Solo se nombra en cargos de nivel inferior al propio y dentro del alcance (D-105, D-108).",
+        "operationId": "appoint",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "position_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Position Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppointmentIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppointmentOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/party-structure/appointments/{appointment_id}": {
+      "patch": {
+        "tags": [
+          "party-structure"
+        ],
+        "summary": "Corregir periodo o acuerdo de un nombramiento",
+        "operationId": "updateAppointment",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "appointment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Appointment Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppointmentUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppointmentOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/party-structure/appointments/{appointment_id}/end": {
+      "post": {
+        "tags": [
+          "party-structure"
+        ],
+        "summary": "Terminar un nombramiento (el asiento queda vacante)",
+        "operationId": "endAppointment",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "appointment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Appointment Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppointmentEndIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppointmentOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/party-structure/positions/{position_id}/derived-choice": {
+      "post": {
+        "tags": [
+          "party-structure"
+        ],
+        "summary": "Elegir de qué cargo toma su titular un asiento derivado en este periodo",
+        "operationId": "chooseDerivedSource",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "position_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Position Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DerivedChoiceIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PositionTypeRef"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/party-structure/people/{person_id}/appointments": {
+      "get": {
+        "tags": [
+          "party-structure"
+        ],
+        "summary": "Cargos de una persona (en órganos visibles)",
+        "operationId": "listPersonAppointments",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "person_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Person Id"
+            }
+          },
+          {
+            "name": "current_only",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true,
+              "title": "Current Only"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PersonAppointmentOut"
+                  },
+                  "title": "Response Listpersonappointments"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -11616,6 +12083,277 @@
           "electoral_region"
         ],
         "title": "Ancestors"
+      },
+      "AppointmentEndIn": {
+        "properties": {
+          "ended_on": {
+            "type": "string",
+            "format": "date",
+            "title": "Ended On"
+          },
+          "reason": {
+            "$ref": "#/components/schemas/EndReason"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "ended_on",
+          "reason"
+        ],
+        "title": "AppointmentEndIn"
+      },
+      "AppointmentIn": {
+        "properties": {
+          "person_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Person Id",
+            "description": "Persona registrada con CURP."
+          },
+          "kind": {
+            "$ref": "#/components/schemas/AppointmentKind"
+          },
+          "starts_on": {
+            "type": "string",
+            "format": "date",
+            "title": "Starts On"
+          },
+          "ends_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ends On",
+            "description": "Vacío: se propone con el periodo del cargo."
+          },
+          "appointed_by": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Appointed By"
+          },
+          "agreement_ref": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agreement Ref"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "person_id",
+          "kind",
+          "starts_on"
+        ],
+        "title": "AppointmentIn"
+      },
+      "AppointmentKind": {
+        "type": "string",
+        "enum": [
+          "elected",
+          "designated",
+          "acting",
+          "delegate"
+        ],
+        "title": "AppointmentKind"
+      },
+      "AppointmentOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "position_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Position Id"
+          },
+          "person": {
+            "$ref": "#/components/schemas/PersonSummary"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/AppointmentKind"
+          },
+          "appointed_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Appointed By"
+          },
+          "agreement_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agreement Ref"
+          },
+          "starts_on": {
+            "type": "string",
+            "format": "date",
+            "title": "Starts On"
+          },
+          "ends_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ends On"
+          },
+          "ended_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ended On"
+          },
+          "end_reason": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EndReason"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "end_notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Notes"
+          },
+          "role": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RoleSummary"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "current": {
+            "type": "boolean",
+            "title": "Current"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "position_id",
+          "person",
+          "kind",
+          "appointed_by",
+          "agreement_ref",
+          "starts_on",
+          "ends_on",
+          "ended_on",
+          "end_reason",
+          "end_notes",
+          "role",
+          "current"
+        ],
+        "title": "AppointmentOut"
+      },
+      "AppointmentUpdate": {
+        "properties": {
+          "ends_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ends On"
+          },
+          "appointed_by": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Appointed By"
+          },
+          "agreement_ref": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agreement Ref"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "AppointmentUpdate"
       },
       "AttendeeOut": {
         "properties": {
@@ -13552,6 +14290,39 @@
         ],
         "title": "DeletionOut"
       },
+      "DerivedChoiceIn": {
+        "properties": {
+          "source_position_type_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Source Position Type Id"
+          },
+          "starts_on": {
+            "type": "string",
+            "format": "date",
+            "title": "Starts On"
+          },
+          "agreement_ref": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agreement Ref"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "source_position_type_id",
+          "starts_on"
+        ],
+        "title": "DerivedChoiceIn"
+      },
       "DirectCounts": {
         "properties": {
           "active": {
@@ -13605,6 +14376,17 @@
           "normative_system"
         ],
         "title": "ElectionRegime"
+      },
+      "EndReason": {
+        "type": "string",
+        "enum": [
+          "term_end",
+          "resignation",
+          "removal",
+          "death",
+          "other"
+        ],
+        "title": "EndReason"
       },
       "EnrollmentIn": {
         "properties": {
@@ -18107,6 +18889,149 @@
         ],
         "title": "PermissionOut"
       },
+      "PersonAppointmentOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "position_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Position Id"
+          },
+          "person": {
+            "$ref": "#/components/schemas/PersonSummary"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/AppointmentKind"
+          },
+          "appointed_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Appointed By"
+          },
+          "agreement_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agreement Ref"
+          },
+          "starts_on": {
+            "type": "string",
+            "format": "date",
+            "title": "Starts On"
+          },
+          "ends_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ends On"
+          },
+          "ended_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ended On"
+          },
+          "end_reason": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EndReason"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "end_notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Notes"
+          },
+          "role": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RoleSummary"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "current": {
+            "type": "boolean",
+            "title": "Current"
+          },
+          "position_type": {
+            "$ref": "#/components/schemas/PositionTypeRef"
+          },
+          "body": {
+            "$ref": "#/components/schemas/BodyTypeRef"
+          },
+          "body_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Body Id"
+          },
+          "territory": {
+            "type": "string",
+            "title": "Territory"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "position_id",
+          "person",
+          "kind",
+          "appointed_by",
+          "agreement_ref",
+          "starts_on",
+          "ends_on",
+          "ended_on",
+          "end_reason",
+          "end_notes",
+          "role",
+          "current",
+          "position_type",
+          "body",
+          "body_id",
+          "territory"
+        ],
+        "title": "PersonAppointmentOut"
+      },
       "PersonCreate": {
         "properties": {
           "given_names": {
@@ -20239,6 +21164,102 @@
           "national"
         ],
         "title": "ScopeRule"
+      },
+      "SeatOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "body_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Body Id"
+          },
+          "position_type": {
+            "$ref": "#/components/schemas/PositionTypeRef"
+          },
+          "region_number": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Region Number",
+            "description": "Circunscripción, en las Secretarías de Circunscripción."
+          },
+          "is_derived": {
+            "type": "boolean",
+            "title": "Is Derived"
+          },
+          "vacant_since": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vacant Since"
+          },
+          "current": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AppointmentOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "derived_from": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PositionTypeRef"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "En un cargo derivado, de qué cargo toma hoy a su titular."
+          },
+          "derived_holder": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PersonSummary"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "choice_pending": {
+            "type": "boolean",
+            "title": "Choice Pending",
+            "description": "Cargo derivado con varias opciones sin elegir para el periodo vigente."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "body_id",
+          "position_type",
+          "region_number",
+          "is_derived",
+          "vacant_since",
+          "current",
+          "derived_from",
+          "derived_holder",
+          "choice_pending"
+        ],
+        "title": "SeatOut"
       },
       "SessionOut": {
         "properties": {

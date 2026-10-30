@@ -1,0 +1,20 @@
+meta {
+  name: Asientos de un órgano
+  type: http
+  seq: 9
+}
+
+get {
+  url: {{baseUrl}}/api/v1/party-structure/bodies/{{bodyId}}/positions
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+docs {
+  Cada asiento con su titular vigente; en el Presídium, el titular derivado y de qué cargo sale
+  (choice_pending si falta elegir la Vicepresidencia nacional del periodo).
+}

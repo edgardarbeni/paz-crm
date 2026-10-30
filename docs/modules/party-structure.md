@@ -1,7 +1,8 @@
 # Módulo: Estructura del partido
 
-**Estado:** en implementación. Fases 0 (concesiones en `identity`, [D-106](../adr/D-106-ajustes-implementacion-concesiones.md)) y 1 (catálogo y
-órganos, [D-107](../adr/D-107-catalogo-y-organos.md)) listas.
+**Estado:** en implementación. Fases 0 (concesiones en `identity`, [D-106](../adr/D-106-ajustes-implementacion-concesiones.md)) 1 (catálogo y
+órganos, [D-107](../adr/D-107-catalogo-y-organos.md)) y 2 (asientos y nombramientos,
+[D-108](../adr/D-108-asientos-nombramientos.md)) listas.
 **Paquete propuesto:** `backend/app/modules/party_structure` · esquema `party_structure` · API
 `/api/v1/party-structure`.
 **Brief:** respuestas de Darío del 2026-10-30 y catálogo estatutario [`cargos_paz.md`](../reference/cargos_paz.md). Lo marcado
@@ -279,7 +280,7 @@ permiso de lectura.
 |---|---|---|
 | 0 | Concesiones en `identity` (D-101, D-106) | Lista |
 | 1 | Catálogo estatutario sembrado de `cargos_paz.md`, órganos, instalación y disolución (D-107) | Lista |
-| 2 | Asientos, nombramientos, periodos consecutivos, Presídium, incompatibilidades y administración delegada | |
+| 2 | Asientos, nombramientos, periodos consecutivos, Presídium, incompatibilidades y administración delegada (D-108) | Lista |
 | 3 | Acceso por nombramiento: vínculo persona ↔ cuenta, invitación, `mfa_required`, revocación (D-104) | |
 | 4 | Coordinaciones territoriales: exclusividad y recálculo de alcance | |
 | 5 | Cambio de marco y bandeja de territorio por resolver (D-102, D-105) | |
@@ -301,6 +302,8 @@ y una ADR difieren, manda la ADR.**
   (vínculo con la persona en el módulo, TOTP pegajoso, sesiones y antiescalamiento).
 - [D-107](../adr/D-107-catalogo-y-organos.md): cómo quedó el catálogo (agrupación en órganos,
   supuestos marcados) y los órganos (los estatales guardan la clave INE del estado).
+- [D-108](../adr/D-108-asientos-nombramientos.md): asientos, nombramientos y administración
+  delegada (el nivel de una concesión manual es el de su alcance).
 - [D-105](../adr/D-105-reglas-estructura-confirmadas.md): respuestas a las preguntas abiertas.
   - Sin incompatibilidades iniciales.
   - El orden de niveles para administrar.

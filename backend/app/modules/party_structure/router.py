@@ -1,28 +1,39 @@
-"""/party-structure — statutory catalog and installed bodies (phase 1, D-105 and D-107)."""
+"""/party-structure — statutory catalog, bodies, seats and appointments (D-105, D-107, D-108)."""
 
 import uuid
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, Query, status
 from pydantic import BaseModel
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlmodel import SQLModel
+from sqlmodel import SQLModel, col
 
 from app.core.db.base import pk
 from app.core.db.session import SessionDep
 from app.core.pagination import CursorPage, PageParams, page_params
 from app.modules.identity.dependencies import CurrentUser, permission
+from app.modules.identity.permissions import Perm
 from app.modules.identity.schemas import RoleSummary
-from app.modules.party_structure import service
+from app.modules.identity.services.scopes import GeoScope
+from app.modules.party_structure import appointments, service
+from app.modules.party_structure.appointments import Seat
 from app.modules.party_structure.models import (
+    Appointment,
+    AppointmentKind,
     Body,
     BodyType,
     CoordinationPositionType,
+    EndReason,
     PositionType,
     TerritorialLevel,
 )
 from app.modules.party_structure.permissions import StructurePerm
 from app.modules.party_structure.schemas import (
+    AppointmentEndIn,
+    AppointmentIn,
+    AppointmentOut,
+    AppointmentUpdate,
     BodyDissolveIn,
     BodyInstallIn,
     BodyOut,
@@ -32,13 +43,18 @@ from app.modules.party_structure.schemas import (
     BodyTypeUpdate,
     CoordinationPositionTypeIn,
     CoordinationPositionTypeOut,
+    DerivedChoiceIn,
     IncompatibilityIn,
     IncompatibilityOut,
+    PersonAppointmentOut,
     PositionTypeIn,
     PositionTypeOut,
     PositionTypeRef,
     PositionTypeUpdate,
+    SeatOut,
 )
+from app.modules.people.models import Person
+from app.modules.people.views import CryptoDep, person_summary
 
 router = APIRouter(prefix="/party-structure", tags=["party-structure"])
 
@@ -316,3 +332,240 @@ async def dissolve_body(
 ) -> BodyOut:
     [out] = await _bodies_out(db, [await service.dissolve_body(db, user.geo, body_id, body)])
     return out
+
+
+# --- seats and appointments (phase 2) ---------------------------------------------------------
+
+AppointmentReader = Annotated[CurrentUser, permission(StructurePerm.APPOINTMENT_READ)]
+AppointmentWriter = Annotated[CurrentUser, permission(StructurePerm.APPOINTMENT_WRITE)]
+
+
+async def _persons(db: AsyncSession, ids: set[uuid.UUID]) -> dict[uuid.UUID, Person]:
+    if not ids:
+        return {}
+    rows = await db.execute(select(Person).where(col(Person.id).in_(ids)))
+    return {pk(p): p for p in rows.scalars()}
+
+
+async def _appointments_out(
+    db: AsyncSession, crypto: CryptoDep, user: CurrentUser, rows: list[Appointment]
+) -> list[AppointmentOut]:
+    persons = await _persons(db, {r.person_id for r in rows})
+    roles = await service.roles_by_id(db, {r.role_id for r in rows if r.role_id})
+    sensitive = await user.holds_within(db, Perm.PERSON_READ_SENSITIVE)
+    return [
+        AppointmentOut.model_validate(
+            {
+                **_fields(r, AppointmentOut),
+                "person": person_summary(crypto, persons[r.person_id], sensitive),
+                "role": RoleSummary.model_validate(roles[r.role_id])
+                if r.role_id in roles
+                else None,
+                "current": r.ended_on is None,
+            }
+        )
+        for r in rows
+    ]
+
+
+async def _visible_seat(db: AsyncSession, geo: GeoScope, position_id: uuid.UUID) -> Seat:
+    seat = await appointments.load_seat(db, position_id)
+    await service.visible_body(db, geo, pk(seat.body))
+    return seat
+
+
+@router.get(
+    "/bodies/{body_id}/positions",
+    operation_id="listBodyPositions",
+    summary="Asientos de un órgano con su titular vigente",
+)
+async def list_positions(
+    db: SessionDep, crypto: CryptoDep, user: AppointmentReader, body_id: uuid.UUID
+) -> list[SeatOut]:
+    body = await service.visible_body(db, user.geo, body_id)
+    seats = await appointments.seats_of(db, pk(body))
+    current = await appointments.current_appointments(db, [pk(s.position) for s in seats])
+    current_out = {
+        a.position_id: a for a in await _appointments_out(db, crypto, user, list(current.values()))
+    }
+    sensitive = await user.holds_within(db, Perm.PERSON_READ_SENSITIVE)
+    out = []
+    for seat in seats:
+        source_ref, holder, pending = None, None, False
+        if seat.position_type.is_derived:
+            source, appointment = await appointments.derived_holder(db, seat)
+            pending = source is None
+            if source is not None:
+                source_ref = PositionTypeRef.model_validate(
+                    (await service.positions_by_id(db, [source]))[source]
+                )
+            if appointment is not None:
+                person = (await _persons(db, {appointment.person_id}))[appointment.person_id]
+                holder = person_summary(crypto, person, sensitive)
+        out.append(
+            SeatOut(
+                id=pk(seat.position),
+                body_id=pk(body),
+                position_type=PositionTypeRef.model_validate(seat.position_type),
+                region_number=seat.position.region_number,
+                is_derived=seat.position_type.is_derived,
+                vacant_since=seat.position.vacant_since,
+                current=current_out.get(pk(seat.position)),
+                derived_from=source_ref,
+                derived_holder=holder,
+                choice_pending=pending,
+            )
+        )
+    return out
+
+
+@router.get(
+    "/positions/{position_id}/appointments",
+    operation_id="listPositionAppointments",
+    summary="Historial de nombramientos de un asiento",
+)
+async def list_position_appointments(
+    db: SessionDep, crypto: CryptoDep, user: AppointmentReader, position_id: uuid.UUID
+) -> list[AppointmentOut]:
+    seat = await _visible_seat(db, user.geo, position_id)
+    return await _appointments_out(
+        db, crypto, user, await appointments.history(db, pk(seat.position))
+    )
+
+
+@router.post(
+    "/positions/{position_id}/appointments",
+    operation_id="appoint",
+    summary="Nombrar al titular de un asiento",
+    description=(
+        "El asiento debe estar vacante y no ser derivado. El titular es una persona con CURP. "
+        "Se rechazan los cargos incompatibles y los periodos consecutivos de más (409). Solo se "
+        "nombra en cargos de nivel inferior al propio y dentro del alcance (D-105, D-108)."
+    ),
+    status_code=status.HTTP_201_CREATED,
+)
+async def appoint(
+    db: SessionDep,
+    crypto: CryptoDep,
+    user: AppointmentWriter,
+    position_id: uuid.UUID,
+    body: AppointmentIn,
+) -> AppointmentOut:
+    created = await appointments.appoint(
+        db,
+        user_id=user.id,
+        access=user.access,
+        position_id=position_id,
+        person_id=body.person_id,
+        kind=AppointmentKind(body.kind),
+        starts_on=body.starts_on,
+        ends_on=body.ends_on,
+        appointed_by=body.appointed_by,
+        agreement_ref=body.agreement_ref,
+    )
+    [out] = await _appointments_out(db, crypto, user, [created])
+    return out
+
+
+@router.patch(
+    "/appointments/{appointment_id}",
+    operation_id="updateAppointment",
+    summary="Corregir periodo o acuerdo de un nombramiento",
+)
+async def update_appointment(
+    db: SessionDep,
+    crypto: CryptoDep,
+    user: AppointmentWriter,
+    appointment_id: uuid.UUID,
+    body: AppointmentUpdate,
+) -> AppointmentOut:
+    updated = await appointments.update_appointment(
+        db,
+        user_id=user.id,
+        access=user.access,
+        appointment_id=appointment_id,
+        ends_on=body.ends_on,
+        appointed_by=body.appointed_by,
+        agreement_ref=body.agreement_ref,
+    )
+    [out] = await _appointments_out(db, crypto, user, [updated])
+    return out
+
+
+@router.post(
+    "/appointments/{appointment_id}/end",
+    operation_id="endAppointment",
+    summary="Terminar un nombramiento (el asiento queda vacante)",
+)
+async def end_appointment(
+    db: SessionDep,
+    crypto: CryptoDep,
+    user: AppointmentWriter,
+    appointment_id: uuid.UUID,
+    body: AppointmentEndIn,
+) -> AppointmentOut:
+    ended = await appointments.end_appointment(
+        db,
+        user_id=user.id,
+        access=user.access,
+        appointment_id=appointment_id,
+        ended_on=body.ended_on,
+        reason=EndReason(body.reason),
+        notes=body.notes,
+    )
+    [out] = await _appointments_out(db, crypto, user, [ended])
+    return out
+
+
+@router.post(
+    "/positions/{position_id}/derived-choice",
+    operation_id="chooseDerivedSource",
+    summary="Elegir de qué cargo toma su titular un asiento derivado en este periodo",
+)
+async def choose_derived_source(
+    db: SessionDep, user: AppointmentWriter, position_id: uuid.UUID, body: DerivedChoiceIn
+) -> PositionTypeRef:
+    choice = await appointments.choose_source(
+        db,
+        user_id=user.id,
+        access=user.access,
+        position_id=position_id,
+        source_position_type_id=body.source_position_type_id,
+        starts_on=body.starts_on,
+        agreement_ref=body.agreement_ref,
+    )
+    positions = await service.positions_by_id(db, [choice.source_position_type_id])
+    return PositionTypeRef.model_validate(positions[choice.source_position_type_id])
+
+
+@router.get(
+    "/people/{person_id}/appointments",
+    operation_id="listPersonAppointments",
+    summary="Cargos de una persona (en órganos visibles)",
+)
+async def list_person_appointments(
+    db: SessionDep,
+    crypto: CryptoDep,
+    user: AppointmentReader,
+    person_id: uuid.UUID,
+    current_only: bool = True,
+) -> list[PersonAppointmentOut]:
+    rows = await appointments.appointments_of_person(db, person_id, current_only=current_only)
+    seats = {r.id: await appointments.load_seat(db, r.position_id) for r in rows}
+    visible = {
+        pk(b)
+        for b in await service.visible_bodies(db, user.geo, {pk(s.body) for s in seats.values()})
+    }
+    rows = [r for r in rows if pk(seats[r.id].body) in visible]
+    names = await service.territory_names(db, [seats[r.id].body for r in rows])
+    base = await _appointments_out(db, crypto, user, rows)
+    return [
+        PersonAppointmentOut(
+            **out.model_dump(),
+            position_type=PositionTypeRef.model_validate(seats[r.id].position_type),
+            body=BodyTypeRef.model_validate(seats[r.id].body_type),
+            body_id=pk(seats[r.id].body),
+            territory=names[pk(seats[r.id].body)],
+        )
+        for r, out in zip(rows, base, strict=True)
+    ]

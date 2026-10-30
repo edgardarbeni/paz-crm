@@ -26,6 +26,7 @@ from app.modules.identity.services.scopes import (
     active_framework,
     ensure_node_within,
 )
+from app.modules.party_structure.appointments import ensure_seats, ensure_seats_for_type
 from app.modules.party_structure.models import (
     Body,
     BodyType,
@@ -166,6 +167,8 @@ async def create_position_type(
     await _flush_unique(db, "un cargo")
     for source_id in sources:
         db.add(PositionDerivation(position_type_id=pk(position), source_position_type_id=source_id))
+    await db.flush()
+    await ensure_seats_for_type(db, position)
     await db.commit()
     return position
 
@@ -330,6 +333,16 @@ async def list_bodies(
     return page
 
 
+async def visible_bodies(db: AsyncSession, geo: GeoScope, body_ids: set[uuid.UUID]) -> list[Body]:
+    if not body_ids:
+        return []
+    statement = select(Body).where(col(Body.id).in_(body_ids), _alive(Body))
+    visible = visible_filter(geo)
+    if visible is not None:
+        statement = statement.where(visible)
+    return list((await db.execute(statement)).scalars())
+
+
 async def visible_body(db: AsyncSession, geo: GeoScope, body_id: uuid.UUID) -> Body:
     statement = select(Body).where(col(Body.id) == body_id, _alive(Body))
     visible = visible_filter(geo)
@@ -406,6 +419,7 @@ async def install_body(db: AsyncSession, geo: GeoScope, body: BodyInstallIn) -> 
     except IntegrityError as error:
         await db.rollback()
         raise ConflictError("Ese órgano ya está instalado en ese territorio.") from error
+    await ensure_seats(db, installed)
     await db.commit()
     return installed
 
