@@ -1,0 +1,15 @@
+meta {
+  name: Importaciones
+  type: http
+  seq: 21
+}
+
+get {
+  url: {{baseUrl}}/api/v1/peace-movement/imports
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}

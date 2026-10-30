@@ -274,6 +274,149 @@ export type AuthenticatedResponse = {
 };
 
 /**
+ * BatchIn
+ */
+export type BatchIn = {
+    /**
+     * Items
+     */
+    items: Array<BatchItemIn>;
+};
+
+/**
+ * BatchItemIn
+ */
+export type BatchItemIn = {
+    /**
+     * Person Id
+     *
+     * Persona existente; excluyente con `person`.
+     */
+    person_id?: string | null;
+    /**
+     * Persona nueva. Si la CURP ya existe, se reutiliza esa persona sin cambiar sus datos.
+     */
+    person?: PersonCreate | null;
+    /**
+     * Level Id
+     */
+    level_id: string;
+    /**
+     * Recruiter Member Id
+     */
+    recruiter_member_id?: string | null;
+    /**
+     * Origin
+     */
+    origin?: 'recruiter' | 'structure' | 'event' | 'campaign';
+    /**
+     * Origin Detail
+     */
+    origin_detail?: string | null;
+    consent: ConsentCapture;
+    /**
+     * House Id
+     *
+     * Casa de Paz que integra al inscribirse.
+     */
+    house_id?: string | null;
+    /**
+     * Client Id
+     *
+     * UUID generado en el dispositivo (idempotencia).
+     */
+    client_id: string;
+    /**
+     * Captured At
+     */
+    captured_at: string;
+    /**
+     * Capture Longitude
+     */
+    capture_longitude?: number | null;
+    /**
+     * Capture Latitude
+     */
+    capture_latitude?: number | null;
+};
+
+/**
+ * BatchItemOut
+ */
+export type BatchItemOut = {
+    /**
+     * Client Id
+     */
+    client_id: string;
+    /**
+     * Status
+     */
+    status: 'accepted' | 'duplicate' | 'error';
+    /**
+     * Member Id
+     */
+    member_id?: string | null;
+    /**
+     * Error Code
+     */
+    error_code?: string | null;
+    /**
+     * Error
+     */
+    error?: string | null;
+};
+
+/**
+ * BatchOut
+ */
+export type BatchOut = {
+    /**
+     * Accepted
+     */
+    accepted: number;
+    /**
+     * Duplicates
+     */
+    duplicates: number;
+    /**
+     * Errors
+     */
+    errors: number;
+    /**
+     * Items
+     */
+    items: Array<BatchItemOut>;
+};
+
+/**
+ * Body_queueMemberImport
+ */
+export type BodyQueueMemberImport = {
+    /**
+     * File
+     *
+     * CSV (UTF-8) o Excel .xlsx.
+     */
+    file: Blob | File;
+    /**
+     * Evidence Uri
+     *
+     * Evidencia de los consentimientos.
+     */
+    evidence_uri: string;
+    /**
+     * Dry Run
+     *
+     * Solo validar, sin escribir.
+     */
+    dry_run?: boolean;
+    /**
+     * Default Level Id
+     */
+    default_level_id?: string | null;
+};
+
+/**
  * Body_uploadHousePhoto
  */
 export type BodyUploadHousePhoto = {
@@ -312,6 +455,32 @@ export type BranchesIn = {
      * Member Ids
      */
     member_ids: Array<string>;
+};
+
+/**
+ * ChallengeOut
+ */
+export type ChallengeOut = {
+    /**
+     * Algorithm
+     */
+    algorithm: string;
+    /**
+     * Challenge
+     */
+    challenge: string;
+    /**
+     * Salt
+     */
+    salt: string;
+    /**
+     * Signature
+     */
+    signature: string;
+    /**
+     * Max Number
+     */
+    max_number: number;
 };
 
 /**
@@ -630,6 +799,46 @@ export type CursorPageMeetingSummary = {
      * Items
      */
     items: Array<MeetingSummary>;
+    /**
+     * Next Cursor
+     *
+     * Pasar en `cursor` para obtener la siguiente página.
+     */
+    next_cursor?: string | null;
+    /**
+     * Has More
+     */
+    has_more: boolean;
+};
+
+/**
+ * CursorPage[MemberImportErrorOut]
+ */
+export type CursorPageMemberImportErrorOut = {
+    /**
+     * Items
+     */
+    items: Array<MemberImportErrorOut>;
+    /**
+     * Next Cursor
+     *
+     * Pasar en `cursor` para obtener la siguiente página.
+     */
+    next_cursor?: string | null;
+    /**
+     * Has More
+     */
+    has_more: boolean;
+};
+
+/**
+ * CursorPage[MemberImportRunOut]
+ */
+export type CursorPageMemberImportRunOut = {
+    /**
+     * Items
+     */
+    items: Array<MemberImportRunOut>;
     /**
      * Next Cursor
      *
@@ -2073,6 +2282,74 @@ export type MemberHistory = {
 };
 
 /**
+ * MemberImportErrorOut
+ */
+export type MemberImportErrorOut = {
+    /**
+     * Row Number
+     */
+    row_number: number;
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Detail
+     */
+    detail: string;
+};
+
+/**
+ * MemberImportRunOut
+ */
+export type MemberImportRunOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Filename
+     */
+    filename: string;
+    /**
+     * Dry Run
+     */
+    dry_run: boolean;
+    /**
+     * Status
+     */
+    status: string;
+    /**
+     * Total Rows
+     */
+    total_rows: number;
+    /**
+     * Accepted Rows
+     */
+    accepted_rows: number;
+    /**
+     * Error Rows
+     */
+    error_rows: number;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Started At
+     */
+    started_at: string | null;
+    /**
+     * Finished At
+     */
+    finished_at: string | null;
+    /**
+     * Failure
+     */
+    failure: string | null;
+};
+
+/**
  * MemberSummary
  */
 export type MemberSummary = {
@@ -2541,6 +2818,28 @@ export type NoticeOut = {
      * Valid To
      */
     valid_to: string | null;
+};
+
+/**
+ * NoticeView
+ */
+export type NoticeView = {
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Version
+     */
+    version: string;
+    /**
+     * Title
+     */
+    title: string;
+    /**
+     * Body
+     */
+    body: string;
 };
 
 /**
@@ -3232,6 +3531,142 @@ export type ProcessUpdate = {
      */
     election_date?: string | null;
     status?: ProcessStatus | null;
+};
+
+/**
+ * ProofIn
+ */
+export type ProofIn = {
+    /**
+     * Challenge
+     */
+    challenge: string;
+    /**
+     * Salt
+     */
+    salt: string;
+    /**
+     * Number
+     */
+    number: number;
+    /**
+     * Signature
+     */
+    signature: string;
+};
+
+/**
+ * PublicEnrollmentIn
+ */
+export type PublicEnrollmentIn = {
+    /**
+     * Referral Code
+     */
+    referral_code: string;
+    person: PublicPersonIn;
+    /**
+     * Level Id
+     */
+    level_id: string;
+    /**
+     * Notice Version
+     */
+    notice_version: string;
+    /**
+     * Accepts Notice
+     *
+     * Debe ser verdadero: consentimiento expreso.
+     */
+    accepts_notice: boolean;
+    proof: ProofIn;
+    /**
+     * Website
+     *
+     * Campo trampa; vacío.
+     */
+    website?: string | null;
+};
+
+/**
+ * PublicEnrollmentOut
+ */
+export type PublicEnrollmentOut = {
+    /**
+     * Status
+     */
+    status?: 'received';
+    /**
+     * Message
+     */
+    message?: string;
+};
+
+/**
+ * PublicFormOut
+ *
+ * Everything the public enrollment page needs, without revealing who invited.
+ */
+export type PublicFormOut = {
+    notice: NoticeView;
+    /**
+     * Levels
+     */
+    levels: Array<LevelOut>;
+    challenge: ChallengeOut;
+};
+
+/**
+ * PublicPersonIn
+ */
+export type PublicPersonIn = {
+    /**
+     * Given Names
+     */
+    given_names: string;
+    /**
+     * Paternal Surname
+     */
+    paternal_surname: string;
+    /**
+     * Maternal Surname
+     */
+    maternal_surname?: string | null;
+    /**
+     * Curp
+     */
+    curp: string;
+    /**
+     * Mobile
+     */
+    mobile: string;
+    /**
+     * Email
+     */
+    email?: string | null;
+    /**
+     * Street
+     */
+    street?: string | null;
+    /**
+     * Exterior Number
+     */
+    exterior_number?: string | null;
+    /**
+     * Postal Code
+     */
+    postal_code?: string | null;
+    /**
+     * State Code
+     *
+     * Entidad de la credencial.
+     */
+    state_code: number;
+    /**
+     * Section Number
+     *
+     * Sección de la credencial.
+     */
+    section_number: number;
 };
 
 /**
@@ -4126,6 +4561,20 @@ export type AppModulesPeaceMovementSchemasMemberOut = {
      * Nulo hasta el primer cálculo de agregados.
      */
     network: NetworkOut | null;
+    /**
+     * Requested House Id
+     *
+     * Casa que eligió en una inscripción pendiente.
+     */
+    requested_house_id?: string | null;
+    /**
+     * Intake
+     *
+     * Lo que envió una inscripción pública para una persona ya registrada (solo con people.person.read_sensitive), para compararlo al validar.
+     */
+    intake?: {
+        [key: string]: unknown;
+    } | null;
     /**
      * House Goal
      *
@@ -9181,3 +9630,251 @@ export type ExportMembersResponses = {
      */
     200: unknown;
 };
+
+export type SubmitMemberBatchData = {
+    body: BatchIn;
+    path?: never;
+    query?: never;
+    url: '/api/v1/peace-movement/members/batch';
+};
+
+export type SubmitMemberBatchErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type SubmitMemberBatchError = SubmitMemberBatchErrors[keyof SubmitMemberBatchErrors];
+
+export type SubmitMemberBatchResponses = {
+    /**
+     * Successful Response
+     */
+    200: BatchOut;
+};
+
+export type SubmitMemberBatchResponse = SubmitMemberBatchResponses[keyof SubmitMemberBatchResponses];
+
+export type ListMemberImportsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Cursor
+         */
+        cursor?: string | null;
+        /**
+         * Sort
+         *
+         * Campos separados por coma; prefijo '-' para descendente.
+         */
+        sort?: string | null;
+    };
+    url: '/api/v1/peace-movement/imports';
+};
+
+export type ListMemberImportsErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ListMemberImportsError = ListMemberImportsErrors[keyof ListMemberImportsErrors];
+
+export type ListMemberImportsResponses = {
+    /**
+     * Successful Response
+     */
+    200: CursorPageMemberImportRunOut;
+};
+
+export type ListMemberImportsResponse = ListMemberImportsResponses[keyof ListMemberImportsResponses];
+
+export type QueueMemberImportData = {
+    body: BodyQueueMemberImport;
+    path?: never;
+    query?: never;
+    url: '/api/v1/peace-movement/imports';
+};
+
+export type QueueMemberImportErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type QueueMemberImportError = QueueMemberImportErrors[keyof QueueMemberImportErrors];
+
+export type QueueMemberImportResponses = {
+    /**
+     * Successful Response
+     */
+    202: MemberImportRunOut;
+};
+
+export type QueueMemberImportResponse = QueueMemberImportResponses[keyof QueueMemberImportResponses];
+
+export type GetMemberImportData = {
+    body?: never;
+    path: {
+        /**
+         * Run Id
+         */
+        run_id: string;
+    };
+    query?: never;
+    url: '/api/v1/peace-movement/imports/{run_id}';
+};
+
+export type GetMemberImportErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type GetMemberImportError = GetMemberImportErrors[keyof GetMemberImportErrors];
+
+export type GetMemberImportResponses = {
+    /**
+     * Successful Response
+     */
+    200: MemberImportRunOut;
+};
+
+export type GetMemberImportResponse = GetMemberImportResponses[keyof GetMemberImportResponses];
+
+export type ListMemberImportErrorsData = {
+    body?: never;
+    path: {
+        /**
+         * Run Id
+         */
+        run_id: string;
+    };
+    query?: {
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Cursor
+         */
+        cursor?: string | null;
+        /**
+         * Sort
+         *
+         * Campos separados por coma; prefijo '-' para descendente.
+         */
+        sort?: string | null;
+    };
+    url: '/api/v1/peace-movement/imports/{run_id}/errors';
+};
+
+export type ListMemberImportErrorsErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ListMemberImportErrorsError = ListMemberImportErrorsErrors[keyof ListMemberImportErrorsErrors];
+
+export type ListMemberImportErrorsResponses = {
+    /**
+     * Successful Response
+     */
+    200: CursorPageMemberImportErrorOut;
+};
+
+export type ListMemberImportErrorsResponse = ListMemberImportErrorsResponses[keyof ListMemberImportErrorsResponses];
+
+export type GetPublicEnrollmentFormData = {
+    body?: never;
+    path: {
+        /**
+         * Referral Code
+         */
+        referral_code: string;
+    };
+    query?: never;
+    url: '/api/v1/public/peace-movement/enroll/{referral_code}';
+};
+
+export type GetPublicEnrollmentFormErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type GetPublicEnrollmentFormError = GetPublicEnrollmentFormErrors[keyof GetPublicEnrollmentFormErrors];
+
+export type GetPublicEnrollmentFormResponses = {
+    /**
+     * Successful Response
+     */
+    200: PublicFormOut;
+};
+
+export type GetPublicEnrollmentFormResponse = GetPublicEnrollmentFormResponses[keyof GetPublicEnrollmentFormResponses];
+
+export type PublicEnrollData = {
+    body: PublicEnrollmentIn;
+    path?: never;
+    query?: never;
+    url: '/api/v1/public/peace-movement/enroll';
+};
+
+export type PublicEnrollErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type PublicEnrollError = PublicEnrollErrors[keyof PublicEnrollErrors];
+
+export type PublicEnrollResponses = {
+    /**
+     * Successful Response
+     */
+    202: PublicEnrollmentOut;
+};
+
+export type PublicEnrollResponse = PublicEnrollResponses[keyof PublicEnrollResponses];

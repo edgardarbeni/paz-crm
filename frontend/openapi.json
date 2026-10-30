@@ -9773,6 +9773,487 @@
           }
         }
       }
+    },
+    "/api/v1/peace-movement/members/batch": {
+      "post": {
+        "tags": [
+          "peace-movement"
+        ],
+        "summary": "Carga por lotes de la app de campo (idempotente; quedan pendientes de validar)",
+        "operationId": "submitMemberBatch",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/peace-movement/imports": {
+      "post": {
+        "tags": [
+          "peace-movement"
+        ],
+        "summary": "Subir un CSV o Excel de pacificadores (se procesa en segundo plano)",
+        "operationId": "queueMemberImport",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_queueMemberImport"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberImportRunOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "peace-movement"
+        ],
+        "summary": "Importaciones",
+        "operationId": "listMemberImports",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 1024
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 200
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Campos separados por coma; prefijo '-' para descendente.",
+              "examples": [
+                "-created_at,name"
+              ],
+              "title": "Sort"
+            },
+            "description": "Campos separados por coma; prefijo '-' para descendente."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CursorPage_MemberImportRunOut_"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/peace-movement/imports/{run_id}": {
+      "get": {
+        "tags": [
+          "peace-movement"
+        ],
+        "summary": "Detalle de importación",
+        "operationId": "getMemberImport",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberImportRunOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/peace-movement/imports/{run_id}/errors": {
+      "get": {
+        "tags": [
+          "peace-movement"
+        ],
+        "summary": "Errores por fila",
+        "operationId": "listMemberImportErrors",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Run Id"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 1024
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 200
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Campos separados por coma; prefijo '-' para descendente.",
+              "examples": [
+                "-created_at,name"
+              ],
+              "title": "Sort"
+            },
+            "description": "Campos separados por coma; prefijo '-' para descendente."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CursorPage_MemberImportErrorOut_"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/public/peace-movement/enroll/{referral_code}": {
+      "get": {
+        "tags": [
+          "peace-movement-public"
+        ],
+        "summary": "Formulario público de inscripción: aviso, niveles y verificación anti-bots",
+        "operationId": "getPublicEnrollmentForm",
+        "parameters": [
+          {
+            "name": "referral_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 32,
+              "title": "Referral Code"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicFormOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/public/peace-movement/enroll": {
+      "post": {
+        "tags": [
+          "peace-movement-public"
+        ],
+        "summary": "Inscripción pública (queda pendiente de validar)",
+        "operationId": "publicEnroll",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublicEnrollmentIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicEnrollmentOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -10400,6 +10881,287 @@
         ],
         "title": "AuthenticatedResponse"
       },
+      "BatchIn": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/BatchItemIn"
+            },
+            "type": "array",
+            "maxItems": 500,
+            "minItems": 1,
+            "title": "Items"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "title": "BatchIn"
+      },
+      "BatchItemIn": {
+        "properties": {
+          "person_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Person Id",
+            "description": "Persona existente; excluyente con `person`."
+          },
+          "person": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PersonCreate"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Persona nueva. Si la CURP ya existe, se reutiliza esa persona sin cambiar sus datos."
+          },
+          "level_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Level Id"
+          },
+          "recruiter_member_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recruiter Member Id"
+          },
+          "origin": {
+            "type": "string",
+            "enum": [
+              "recruiter",
+              "structure",
+              "event",
+              "campaign"
+            ],
+            "title": "Origin",
+            "default": "recruiter"
+          },
+          "origin_detail": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Origin Detail"
+          },
+          "consent": {
+            "$ref": "#/components/schemas/ConsentCapture"
+          },
+          "house_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "House Id",
+            "description": "Casa de Paz que integra al inscribirse."
+          },
+          "client_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Client Id",
+            "description": "UUID generado en el dispositivo (idempotencia)."
+          },
+          "captured_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Captured At"
+          },
+          "capture_longitude": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 180.0,
+                "minimum": -180.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Capture Longitude"
+          },
+          "capture_latitude": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 90.0,
+                "minimum": -90.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Capture Latitude"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "level_id",
+          "consent",
+          "client_id",
+          "captured_at"
+        ],
+        "title": "BatchItemIn"
+      },
+      "BatchItemOut": {
+        "properties": {
+          "client_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Client Id"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "accepted",
+              "duplicate",
+              "error"
+            ],
+            "title": "Status"
+          },
+          "member_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Member Id"
+          },
+          "error_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Code"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "client_id",
+          "status"
+        ],
+        "title": "BatchItemOut"
+      },
+      "BatchOut": {
+        "properties": {
+          "accepted": {
+            "type": "integer",
+            "title": "Accepted"
+          },
+          "duplicates": {
+            "type": "integer",
+            "title": "Duplicates"
+          },
+          "errors": {
+            "type": "integer",
+            "title": "Errors"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/BatchItemOut"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "accepted",
+          "duplicates",
+          "errors",
+          "items"
+        ],
+        "title": "BatchOut"
+      },
+      "Body_queueMemberImport": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File",
+            "description": "CSV (UTF-8) o Excel .xlsx."
+          },
+          "evidence_uri": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 3,
+            "title": "Evidence Uri",
+            "description": "Evidencia de los consentimientos."
+          },
+          "dry_run": {
+            "type": "boolean",
+            "title": "Dry Run",
+            "description": "Solo validar, sin escribir.",
+            "default": true
+          },
+          "default_level_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Default Level Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file",
+          "evidence_uri"
+        ],
+        "title": "Body_queueMemberImport"
+      },
       "Body_uploadHousePhoto": {
         "properties": {
           "file": {
@@ -10469,6 +11231,40 @@
           "member_ids"
         ],
         "title": "BranchesIn"
+      },
+      "ChallengeOut": {
+        "properties": {
+          "algorithm": {
+            "type": "string",
+            "title": "Algorithm"
+          },
+          "challenge": {
+            "type": "string",
+            "title": "Challenge"
+          },
+          "salt": {
+            "type": "string",
+            "title": "Salt"
+          },
+          "signature": {
+            "type": "string",
+            "title": "Signature"
+          },
+          "max_number": {
+            "type": "integer",
+            "title": "Max Number"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "algorithm",
+          "challenge",
+          "salt",
+          "signature",
+          "max_number"
+        ],
+        "title": "ChallengeOut"
       },
       "ChildrenPage": {
         "properties": {
@@ -11029,6 +11825,72 @@
           "has_more"
         ],
         "title": "CursorPage[MeetingSummary]"
+      },
+      "CursorPage_MemberImportErrorOut_": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/MemberImportErrorOut"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor",
+            "description": "Pasar en `cursor` para obtener la siguiente página."
+          },
+          "has_more": {
+            "type": "boolean",
+            "title": "Has More"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "has_more"
+        ],
+        "title": "CursorPage[MemberImportErrorOut]"
+      },
+      "CursorPage_MemberImportRunOut_": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/MemberImportRunOut"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor",
+            "description": "Pasar en `cursor` para obtener la siguiente página."
+          },
+          "has_more": {
+            "type": "boolean",
+            "title": "Has More"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "has_more"
+        ],
+        "title": "CursorPage[MemberImportRunOut]"
       },
       "CursorPage_MemberSummary_": {
         "properties": {
@@ -13813,6 +14675,119 @@
         ],
         "title": "MemberHistory"
       },
+      "MemberImportErrorOut": {
+        "properties": {
+          "row_number": {
+            "type": "integer",
+            "title": "Row Number"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "detail": {
+            "type": "string",
+            "title": "Detail"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "row_number",
+          "code",
+          "detail"
+        ],
+        "title": "MemberImportErrorOut"
+      },
+      "MemberImportRunOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "filename": {
+            "type": "string",
+            "title": "Filename"
+          },
+          "dry_run": {
+            "type": "boolean",
+            "title": "Dry Run"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "total_rows": {
+            "type": "integer",
+            "title": "Total Rows"
+          },
+          "accepted_rows": {
+            "type": "integer",
+            "title": "Accepted Rows"
+          },
+          "error_rows": {
+            "type": "integer",
+            "title": "Error Rows"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "finished_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finished At"
+          },
+          "failure": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Failure"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "filename",
+          "dry_run",
+          "status",
+          "total_rows",
+          "accepted_rows",
+          "error_rows",
+          "created_at",
+          "started_at",
+          "finished_at",
+          "failure"
+        ],
+        "title": "MemberImportRunOut"
+      },
       "MemberSummary": {
         "properties": {
           "id": {
@@ -14666,6 +15641,35 @@
           "valid_to"
         ],
         "title": "NoticeOut"
+      },
+      "NoticeView": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "body": {
+            "type": "string",
+            "title": "Body"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "version",
+          "title",
+          "body"
+        ],
+        "title": "NoticeView"
       },
       "OfficeTypeIn": {
         "properties": {
@@ -16053,6 +17057,255 @@
         "additionalProperties": false,
         "type": "object",
         "title": "ProcessUpdate"
+      },
+      "ProofIn": {
+        "properties": {
+          "challenge": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Challenge"
+          },
+          "salt": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 10,
+            "title": "Salt"
+          },
+          "number": {
+            "type": "integer",
+            "maximum": 10000000.0,
+            "minimum": 0.0,
+            "title": "Number"
+          },
+          "signature": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Signature"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "challenge",
+          "salt",
+          "number",
+          "signature"
+        ],
+        "title": "ProofIn"
+      },
+      "PublicEnrollmentIn": {
+        "properties": {
+          "referral_code": {
+            "type": "string",
+            "maxLength": 32,
+            "minLength": 8,
+            "title": "Referral Code"
+          },
+          "person": {
+            "$ref": "#/components/schemas/PublicPersonIn"
+          },
+          "level_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Level Id"
+          },
+          "notice_version": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 1,
+            "title": "Notice Version"
+          },
+          "accepts_notice": {
+            "type": "boolean",
+            "title": "Accepts Notice",
+            "description": "Debe ser verdadero: consentimiento expreso."
+          },
+          "proof": {
+            "$ref": "#/components/schemas/ProofIn"
+          },
+          "website": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Website",
+            "description": "Campo trampa; vacío."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "referral_code",
+          "person",
+          "level_id",
+          "notice_version",
+          "accepts_notice",
+          "proof"
+        ],
+        "title": "PublicEnrollmentIn"
+      },
+      "PublicEnrollmentOut": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "const": "received",
+            "title": "Status",
+            "default": "received"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "Recibimos tu inscripción. Una persona del Movimiento de Paz la revisará pronto."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "PublicEnrollmentOut"
+      },
+      "PublicFormOut": {
+        "properties": {
+          "notice": {
+            "$ref": "#/components/schemas/NoticeView"
+          },
+          "levels": {
+            "items": {
+              "$ref": "#/components/schemas/LevelOut"
+            },
+            "type": "array",
+            "title": "Levels"
+          },
+          "challenge": {
+            "$ref": "#/components/schemas/ChallengeOut"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "notice",
+          "levels",
+          "challenge"
+        ],
+        "title": "PublicFormOut",
+        "description": "Everything the public enrollment page needs, without revealing who invited."
+      },
+      "PublicPersonIn": {
+        "properties": {
+          "given_names": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Given Names"
+          },
+          "paternal_surname": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Paternal Surname"
+          },
+          "maternal_surname": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Maternal Surname"
+          },
+          "curp": {
+            "type": "string",
+            "maxLength": 18,
+            "minLength": 18,
+            "title": "Curp"
+          },
+          "mobile": {
+            "type": "string",
+            "maxLength": 20,
+            "minLength": 10,
+            "title": "Mobile"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 150
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "street": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Street"
+          },
+          "exterior_number": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 30
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exterior Number"
+          },
+          "postal_code": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{5}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Postal Code"
+          },
+          "state_code": {
+            "type": "integer",
+            "maximum": 32.0,
+            "minimum": 1.0,
+            "title": "State Code",
+            "description": "Entidad de la credencial."
+          },
+          "section_number": {
+            "type": "integer",
+            "maximum": 9999.0,
+            "minimum": 1.0,
+            "title": "Section Number",
+            "description": "Sección de la credencial."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "given_names",
+          "paternal_surname",
+          "curp",
+          "mobile",
+          "state_code",
+          "section_number"
+        ],
+        "title": "PublicPersonIn"
       },
       "ReadinessStatus": {
         "properties": {
@@ -17641,6 +18894,32 @@
               }
             ],
             "description": "Nulo hasta el primer cálculo de agregados."
+          },
+          "requested_house_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested House Id",
+            "description": "Casa que eligió en una inscripción pendiente."
+          },
+          "intake": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Intake",
+            "description": "Lo que envió una inscripción pública para una persona ya registrada (solo con people.person.read_sensitive), para compararlo al validar."
           },
           "house_goal": {
             "anyOf": [

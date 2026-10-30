@@ -142,6 +142,10 @@ uv run paz --help                    # CLI de operación
     `--full`, nocturno), `GET …/members/{id}/network`, `…/stats/geography`, `…/stats/growth` y
     `…/members-export` (CSV). Para medir: `paz peace-movement seed-load --members 1000000`
     (solo desarrollo; D-97).
+  - Entradas fuera del panel (D-98): inscripción pública en `/api/v1/public/peace-movement`
+    (prueba de trabajo propia, sin terceros), carga por lotes idempotente
+    (`…/members/batch`) e importación CSV o Excel con dry-run (`…/imports`, la procesa el
+    `scheduler`).
   - Antes de inscribir hace falta el aviso del MP: `POST /api/v1/people/privacy-notices` o, en
     desarrollo, `paz people sample-notice`.
 - **Errores.** Siempre RFC 9457 (`application/problem+json`): `type` es `urn:pazos:problem:<code>`

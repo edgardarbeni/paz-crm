@@ -3,8 +3,8 @@
 import { type InfiniteData, infiniteQueryOptions, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen';
-import { acceptInvitation, activateUser, addConsent, addHouseMeeting, addHouseMember, approveNomination, cancelNomination, changeFormulaStatus, changeMemberLevel, changePassword, closePeaceHouse, configureMunicipalities, configureProcessOffices, configureProcessRules, confirmTotp, createCoalition, createFormula, createNomination, createOfficeType, createParty, createPerson, createProcess, createRole, createZoneCoordinator, deleteHousePhoto, deletePerson, deleteRole, disableTotp, disableUser, endZoneCoordinator, enrollMember, exportMembers, forgotPassword, getGeoNode, getGeoNodeChildren, getHealth, getHouseMeeting, getImportRun, getMe, getMember, getMemberHistory, getMemberNetwork, getNomination, getNominationHistory, getPeaceGeographyStats, getPeaceGrowth, getPeaceHouse, getPeaceSettings, getPerson, getProcess, getReadiness, getRole, getUser, getUserScopes, getVectorTile, inspectInvitation, inviteUser, listAccessEntries, listAuditEntries, listCoalitions, listConsents, listFrameworks, listGeoNodes, listHouseGoals, listHouseMeetings, listHouseMembers, listHousePhotos, listImportIssues, listImportRuns, listLevelGoals, listMemberChildren, listMunicipalitySettings, listMySessions, listNominations, listOfficeTypes, listParticipationLevels, listParties, listPermissions, listPrivacyNotices, listProcesses, listProcessOffices, listProcessRules, listRoles, listUserBranches, listUsers, listUserSessions, listValidationRules, listZoneCoordinators, locatePoint, login, logout, memberLeaves, openPeaceHouse, type Options, publishPrivacyNotice, reassignHouseCredit, reassignMember, recordHouseLocationConsent, refreshSession, regenerateRecoveryCodes, rejectMember, removeHouseMember, resendInvitation, resetPassword, resetUserMfa, revokeHouseLocationConsent, revokeMyOtherSessions, revokeMySession, revokeUserSessions, searchGeography, searchMembers, searchPeaceHouses, searchPeople, setHouseGoal, setLevelGoal, setRolePermissions, setupTotp, setUserBranches, setUserRoles, setUserScopes, submitNomination, substituteFormula, unlockUser, updateFormulaMembers, updateNomination, updateOfficeType, updateParty, updatePeaceHouse, updatePeaceSettings, updatePerson, updateProcess, updateRole, updateUser, uploadHousePhoto, validateMember, validateNomination, verifyMfa } from '../sdk.gen';
-import type { AcceptInvitationData, AcceptInvitationError, AcceptInvitationResponse, ActivateUserData, ActivateUserError, ActivateUserResponse, AddConsentData, AddConsentError, AddConsentResponse, AddHouseMeetingData, AddHouseMeetingError, AddHouseMeetingResponse, AddHouseMemberData, AddHouseMemberError, AddHouseMemberResponse, ApproveNominationData, ApproveNominationError, ApproveNominationResponse, CancelNominationData, CancelNominationError, CancelNominationResponse, ChangeFormulaStatusData, ChangeFormulaStatusError, ChangeFormulaStatusResponse, ChangeMemberLevelData, ChangeMemberLevelError, ChangeMemberLevelResponse, ChangePasswordData, ChangePasswordError, ChangePasswordResponse, ClosePeaceHouseData, ClosePeaceHouseError, ClosePeaceHouseResponse, ConfigureMunicipalitiesData, ConfigureMunicipalitiesError, ConfigureMunicipalitiesResponse, ConfigureProcessOfficesData, ConfigureProcessOfficesError, ConfigureProcessOfficesResponse, ConfigureProcessRulesData, ConfigureProcessRulesError, ConfigureProcessRulesResponse, ConfirmTotpData, ConfirmTotpError, ConfirmTotpResponse, CreateCoalitionData, CreateCoalitionError, CreateCoalitionResponse, CreateFormulaData, CreateFormulaError, CreateFormulaResponse, CreateNominationData, CreateNominationError, CreateNominationResponse, CreateOfficeTypeData, CreateOfficeTypeError, CreateOfficeTypeResponse, CreatePartyData, CreatePartyError, CreatePartyResponse, CreatePersonData, CreatePersonError, CreatePersonResponse, CreateProcessData, CreateProcessError, CreateProcessResponse, CreateRoleData, CreateRoleError, CreateRoleResponse, CreateZoneCoordinatorData, CreateZoneCoordinatorError, CreateZoneCoordinatorResponse, DeleteHousePhotoData, DeleteHousePhotoError, DeleteHousePhotoResponse, DeletePersonData, DeletePersonError, DeletePersonResponse, DeleteRoleData, DeleteRoleError, DeleteRoleResponse, DisableTotpData, DisableTotpError, DisableTotpResponse, DisableUserData, DisableUserError, DisableUserResponse, EndZoneCoordinatorData, EndZoneCoordinatorError, EndZoneCoordinatorResponse, EnrollMemberData, EnrollMemberError, EnrollMemberResponse, ExportMembersData, ExportMembersError, ForgotPasswordData, ForgotPasswordError, GetGeoNodeChildrenData, GetGeoNodeChildrenError, GetGeoNodeChildrenResponse, GetGeoNodeData, GetGeoNodeError, GetGeoNodeResponse, GetHealthData, GetHealthError, GetHealthResponse, GetHouseMeetingData, GetHouseMeetingError, GetHouseMeetingResponse, GetImportRunData, GetImportRunError, GetImportRunResponse, GetMeData, GetMeError, GetMemberData, GetMemberError, GetMemberHistoryData, GetMemberHistoryError, GetMemberHistoryResponse, GetMemberNetworkData, GetMemberNetworkError, GetMemberNetworkResponse, GetMemberResponse, GetMeResponse, GetNominationData, GetNominationError, GetNominationHistoryData, GetNominationHistoryError, GetNominationHistoryResponse, GetNominationResponse, GetPeaceGeographyStatsData, GetPeaceGeographyStatsError, GetPeaceGeographyStatsResponse, GetPeaceGrowthData, GetPeaceGrowthError, GetPeaceGrowthResponse, GetPeaceHouseData, GetPeaceHouseError, GetPeaceHouseResponse, GetPeaceSettingsData, GetPeaceSettingsError, GetPeaceSettingsResponse, GetPersonData, GetPersonError, GetPersonResponse, GetProcessData, GetProcessError, GetProcessResponse, GetReadinessData, GetReadinessError, GetReadinessResponse, GetRoleData, GetRoleError, GetRoleResponse, GetUserData, GetUserError, GetUserResponse, GetUserScopesData, GetUserScopesError, GetUserScopesResponse, GetVectorTileData, GetVectorTileError, InspectInvitationData, InspectInvitationError, InspectInvitationResponse, InviteUserData, InviteUserError, InviteUserResponse, ListAccessEntriesData, ListAccessEntriesError, ListAccessEntriesResponse, ListAuditEntriesData, ListAuditEntriesError, ListAuditEntriesResponse, ListCoalitionsData, ListCoalitionsError, ListCoalitionsResponse, ListConsentsData, ListConsentsError, ListConsentsResponse, ListFrameworksData, ListFrameworksError, ListFrameworksResponse, ListGeoNodesData, ListGeoNodesError, ListGeoNodesResponse, ListHouseGoalsData, ListHouseGoalsError, ListHouseGoalsResponse, ListHouseMeetingsData, ListHouseMeetingsError, ListHouseMeetingsResponse, ListHouseMembersData, ListHouseMembersError, ListHouseMembersResponse, ListHousePhotosData, ListHousePhotosError, ListHousePhotosResponse, ListImportIssuesData, ListImportIssuesError, ListImportIssuesResponse, ListImportRunsData, ListImportRunsError, ListImportRunsResponse, ListLevelGoalsData, ListLevelGoalsError, ListLevelGoalsResponse, ListMemberChildrenData, ListMemberChildrenError, ListMemberChildrenResponse, ListMunicipalitySettingsData, ListMunicipalitySettingsError, ListMunicipalitySettingsResponse, ListMySessionsData, ListMySessionsError, ListMySessionsResponse, ListNominationsData, ListNominationsError, ListNominationsResponse, ListOfficeTypesData, ListOfficeTypesError, ListOfficeTypesResponse, ListParticipationLevelsData, ListParticipationLevelsError, ListParticipationLevelsResponse, ListPartiesData, ListPartiesError, ListPartiesResponse, ListPermissionsData, ListPermissionsError, ListPermissionsResponse, ListPrivacyNoticesData, ListPrivacyNoticesError, ListPrivacyNoticesResponse, ListProcessesData, ListProcessesError, ListProcessesResponse, ListProcessOfficesData, ListProcessOfficesError, ListProcessOfficesResponse, ListProcessRulesData, ListProcessRulesError, ListProcessRulesResponse, ListRolesData, ListRolesError, ListRolesResponse, ListUserBranchesData, ListUserBranchesError, ListUserBranchesResponse, ListUsersData, ListUsersError, ListUserSessionsData, ListUserSessionsError, ListUserSessionsResponse, ListUsersResponse, ListValidationRulesData, ListValidationRulesError, ListValidationRulesResponse, ListZoneCoordinatorsData, ListZoneCoordinatorsError, ListZoneCoordinatorsResponse, LocatePointData, LocatePointError, LocatePointResponse, LoginData, LoginError, LoginResponse, LogoutData, LogoutError, LogoutResponse, MemberLeavesData, MemberLeavesError, MemberLeavesResponse, OpenPeaceHouseData, OpenPeaceHouseError, OpenPeaceHouseResponse, PublishPrivacyNoticeData, PublishPrivacyNoticeError, PublishPrivacyNoticeResponse, ReassignHouseCreditData, ReassignHouseCreditError, ReassignHouseCreditResponse, ReassignMemberData, ReassignMemberError, ReassignMemberResponse, RecordHouseLocationConsentData, RecordHouseLocationConsentError, RecordHouseLocationConsentResponse, RefreshSessionData, RefreshSessionError, RefreshSessionResponse, RegenerateRecoveryCodesData, RegenerateRecoveryCodesError, RegenerateRecoveryCodesResponse, RejectMemberData, RejectMemberError, RejectMemberResponse, RemoveHouseMemberData, RemoveHouseMemberError, RemoveHouseMemberResponse, ResendInvitationData, ResendInvitationError, ResendInvitationResponse, ResetPasswordData, ResetPasswordError, ResetPasswordResponse, ResetUserMfaData, ResetUserMfaError, ResetUserMfaResponse, RevokeHouseLocationConsentData, RevokeHouseLocationConsentError, RevokeHouseLocationConsentResponse, RevokeMyOtherSessionsData, RevokeMyOtherSessionsError, RevokeMyOtherSessionsResponse, RevokeMySessionData, RevokeMySessionError, RevokeMySessionResponse, RevokeUserSessionsData, RevokeUserSessionsError, RevokeUserSessionsResponse, SearchGeographyData, SearchGeographyError, SearchGeographyResponse, SearchMembersData, SearchMembersError, SearchMembersResponse, SearchPeaceHousesData, SearchPeaceHousesError, SearchPeaceHousesResponse, SearchPeopleData, SearchPeopleError, SearchPeopleResponse, SetHouseGoalData, SetHouseGoalError, SetHouseGoalResponse, SetLevelGoalData, SetLevelGoalError, SetLevelGoalResponse, SetRolePermissionsData, SetRolePermissionsError, SetRolePermissionsResponse, SetupTotpData, SetupTotpError, SetupTotpResponse, SetUserBranchesData, SetUserBranchesError, SetUserBranchesResponse, SetUserRolesData, SetUserRolesError, SetUserRolesResponse, SetUserScopesData, SetUserScopesError, SetUserScopesResponse, SubmitNominationData, SubmitNominationError, SubmitNominationResponse, SubstituteFormulaData, SubstituteFormulaError, SubstituteFormulaResponse, UnlockUserData, UnlockUserError, UnlockUserResponse, UpdateFormulaMembersData, UpdateFormulaMembersError, UpdateFormulaMembersResponse, UpdateNominationData, UpdateNominationError, UpdateNominationResponse, UpdateOfficeTypeData, UpdateOfficeTypeError, UpdateOfficeTypeResponse, UpdatePartyData, UpdatePartyError, UpdatePartyResponse, UpdatePeaceHouseData, UpdatePeaceHouseError, UpdatePeaceHouseResponse, UpdatePeaceSettingsData, UpdatePeaceSettingsError, UpdatePeaceSettingsResponse, UpdatePersonData, UpdatePersonError, UpdatePersonResponse, UpdateProcessData, UpdateProcessError, UpdateProcessResponse, UpdateRoleData, UpdateRoleError, UpdateRoleResponse, UpdateUserData, UpdateUserError, UpdateUserResponse, UploadHousePhotoData, UploadHousePhotoError, UploadHousePhotoResponse, ValidateMemberData, ValidateMemberError, ValidateMemberResponse, ValidateNominationData, ValidateNominationError, ValidateNominationResponse, VerifyMfaData, VerifyMfaError, VerifyMfaResponse } from '../types.gen';
+import { acceptInvitation, activateUser, addConsent, addHouseMeeting, addHouseMember, approveNomination, cancelNomination, changeFormulaStatus, changeMemberLevel, changePassword, closePeaceHouse, configureMunicipalities, configureProcessOffices, configureProcessRules, confirmTotp, createCoalition, createFormula, createNomination, createOfficeType, createParty, createPerson, createProcess, createRole, createZoneCoordinator, deleteHousePhoto, deletePerson, deleteRole, disableTotp, disableUser, endZoneCoordinator, enrollMember, exportMembers, forgotPassword, getGeoNode, getGeoNodeChildren, getHealth, getHouseMeeting, getImportRun, getMe, getMember, getMemberHistory, getMemberImport, getMemberNetwork, getNomination, getNominationHistory, getPeaceGeographyStats, getPeaceGrowth, getPeaceHouse, getPeaceSettings, getPerson, getProcess, getPublicEnrollmentForm, getReadiness, getRole, getUser, getUserScopes, getVectorTile, inspectInvitation, inviteUser, listAccessEntries, listAuditEntries, listCoalitions, listConsents, listFrameworks, listGeoNodes, listHouseGoals, listHouseMeetings, listHouseMembers, listHousePhotos, listImportIssues, listImportRuns, listLevelGoals, listMemberChildren, listMemberImportErrors, listMemberImports, listMunicipalitySettings, listMySessions, listNominations, listOfficeTypes, listParticipationLevels, listParties, listPermissions, listPrivacyNotices, listProcesses, listProcessOffices, listProcessRules, listRoles, listUserBranches, listUsers, listUserSessions, listValidationRules, listZoneCoordinators, locatePoint, login, logout, memberLeaves, openPeaceHouse, type Options, publicEnroll, publishPrivacyNotice, queueMemberImport, reassignHouseCredit, reassignMember, recordHouseLocationConsent, refreshSession, regenerateRecoveryCodes, rejectMember, removeHouseMember, resendInvitation, resetPassword, resetUserMfa, revokeHouseLocationConsent, revokeMyOtherSessions, revokeMySession, revokeUserSessions, searchGeography, searchMembers, searchPeaceHouses, searchPeople, setHouseGoal, setLevelGoal, setRolePermissions, setupTotp, setUserBranches, setUserRoles, setUserScopes, submitMemberBatch, submitNomination, substituteFormula, unlockUser, updateFormulaMembers, updateNomination, updateOfficeType, updateParty, updatePeaceHouse, updatePeaceSettings, updatePerson, updateProcess, updateRole, updateUser, uploadHousePhoto, validateMember, validateNomination, verifyMfa } from '../sdk.gen';
+import type { AcceptInvitationData, AcceptInvitationError, AcceptInvitationResponse, ActivateUserData, ActivateUserError, ActivateUserResponse, AddConsentData, AddConsentError, AddConsentResponse, AddHouseMeetingData, AddHouseMeetingError, AddHouseMeetingResponse, AddHouseMemberData, AddHouseMemberError, AddHouseMemberResponse, ApproveNominationData, ApproveNominationError, ApproveNominationResponse, CancelNominationData, CancelNominationError, CancelNominationResponse, ChangeFormulaStatusData, ChangeFormulaStatusError, ChangeFormulaStatusResponse, ChangeMemberLevelData, ChangeMemberLevelError, ChangeMemberLevelResponse, ChangePasswordData, ChangePasswordError, ChangePasswordResponse, ClosePeaceHouseData, ClosePeaceHouseError, ClosePeaceHouseResponse, ConfigureMunicipalitiesData, ConfigureMunicipalitiesError, ConfigureMunicipalitiesResponse, ConfigureProcessOfficesData, ConfigureProcessOfficesError, ConfigureProcessOfficesResponse, ConfigureProcessRulesData, ConfigureProcessRulesError, ConfigureProcessRulesResponse, ConfirmTotpData, ConfirmTotpError, ConfirmTotpResponse, CreateCoalitionData, CreateCoalitionError, CreateCoalitionResponse, CreateFormulaData, CreateFormulaError, CreateFormulaResponse, CreateNominationData, CreateNominationError, CreateNominationResponse, CreateOfficeTypeData, CreateOfficeTypeError, CreateOfficeTypeResponse, CreatePartyData, CreatePartyError, CreatePartyResponse, CreatePersonData, CreatePersonError, CreatePersonResponse, CreateProcessData, CreateProcessError, CreateProcessResponse, CreateRoleData, CreateRoleError, CreateRoleResponse, CreateZoneCoordinatorData, CreateZoneCoordinatorError, CreateZoneCoordinatorResponse, DeleteHousePhotoData, DeleteHousePhotoError, DeleteHousePhotoResponse, DeletePersonData, DeletePersonError, DeletePersonResponse, DeleteRoleData, DeleteRoleError, DeleteRoleResponse, DisableTotpData, DisableTotpError, DisableTotpResponse, DisableUserData, DisableUserError, DisableUserResponse, EndZoneCoordinatorData, EndZoneCoordinatorError, EndZoneCoordinatorResponse, EnrollMemberData, EnrollMemberError, EnrollMemberResponse, ExportMembersData, ExportMembersError, ForgotPasswordData, ForgotPasswordError, GetGeoNodeChildrenData, GetGeoNodeChildrenError, GetGeoNodeChildrenResponse, GetGeoNodeData, GetGeoNodeError, GetGeoNodeResponse, GetHealthData, GetHealthError, GetHealthResponse, GetHouseMeetingData, GetHouseMeetingError, GetHouseMeetingResponse, GetImportRunData, GetImportRunError, GetImportRunResponse, GetMeData, GetMeError, GetMemberData, GetMemberError, GetMemberHistoryData, GetMemberHistoryError, GetMemberHistoryResponse, GetMemberImportData, GetMemberImportError, GetMemberImportResponse, GetMemberNetworkData, GetMemberNetworkError, GetMemberNetworkResponse, GetMemberResponse, GetMeResponse, GetNominationData, GetNominationError, GetNominationHistoryData, GetNominationHistoryError, GetNominationHistoryResponse, GetNominationResponse, GetPeaceGeographyStatsData, GetPeaceGeographyStatsError, GetPeaceGeographyStatsResponse, GetPeaceGrowthData, GetPeaceGrowthError, GetPeaceGrowthResponse, GetPeaceHouseData, GetPeaceHouseError, GetPeaceHouseResponse, GetPeaceSettingsData, GetPeaceSettingsError, GetPeaceSettingsResponse, GetPersonData, GetPersonError, GetPersonResponse, GetProcessData, GetProcessError, GetProcessResponse, GetPublicEnrollmentFormData, GetPublicEnrollmentFormError, GetPublicEnrollmentFormResponse, GetReadinessData, GetReadinessError, GetReadinessResponse, GetRoleData, GetRoleError, GetRoleResponse, GetUserData, GetUserError, GetUserResponse, GetUserScopesData, GetUserScopesError, GetUserScopesResponse, GetVectorTileData, GetVectorTileError, InspectInvitationData, InspectInvitationError, InspectInvitationResponse, InviteUserData, InviteUserError, InviteUserResponse, ListAccessEntriesData, ListAccessEntriesError, ListAccessEntriesResponse, ListAuditEntriesData, ListAuditEntriesError, ListAuditEntriesResponse, ListCoalitionsData, ListCoalitionsError, ListCoalitionsResponse, ListConsentsData, ListConsentsError, ListConsentsResponse, ListFrameworksData, ListFrameworksError, ListFrameworksResponse, ListGeoNodesData, ListGeoNodesError, ListGeoNodesResponse, ListHouseGoalsData, ListHouseGoalsError, ListHouseGoalsResponse, ListHouseMeetingsData, ListHouseMeetingsError, ListHouseMeetingsResponse, ListHouseMembersData, ListHouseMembersError, ListHouseMembersResponse, ListHousePhotosData, ListHousePhotosError, ListHousePhotosResponse, ListImportIssuesData, ListImportIssuesError, ListImportIssuesResponse, ListImportRunsData, ListImportRunsError, ListImportRunsResponse, ListLevelGoalsData, ListLevelGoalsError, ListLevelGoalsResponse, ListMemberChildrenData, ListMemberChildrenError, ListMemberChildrenResponse, ListMemberImportErrorsData, ListMemberImportErrorsError, ListMemberImportErrorsResponse, ListMemberImportsData, ListMemberImportsError, ListMemberImportsResponse, ListMunicipalitySettingsData, ListMunicipalitySettingsError, ListMunicipalitySettingsResponse, ListMySessionsData, ListMySessionsError, ListMySessionsResponse, ListNominationsData, ListNominationsError, ListNominationsResponse, ListOfficeTypesData, ListOfficeTypesError, ListOfficeTypesResponse, ListParticipationLevelsData, ListParticipationLevelsError, ListParticipationLevelsResponse, ListPartiesData, ListPartiesError, ListPartiesResponse, ListPermissionsData, ListPermissionsError, ListPermissionsResponse, ListPrivacyNoticesData, ListPrivacyNoticesError, ListPrivacyNoticesResponse, ListProcessesData, ListProcessesError, ListProcessesResponse, ListProcessOfficesData, ListProcessOfficesError, ListProcessOfficesResponse, ListProcessRulesData, ListProcessRulesError, ListProcessRulesResponse, ListRolesData, ListRolesError, ListRolesResponse, ListUserBranchesData, ListUserBranchesError, ListUserBranchesResponse, ListUsersData, ListUsersError, ListUserSessionsData, ListUserSessionsError, ListUserSessionsResponse, ListUsersResponse, ListValidationRulesData, ListValidationRulesError, ListValidationRulesResponse, ListZoneCoordinatorsData, ListZoneCoordinatorsError, ListZoneCoordinatorsResponse, LocatePointData, LocatePointError, LocatePointResponse, LoginData, LoginError, LoginResponse, LogoutData, LogoutError, LogoutResponse, MemberLeavesData, MemberLeavesError, MemberLeavesResponse, OpenPeaceHouseData, OpenPeaceHouseError, OpenPeaceHouseResponse, PublicEnrollData, PublicEnrollError, PublicEnrollResponse, PublishPrivacyNoticeData, PublishPrivacyNoticeError, PublishPrivacyNoticeResponse, QueueMemberImportData, QueueMemberImportError, QueueMemberImportResponse, ReassignHouseCreditData, ReassignHouseCreditError, ReassignHouseCreditResponse, ReassignMemberData, ReassignMemberError, ReassignMemberResponse, RecordHouseLocationConsentData, RecordHouseLocationConsentError, RecordHouseLocationConsentResponse, RefreshSessionData, RefreshSessionError, RefreshSessionResponse, RegenerateRecoveryCodesData, RegenerateRecoveryCodesError, RegenerateRecoveryCodesResponse, RejectMemberData, RejectMemberError, RejectMemberResponse, RemoveHouseMemberData, RemoveHouseMemberError, RemoveHouseMemberResponse, ResendInvitationData, ResendInvitationError, ResendInvitationResponse, ResetPasswordData, ResetPasswordError, ResetPasswordResponse, ResetUserMfaData, ResetUserMfaError, ResetUserMfaResponse, RevokeHouseLocationConsentData, RevokeHouseLocationConsentError, RevokeHouseLocationConsentResponse, RevokeMyOtherSessionsData, RevokeMyOtherSessionsError, RevokeMyOtherSessionsResponse, RevokeMySessionData, RevokeMySessionError, RevokeMySessionResponse, RevokeUserSessionsData, RevokeUserSessionsError, RevokeUserSessionsResponse, SearchGeographyData, SearchGeographyError, SearchGeographyResponse, SearchMembersData, SearchMembersError, SearchMembersResponse, SearchPeaceHousesData, SearchPeaceHousesError, SearchPeaceHousesResponse, SearchPeopleData, SearchPeopleError, SearchPeopleResponse, SetHouseGoalData, SetHouseGoalError, SetHouseGoalResponse, SetLevelGoalData, SetLevelGoalError, SetLevelGoalResponse, SetRolePermissionsData, SetRolePermissionsError, SetRolePermissionsResponse, SetupTotpData, SetupTotpError, SetupTotpResponse, SetUserBranchesData, SetUserBranchesError, SetUserBranchesResponse, SetUserRolesData, SetUserRolesError, SetUserRolesResponse, SetUserScopesData, SetUserScopesError, SetUserScopesResponse, SubmitMemberBatchData, SubmitMemberBatchError, SubmitMemberBatchResponse, SubmitNominationData, SubmitNominationError, SubmitNominationResponse, SubstituteFormulaData, SubstituteFormulaError, SubstituteFormulaResponse, UnlockUserData, UnlockUserError, UnlockUserResponse, UpdateFormulaMembersData, UpdateFormulaMembersError, UpdateFormulaMembersResponse, UpdateNominationData, UpdateNominationError, UpdateNominationResponse, UpdateOfficeTypeData, UpdateOfficeTypeError, UpdateOfficeTypeResponse, UpdatePartyData, UpdatePartyError, UpdatePartyResponse, UpdatePeaceHouseData, UpdatePeaceHouseError, UpdatePeaceHouseResponse, UpdatePeaceSettingsData, UpdatePeaceSettingsError, UpdatePeaceSettingsResponse, UpdatePersonData, UpdatePersonError, UpdatePersonResponse, UpdateProcessData, UpdateProcessError, UpdateProcessResponse, UpdateRoleData, UpdateRoleError, UpdateRoleResponse, UpdateUserData, UpdateUserError, UpdateUserResponse, UploadHousePhotoData, UploadHousePhotoError, UploadHousePhotoResponse, ValidateMemberData, ValidateMemberError, ValidateMemberResponse, ValidateNominationData, ValidateNominationError, ValidateNominationResponse, VerifyMfaData, VerifyMfaError, VerifyMfaResponse } from '../types.gen';
 
 export type QueryKey<TOptions extends Options> = [
     Pick<TOptions, 'baseUrl' | 'body' | 'headers' | 'path' | 'query'> & {
@@ -2829,3 +2829,186 @@ export const exportMembersOptions = (options?: Options<ExportMembersData>) => qu
     },
     queryKey: exportMembersQueryKey(options)
 });
+
+/**
+ * Carga por lotes de la app de campo (idempotente; quedan pendientes de validar)
+ */
+export const submitMemberBatchMutation = (options?: Partial<Options<SubmitMemberBatchData>>): UseMutationOptions<SubmitMemberBatchResponse, SubmitMemberBatchError, Options<SubmitMemberBatchData>> => {
+    const mutationOptions: UseMutationOptions<SubmitMemberBatchResponse, SubmitMemberBatchError, Options<SubmitMemberBatchData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await submitMemberBatch({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const listMemberImportsQueryKey = (options?: Options<ListMemberImportsData>) => createQueryKey('listMemberImports', options);
+
+/**
+ * Importaciones
+ */
+export const listMemberImportsOptions = (options?: Options<ListMemberImportsData>) => queryOptions<ListMemberImportsResponse, ListMemberImportsError, ListMemberImportsResponse, ReturnType<typeof listMemberImportsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listMemberImports({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listMemberImportsQueryKey(options)
+});
+
+export const listMemberImportsInfiniteQueryKey = (options?: Options<ListMemberImportsData>): QueryKey<Options<ListMemberImportsData>> => createQueryKey('listMemberImports', options, true);
+
+/**
+ * Importaciones
+ */
+export const listMemberImportsInfiniteOptions = (options?: Options<ListMemberImportsData>) => {
+    const opts = infiniteQueryOptions<ListMemberImportsResponse, ListMemberImportsError, InfiniteData<ListMemberImportsResponse>, QueryKey<Options<ListMemberImportsData>>, string | null | Pick<QueryKey<Options<ListMemberImportsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<ListMemberImportsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    cursor: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await listMemberImports({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: listMemberImportsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
+
+/**
+ * Subir un CSV o Excel de pacificadores (se procesa en segundo plano)
+ */
+export const queueMemberImportMutation = (options?: Partial<Options<QueueMemberImportData>>): UseMutationOptions<QueueMemberImportResponse, QueueMemberImportError, Options<QueueMemberImportData>> => {
+    const mutationOptions: UseMutationOptions<QueueMemberImportResponse, QueueMemberImportError, Options<QueueMemberImportData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await queueMemberImport({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getMemberImportQueryKey = (options: Options<GetMemberImportData>) => createQueryKey('getMemberImport', options);
+
+/**
+ * Detalle de importación
+ */
+export const getMemberImportOptions = (options: Options<GetMemberImportData>) => queryOptions<GetMemberImportResponse, GetMemberImportError, GetMemberImportResponse, ReturnType<typeof getMemberImportQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getMemberImport({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getMemberImportQueryKey(options)
+});
+
+export const listMemberImportErrorsQueryKey = (options: Options<ListMemberImportErrorsData>) => createQueryKey('listMemberImportErrors', options);
+
+/**
+ * Errores por fila
+ */
+export const listMemberImportErrorsOptions = (options: Options<ListMemberImportErrorsData>) => queryOptions<ListMemberImportErrorsResponse, ListMemberImportErrorsError, ListMemberImportErrorsResponse, ReturnType<typeof listMemberImportErrorsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listMemberImportErrors({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listMemberImportErrorsQueryKey(options)
+});
+
+export const listMemberImportErrorsInfiniteQueryKey = (options: Options<ListMemberImportErrorsData>): QueryKey<Options<ListMemberImportErrorsData>> => createQueryKey('listMemberImportErrors', options, true);
+
+/**
+ * Errores por fila
+ */
+export const listMemberImportErrorsInfiniteOptions = (options: Options<ListMemberImportErrorsData>) => {
+    const opts = infiniteQueryOptions<ListMemberImportErrorsResponse, ListMemberImportErrorsError, InfiniteData<ListMemberImportErrorsResponse>, QueryKey<Options<ListMemberImportErrorsData>>, string | null | Pick<QueryKey<Options<ListMemberImportErrorsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<ListMemberImportErrorsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    cursor: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await listMemberImportErrors({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: listMemberImportErrorsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
+
+export const getPublicEnrollmentFormQueryKey = (options: Options<GetPublicEnrollmentFormData>) => createQueryKey('getPublicEnrollmentForm', options);
+
+/**
+ * Formulario público de inscripción: aviso, niveles y verificación anti-bots
+ */
+export const getPublicEnrollmentFormOptions = (options: Options<GetPublicEnrollmentFormData>) => queryOptions<GetPublicEnrollmentFormResponse, GetPublicEnrollmentFormError, GetPublicEnrollmentFormResponse, ReturnType<typeof getPublicEnrollmentFormQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getPublicEnrollmentForm({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getPublicEnrollmentFormQueryKey(options)
+});
+
+/**
+ * Inscripción pública (queda pendiente de validar)
+ */
+export const publicEnrollMutation = (options?: Partial<Options<PublicEnrollData>>): UseMutationOptions<PublicEnrollResponse, PublicEnrollError, Options<PublicEnrollData>> => {
+    const mutationOptions: UseMutationOptions<PublicEnrollResponse, PublicEnrollError, Options<PublicEnrollData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await publicEnroll({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};

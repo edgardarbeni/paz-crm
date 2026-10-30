@@ -14,7 +14,7 @@ from app.core.pagination import CursorPage, PageParams, page_params
 from app.core.storage import ObjectStorage, StorageDep
 from app.modules.identity.dependencies import CurrentUser, permission
 from app.modules.identity.permissions import Perm
-from app.modules.peace_movement import catalog, houses, members, scope, stats
+from app.modules.peace_movement import catalog, houses, intake, members, scope, stats
 from app.modules.peace_movement.models import (
     Member,
     PeaceHouse,
@@ -25,6 +25,8 @@ from app.modules.peace_movement.models import (
 from app.modules.peace_movement.permissions import PeacePerm
 from app.modules.peace_movement.schemas import (
     AttendeeOut,
+    BatchIn,
+    BatchOut,
     BranchesIn,
     BranchOut,
     ChildrenPage,
@@ -52,6 +54,8 @@ from app.modules.peace_movement.schemas import (
     MeetingOut,
     MeetingSummary,
     MemberHistory,
+    MemberImportErrorOut,
+    MemberImportRunOut,
     MemberOut,
     MemberSummary,
     NetworkNode,
@@ -264,6 +268,8 @@ async def _member_out(
         progress_pct=pct,
         traffic_light=light,
         network=NetworkOut.model_validate(network) if network else None,
+        requested_house_id=member.requested_house_id,
+        intake=intake.decoded_intake(crypto, member) if sensitive else None,
         house_goal=house_goal,
         houses_progress_pct=houses_pct,
     )
@@ -923,4 +929,89 @@ async def export_members(
         content=content,
         media_type="text/csv; charset=utf-8",
         headers={"Content-Disposition": 'attachment; filename="pacificadores.csv"'},
+    )
+
+
+# --- intake (phase 4) -------------------------------------------------------------------------
+
+Importer = Annotated[CurrentUser, permission(PeacePerm.MEMBER_IMPORT)]
+
+
+@router.post(
+    "/members/batch",
+    operation_id="submitMemberBatch",
+    summary="Carga por lotes de la app de campo (idempotente; quedan pendientes de validar)",
+)
+async def submit_batch(db: SessionDep, crypto: CryptoDep, user: Writer, body: BatchIn) -> BatchOut:
+    items = await intake.submit_batch(db, crypto, _actor(user), body)
+    return BatchOut(
+        accepted=sum(1 for i in items if i.status == "accepted"),
+        duplicates=sum(1 for i in items if i.status == "duplicate"),
+        errors=sum(1 for i in items if i.status == "error"),
+        items=items,
+    )
+
+
+@router.post(
+    "/imports",
+    operation_id="queueMemberImport",
+    summary="Subir un CSV o Excel de pacificadores (se procesa en segundo plano)",
+    status_code=status.HTTP_202_ACCEPTED,
+)
+async def queue_import(
+    db: SessionDep,
+    storage: StorageDep,
+    user: Importer,
+    file: Annotated[UploadFile, File(description="CSV (UTF-8) o Excel .xlsx.")],
+    evidence_uri: Annotated[
+        str, Form(min_length=3, max_length=500, description="Evidencia de los consentimientos.")
+    ],
+    dry_run: Annotated[bool, Form(description="Solo validar, sin escribir.")] = True,
+    default_level_id: Annotated[uuid.UUID | None, Form()] = None,
+) -> MemberImportRunOut:
+    data = await file.read(intake.IMPORT_MAX_BYTES + 1)
+    run = await intake.queue_import(
+        db,
+        storage,
+        _actor(user),
+        filename=file.filename or "importacion.csv",
+        data=data,
+        dry_run=dry_run,
+        evidence_uri=evidence_uri,
+        default_level_id=default_level_id,
+    )
+    return MemberImportRunOut.model_validate(run)
+
+
+@router.get("/imports", operation_id="listMemberImports", summary="Importaciones")
+async def list_imports(
+    db: SessionDep, user: Importer, params: Annotated[PageParams, Depends(page_params)]
+) -> CursorPage[MemberImportRunOut]:
+    page = await intake.list_runs(db, _actor(user), params)
+    return CursorPage[MemberImportRunOut](
+        items=[MemberImportRunOut.model_validate(run) for run in page.items],
+        next_cursor=page.next_cursor,
+        has_more=page.has_more,
+    )
+
+
+@router.get("/imports/{run_id}", operation_id="getMemberImport", summary="Detalle de importación")
+async def get_import(db: SessionDep, user: Importer, run_id: uuid.UUID) -> MemberImportRunOut:
+    return MemberImportRunOut.model_validate(await intake.get_run(db, _actor(user), run_id))
+
+
+@router.get(
+    "/imports/{run_id}/errors", operation_id="listMemberImportErrors", summary="Errores por fila"
+)
+async def list_import_errors(
+    db: SessionDep,
+    user: Importer,
+    run_id: uuid.UUID,
+    params: Annotated[PageParams, Depends(page_params)],
+) -> CursorPage[MemberImportErrorOut]:
+    page = await intake.run_errors(db, _actor(user), run_id, params)
+    return CursorPage[MemberImportErrorOut](
+        items=[MemberImportErrorOut.model_validate(error) for error in page.items],
+        next_cursor=page.next_cursor,
+        has_more=page.has_more,
     )

@@ -9,3 +9,5 @@
 # Peace Movement aggregates: pending network changes every minute, full recompute nightly.
 * * * * * paz peace-movement aggregate
 45 3 * * * paz peace-movement aggregate --full
+# Peace Movement imports queued from the panel (CSV/Excel), every minute.
+* * * * * paz peace-movement process-imports

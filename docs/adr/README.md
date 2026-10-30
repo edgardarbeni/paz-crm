@@ -172,6 +172,7 @@ plantean alternativas; el 2026-10-29 se aceptó la opción recomendada de cada u
 | [D-95](D-95-ajustes-implementacion-pacificadores.md) | Ajustes de implementación de la fase 1 del Movimiento de Paz (pacificadores) | Aceptada |
 | [D-96](D-96-ajustes-implementacion-casas.md) | Ajustes de implementación de la fase 2 del Movimiento de Paz (Casas de Paz) | Aceptada |
 | [D-97](D-97-agregados-red-movimiento-paz.md) | Agregados de la red del Movimiento de Paz (fase 3) | Aceptada |
+| [D-98](D-98-entradas-masivas-publicas.md) | Entradas públicas y masivas del Movimiento de Paz (fase 4; precisa D-90) | Aceptada |
 
 ## Suposiciones vigentes
 

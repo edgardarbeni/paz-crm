@@ -194,6 +194,14 @@ class MemberOut(Schema):
     progress_pct: int | None
     traffic_light: Literal["red", "yellow", "green"] | None
     network: NetworkOut | None = Field(description="Nulo hasta el primer cálculo de agregados.")
+    requested_house_id: uuid.UUID | None = Field(
+        default=None, description="Casa que eligió en una inscripción pendiente."
+    )
+    intake: dict[str, object] | None = Field(
+        default=None,
+        description="Lo que envió una inscripción pública para una persona ya registrada "
+        "(solo con people.person.read_sensitive), para compararlo al validar.",
+    )
     house_goal: int | None = Field(description="Casas consolidadas que pide su nivel.")
     houses_progress_pct: int | None
 
@@ -454,3 +462,117 @@ class GeoStatOut(Schema):
 class GrowthPoint(Schema):
     day: date
     enrollments: int
+
+
+# --- intake (phase 4) -------------------------------------------------------------------------
+
+
+class ChallengeOut(Schema):
+    algorithm: str
+    challenge: str
+    salt: str
+    signature: str
+    max_number: int
+
+
+class NoticeView(Schema):
+    code: str
+    version: str
+    title: str
+    body: str
+
+
+class PublicFormOut(Schema):
+    """Everything the public enrollment page needs, without revealing who invited."""
+
+    notice: NoticeView
+    levels: list[LevelOut]
+    challenge: ChallengeOut
+
+
+class ProofIn(Schema):
+    challenge: Annotated[str, StringConstraints(pattern=r"^[0-9a-f]{64}$")]
+    salt: Annotated[str, StringConstraints(min_length=10, max_length=200)]
+    number: Annotated[int, Field(ge=0, le=10_000_000)]
+    signature: Annotated[str, StringConstraints(pattern=r"^[0-9a-f]{64}$")]
+
+
+class PublicPersonIn(Schema):
+    given_names: Annotated[
+        str, StringConstraints(strip_whitespace=True, min_length=1, max_length=120)
+    ]
+    paternal_surname: Annotated[
+        str, StringConstraints(strip_whitespace=True, min_length=1, max_length=80)
+    ]
+    maternal_surname: Annotated[
+        str | None, StringConstraints(strip_whitespace=True, min_length=1, max_length=80)
+    ] = None
+    curp: Annotated[str, StringConstraints(strip_whitespace=True, min_length=18, max_length=18)]
+    mobile: Annotated[str, StringConstraints(min_length=10, max_length=20)]
+    email: Annotated[str | None, StringConstraints(max_length=150)] = None
+    street: Annotated[str | None, StringConstraints(max_length=200)] = None
+    exterior_number: Annotated[str | None, StringConstraints(max_length=30)] = None
+    postal_code: Annotated[str | None, StringConstraints(pattern=r"^\d{5}$")] = None
+    state_code: Annotated[int, Field(ge=1, le=32, description="Entidad de la credencial.")]
+    section_number: Annotated[int, Field(ge=1, le=9999, description="Sección de la credencial.")]
+
+
+class PublicEnrollmentIn(Schema):
+    referral_code: Annotated[str, StringConstraints(min_length=8, max_length=32)]
+    person: PublicPersonIn
+    level_id: uuid.UUID
+    notice_version: Annotated[str, StringConstraints(min_length=1, max_length=50)]
+    accepts_notice: bool = Field(description="Debe ser verdadero: consentimiento expreso.")
+    proof: ProofIn
+    website: Annotated[str | None, Field(max_length=200, description="Campo trampa; vacío.")] = None
+
+
+class PublicEnrollmentOut(Schema):
+    status: Literal["received"] = "received"
+    message: str = "Recibimos tu inscripción. Una persona del Movimiento de Paz la revisará pronto."
+
+
+class BatchItemIn(EnrollmentIn):
+    client_id: uuid.UUID = Field(description="UUID generado en el dispositivo (idempotencia).")
+    captured_at: datetime
+    capture_longitude: Annotated[float | None, Field(ge=-180, le=180)] = None
+    capture_latitude: Annotated[float | None, Field(ge=-90, le=90)] = None
+
+
+class BatchIn(Schema):
+    items: list[BatchItemIn] = Field(min_length=1, max_length=500)
+
+
+class BatchItemOut(Schema):
+    client_id: uuid.UUID
+    status: Literal["accepted", "duplicate", "error"]
+    member_id: uuid.UUID | None = None
+    error_code: str | None = None
+    error: str | None = None
+
+
+class BatchOut(Schema):
+    accepted: int
+    duplicates: int
+    errors: int
+    items: list[BatchItemOut]
+
+
+class MemberImportRunOut(Schema):
+    id: uuid.UUID
+    filename: str
+    dry_run: bool
+    status: str
+    total_rows: int
+    accepted_rows: int
+    error_rows: int
+    created_at: datetime
+    started_at: datetime | None
+    finished_at: datetime | None
+    failure: str | None
+
+
+class MemberImportErrorOut(Schema):
+    row_number: int
+    code: str
+    detail: str

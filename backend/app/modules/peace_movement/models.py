@@ -284,6 +284,14 @@ class Member(BusinessTable, table=True):
     consent_id: uuid.UUID | None = _fk(
         "people.privacy_consents.id", nullable=True, ondelete="SET NULL"
     )
+    # A pending enrollment that chose a house joins it when validated (D-96).
+    requested_house_id: uuid.UUID | None = _fk(
+        f"{SCHEMA}.peace_houses.id", nullable=True, ondelete="SET NULL"
+    )
+    # What a public enrollment submitted for an existing person, encrypted: the stored person
+    # is never overwritten and the validator compares (D-92).
+    intake_ciphertext: bytes | None = Field(default=None, sa_type=LargeBinary)
+    intake_key_version: int | None = Field(default=None, sa_type=SmallInteger)
 
 
 class MemberLevelChange(BusinessTable, table=True):
@@ -541,3 +549,66 @@ class MemberSectionCount(SQLModel, table=True):
     section_id: uuid.UUID = Field(foreign_key="geography.sections.id", primary_key=True)
     level_id: uuid.UUID = Field(foreign_key=f"{SCHEMA}.participation_levels.id", primary_key=True)
     active: int
+
+
+# --- intake (phase 4) -------------------------------------------------------------------------
+
+
+class MemberIntakeKey(SQLModel, table=True):
+    """Idempotency of the field app's batch upload: one row per client-generated UUID."""
+
+    __tablename__ = "member_intake_keys"
+    __table_args__: ClassVar[dict[str, Any]] = {"schema": SCHEMA}
+    __audit__: ClassVar[bool] = False  # the member it creates is audited
+
+    client_id: uuid.UUID = Field(primary_key=True)
+    member_id: uuid.UUID = Field(foreign_key=f"{SCHEMA}.members.id", ondelete="CASCADE")
+    submitted_by_user_id: uuid.UUID | None = _fk("identity.users.id", nullable=True)
+    captured_at: datetime | None = Field(default=None, sa_type=TZ)
+    capture_location: Any = Field(
+        default=None, sa_type=Geometry("POINT", srid=4326, spatial_index=False), nullable=True
+    )
+    created_at: datetime = Field(sa_column=Column(TZ, nullable=False, server_default=text("now()")))
+
+
+class ImportStatus(StrEnum):
+    QUEUED = "queued"
+    RUNNING = "running"
+    DONE = "done"
+    FAILED = "failed"
+
+
+class MemberImportRun(BusinessTable, table=True):
+    """An import of a CSV or Excel file, processed by the scheduler (D-84). A dry run validates
+    every row and writes nothing but this report."""
+
+    __tablename__ = "member_import_runs"
+    __table_args__ = (_in("status", ImportStatus, "status"), {"schema": SCHEMA})
+
+    filename: str = Field(max_length=200)
+    storage_key: str = Field(max_length=300)
+    dry_run: bool
+    status: str = Field(sa_type=Text)
+    evidence_uri: str = Field(max_length=500)
+    default_level_id: uuid.UUID | None = _fk(f"{SCHEMA}.participation_levels.id", nullable=True)
+    created_by_user_id: uuid.UUID = _fk("identity.users.id")
+    total_rows: int = 0
+    accepted_rows: int = 0
+    error_rows: int = 0
+    started_at: datetime | None = Field(default=None, sa_type=TZ)
+    finished_at: datetime | None = Field(default=None, sa_type=TZ)
+    failure: str | None = Field(default=None, max_length=500)
+
+
+class MemberImportError(SQLModel, table=True):
+    __tablename__ = "member_import_errors"
+    __table_args__: ClassVar[dict[str, Any]] = {"schema": SCHEMA}
+    __audit__: ClassVar[bool] = False
+
+    id: int | None = Field(default=None, sa_column=Column(BigInteger, primary_key=True))
+    run_id: uuid.UUID = Field(
+        foreign_key=f"{SCHEMA}.member_import_runs.id", ondelete="CASCADE", index=True
+    )
+    row_number: int
+    code: str = Field(max_length=50)
+    detail: str = Field(max_length=500)

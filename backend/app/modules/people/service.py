@@ -306,6 +306,8 @@ async def build_person(
     *,
     can_accept_incoherence: bool,
     address_outside_scope: bool = False,
+    curp_checked: bool = False,
+    geography_checked: bool = False,
 ) -> PersonView:
     """Creates the person and flushes without committing, so another module can write in the
     same transaction. `address_outside_scope` skips the D-66 address rule; only a module with
@@ -325,9 +327,11 @@ async def build_person(
         accept_incoherence=body.accept_curp_incoherence,
         can_accept=can_accept_incoherence,
     )
-    await _ensure_curp_unique(db, person)
+    if not curp_checked:  # the caller already looked the CURP up
+        await _ensure_curp_unique(db, person)
     if body.address:
-        await _validate_geography(db, body.address)
+        if not geography_checked:  # the caller resolved the nodes itself
+            await _validate_geography(db, body.address)
         if not address_outside_scope:
             await _ensure_address_in_scope(db, geo, body.address)
     db.add(person)

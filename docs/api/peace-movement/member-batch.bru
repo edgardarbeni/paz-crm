@@ -1,0 +1,41 @@
+meta {
+  name: Carga por lotes (app de campo)
+  type: http
+  seq: 20
+}
+
+post {
+  url: {{baseUrl}}/api/v1/peace-movement/members/batch
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "items": [
+      {
+        "client_id": "0193f3a2-5b6c-7d8e-9f00-112233445566",
+        "captured_at": "2026-10-28T12:00:00-06:00",
+        "person": {
+          "given_names": "Juan",
+          "paternal_surname": "López",
+          "curp": "LODA900101HASPZN09",
+          "address": {
+            "section_id": "{{sectionId}}"
+          }
+        },
+        "level_id": "{{levelId}}",
+        "recruiter_member_id": "{{memberId}}",
+        "origin": "recruiter",
+        "consent": {
+          "channel": "paper",
+          "evidence_uri": "s3://pazos/consents/1.jpg"
+        }
+      }
+    ]
+  }
+}

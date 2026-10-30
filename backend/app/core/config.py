@@ -78,6 +78,9 @@ class Settings(BaseSettings):
     ine_api_base_url: str = "https://cartografia.ine.mx/sige8/api"
     ine_storage_base_url: str = "https://storage.googleapis.com/mapoteca/"
 
+    # Proof of work of public forms (D-86). Without it, a key is derived from the JWT secret.
+    pow_secret: SecretStr | None = None
+
     # S3-compatible object storage (D-38). Without an endpoint, file features answer 503.
     storage_endpoint: str | None = None
     storage_public_endpoint: str | None = None

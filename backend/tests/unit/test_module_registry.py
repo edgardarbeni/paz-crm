@@ -36,7 +36,7 @@ def test_core_modules_are_discovered_in_order() -> None:
 def test_routers_cover_the_whole_api() -> None:
     prefixes = {router.prefix for router in api_routers()}
     assert {"/auth", "/users", "/audit-log", "/geography", "/people"} <= prefixes
-    assert len(api_routers()) == 8  # identity has three routers
+    assert len(api_routers()) == 9  # identity has three, peace_movement two
 
 
 def test_permission_codes_follow_the_convention() -> None:

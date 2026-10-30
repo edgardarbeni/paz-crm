@@ -7,7 +7,7 @@ UPDATE recorded with one bulk audit entry (D-90).
 
 import secrets
 import uuid
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import UTC, date, datetime
 from typing import Any
 
@@ -33,11 +33,13 @@ from app.modules.peace_movement.models import (
     MemberRecruiterChange,
     MemberStatus,
     NetworkChange,
+    ParticipationLevel,
 )
+from app.modules.peace_movement.models import Settings as PeaceSettings
 from app.modules.peace_movement.schemas import EnrollmentIn
 from app.modules.peace_movement.scope import in_branch, member_visibility
 from app.modules.people import service as people
-from app.modules.people.models import Person, PersonAddress
+from app.modules.people.models import Person, PersonAddress, PrivacyNotice
 
 logger = get_logger(__name__)
 
@@ -50,9 +52,26 @@ class MemberRequirementsError(BadRequestError):
     title = "La persona no cumple los requisitos del Movimiento de Paz"
 
 
+class AlreadyEnrolledError(ConflictError):
+    code = "already-enrolled"
+    title = "La persona ya está inscrita"
+
+
 class NoticeUnavailableError(ConflictError):
     code = "notice-unavailable"
     title = "No hay un aviso de privacidad del Movimiento de Paz vigente"
+
+
+@dataclass(frozen=True, slots=True)
+class RegisterCache:
+    """Lookups that do not change during a bulk intake (an import run)."""
+
+    notice: PrivacyNotice
+    settings: PeaceSettings
+    levels: dict[uuid.UUID, ParticipationLevel]
+    # Filled during the run: section → state, and recruiters already authorized for the actor.
+    section_states: dict[uuid.UUID, uuid.UUID] = field(default_factory=dict)
+    recruiters: dict[uuid.UUID, Member] = field(default_factory=dict)
 
 
 @dataclass(frozen=True, slots=True)
@@ -124,6 +143,21 @@ async def _home(db: AsyncSession, address: PersonAddress | None) -> tuple[uuid.U
     return state_id, address.section_id
 
 
+async def _home_of(
+    db: AsyncSession, person: Person, cache: "RegisterCache | None"
+) -> tuple[uuid.UUID, uuid.UUID]:
+    """(state_id, section_id) of the person's primary address, with the section's state cached
+    during bulk intake."""
+    address = await _primary_address(db, pk(person))
+    if cache is None or address is None or address.section_id is None:
+        return await _home(db, address)
+    state = cache.section_states.get(address.section_id)
+    if state is None:
+        state, _ = await _home(db, address)
+        cache.section_states[address.section_id] = state
+    return state, address.section_id
+
+
 async def _section_in_scope(db: AsyncSession, geo: GeoScope, section_id: uuid.UUID) -> bool:
     if geo.unrestricted:
         return True
@@ -135,7 +169,13 @@ async def _section_in_scope(db: AsyncSession, geo: GeoScope, section_id: uuid.UU
 
 
 async def _person_for_enrollment(
-    db: AsyncSession, crypto: people.Crypto, actor: Actor, body: EnrollmentIn, *, branch: bool
+    db: AsyncSession,
+    crypto: people.Crypto,
+    actor: Actor,
+    body: EnrollmentIn,
+    *,
+    branch: bool,
+    bulk: bool = False,
 ) -> Person:
     if body.person_id is not None:
         if branch:
@@ -167,11 +207,98 @@ async def _person_for_enrollment(
         body.person,
         can_accept_incoherence=actor.can_accept_curp_incoherence,
         address_outside_scope=branch,
+        curp_checked=True,
+        geography_checked=bulk,
     )
     return view.person
 
 
 # --- enrollment -------------------------------------------------------------------------------
+
+
+async def register(
+    db: AsyncSession,
+    *,
+    person: Person,
+    level: ParticipationLevel,
+    recruiter: Member | None,
+    origin: str,
+    origin_detail: str | None,
+    channel: EnrollmentChannel,
+    status: MemberStatus,
+    registered_by: uuid.UUID | None,
+    consent_channel: str,
+    evidence_uri: str | None,
+    requested_house_id: uuid.UUID | None = None,
+    intake_ciphertext: bytes | None = None,
+    intake_key_version: int | None = None,
+    cache: "RegisterCache | None" = None,
+    home: tuple[uuid.UUID, uuid.UUID] | None = None,
+) -> Member:
+    """Creates the member once the person, recruiter and level are authorized, in the caller's
+    transaction (flush, no commit). Shared by the panel, the batch upload, the import and the
+    public enrollment."""
+    notice = cache.notice if cache else await people.current_notice(db, NOTICE_CODE)
+    if notice is None:
+        raise NoticeUnavailableError(
+            "Carga el aviso de privacidad del Movimiento de Paz antes de inscribir."
+        )
+    if recruiter is not None and recruiter.status != MemberStatus.ACTIVE:
+        raise ConflictError("El reclutador debe estar activo.")
+    if person.curp_ciphertext is None:
+        raise MemberRequirementsError("La persona necesita CURP para inscribirse.")
+    state_id, section_id = home or await _home(db, await _primary_address(db, pk(person)))
+    current = await db.execute(
+        select(col(Member.id)).where(
+            col(Member.person_id) == pk(person),
+            col(Member.status).in_(CURRENT_STATUSES),
+            col(Member.deleted_at).is_(None),
+        )
+    )
+    if current.first() is not None:
+        raise AlreadyEnrolledError("La persona ya está inscrita en el Movimiento de Paz.")
+
+    tree_id = int((await db.execute(text(f"SELECT nextval('{TREE_SEQUENCE}')"))).scalar_one())
+    path = f"{recruiter.path}.{tree_id}" if recruiter else str(tree_id)
+    consent = await people.record_consent(
+        db, pk(person), notice, channel=consent_channel, evidence_uri=evidence_uri
+    )
+    active = status == MemberStatus.ACTIVE
+    member = Member(
+        person_id=pk(person),
+        enrolled_on=date.today(),
+        level_id=pk(level),
+        recruited_by_member_id=pk(recruiter) if recruiter else None,
+        origin=origin,
+        origin_detail=origin_detail,
+        registered_by_user_id=registered_by,
+        channel=channel,
+        status=status,
+        validated_by_user_id=registered_by if active else None,
+        validated_at=datetime.now(UTC) if active else None,
+        referral_code=secrets.token_urlsafe(12),
+        tree_id=tree_id,
+        path=path,
+        depth=path.count("."),
+        state_id=state_id,
+        section_id=section_id,
+        consent_id=consent.id,
+        requested_house_id=requested_house_id,
+        intake_ciphertext=intake_ciphertext,
+        intake_key_version=intake_key_version,
+    )
+    db.add(member)
+    await db.flush()
+    db.add(_change("enrolled", member, path, status=status))
+    settings = cache.settings if cache else await catalog.get_settings(db)
+    if member.depth > settings.depth_alert_threshold:
+        logger.warning(
+            "peace_movement_depth_alert",
+            member_id=str(member.id),
+            depth=member.depth,
+            threshold=settings.depth_alert_threshold,
+        )
+    return member
 
 
 async def enroll(
@@ -182,90 +309,67 @@ async def enroll(
     *,
     channel: EnrollmentChannel = EnrollmentChannel.PANEL,
     status: MemberStatus = MemberStatus.ACTIVE,
+    commit: bool = True,
+    cache: "RegisterCache | None" = None,
 ) -> Member:
-    """Enrolls a person. From the panel the member is active; other channels (public link,
-    field app) pass `pending_validation` and do not count until validated."""
-    notice = await people.current_notice(db, NOTICE_CODE)
-    if notice is None:
-        raise NoticeUnavailableError(
-            "Carga el aviso de privacidad del Movimiento de Paz antes de inscribir."
-        )
-    level = await catalog.get_level(db, body.level_id)
-
+    """Enrolls a person under the user's member scope. From the panel the member is active; the
+    field app's enrollments arrive `pending_validation` and do not count until validated."""
+    level = (cache.levels.get(body.level_id) if cache else None) or await catalog.get_level(
+        db, body.level_id
+    )
     recruiter: Member | None = None
     branch = False
     if body.recruiter_member_id is not None:
-        recruiter = await visible_member(db, actor.geo, body.recruiter_member_id, for_update=True)
+        # Bulk intake (cache) skips the row lock: parallel chunks share recruiters and would
+        # deadlock; the foreign key already keeps the reference valid.
+        recruiter = cache.recruiters.get(body.recruiter_member_id) if cache else None
+        if recruiter is None:
+            recruiter = await visible_member(
+                db, actor.geo, body.recruiter_member_id, for_update=cache is None
+            )
+            if cache is not None:
+                cache.recruiters[body.recruiter_member_id] = recruiter
         if recruiter.status != MemberStatus.ACTIVE:
             raise ConflictError("El reclutador debe estar activo.")
         branch = not actor.geo.unrestricted and await in_branch(db, actor.geo, recruiter)
 
-    person = await _person_for_enrollment(db, crypto, actor, body, branch=branch)
+    person = await _person_for_enrollment(
+        db, crypto, actor, body, branch=branch, bulk=cache is not None
+    )
     if person.curp_ciphertext is None:
         raise MemberRequirementsError("La persona necesita CURP para inscribirse.")
-    state_id, section_id = await _home(db, await _primary_address(db, pk(person)))
+    home = await _home_of(db, person, cache)
+    section_id = home[1]
     if not branch and not await _section_in_scope(db, actor.geo, section_id):
         raise NotFoundError("Persona no encontrada.")
 
-    current = await db.execute(
-        select(col(Member.id)).where(
-            col(Member.person_id) == person.id,
-            col(Member.status).in_(CURRENT_STATUSES),
-            col(Member.deleted_at).is_(None),
-        )
-    )
-    if current.first() is not None:
-        raise ConflictError("La persona ya está inscrita en el Movimiento de Paz.")
-
-    tree_id = int((await db.execute(text(f"SELECT nextval('{TREE_SEQUENCE}')"))).scalar_one())
-    path = f"{recruiter.path}.{tree_id}" if recruiter else str(tree_id)
-    consent = await people.record_consent(
+    active = status == MemberStatus.ACTIVE
+    member = await register(
         db,
-        pk(person),
-        notice,
-        channel=body.consent.channel if channel == EnrollmentChannel.PANEL else channel.value,
-        evidence_uri=body.consent.evidence_uri,
-    )
-    member = Member(
-        person_id=pk(person),
-        enrolled_on=date.today(),
-        level_id=pk(level),
-        recruited_by_member_id=pk(recruiter) if recruiter else None,
+        person=person,
+        level=level,
+        recruiter=recruiter,
         origin=body.origin,
         origin_detail=body.origin_detail,
-        registered_by_user_id=actor.user_id,
         channel=channel,
         status=status,
-        validated_by_user_id=actor.user_id if status == MemberStatus.ACTIVE else None,
-        validated_at=datetime.now(UTC) if status == MemberStatus.ACTIVE else None,
-        referral_code=secrets.token_urlsafe(12),
-        tree_id=tree_id,
-        path=path,
-        depth=path.count("."),
-        state_id=state_id,
-        section_id=section_id,
-        consent_id=consent.id,
+        registered_by=actor.user_id,
+        consent_channel=body.consent.channel
+        if channel == EnrollmentChannel.PANEL
+        else channel.value,
+        evidence_uri=body.consent.evidence_uri,
+        requested_house_id=None if active else body.house_id,
+        cache=cache,
+        home=home,
     )
-    db.add(member)
-    await db.flush()
-    db.add(_change("enrolled", member, path, status=status))
-    if body.house_id is not None:
-        if status != MemberStatus.ACTIVE:
-            raise BadRequestError("Solo una inscripción activa puede integrar una casa.")
+    if body.house_id is not None and active:
         from app.modules.peace_movement import houses  # noqa: PLC0415 - houses imports members
 
         await houses.add_member(
             db, actor, body.house_id, pk(member), HouseMemberSource.ENROLLMENT, commit=False
         )
-    settings = await catalog.get_settings(db)
-    if member.depth > settings.depth_alert_threshold:
-        logger.warning(
-            "peace_movement_depth_alert",
-            member_id=str(member.id),
-            depth=member.depth,
-            threshold=settings.depth_alert_threshold,
-        )
-    await db.commit()
+    if commit:
+        await db.commit()
     return member
 
 
@@ -280,8 +384,29 @@ async def validate(db: AsyncSession, actor: Actor, member_id: uuid.UUID) -> Memb
     member.validated_by_user_id = actor.user_id
     member.validated_at = datetime.now(UTC)
     db.add(_change("validated", member, member.path))
+    await db.flush()
+    if member.requested_house_id is not None:
+        await _join_requested_house(db, actor, member)
     await db.commit()
     return member
+
+
+async def _join_requested_house(db: AsyncSession, actor: Actor, member: Member) -> None:
+    """The house chosen in a pending enrollment, if it is still open (D-96)."""
+    from app.modules.peace_movement import houses  # noqa: PLC0415 - houses imports members
+
+    house_id = member.requested_house_id
+    if house_id is None:
+        return
+    member.requested_house_id = None
+    internal = Actor(user_id=actor.user_id, geo=GeoScope(user_id=actor.user_id, unrestricted=True))
+    try:
+        async with db.begin_nested():
+            await houses.add_member(
+                db, internal, house_id, pk(member), HouseMemberSource.ENROLLMENT, commit=False
+            )
+    except (ConflictError, NotFoundError):
+        logger.info("requested_house_unavailable", member_id=str(member.id))
 
 
 async def reject(db: AsyncSession, actor: Actor, member_id: uuid.UUID, reason: str) -> Member:
