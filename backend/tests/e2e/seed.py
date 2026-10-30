@@ -276,8 +276,8 @@ def _curp(index: int) -> str:
 async def _seed_peace_movement(
     db: AsyncSession, crypto: Crypto, user_id: uuid.UUID, geo: dict[str, Any]
 ) -> dict[str, Any]:
-    """A sample notice, a small pyramid (an Ambassador with recruits), one pending enrollment
-    and an open Peace House."""
+    """A sample notice, a small pyramid (an Ambassador with recruits) and one pending
+    enrollment."""
     await publish_notice(
         db,
         code="peace_movement",
@@ -334,7 +334,12 @@ async def _seed_peace_movement(
     await db.commit()
     await aggregates.rebuild_all(db)  # the scheduler is not running in E2E
     return {
-        "root": {"id": str(root.id), "name": "Rosa Embajadora E2E", "code": root.referral_code},
+        "root": {
+            "id": str(root.id),
+            "person_id": str(root.person_id),
+            "name": "Rosa Embajadora E2E",
+            "code": root.referral_code,
+        },
         "recruits": [str(first.id), str(second.id)],
         "pending": {"id": str(pending.id), "name": "Víctor Pendiente E2E"},
         "next_curp": _curp(10),

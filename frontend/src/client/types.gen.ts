@@ -1580,6 +1580,30 @@ export type HouseIn = {
 };
 
 /**
+ * HouseMapOut
+ *
+ * GeoJSON FeatureCollection of the visible houses (approximate points).
+ */
+export type HouseMapOut = {
+    /**
+     * Type
+     */
+    type?: 'FeatureCollection';
+    /**
+     * Features
+     */
+    features: Array<{
+        [key: string]: unknown;
+    }>;
+    /**
+     * Truncated
+     *
+     * Hay más casas que las devueltas; acota por estado.
+     */
+    truncated: boolean;
+};
+
+/**
  * HouseMemberIn
  */
 export type HouseMemberIn = {
@@ -8361,6 +8385,10 @@ export type SearchMembersData = {
          */
         recruiter_id?: string | null;
         /**
+         * Person Id
+         */
+        person_id?: string | null;
+        /**
          * Q
          */
         q?: string | null;
@@ -8904,6 +8932,44 @@ export type OpenPeaceHouseResponses = {
 };
 
 export type OpenPeaceHouseResponse = OpenPeaceHouseResponses[keyof OpenPeaceHouseResponses];
+
+export type GetPeaceHousesMapData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Status
+         */
+        status?: string | null;
+        /**
+         * State Id
+         */
+        state_id?: string | null;
+    };
+    url: '/api/v1/peace-movement/houses/map';
+};
+
+export type GetPeaceHousesMapErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type GetPeaceHousesMapError = GetPeaceHousesMapErrors[keyof GetPeaceHousesMapErrors];
+
+export type GetPeaceHousesMapResponses = {
+    /**
+     * Successful Response
+     */
+    200: HouseMapOut;
+};
+
+export type GetPeaceHousesMapResponse = GetPeaceHousesMapResponses[keyof GetPeaceHousesMapResponses];
 
 export type GetPeaceHouseData = {
     body?: never;

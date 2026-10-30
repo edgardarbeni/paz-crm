@@ -407,6 +407,10 @@ async def test_search_and_reads_are_logged(  # noqa: PLR0917
         await client.get(f"{API}/members", headers=root, params={"recruiter_id": top["id"]})
     ).json()
     assert len(page["items"]) == 2
+    mine = (
+        await client.get(f"{API}/members", headers=root, params={"person_id": top["person"]["id"]})
+    ).json()
+    assert [m["id"] for m in mine["items"]] == [top["id"]]
     assert (
         await client.get(f"{API}/members", headers=root, params={"q": "juan", "limit": 1})
     ).json()["has_more"] is True

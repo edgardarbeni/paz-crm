@@ -1,12 +1,14 @@
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
+import { searchMembersOptions } from "@/client/@tanstack/react-query.gen";
 import { PazosMark } from "@/components/brand/logo";
 import { Kbd } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { NAV } from "@/features/shell/nav";
 import { SystemStatus } from "@/features/system/system-status";
-import { hasPermission } from "@/lib/auth/permissions";
-import { useMe } from "@/lib/auth/use-me";
+import { hasPermission, Perm } from "@/lib/auth/permissions";
+import { useCan, useMe } from "@/lib/auth/use-me";
 
 export const Route = createFileRoute("/_app/")({ component: HomePage });
 
@@ -22,6 +24,9 @@ const SHORTCUTS: [string, string][] = [
 const QUICK_ACCESS: Record<string, string> = {
   "/nominations": "Captura y seguimiento de planillas, fórmulas y listas.",
   "/people": "Busca, registra y actualiza personas.",
+  "/peace-movement/members":
+    "Pacificadores, su red, avance contra la meta y enlaces de inscripción.",
+  "/peace-movement/houses/map": "Casas de Paz sobre el mapa, con su estatus.",
   "/processes": "Cargos, ayuntamientos, reglas y coaliciones por proceso.",
   "/geography/map": "Secciones, distritos y municipios sobre el mapa.",
   "/users": "Invitaciones, roles y alcance geográfico.",
@@ -49,6 +54,7 @@ function HomePage() {
         </h1>
         {me ? <p className="relative mt-2 text-lg text-white/85">Hola, {me.full_name}.</p> : null}
       </div>
+      <PendingValidations />
       {items.length ? (
         <nav aria-label="Accesos rápidos">
           <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -102,5 +108,34 @@ function HomePage() {
         </Card>
       </div>
     </section>
+  );
+}
+
+/** Enrollments waiting for someone with `peace_movement.member.validate` (public link, app). */
+function PendingValidations() {
+  const can = useCan();
+  const allowed = can(Perm.PEACE_MEMBER_VALIDATE);
+  const pending = useQuery({
+    ...searchMembersOptions({ query: { status: "pending_validation", limit: 50 } }),
+    enabled: allowed,
+  });
+  const count = pending.data?.items.length ?? 0;
+  if (!allowed || !count) return null;
+  return (
+    <Link
+      to="/peace-movement/validation"
+      className="flex items-center justify-between gap-4 rounded-2xl border border-primary/30 bg-secondary/60 p-4 text-sm outline-none transition-colors hover:bg-secondary focus-visible:ring-3 focus-visible:ring-ring/50"
+    >
+      <span>
+        <strong>
+          {pending.data?.has_more ? "Más de 50" : count}{" "}
+          {count === 1 ? "inscripción pendiente" : "inscripciones pendientes"}
+        </strong>{" "}
+        de validar en el Movimiento de Paz.
+      </span>
+      <span className="flex items-center gap-1 font-semibold text-primary">
+        Revisar <ArrowRight aria-hidden className="size-4" />
+      </span>
+    </Link>
   );
 }

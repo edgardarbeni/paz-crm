@@ -161,7 +161,7 @@ plantean alternativas; el 2026-10-29 se aceptó la opción recomendada de cada u
 | [D-84](D-84-tareas-periodicas.md) | Tareas periódicas y en segundo plano | Aceptada |
 | [D-85](D-85-ubicacion-casas-paz.md) | Precisión de la ubicación de las Casas de Paz | Aceptada |
 | [D-86](D-86-proteccion-bots-inscripcion-publica.md) | Protección contra bots en la inscripción pública | Aceptada |
-| [D-87](D-87-cuentas-portal-pacificadores.md) | Cuentas del portal de pacificadores (entrega posterior) | Aceptada |
+| [D-87](D-87-cuentas-portal-pacificadores.md) | Cuentas del portal de pacificadores (entrega posterior) | Reemplazada por D-100 |
 | [D-88](D-88-autenticacion-dispositivos-campo.md) | Autenticación de dispositivos de campo (entrega posterior) | Aceptada |
 | [D-89](D-89-bitacora-lecturas.md) | Bitácora de lecturas sensibles (amplía D-37 y D-45) | Aceptada |
 | [D-90](D-90-auditoria-escrituras-masivas.md) | Auditoría de escrituras masivas (amplía D-36 y D-45) | Aceptada |
@@ -174,6 +174,7 @@ plantean alternativas; el 2026-10-29 se aceptó la opción recomendada de cada u
 | [D-97](D-97-agregados-red-movimiento-paz.md) | Agregados de la red del Movimiento de Paz (fase 3) | Aceptada |
 | [D-98](D-98-entradas-masivas-publicas.md) | Entradas públicas y masivas del Movimiento de Paz (fase 4; precisa D-90) | Aceptada |
 | [D-99](D-99-panel-movimiento-paz.md) | Panel del Movimiento de Paz (fase 5) | Aceptada |
+| [D-100](D-100-sin-portal-todo-en-panel-o-app.md) | Sin portal de pacificadores: la App y el panel (reemplaza D-87) | Aceptada |
 
 ## Suposiciones vigentes
 

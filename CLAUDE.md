@@ -16,8 +16,9 @@ resultados electorales. Sus prioridades son:
 
 **Estado:** el MVP está completo (fases A–E, D-77). Desde entonces se agregaron la identidad
 visual (D-78), la búsqueda geográfica por nombre (D-79) y el módulo Movimiento de Paz (D-82 a
-D-99). Cada módulo nuevo se especifica
-primero en su ficha de `docs/modules/`.
+D-100). No hay portal de pacificadores: el personal usa el panel y quien está en campo usará la
+App (Flutter, todavía sin construir). Cada módulo nuevo se especifica primero en su ficha de
+`docs/modules/`.
 
 ## Documentación
 

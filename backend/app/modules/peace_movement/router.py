@@ -52,6 +52,7 @@ from app.modules.peace_movement.schemas import (
     HouseGoalIn,
     HouseGoalOut,
     HouseIn,
+    HouseMapOut,
     HouseMemberIn,
     HouseMemberOut,
     HouseOut,
@@ -324,6 +325,7 @@ async def search_members(
     level_id: uuid.UUID | None = None,
     state_id: uuid.UUID | None = None,
     recruiter_id: uuid.UUID | None = None,
+    person_id: uuid.UUID | None = None,
     q: Annotated[str | None, Query(min_length=2, max_length=100)] = None,
 ) -> CursorPage[MemberSummary]:
     page = await members.search_members(
@@ -334,6 +336,7 @@ async def search_members(
         level_id=level_id,
         state_id=state_id,
         recruiter_id=recruiter_id,
+        person_id=person_id,
         q=q,
     )
     items = await _summaries(db, crypto, page.items, user.has(Perm.PERSON_READ_SENSITIVE))
@@ -629,6 +632,23 @@ async def open_house(
 ) -> HouseOut:
     house = await houses.open_house(db, crypto, _actor(user), body)
     return await _house_out(db, crypto, user, house.id)  # type: ignore[arg-type]
+
+
+@router.get(
+    "/houses/map",
+    operation_id="getPeaceHousesMap",
+    summary="Casas de Paz en el mapa (puntos aproximados, GeoJSON)",
+)
+async def houses_map(
+    db: SessionDep,
+    user: HouseReader,
+    status_: Annotated[
+        str | None, Query(alias="status", pattern="^(open|consolidated|closed)$")
+    ] = None,
+    state_id: uuid.UUID | None = None,
+) -> HouseMapOut:
+    features, truncated = await houses.map_points(db, user.geo, status=status_, state_id=state_id)
+    return HouseMapOut(features=features, truncated=truncated)
 
 
 @router.get("/houses/{house_id}", operation_id="getPeaceHouse", summary="Detalle de Casa de Paz")

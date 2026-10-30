@@ -495,3 +495,48 @@ async def test_house_scope(  # noqa: PLR0917
         client, viewer, owner_engine, geo.sections[101],
         opener=near["id"], host=near["id"], contact=near_contact["id"], expect=403,
     )  # fmt: skip
+
+
+async def test_houses_map(  # noqa: PLR0917
+    client: AsyncClient,
+    root: dict[str, str],
+    scoped: Any,
+    geo: Geo,
+    levels: dict[str, str],
+    notice: dict[str, Any],
+    owner_engine: AsyncEngine,
+) -> None:
+    near = await enroll(client, root, levels, geo.sections[101])
+    near_contact = await enroll(client, root, levels, geo.sections[101], recruiter=near["id"])
+    far = await enroll(client, root, levels, geo.sections[104])
+    far_contact = await enroll(client, root, levels, geo.sections[104], recruiter=far["id"])
+    mine = await open_house(
+        client, root, owner_engine, geo.sections[101],
+        opener=near["id"], host=near["id"], contact=near_contact["id"],
+    )  # fmt: skip
+    other = await open_house(
+        client, root, owner_engine, geo.sections[104],
+        opener=far["id"], host=far["id"], contact=far_contact["id"],
+    )  # fmt: skip
+    everything = (await client.get(f"{API}/houses/map", headers=root)).json()
+    assert everything["type"] == "FeatureCollection"
+    assert everything["truncated"] is False
+    by_id = {f["properties"]["id"]: f for f in everything["features"]}
+    assert set(by_id) == {mine["id"], other["id"]}
+    # Approximate point only (3 decimals), never the exact one.
+    lon, lat = by_id[mine["id"]]["geometry"]["coordinates"]
+    assert (lon, lat) == (mine["approx_longitude"], mine["approx_latitude"])
+    assert by_id[mine["id"]]["properties"]["status"] == "open"
+
+    _, local = await scoped(
+        ("viewer",), [{"level": "municipality", "node_id": geo.municipalities[1]}]
+    )
+    scoped_map = (await client.get(f"{API}/houses/map", headers=local)).json()
+    assert [f["properties"]["id"] for f in scoped_map["features"]] == [mine["id"]]
+    await client.post(f"{API}/houses/{other['id']}/close", headers=root, json={"reason": "Fin"})
+    current = (await client.get(f"{API}/houses/map", headers=root)).json()
+    assert [f["properties"]["id"] for f in current["features"]] == [mine["id"]]
+    closed = (
+        await client.get(f"{API}/houses/map", headers=root, params={"status": "closed"})
+    ).json()
+    assert [f["properties"]["id"] for f in closed["features"]] == [other["id"]]

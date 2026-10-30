@@ -743,3 +743,41 @@ async def progress(
     if goal is None:
         return None, None
     return goal.member_goal, count * 100 // goal.member_goal
+
+
+MAP_LIMIT = 10_000
+
+
+async def map_points(
+    db: AsyncSession, geo: GeoScope, *, status: str | None = None, state_id: uuid.UUID | None = None
+) -> tuple[list[dict[str, Any]], bool]:
+    """Visible houses as GeoJSON points at their approximate location (D-85), capped."""
+    statement = select(
+        col(PeaceHouse.id),
+        col(PeaceHouse.name),
+        col(PeaceHouse.status),
+        col(PeaceHouse.public_location_consent_id),
+        func.ST_X(col(PeaceHouse.location)),
+        func.ST_Y(col(PeaceHouse.location)),
+    ).where(*_visible(geo))
+    if status:
+        statement = statement.where(col(PeaceHouse.status) == status)
+    else:
+        statement = statement.where(col(PeaceHouse.status).in_(CURRENT_HOUSE_STATUSES))
+    if state_id:
+        statement = statement.where(col(PeaceHouse.state_id) == state_id)
+    rows = (await db.execute(statement.limit(MAP_LIMIT + 1))).all()
+    features = [
+        {
+            "type": "Feature",
+            "geometry": {"type": "Point", "coordinates": [float(lon), float(lat)]},
+            "properties": {
+                "id": str(house_id),
+                "name": name,
+                "status": house_status,
+                "publishable": consent is not None,
+            },
+        }
+        for house_id, name, house_status, consent, lon, lat in rows[:MAP_LIMIT]
+    ]
+    return features, len(rows) > MAP_LIMIT

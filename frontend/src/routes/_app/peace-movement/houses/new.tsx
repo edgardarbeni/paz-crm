@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { LocateFixed, Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { openPeaceHouseMutation } from "@/client/@tanstack/react-query.gen";
 import type { ScheduleSlot } from "@/client/types.gen";
@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { GeoMap, type PointCollection } from "@/features/geography/geo-map";
 import { SELECT_CLASS, WEEKDAYS } from "@/features/peace-movement/labels";
 import { MemberPicker } from "@/features/peace-movement/shared";
 
@@ -62,6 +63,22 @@ function NewHousePage() {
   const lat = Number(point.latitude);
   const lon = Number(point.longitude);
   const hasPoint = point.latitude !== "" && point.longitude !== "" && !Number.isNaN(lat + lon);
+  const picked = useMemo<PointCollection | null>(
+    () =>
+      hasPoint
+        ? {
+            type: "FeatureCollection",
+            features: [
+              {
+                type: "Feature",
+                geometry: { type: "Point", coordinates: [lon, lat] },
+                properties: { status: "open" },
+              },
+            ],
+          }
+        : null,
+    [hasPoint, lon, lat],
+  );
   const ready =
     name.trim().length >= 2 &&
     address.street.trim() &&
@@ -308,8 +325,17 @@ function NewHousePage() {
               </Button>
             </div>
             <p className="text-xs text-muted-foreground">
-              La sección, el municipio y el estado se calculan con el punto.
+              Haz clic en el mapa para marcar el punto, o escríbelo. La sección, el municipio y el
+              estado se calculan con él.
             </p>
+            <GeoMap
+              visible={["states", "municipalities", "sections"]}
+              points={picked}
+              onClick={({ lng, lat: clickedLat }) =>
+                setPoint({ latitude: clickedLat.toFixed(6), longitude: lng.toFixed(6) })
+              }
+              className="h-80 w-full rounded-lg border"
+            />
           </CardContent>
         </Card>
 
