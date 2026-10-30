@@ -1,4 +1,4 @@
-# D-102 · Cambio de marco geográfico en la estructura del partido (precisa D-63)
+# D-102 · Cambio de marco geográfico en la estructura del partido (amplía D-41, punto 7)
 
 - **Estado:** Propuesta (2026-10-30)
 - **Área:** Estructura del partido · Geografía electoral
