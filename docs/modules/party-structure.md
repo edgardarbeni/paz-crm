@@ -3,7 +3,7 @@
 **Estado:** especificación aprobada para diseño; sin implementar.
 **Paquete propuesto:** `backend/app/modules/party_structure` · esquema `party_structure` · API
 `/api/v1/structure`.
-**Brief:** respuestas de Darío del 2026-10-30 y catálogo estatutario `cargos_paz.md`. Lo marcado
+**Brief:** respuestas de Darío del 2026-10-30 y catálogo estatutario [`cargos_paz.md`](../reference/cargos_paz.md). Lo marcado
 como **[SUPUESTO]** debe confirmarse; lo marcado como **[ADR]** requiere proponer una decisión con
 alternativas antes de implementarse.
 
