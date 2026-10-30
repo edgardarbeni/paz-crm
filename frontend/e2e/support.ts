@@ -5,8 +5,16 @@ import { expect, type Page } from "@playwright/test";
 export interface Seed {
   password: string;
   users: Record<
-    "login" | "enroll" | "capture" | "substitute" | "scoped" | "geography" | "peace",
-    { email: string; totp_secret: string | null }
+    | "login"
+    | "enroll"
+    | "capture"
+    | "substitute"
+    | "scoped"
+    | "geography"
+    | "peace"
+    | "grants"
+    | "target",
+    { email: string; totp_secret: string | null; id: string }
   >;
   process_id: string;
   municipality_1: string;

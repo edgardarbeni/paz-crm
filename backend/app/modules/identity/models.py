@@ -105,16 +105,24 @@ class RolePermission(TimestampMixin, table=True):
     )
 
 
-class UserRole(TimestampMixin, table=True):
-    __tablename__ = "user_roles"
-    __table_args__: ClassVar[dict[str, Any]] = {"schema": SCHEMA}
+class GrantOrigin(StrEnum):
+    MANUAL = "manual"
+    APPOINTMENT = "appointment"
 
-    user_id: uuid.UUID = Field(
-        foreign_key=f"{SCHEMA}.users.id", ondelete="CASCADE", primary_key=True
-    )
-    role_id: uuid.UUID = Field(
-        foreign_key=f"{SCHEMA}.roles.id", ondelete="CASCADE", primary_key=True, index=True
-    )
+
+class UserGrant(UUIDPrimaryKeyMixin, TimestampMixin, table=True):
+    """A (role, scope) pair (D-101): the role's permissions apply only inside this grant's
+    scope (`user_grant_scopes`). A user's access is the sum of their grants."""
+
+    __tablename__ = "user_grants"
+    __table_args__ = (_check_in("origin", GrantOrigin, "origin"), {"schema": SCHEMA})
+
+    user_id: uuid.UUID = _fk("users")
+    role_id: uuid.UUID = _fk("roles")
+    origin: GrantOrigin = Field(default=GrantOrigin.MANUAL, sa_type=Text)
+    # The record that originated the grant (an appointment); no FK so the core does not depend
+    # on business modules (D-104).
+    source_id: uuid.UUID | None = Field(default=None, index=True)
     assigned_by_user_id: uuid.UUID | None = Field(
         default=None, foreign_key=f"{SCHEMA}.users.id", ondelete="SET NULL"
     )
@@ -242,17 +250,17 @@ def _geo_fk(table: str) -> Any:
     )
 
 
-class UserScope(UUIDPrimaryKeyMixin, TimestampMixin, table=True):
-    """A geographic node a user is limited to. One FK column per level (no polymorphic FK)."""
+class UserGrantScope(UUIDPrimaryKeyMixin, TimestampMixin, table=True):
+    """A geographic node a grant is limited to. One FK column per level (no polymorphic FK)."""
 
-    __tablename__ = "user_scopes"
+    __tablename__ = "user_grant_scopes"
     __table_args__ = (
         _check_in("scope_level", ScopeLevel, "scope_level"),
         _scope_check(),
         {"schema": SCHEMA},
     )
 
-    user_id: uuid.UUID = _fk("users")
+    grant_id: uuid.UUID = _fk("user_grants")
     scope_level: ScopeLevel = Field(sa_type=Text)
     electoral_region_id: uuid.UUID | None = _geo_fk("electoral_regions")
     state_id: uuid.UUID | None = _geo_fk("states")
@@ -262,16 +270,16 @@ class UserScope(UUIDPrimaryKeyMixin, TimestampMixin, table=True):
     section_id: uuid.UUID | None = _geo_fk("sections")
 
 
-class UserScopeSection(SQLModel, table=True):
-    """Derived: the sections a (non-national) scope resolves to. Rebuilt on scope changes and
-    framework activation; queries filter with EXISTS against it (D-34)."""
+class UserGrantSection(SQLModel, table=True):
+    """Derived: the sections a (non-national) grant resolves to. Rebuilt on grant changes and
+    framework activation; queries filter with EXISTS against it (D-34, D-101)."""
 
-    __tablename__ = "user_scope_sections"
+    __tablename__ = "user_grant_sections"
     __table_args__: ClassVar[dict[str, Any]] = {"schema": SCHEMA}
     __audit__: ClassVar[bool] = False
 
-    user_id: uuid.UUID = Field(
-        foreign_key=f"{SCHEMA}.users.id", ondelete="CASCADE", primary_key=True
+    grant_id: uuid.UUID = Field(
+        foreign_key=f"{SCHEMA}.user_grants.id", ondelete="CASCADE", primary_key=True
     )
     section_id: uuid.UUID = Field(
         foreign_key="geography.sections.id", ondelete="CASCADE", primary_key=True, index=True

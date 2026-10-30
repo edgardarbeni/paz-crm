@@ -1,8 +1,9 @@
 # Módulo: Estructura del partido
 
-**Estado:** especificación aprobada para diseño; sin implementar.
+**Estado:** en implementación. Fase 0 lista: concesiones (rol, alcance) en `identity`
+([D-101](../adr/D-101-concesiones-rol-alcance.md), [D-106](../adr/D-106-ajustes-implementacion-concesiones.md)).
 **Paquete propuesto:** `backend/app/modules/party_structure` · esquema `party_structure` · API
-`/api/v1/structure`.
+`/api/v1/party-structure`.
 **Brief:** respuestas de Darío del 2026-10-30 y catálogo estatutario [`cargos_paz.md`](../reference/cargos_paz.md). Lo marcado
 como **[SUPUESTO]** debe confirmarse; lo marcado como **[ADR]** requiere proponer una decisión con
 alternativas antes de implementarse.
@@ -272,15 +273,18 @@ permiso de lectura.
 - Al cambiar el titular del asiento, el crédito permanece en el asiento.
 - No se puede enlazar a estructura una casa acreditada a un integrante activo del MP.
 
-## Plan sugerido
+## Plan aprobado (2026-10-30)
 
-1. ADR y cambios a `identity`: concesiones `(rol, alcance)`, origen de concesiones, `users.person_id`, invitación con TOTP obligatorio.
-2. Catálogos, siembra estatutaria, órganos e instalación.
-3. Asientos, nombramientos, incompatibilidades, cargos derivados y concesión automática de acceso.
-4. Coordinaciones territoriales, exclusividad y recálculo de alcance.
-5. Revocación por vencimiento y migración de marco.
-6. Cambios al Movimiento de Paz: crédito a asientos, retiro de coordinadores de zona, meta de casas del Constructor y migración de datos.
-7. Panel.
+| Fase | Contenido | Estado |
+|---|---|---|
+| 0 | Concesiones en `identity` (D-101, D-106) | Lista |
+| 1 | Catálogo estatutario sembrado de `cargos_paz.md`, órganos, instalación y disolución | |
+| 2 | Asientos, nombramientos, periodos consecutivos, Presídium, incompatibilidades y administración delegada | |
+| 3 | Acceso por nombramiento: vínculo persona ↔ cuenta, invitación, `mfa_required`, revocación (D-104) | |
+| 4 | Coordinaciones territoriales: exclusividad y recálculo de alcance | |
+| 5 | Cambio de marco y bandeja de territorio por resolver (D-102, D-105) | |
+| 6 | Movimiento de Paz: crédito a quien abre o a un asiento, bandeja de casas y retiro de zonas (D-103) | |
+| 7 | Panel de la estructura y de las bandejas | |
 
 ## Decisiones
 

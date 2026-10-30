@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 
 from app.core.modules import permission_codes
 from app.modules.identity.permissions import SYSTEM_ROLES
-from tests.integration.conftest import Account, UserFactory, bearer, login, token_for
+from tests.integration.conftest import Account, UserFactory, bearer, login, set_roles, token_for
 
 
 async def _role_ids(client: AsyncClient, headers: dict[str, str]) -> dict[str, str]:
@@ -67,12 +67,7 @@ async def test_admin_cannot_escalate_to_superadmin(
     ids = await _role_ids(client, headers)
 
     for user_id in (target.id, admin.id):  # neither for others nor for themselves
-        response = await client.put(
-            f"/api/v1/users/{user_id}/roles",
-            headers=headers,
-            json={"role_ids": [ids["superadmin"]]},
-        )
-        assert response.status_code == 403
+        await set_roles(client, headers, user_id, [ids["superadmin"]], expect=403)
     invite = await client.post(
         "/api/v1/users",
         headers=headers,
@@ -106,7 +101,7 @@ async def test_cannot_grant_permissions_one_does_not_hold(
         client, root, "lead", ["identity.role.read", "identity.role.create", "identity.role.update"]
     )
     lead = await make_user()
-    await client.put(f"/api/v1/users/{lead.id}/roles", headers=root, json={"role_ids": [lead_role]})
+    await set_roles(client, root, lead.id, [lead_role])
     headers = await token_for(client, lead)
 
     beyond = await client.post(
@@ -139,10 +134,7 @@ async def test_last_superadmin_is_protected(client: AsyncClient, superadmin: Acc
     headers = await token_for(client, superadmin)
     self_disable = await client.post(f"/api/v1/users/{superadmin.id}/disable", headers=headers)
     assert self_disable.status_code == 409
-    demote = await client.put(
-        f"/api/v1/users/{superadmin.id}/roles", headers=headers, json={"role_ids": []}
-    )
-    assert demote.status_code == 409
+    await set_roles(client, headers, superadmin.id, [], expect=409)
 
 
 # --- user administration ----------------------------------------------------------------------
@@ -281,11 +273,11 @@ async def test_roles_crud_and_guards(
     assert permissions.json()["permissions"] == ["audit.log.read", "identity.user.read"]
 
     member = await make_user()
-    await client.put(f"/api/v1/users/{member.id}/roles", headers=root, json={"role_ids": [role_id]})
+    await set_roles(client, root, member.id, [role_id])
     assert (await client.get(f"/api/v1/roles/{role_id}", headers=root)).json()["user_count"] == 1
     in_use = await client.delete(f"/api/v1/roles/{role_id}", headers=root)
     assert in_use.status_code == 409
-    await client.put(f"/api/v1/users/{member.id}/roles", headers=root, json={"role_ids": []})
+    await set_roles(client, root, member.id, [])
     assert (await client.delete(f"/api/v1/roles/{role_id}", headers=root)).status_code == 204
     assert (await client.get(f"/api/v1/roles/{role_id}", headers=root)).status_code == 404
 

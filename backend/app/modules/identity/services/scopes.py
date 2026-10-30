@@ -1,25 +1,26 @@
-"""Geographic scope (D-34): what part of the country a user may see and act on.
+"""Geographic scope (D-34, D-101): what part of the country a user may see and act on.
 
-- A user's scopes are nodes (national, region, state, DF, DL, municipality, section).
-- They resolve to a set of sections, materialized in `user_scope_sections` for non-national
+- Each grant has scope nodes (national, region, state, DF, DL, municipality, section).
+- They resolve to sections, materialized per grant in `user_grant_sections` for non-national
   scopes; repositories filter with EXISTS against it (query layer, not only endpoints).
-- `grants_all` (superadmin) and a `national` scope see everything. No scope = sees nothing
-  (deny by default).
-- Nobody can hand out a scope wider than their own (geographic anti-escalation).
+- A request's scope is the one *for the permission it exercises*: the union of the grants whose
+  role includes that permission (`GeoScope.grant_ids`). `grants_all` (superadmin) and a national
+  grant see everything. No grant = sees nothing (deny by default).
+- Modules never read `user_grant_sections` directly: they use `sections_filter` (ORM) or
+  `section_sql` + `sql_params` (raw SQL).
 """
 
 import uuid
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
-from sqlalchemy import ColumnElement, delete, exists, select, text
+from sqlalchemy import ColumnElement, delete, exists, false, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Mapped
 from sqlmodel import col
 
-from app.core.errors import BadRequestError, ForbiddenError, NotFoundError
-from app.modules.identity import repository as repo
-from app.modules.identity.models import SCOPE_COLUMNS, ScopeLevel, UserScope, UserScopeSection
+from app.core.errors import BadRequestError, ForbiddenError
+from app.modules.identity.models import SCOPE_COLUMNS, ScopeLevel, UserGrantScope, UserGrantSection
 from app.modules.identity.services.access import Access, load_access
 
 # Level → (geography table, column in geography.sections that links to it, or None for itself)
@@ -35,44 +36,106 @@ _LEVEL_TABLES: dict[ScopeLevel, tuple[str, str | None]] = {
 
 SectionColumn = ColumnElement[Any] | Mapped[Any]
 
+_GRANTS_PARAM = "scope_grants"
+
 
 @dataclass(frozen=True, slots=True)
 class GeoScope:
-    """Resolved scope of a user for the current request."""
+    """Resolved scope of a user for one permission (or for all their grants)."""
 
     user_id: uuid.UUID
     unrestricted: bool
+    grant_ids: tuple[uuid.UUID, ...] = field(default=())
 
     def sections_filter(self, section_id: SectionColumn) -> ColumnElement[bool] | None:
-        """EXISTS clause limiting `section_id` to the user's sections (None = no filter)."""
+        """EXISTS clause limiting `section_id` to the scope's sections (None = no filter)."""
         if self.unrestricted:
             return None
+        if not self.grant_ids:
+            return false()
         return exists().where(
-            col(UserScopeSection.user_id) == self.user_id,
-            col(UserScopeSection.section_id) == section_id,
+            col(UserGrantSection.grant_id).in_(self.grant_ids),
+            col(UserGrantSection.section_id) == section_id,
         )
 
+    def section_sql(self, section_expr: str, *, alias: str = "u") -> str:
+        """Raw-SQL twin of `sections_filter`: `EXISTS (…)` over `section_expr`. Bind
+        `sql_params`. Callers skip it when `unrestricted`."""
+        return (
+            f"EXISTS (SELECT 1 FROM identity.user_grant_sections {alias} "
+            f"WHERE {alias}.grant_id = ANY(CAST(:{_GRANTS_PARAM} AS uuid[])) "
+            f"AND {alias}.section_id = {section_expr})"
+        )
 
-async def resolve_scope(db: AsyncSession, user_id: uuid.UUID, access: Access) -> GeoScope:
-    if access.grants_all:
-        return GeoScope(user_id=user_id, unrestricted=True)
-    national = (
-        await db.execute(
-            select(col(UserScope.id)).where(
-                col(UserScope.user_id) == user_id, col(UserScope.scope_level) == ScopeLevel.NATIONAL
+    def sections_join_sql(self, alias: str = "u") -> str:
+        """`identity.user_grant_sections <alias>` restricted to the scope, for JOINs (add
+        `ON <alias>.section_id = …`). Bind `sql_params`."""
+        return (
+            f"(SELECT DISTINCT section_id FROM identity.user_grant_sections "
+            f"WHERE grant_id = ANY(CAST(:{_GRANTS_PARAM} AS uuid[]))) {alias}"
+        )
+
+    @property
+    def sql_params(self) -> dict[str, Any]:
+        return {_GRANTS_PARAM: list(self.grant_ids)}
+
+    async def contains_section(self, db: AsyncSession, section_id: uuid.UUID | None) -> bool:
+        if self.unrestricted:
+            return True
+        if section_id is None or not self.grant_ids:
+            return False
+        found = await db.execute(
+            select(col(UserGrantSection.section_id)).where(
+                col(UserGrantSection.grant_id).in_(self.grant_ids),
+                col(UserGrantSection.section_id) == section_id,
             )
         )
+        return found.first() is not None
+
+    def covers(self, other: "GeoScope") -> bool:
+        """Cheap sufficient test: every grant of `other` is also one of ours (same sections)."""
+        return self.unrestricted or set(other.grant_ids) <= set(self.grant_ids)
+
+
+async def scope_covers(db: AsyncSession, outer: GeoScope, inner: GeoScope) -> bool:
+    """True if every section of `inner` is also in `outer`."""
+    if outer.covers(inner):
+        return True
+    if inner.unrestricted:
+        return False
+    found = (
+        await db.execute(
+            text(
+                "SELECT 1 FROM identity.user_grant_sections t "
+                "WHERE t.grant_id = ANY(CAST(:inner AS uuid[])) "
+                "AND NOT EXISTS (SELECT 1 FROM identity.user_grant_sections o "
+                "WHERE o.grant_id = ANY(CAST(:outer AS uuid[])) AND o.section_id = t.section_id) "
+                "LIMIT 1"
+            ),
+            {"inner": list(inner.grant_ids), "outer": list(outer.grant_ids)},
+        )
     ).first()
-    return GeoScope(user_id=user_id, unrestricted=national is not None)
+    return found is None
 
 
-async def scopes_of(db: AsyncSession, user_id: uuid.UUID) -> list[UserScope]:
-    result = await db.execute(
-        select(UserScope)
-        .where(col(UserScope.user_id) == user_id)
-        .order_by(col(UserScope.created_at))
+def geo_for(user_id: uuid.UUID, access: Access, permission: str | None = None) -> GeoScope:
+    """The scope `access` has for `permission` (for all its grants when None)."""
+    if access.grants_all:
+        return GeoScope(user_id=user_id, unrestricted=True)
+    grants = access.grants_for(permission)
+    return GeoScope(
+        user_id=user_id,
+        unrestricted=any(grant.national for grant in grants),
+        grant_ids=tuple(grant.id for grant in grants),
     )
-    return list(result.scalars())
+
+
+async def resolve_scope(
+    db: AsyncSession, user_id: uuid.UUID, access: Access, permission: str | None = None
+) -> GeoScope:
+    """Kept async for callers outside a request (jobs, imports)."""
+    del db
+    return geo_for(user_id, access, permission)
 
 
 async def _active_framework(db: AsyncSession) -> uuid.UUID:
@@ -117,46 +180,89 @@ async def _validate_node(
         raise BadRequestError(f"El nodo {node_id} no existe en el marco activo ({level.value}).")
 
 
-async def rebuild_scope_sections(db: AsyncSession, user_id: uuid.UUID) -> int:
-    """Recomputes `user_scope_sections` from `user_scopes` (caller commits)."""
-    await db.execute(delete(UserScopeSection).where(col(UserScopeSection.user_id) == user_id))
-    scopes = await scopes_of(db, user_id)
+async def ensure_node_within(
+    db: AsyncSession, actor: GeoScope, level: ScopeLevel, node: uuid.UUID | None
+) -> None:
+    """A node can only be handed out inside the actor's scope (geographic anti-escalation)."""
+    if actor.unrestricted:
+        return
+    if level == ScopeLevel.NATIONAL:
+        raise ForbiddenError(
+            "Solo quien tiene alcance nacional para esos permisos puede otorgarlo."
+        )
+    outside = (
+        await db.execute(
+            text(
+                f"SELECT 1 FROM ({_node_sections_sql(level)}) n "
+                f"WHERE NOT {actor.section_sql('n.id', alias='a')} LIMIT 1"
+            ),
+            {"node": node, **actor.sql_params},
+        )
+    ).first()
+    if outside is not None:
+        raise ForbiddenError("No puedes otorgar un alcance fuera del tuyo.")
+
+
+async def grant_scopes(db: AsyncSession, grant_id: uuid.UUID) -> list[UserGrantScope]:
+    result = await db.execute(
+        select(UserGrantScope)
+        .where(col(UserGrantScope.grant_id) == grant_id)
+        .order_by(col(UserGrantScope.created_at), col(UserGrantScope.id))
+    )
+    return list(result.scalars())
+
+
+async def rebuild_grant_sections(db: AsyncSession, grant_id: uuid.UUID) -> int:
+    """Recomputes `user_grant_sections` from `user_grant_scopes` (caller commits)."""
+    await db.execute(delete(UserGrantSection).where(col(UserGrantSection.grant_id) == grant_id))
+    scopes = await grant_scopes(db, grant_id)
     if any(scope.scope_level == ScopeLevel.NATIONAL for scope in scopes):
         return 0  # national: unrestricted, nothing to materialize
     total = 0
     for scope in scopes:
         level = ScopeLevel(scope.scope_level)
         node = getattr(scope, SCOPE_COLUMNS[level])
-        sql = _node_sections_sql(level)
         result = await db.execute(
             text(
-                "INSERT INTO identity.user_scope_sections (user_id, section_id) "
-                f"SELECT :user, id FROM ({sql}) sections ON CONFLICT DO NOTHING"
+                "INSERT INTO identity.user_grant_sections (grant_id, section_id) "
+                f"SELECT :grant, id FROM ({_node_sections_sql(level)}) sections "
+                "ON CONFLICT DO NOTHING"
             ),
-            {"user": user_id, "node": node},
+            {"grant": grant_id, "node": node},
         )
         total += result.rowcount  # type: ignore[attr-defined]
     return total
+
+
+# A user's whole scope (all grants), for "is the target inside the actor?" checks.
+_TARGET_NATIONAL = (
+    "EXISTS (SELECT 1 FROM identity.user_grants g JOIN identity.roles r ON r.id = g.role_id "
+    "WHERE g.user_id = {user} AND (r.grants_all OR EXISTS (SELECT 1 FROM "
+    "identity.user_grant_scopes gs WHERE gs.grant_id = g.id AND gs.scope_level = 'national')))"
+)
+_TARGET_OUTSIDE = (
+    "EXISTS (SELECT 1 FROM identity.user_grants g JOIN identity.user_grant_sections t "
+    "ON t.grant_id = g.id WHERE g.user_id = {user} AND NOT {inside})"
+)
 
 
 async def ensure_within_scope(db: AsyncSession, actor: GeoScope, *, user_id: uuid.UUID) -> None:
     """The target's scope must be inside the actor's (users without scope are manageable)."""
     if actor.unrestricted:
         return
-    target = await resolve_scope(db, user_id, await load_access(db, user_id))
+    target = geo_for(user_id, await load_access(db, user_id))
     if target.unrestricted:
         raise ForbiddenError("El usuario tiene un alcance más amplio que el tuyo.")
     outside = (
         await db.execute(
             text(
-                "SELECT 1 FROM identity.user_scope_sections t WHERE t.user_id = :target "
-                "AND NOT EXISTS (SELECT 1 FROM identity.user_scope_sections a "
-                "WHERE a.user_id = :actor AND a.section_id = t.section_id) LIMIT 1"
+                "SELECT "
+                + _TARGET_OUTSIDE.format(user=":target", inside=actor.section_sql("t.section_id"))
             ),
-            {"target": user_id, "actor": actor.user_id},
+            {"target": user_id, **actor.sql_params},
         )
-    ).first()
-    if outside is not None:
+    ).scalar_one()
+    if outside:
         raise ForbiddenError("El usuario está fuera de tu alcance geográfico.")
 
 
@@ -164,76 +270,23 @@ def manageable_users_filter(
     actor: GeoScope, user_id_column: SectionColumn
 ) -> ColumnElement[bool] | None:
     """SQL filter: users whose scope is inside the actor's (or who have no scope yet)."""
+    del user_id_column  # the filter correlates on `identity.users.id`
     if actor.unrestricted:
         return None
     return text(
-        "NOT EXISTS (SELECT 1 FROM identity.user_scopes n WHERE n.user_id = users.id "
-        "AND n.scope_level = 'national') "
-        "AND NOT EXISTS (SELECT 1 FROM identity.user_scope_sections t WHERE t.user_id = users.id "
-        "AND NOT EXISTS (SELECT 1 FROM identity.user_scope_sections a "
-        "WHERE a.user_id = :scope_actor AND a.section_id = t.section_id))"
-    ).bindparams(scope_actor=actor.user_id)  # type: ignore[return-value]
-
-
-async def set_scopes(
-    db: AsyncSession,
-    *,
-    actor: GeoScope,
-    user_id: uuid.UUID,
-    scopes: list[tuple[ScopeLevel, uuid.UUID | None]],
-) -> list[UserScope]:
-    """Replaces the user's scopes (caller commits)."""
-    if await repo.user_by_id(db, user_id) is None:
-        raise NotFoundError("Usuario no encontrado.")
-    framework_id = await _active_framework(db)
-    for level, node in scopes:
-        if level == ScopeLevel.NATIONAL:
-            if node is not None:
-                raise BadRequestError("El alcance nacional no lleva nodo.")
-            if not actor.unrestricted:
-                raise ForbiddenError("Solo un usuario con alcance nacional puede otorgarlo.")
-            continue
-        if node is None:
-            raise BadRequestError(f"El alcance {level.value} requiere un nodo.")
-        await _validate_node(db, level, node, framework_id)
-        if not actor.unrestricted:
-            sql = _node_sections_sql(level)
-            outside = (
-                await db.execute(
-                    text(
-                        f"SELECT 1 FROM ({sql}) n WHERE NOT EXISTS (SELECT 1 FROM "
-                        "identity.user_scope_sections a WHERE a.user_id = :actor "
-                        "AND a.section_id = n.id) LIMIT 1"
-                    ),
-                    {"node": node, "actor": actor.user_id},
-                )
-            ).first()
-            if outside is not None:
-                raise ForbiddenError("No puedes otorgar un alcance fuera del tuyo.")
-
-    # ORM deletes (not a Core DELETE) so the removed scopes stay in the audit log (D-45).
-    for previous in await scopes_of(db, user_id):
-        await db.delete(previous)
-    await db.flush()
-    created: list[UserScope] = []
-    for level, node in dict.fromkeys(scopes):
-        values: dict[str, object] = {"user_id": user_id, "scope_level": level}
-        if node is not None:
-            values[SCOPE_COLUMNS[level]] = node
-        scope = UserScope(**values)  # type: ignore[arg-type]
-        db.add(scope)
-        created.append(scope)
-    await db.flush()
-    await rebuild_scope_sections(db, user_id)
-    return created
+        "NOT "
+        + _TARGET_NATIONAL.format(user="users.id")
+        + " AND NOT "
+        + _TARGET_OUTSIDE.format(user="users.id", inside=actor.section_sql("t.section_id"))
+    ).bindparams(**actor.sql_params)  # type: ignore[return-value]
 
 
 async def rebuild_all(db: AsyncSession) -> int:
-    """After activating a framework (scopes already remapped)."""
-    users = (await db.execute(select(col(UserScope.user_id)).distinct())).scalars().all()
-    for user_id in users:
-        await rebuild_scope_sections(db, user_id)
-    return len(users)
+    """After activating a framework (grant scopes already remapped)."""
+    grants = (await db.execute(select(col(UserGrantScope.grant_id)).distinct())).scalars().all()
+    for grant_id in grants:
+        await rebuild_grant_sections(db, grant_id)
+    return len(grants)
 
 
 # Shared with modules that resolve their own geographic zones (e.g. Peace Movement coordinators).

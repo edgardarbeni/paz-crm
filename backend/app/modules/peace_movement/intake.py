@@ -54,6 +54,7 @@ from app.modules.peace_movement.models import (
     MemberStatus,
     ParticipationLevel,
 )
+from app.modules.peace_movement.permissions import PeacePerm
 from app.modules.peace_movement.schemas import (
     BatchIn,
     BatchItemOut,
@@ -481,8 +482,10 @@ async def _row_enrollment(
 
 
 async def _actor_of(db: AsyncSession, user_id: uuid.UUID) -> Actor:
+    """The scope of the import permission (D-101): the run acts only where the user may import."""
     access = await load_access(db, user_id)
-    return Actor(user_id=user_id, geo=await resolve_scope(db, user_id, access))
+    geo = await resolve_scope(db, user_id, access, PeacePerm.MEMBER_IMPORT)
+    return Actor(user_id=user_id, geo=geo)
 
 
 async def process_next_import(

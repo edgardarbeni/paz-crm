@@ -1426,74 +1426,6 @@
         }
       }
     },
-    "/api/v1/users/{user_id}/roles": {
-      "put": {
-        "tags": [
-          "users"
-        ],
-        "summary": "Reemplazar los roles",
-        "operationId": "setUserRoles",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "user_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "User Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UserRolesRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserOut"
-                }
-              }
-            }
-          },
-          "4XX": {
-            "description": "Error del cliente (RFC 9457)",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem"
-                }
-              }
-            }
-          },
-          "5XX": {
-            "description": "Error del servidor (RFC 9457)",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v1/users/{user_id}/invitation": {
       "post": {
         "tags": [
@@ -1723,13 +1655,13 @@
         }
       }
     },
-    "/api/v1/users/{user_id}/scopes": {
+    "/api/v1/users/{user_id}/grants": {
       "get": {
         "tags": [
           "users"
         ],
-        "summary": "Alcance geográfico",
-        "operationId": "getUserScopes",
+        "summary": "Concesiones (rol y alcance)",
+        "operationId": "listUserGrants",
         "security": [
           {
             "HTTPBearer": []
@@ -1755,9 +1687,9 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/ScopeOut"
+                    "$ref": "#/components/schemas/GrantOut"
                   },
-                  "title": "Response Getuserscopes"
+                  "title": "Response Listusergrants"
                 }
               }
             }
@@ -1788,8 +1720,9 @@
         "tags": [
           "users"
         ],
-        "summary": "Reemplazar el alcance geográfico (no puede exceder el propio)",
-        "operationId": "setUserScopes",
+        "summary": "Reemplazar las concesiones manuales",
+        "description": "Cada concesión es un rol con su alcance: sus permisos solo valen dentro de ese alcance (D-101). Las concesiones de un nombramiento no se tocan aquí. No se puede conceder un rol con permisos que no tienes ni un alcance mayor al que tienes para esos permisos.",
+        "operationId": "setUserGrants",
         "security": [
           {
             "HTTPBearer": []
@@ -1812,7 +1745,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ScopesRequest"
+                "$ref": "#/components/schemas/GrantsRequest"
               }
             }
           }
@@ -1825,9 +1758,9 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/ScopeOut"
+                    "$ref": "#/components/schemas/GrantOut"
                   },
-                  "title": "Response Setuserscopes"
+                  "title": "Response Setusergrants"
                 }
               }
             }
@@ -7945,13 +7878,13 @@
         }
       }
     },
-    "/api/v1/peace-movement/users/{user_id}/branches": {
+    "/api/v1/peace-movement/grants/{grant_id}/branches": {
       "get": {
         "tags": [
           "peace-movement"
         ],
-        "summary": "Ramas asignadas a un usuario (alcance por rama)",
-        "operationId": "listUserBranches",
+        "summary": "Ramas de una concesión (alcance por rama)",
+        "operationId": "listGrantBranches",
         "security": [
           {
             "HTTPBearer": []
@@ -7959,13 +7892,13 @@
         ],
         "parameters": [
           {
-            "name": "user_id",
+            "name": "grant_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
               "format": "uuid",
-              "title": "User Id"
+              "title": "Grant Id"
             }
           }
         ],
@@ -7979,7 +7912,7 @@
                   "items": {
                     "$ref": "#/components/schemas/BranchOut"
                   },
-                  "title": "Response Listuserbranches"
+                  "title": "Response Listgrantbranches"
                 }
               }
             }
@@ -8010,8 +7943,9 @@
         "tags": [
           "peace-movement"
         ],
-        "summary": "Reemplazar las ramas de un usuario",
-        "operationId": "setUserBranches",
+        "summary": "Reemplazar las ramas de una concesión",
+        "description": "Una rama amplía una concesión: su rol también alcanza la red debajo del pacificador, aunque cruce estados (D-83, D-101).",
+        "operationId": "setGrantBranches",
         "security": [
           {
             "HTTPBearer": []
@@ -8019,13 +7953,13 @@
         ],
         "parameters": [
           {
-            "name": "user_id",
+            "name": "grant_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
               "format": "uuid",
-              "title": "User Id"
+              "title": "Grant Id"
             }
           }
         ],
@@ -8049,7 +7983,7 @@
                   "items": {
                     "$ref": "#/components/schemas/BranchOut"
                   },
-                  "title": "Response Setuserbranches"
+                  "title": "Response Setgrantbranches"
                 }
               }
             }
@@ -13066,6 +13000,121 @@
         ],
         "title": "GeographicLevel"
       },
+      "GrantIn": {
+        "properties": {
+          "id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id",
+            "description": "Concesión manual existente que se conserva; vacío para una nueva."
+          },
+          "role_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Role Id"
+          },
+          "scopes": {
+            "items": {
+              "$ref": "#/components/schemas/ScopeIn"
+            },
+            "type": "array",
+            "maxItems": 50,
+            "title": "Scopes",
+            "description": "Sin alcance no ve nada."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "role_id"
+        ],
+        "title": "GrantIn"
+      },
+      "GrantOrigin": {
+        "type": "string",
+        "enum": [
+          "manual",
+          "appointment"
+        ],
+        "title": "GrantOrigin"
+      },
+      "GrantOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "role": {
+            "$ref": "#/components/schemas/RoleSummary"
+          },
+          "origin": {
+            "$ref": "#/components/schemas/GrantOrigin"
+          },
+          "source_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Id",
+            "description": "Nombramiento que la originó, si aplica."
+          },
+          "scopes": {
+            "items": {
+              "$ref": "#/components/schemas/ScopeOut"
+            },
+            "type": "array",
+            "title": "Scopes"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "role",
+          "origin",
+          "source_id",
+          "scopes",
+          "created_at"
+        ],
+        "title": "GrantOut",
+        "description": "A (role, scope) pair (D-101): the role's permissions apply only inside its scopes."
+      },
+      "GrantsRequest": {
+        "properties": {
+          "grants": {
+            "items": {
+              "$ref": "#/components/schemas/GrantIn"
+            },
+            "type": "array",
+            "maxItems": 20,
+            "title": "Grants"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "grants"
+        ],
+        "title": "GrantsRequest"
+      },
       "GrowthPoint": {
         "properties": {
           "day": {
@@ -14599,14 +14648,14 @@
           "geo_unrestricted": {
             "type": "boolean",
             "title": "Geo Unrestricted",
-            "description": "Ve todo el país (superadmin o alcance nacional)."
+            "description": "Alguna concesión ve todo el país (superadmin o alcance nacional)."
           },
-          "geo_scopes": {
+          "grants": {
             "items": {
-              "$ref": "#/components/schemas/ScopeOut"
+              "$ref": "#/components/schemas/GrantOut"
             },
             "type": "array",
-            "title": "Geo Scopes"
+            "title": "Grants"
           }
         },
         "additionalProperties": false,
@@ -14623,7 +14672,7 @@
           "session_id",
           "scope",
           "geo_unrestricted",
-          "geo_scopes"
+          "grants"
         ],
         "title": "MeResponse"
       },
@@ -18248,24 +18297,6 @@
         ],
         "title": "ScopeOut"
       },
-      "ScopesRequest": {
-        "properties": {
-          "scopes": {
-            "items": {
-              "$ref": "#/components/schemas/ScopeIn"
-            },
-            "type": "array",
-            "maxItems": 50,
-            "title": "Scopes"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "scopes"
-        ],
-        "title": "ScopesRequest"
-      },
       "SessionOut": {
         "properties": {
           "id": {
@@ -18877,25 +18908,6 @@
           "created_at"
         ],
         "title": "UserOut"
-      },
-      "UserRolesRequest": {
-        "properties": {
-          "role_ids": {
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "type": "array",
-            "maxItems": 20,
-            "title": "Role Ids"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "role_ids"
-        ],
-        "title": "UserRolesRequest"
       },
       "UserStatus": {
         "type": "string",

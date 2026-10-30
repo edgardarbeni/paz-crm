@@ -82,7 +82,7 @@ backend/app/
   modules/
     identity/        usuarios, roles, permisos, sesiones, TOTP, alcances
       routers/ (auth, admin) · services/ (auth, mfa, sessions, credentials, admin,
-      access, scopes) · security/ (tokens, passwords…) · repository.py · container.py ·
+      access, grants, scopes) · security/ (tokens, passwords…) · repository.py · container.py ·
       dependencies.py · permissions.py · bootstrap.py
     geography/       marcos, niveles, búsqueda, locate, teselas MVT, importador
       models · schemas · service · router · frameworks.py · ine.py · importer/
@@ -191,20 +191,31 @@ La convención es declarar alias por módulo, por ejemplo
 
 Roles de sistema: `superadmin`, `admin`, `coordinator`, `capturist` y `viewer`.
 
-## 4. Alcance geográfico (D-34)
+## 4. Alcance geográfico (D-34, D-101)
 
-**Modelo.**
-- `identity.user_scopes` guarda los nodos asignados a cada usuario: nacional, circunscripción,
+**Modelo: concesiones.**
+- `identity.user_grants` guarda las concesiones de cada usuario: un rol, su origen (`manual` o
+  `appointment`) y, si viene de un nombramiento, su `source_id`. El acceso es la suma de ellas.
+- `identity.user_grant_scopes` guarda los nodos de cada concesión: nacional, circunscripción,
   estado, DF, DL, municipio o sección.
-- `identity.user_scope_sections` es la tabla derivada con las secciones que cubren esos nodos.
-  Se reconstruye en `set_scopes` y al activar un marco (`rebuild_all`). El alcance nacional no
-  se materializa.
-- `GeoScope.unrestricted` es verdadero para superadmin y alcance nacional.
-- Sin alcance no se ve nada: se niega por defecto.
+- `identity.user_grant_sections` es la tabla derivada `(grant_id, section_id)` con las secciones
+  que cubren esos nodos. Se reconstruye al cambiar una concesión (`services/grants.py`) y al
+  activar un marco (`rebuild_all`). El alcance nacional no se materializa.
+- **El alcance es por permiso.** `permission(Perm.X)` entrega `CurrentUser.geo` acotado a las
+  concesiones cuyo rol incluye X (`GeoScope.grant_ids`). Así un rol nunca presta sus permisos al
+  territorio de otra concesión. Las rutas sin permiso (cuenta propia) reciben todas.
+- **Permisos secundarios.** Desenmascarar datos (`read_sensitive`), aprobar o forzar reglas solo
+  aplican si su alcance cubre el del permiso de la ruta: `await user.holds_within(db, Perm.Y)`.
+  Es conservador: si cubre solo una parte, no aplica en ninguna.
+- `GeoScope.unrestricted` es verdadero para superadmin y para una concesión nacional del permiso.
+- Sin concesión no se ve nada: se niega por defecto.
 
 **Aplicación en la consulta.** Cada servicio recibe `user.geo` y agrega un predicado `EXISTS`
-contra `user_scope_sections`. Cada predicado devuelve `None` cuando el alcance no tiene
-restricción.
+contra `user_grant_sections`, sin leer la tabla directamente:
+- con el ORM, `GeoScope.sections_filter(col)`;
+- en SQL crudo, `GeoScope.section_sql("x.section_id")` más `GeoScope.sql_params`.
+
+Cada predicado devuelve `None` cuando el alcance no tiene restricción.
 
 | Módulo | Predicado | Regla |
 |---|---|---|
@@ -212,14 +223,19 @@ restricción.
 | Geografía | `LevelDef.visible(geo)` (`geography/service.py`) | El nodo toca al menos una sección del alcance |
 | Candidaturas | `scope.readable_filter`, `is_editable`, `ensure_node_within_scope` | Se lee si comparte una sección y se edita si todas están en el alcance (vista `candidacies.nomination_sections`, migración 0009). Las postulaciones nacionales exigen alcance nacional |
 | Personas | `people/service.py:visible_filter` | Domicilio en el alcance, sin domicilio, o parte de una postulación visible |
-| Movimiento de Paz | `peace_movement/scope.py:member_visibility` | Sección del domicilio en el alcance **o** dentro de una rama asignada (`user_branch_scopes`, `path <@`), aunque cruce estados ([D-83](adr/D-83-alcance-por-rama.md)) |
-| Usuarios | `manageable_users_filter`, `ensure_within_scope` | Solo se gestiona a usuarios cuyo alcance está dentro del propio |
+| Movimiento de Paz | `peace_movement/scope.py:member_visibility` | Sección del domicilio en el alcance **o** dentro de una rama de las mismas concesiones (`user_branch_scopes.grant_id`, `path <@`), aunque cruce estados ([D-83](adr/D-83-alcance-por-rama.md), [D-101](adr/D-101-concesiones-rol-alcance.md)) |
+| Usuarios | `manageable_users_filter`, `ensure_within_scope` | Solo se gestiona a usuarios cuyo alcance (todas sus concesiones) está dentro del alcance del actor para el permiso de gestión |
 
-**Antiescalamiento.** `set_scopes` rechaza otorgar un nodo con secciones fuera del alcance
-del actor; el alcance nacional solo lo otorga quien ya lo tiene.
+**Antiescalamiento (D-52, D-101).** `grants.ensure_can_hand_out` exige dos cosas para conceder
+(rol, alcance):
+- que el actor tenga cada permiso del rol;
+- que, para cada permiso, el alcance esté dentro del que el actor tiene para ese permiso.
+
+El nacional de un permiso solo lo concede quien ya lo tiene. Lo mismo vale para quitar o cambiar
+una concesión.
 
 **Rendimiento.** Después de reconstruir alcances en bloque se ejecuta
-`ANALYZE identity.user_scope_sections`; sin estadísticas las teselas acotadas se degradan
+`ANALYZE identity.user_grant_sections`; sin estadísticas las teselas acotadas se degradan
 ([D-63](adr/D-63-operacion-geografia.md), R-7 de la [fase C](history/fases/FASE_C.md)).
 
 ## 5. Auditoría (D-37, D-45, D-53)
@@ -247,7 +263,7 @@ del actor; el alcance nacional solo lo otorga quien ya lo tiene.
 
 **Ajustes por modelo:**
 - `__audit__ = False`: no se audita. Se usa en geografía importada (una entrada `geo_import`
-  por corrida, D-36), `recovery_codes`, `refresh_tokens` y `user_scope_sections`.
+  por corrida, D-36), `recovery_codes`, `refresh_tokens` y `user_grant_sections`.
 - `__audit_masked__`: campos guardados como `***`, como `password_hash`. Los valores `bytes`
   (cifrados e índices ciegos) siempre se enmascaran.
 - `__audit_ignore_fields__`: un update que solo toca esos campos no se registra
@@ -397,7 +413,7 @@ alguna ADR ya la cubre. Los requisitos vienen del brief original, hoy repartido 
 | 5 | "Los routers solo orquestan" | Hay lógica en algunos routers: `geography/router.py` consulta marcos directo y maneja la caché de teselas en Redis; `people/router.py` descifra y enmascara la CURP y los contactos; algunas rutas de `identity` hacen `commit` | No |
 | 6 | Redis "para caché, rate limiting y sesiones revocadas" | Redis se usa para rate limiting y caché de teselas MVT (solo usuarios sin restricción). La revocación se verifica en BD en cada petición | Sí (fase B, "Revocación inmediata") |
 | 7 | `app/core (config, seguridad, db, auditoría)` | La seguridad de identidad (JWT, Argon2, TOTP) vive en `identity/security`; `core` tiene `crypto` (cifrado de campos), rate limit y middlewares | No (organización) |
-| 8 | PK UUIDv7 con `created_at`, `updated_at` y `deleted_at` en todas las tablas, salvo D-03, D-04 y D-37 | `identity.user_scope_sections` usa PK compuesta `(user_id, section_id)` sin timestamps. Es una tabla derivada, en la línea de D-03, pero no está listada como excepción | Parcial |
+| 8 | PK UUIDv7 con `created_at`, `updated_at` y `deleted_at` en todas las tablas, salvo D-03, D-04 y D-37 | `identity.user_grant_sections` usa PK compuesta `(grant_id, section_id)` sin timestamps. Es una tabla derivada, en la línea de D-03, pero no está listada como excepción | Parcial |
 | 9 | WebAuthn/passkeys "preparado como extensión" | No hay código específico; `user_sessions.auth_methods` (RFC 8176) admite nuevos métodos y `reference/data-model.md` prevé una tabla `webauthn_credentials` futura | Sí (data-model.md) |
 | 10 | Valores sensibles de la bitácora "enmascarados o cifrados" (D-37) y purga ARCO de personas (D-69) | Resuelta: `Person` enmascara nombre, apellidos, nacimiento, sexo y entidad, y `PersonAddress` el CP. La geografía del domicilio se conserva | Sí, [D-93](adr/D-93-bitacora-alcance-y-enmascarado.md) |
 | 11 | D-19: teselas MVT "con simplificación por zoom" | Resuelta: hasta D-80 `tile` solo cuantizaba la geometría original (~900 KB y ~350 ms por tesela de municipios en z6). Ahora sirve `geom_low` / `geom_mid` según el zoom (188 KB, 24–58 ms) | Sí, [D-80](adr/D-80-teselas-geometrias-generalizadas.md) |
@@ -406,12 +422,12 @@ alguna ADR ya la cubre. Los requisitos vienen del brief original, hoy repartido 
 
 | Ubicación | Ahora |
 |---|---|
-| `identity/services/scopes.py` (`set_scopes`) | Borra los `user_scopes` anteriores con el ORM; queda qué alcance se quitó |
+| `identity/services/grants.py` (antes `scopes.set_scopes`) | Borra los alcances y concesiones anteriores con el ORM; queda qué se quitó |
 | `people/service.py` (`update_person`) | Retira contactos y domicilios con el ORM (`soft_delete`) |
 | `people/service.py` (`purge_due`) | Borra contactos, domicilios y consentimientos con el ORM (`delete`) |
 | `candidacies/nominations.py` (`update_members`) | Retira a los integrantes anteriores con el ORM (`soft_delete`) |
 
-Las escrituras Core sobre `recovery_codes`, `refresh_tokens` y `user_scope_sections` siguen
+Las escrituras Core sobre `recovery_codes`, `refresh_tokens` y `user_grant_sections` siguen
 excluidas a propósito (D-53, D-34).
 
 **Detalles menores** (resueltos en la fase 0b): el docstring de `identity/permissions.py`

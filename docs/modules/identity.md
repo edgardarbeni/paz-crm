@@ -24,14 +24,15 @@ del panel: `/users`, `/roles`, `/audit`, `/account`, `/login`, `/enroll-mfa`,
   - `core/mail` (SMTP; Mailpit en desarrollo);
   - `core/audit` (bitácora, §5);
   - `core/pagination` y `core/errors`.
-- **Geografía:** `user_scopes` y `user_scope_sections` referencian los nodos de `geography`
-  del marco activo. Al activar un marco, `paz geo activate` remapea los alcances y llama a
-  `scopes.rebuild_all` ([`geography.md`](geography.md)).
+- **Geografía:** `user_grant_scopes` y `user_grant_sections` referencian los nodos de
+  `geography` del marco activo. Al activar un marco, `paz geo activate` remapea los alcances y
+  llama a `scopes.rebuild_all` ([`geography.md`](geography.md)).
 
 ## Entidades y relaciones
 
 ER completo: [`reference/data-model.md` §2](../reference/data-model.md#2-identidad-identity)
-y §5 (auditoría). Migraciones `0003` (tablas), `0004` (roles y permisos) y `0006` (alcances).
+y §5 (auditoría). Migraciones `0003` (tablas), `0004` (roles y permisos), `0006` (alcances) y `0018`
+(concesiones, [D-101](../adr/D-101-concesiones-rol-alcance.md)).
 
 | Tabla | Claves y notas |
 |---|---|
@@ -44,9 +45,10 @@ y §5 (auditoría). Migraciones `0003` (tablas), `0004` (roles y permisos) y `00
 | `refresh_tokens` | `token_hash` único, `parent_token_id` para detectar reuso |
 | `roles` | `code` único, `requires_mfa`, `is_system`, `grants_all` |
 | `permissions` | `code` único `<módulo>.<recurso>.<acción>`; sembrados por migración |
-| `role_permissions`, `user_roles` | Tablas puente N:M |
-| `user_scopes` | `scope_level` (`national`, `electoral_region`, `state`, `federal_district`, `local_district`, `municipality`, `section`) con una FK nullable por nivel y `CHECK` de exclusividad |
-| `user_scope_sections` | Derivada `(user_id, section_id)`; se reconstruye, no se edita |
+| `role_permissions` | Tabla puente N:M |
+| `user_grants` | Concesión: `user_id`, `role_id`, `origin` (`manual` o `appointment`), `source_id` (el nombramiento, sin FK), `assigned_by_user_id` ([D-101](../adr/D-101-concesiones-rol-alcance.md)) |
+| `user_grant_scopes` | Alcance de una concesión: `scope_level` (`national`, `electoral_region`, `state`, `federal_district`, `local_district`, `municipality`, `section`) con una FK nullable por nivel y `CHECK` de exclusividad |
+| `user_grant_sections` | Derivada `(grant_id, section_id)`; se reconstruye, no se edita |
 | `audit.audit_log` | Append-only con cadena de hashes; se lee aquí ([architecture §5](../architecture.md#5-auditoría-d-37-d-45-d-53)) |
 
 **Ciclo de vida del usuario** ([D-35](../adr/D-35-alta-usuarios-correo.md), [D-54](../adr/D-54-ajustes-modelo-identidad.md)):
@@ -116,10 +118,16 @@ y §5 (auditoría). Migraciones `0003` (tablas), `0004` (roles y permisos) y `00
 - Solo un superadmin gestiona cuentas superadmin, y el último superadmin no se puede desactivar ni degradar.
 - Los roles de sistema no se eliminan, `superadmin` es inmutable y un rol con usuarios no se elimina.
 
-**Alcance** ([D-34](../adr/D-34-alcance-geografico.md)):
-- `PUT /users/{id}/scopes` reemplaza los alcances y valida que cada nodo exista en el marco activo.
-- No se puede otorgar un nodo con secciones fuera del alcance propio.
-- El alcance nacional solo lo otorga quien ya lo tiene.
+**Concesiones** ([D-34](../adr/D-34-alcance-geografico.md), [D-101](../adr/D-101-concesiones-rol-alcance.md)):
+- El acceso de un usuario es la suma de sus concesiones. Cada una es un rol con su alcance, y
+  los permisos del rol solo valen dentro de ese alcance.
+- `GET` / `PUT /users/{id}/grants` lista y reemplaza las concesiones **manuales**; para
+  conservar una se manda su `id`. Las de un nombramiento no se tocan aquí. El rol de una
+  concesión no cambia: se quita y se agrega otra.
+- Antiescalamiento por par: quien concede tiene cada permiso del rol, y para cada uno el
+  alcance está dentro del que él tiene para ese permiso. El nacional de un permiso solo lo
+  concede quien ya lo tiene.
+- Invitar con roles crea concesiones sin alcance (no ven nada hasta que se les asigne).
 
 ## Permisos y alcance
 
@@ -138,7 +146,7 @@ y §5 (auditoría). Migraciones `0003` (tablas), `0004` (roles y permisos) y `00
 | Código | Acción |
 |---|---|
 | `identity.user.read`, `.create`, `.update`, `.disable` | Usuarios |
-| `identity.user.assign_roles`, `.assign_scopes` | Roles y alcances de un usuario |
+| `identity.user.assign_roles`, `.assign_scopes` | Concesiones de un usuario (`PUT /users/{id}/grants` exige ambos) |
 | `identity.user.reset_mfa`, `.revoke_sessions` | Seguridad de una cuenta |
 | `identity.role.read`, `.create`, `.update`, `.delete` | Roles |
 | `identity.permission.read` | Catálogo de permisos |
@@ -149,9 +157,13 @@ por migración, y un test exige que la base y el código coincidan. El panel tie
 manual en `frontend/src/lib/auth/permissions.ts`.
 
 **Alcance geográfico:**
-- Un usuario se gestiona solo si su alcance está dentro del del actor o si aún no tiene
-  alcance (`manageable_users_filter`, `ensure_within_scope`). El filtro se aplica en la
-  consulta SQL.
+- Cada endpoint usa el alcance **del permiso que exige**: la unión de las concesiones cuyo rol
+  lo incluye (`permission(Perm.X)` entrega `CurrentUser.geo` ya acotado).
+- Un permiso secundario (desenmascarar, aprobar, forzar reglas) solo aplica si su alcance cubre
+  el del permiso principal (`CurrentUser.holds_within`).
+- Un usuario se gestiona solo si todo su alcance está dentro del alcance del actor para el
+  permiso de gestión, o si aún no tiene alcance (`manageable_users_filter`,
+  `ensure_within_scope`). El filtro se aplica en la consulta SQL.
 - Sin alcance no se ve nada; superadmin y alcance nacional no tienen restricción.
 
 ## Datos sensibles
@@ -176,7 +188,7 @@ de definir si se requiere).
 
 - **Por petición:** una consulta de usuario más sesión, dos de permisos y una de alcance. No
   hay caché de permisos (DT-13).
-- **Alcances:** en el benchmark nacional de la fase C, `user_scope_sections` recibió 5,589
+- **Alcances:** en el benchmark nacional de la fase C, `user_scope_sections` (hoy `user_grant_sections`) recibió 5,589
   filas para un usuario acotado. Sin `ANALYZE`, una tesela tardó 207 ms; analizada, 5.6 ms.
   Por eso se ejecuta `ANALYZE` tras las reconstrucciones masivas
   ([D-63](../adr/D-63-operacion-geografia.md), riesgo R-7).
@@ -195,7 +207,7 @@ de definir si se requiere).
 
 **Consume este módulo:**
 - La geografía del marco activo, para validar nodos de alcance.
-- `paz geo activate`, que remapea los alcances y reconstruye `user_scope_sections`.
+- `paz geo activate`, que remapea los alcances de las concesiones y reconstruye `user_grant_sections`.
 
 **Correo saliente** (después del commit): invitaciones y restablecimiento de contraseña, con
 enlaces a `PAZ_PUBLIC_BASE_URL`.
@@ -217,7 +229,7 @@ Cubiertos por `tests/integration/identity/` y `tests/integration/geography/`:
 - [x] El catálogo de permisos de la base coincide con `Perm` (`test_migrations_seed_the_registry`, `test_permission_catalog_matches_code_registry`).
 - [x] Sin alcance no se ve nada; un usuario no otorga alcance fuera del suyo; la administración de usuarios se limita por alcance; el alcance nacional ve todo.
 - [x] La bitácora se consulta con filtros y cursor (`test_audit_log_viewer`).
-- [ ] **Quitar un alcance queda en la bitácora.** Hoy no: `set_scopes` borra los `user_scopes` anteriores con una sentencia Core (`services/scopes.py:214`), sin `record_audit` ([architecture §8](../architecture.md#8-diferencias-entre-el-código-y-claudemd)).
+- [x] **Quitar un alcance queda en la bitácora.** Las concesiones y sus alcances se crean y se borran con el ORM (`services/grants.py`: `replace_scopes`, `remove_grant`), así que la bitácora registra qué se quitó ([D-93](../adr/D-93-bitacora-alcance-y-enmascarado.md), [D-101](../adr/D-101-concesiones-rol-alcance.md)).
 - [ ] **Bitácora limitada por alcance.** Hoy un admin estatal lee la bitácora completa (`GET /audit-log` solo exige `audit.log.read`). Pendiente de definir si es intencional.
 - [ ] **Contraseñas filtradas** (ASVS 2.1.7): se rechazan. Pendiente (DT-9).
 

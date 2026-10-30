@@ -1,11 +1,11 @@
 meta {
-  name: Asignar ramas a un usuario
+  name: Asignar ramas a una concesión
   type: http
   seq: 9
 }
 
 put {
-  url: {{baseUrl}}/api/v1/peace-movement/users/{{userId}}/branches
+  url: {{baseUrl}}/api/v1/peace-movement/grants/{{grantId}}/branches
   body: json
   auth: bearer
 }
@@ -20,4 +20,9 @@ body:json {
       "{{memberId}}"
     ]
   }
+}
+
+docs {
+  Una rama amplía una concesión: su rol también alcanza la red debajo del pacificador, aunque
+  cruce estados (D-83, D-101). El id de la concesión sale de GET /api/v1/users/{id}/grants.
 }

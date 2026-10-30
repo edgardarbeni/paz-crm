@@ -7,12 +7,13 @@ alive, user active) → load effective permissions → bind the actor to the req
 
 import uuid
 from collections.abc import Awaitable, Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Annotated
 
 from fastapi import Depends, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import col
 
 from app.core.context import bind_actor
@@ -22,7 +23,7 @@ from app.modules.identity.container import ServicesDep
 from app.modules.identity.models import User, UserSession, UserStatus
 from app.modules.identity.security.tokens import TokenScope
 from app.modules.identity.services.access import Access, load_access, utcnow
-from app.modules.identity.services.scopes import GeoScope, resolve_scope
+from app.modules.identity.services.scopes import GeoScope, geo_for, scope_covers
 
 _bearer = HTTPBearer(auto_error=False, description="Access token (JWT) de /auth/login.")
 
@@ -37,9 +38,26 @@ class CurrentUser:
     auth_methods: tuple[str, ...]
     access: Access
     geo: GeoScope
+    """The scope for the permission the endpoint requires (`permission(...)`), or for all the
+    user's grants on endpoints without one (D-101)."""
 
     def has(self, permission: str) -> bool:
+        """The user holds `permission` somewhere; use `geo_for` to know where."""
         return self.access.has(permission)
+
+    def geo_for(self, permission: str) -> GeoScope:
+        return geo_for(self.id, self.access, permission)
+
+    async def holds_within(self, db: AsyncSession, permission: str) -> bool:
+        """For a secondary permission (unmask, approve, override): it applies only if its scope
+        covers the scope of the permission being exercised (`geo`), so a grant never lends its
+        power to another grant's territory (D-101)."""
+        if not self.has(permission):
+            return False
+        return await scope_covers(db, self.geo_for(permission), self.geo)
+
+    def narrowed(self, permission: str) -> "CurrentUser":
+        return replace(self, geo=self.geo_for(permission))
 
 
 class MfaEnrollmentRequiredError(ForbiddenError):
@@ -87,7 +105,7 @@ async def _authenticate(
         scope=claims.scope,
         auth_methods=claims.auth_methods,
         access=access,
-        geo=await resolve_scope(db, user.id, access),
+        geo=geo_for(user.id, access),
     )
     request.state.current_user = current
     return current
@@ -116,7 +134,7 @@ def require_permission(permission: str) -> Callable[[CurrentUser], Awaitable[Cur
     async def dependency(current: CurrentUserDep) -> CurrentUser:
         if not current.has(permission):
             raise ForbiddenError(f"No tienes el permiso «{permission}».")
-        return current
+        return current.narrowed(permission)
 
     dependency.__name__ = f"require_{permission.replace('.', '_')}"
     return dependency

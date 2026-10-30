@@ -230,7 +230,7 @@ def geo_activate(
         typer.echo(f"Marco activo: {report.framework_id} (antes: {report.previous_framework_id})")
         typer.echo(f"Alcances remapeados: {report.remapped}")
         typer.echo(f"Alcances eliminados (sin equivalente): {report.removed}")
-        typer.echo(f"Usuarios recalculados: {report.users_rebuilt}")
+        typer.echo(f"Concesiones recalculadas: {report.grants_rebuilt}")
 
     asyncio.run(run())
 

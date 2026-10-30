@@ -313,13 +313,7 @@ async def open_house(
 
 
 async def _section_in_scope(db: AsyncSession, geo: GeoScope, section_id: uuid.UUID) -> bool:
-    if geo.unrestricted:
-        return True
-    found = await db.execute(
-        text("SELECT 1 FROM identity.user_scope_sections WHERE user_id = :u AND section_id = :s"),
-        {"u": geo.user_id, "s": section_id},
-    )
-    return found.first() is not None
+    return await geo.contains_section(db, section_id)
 
 
 async def update_house(

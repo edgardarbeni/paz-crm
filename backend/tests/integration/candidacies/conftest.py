@@ -15,7 +15,7 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncEngine
 
 from app.modules.people import curp
-from tests.integration.conftest import Account, UserFactory, token_for
+from tests.integration.conftest import Account, UserFactory, set_scopes, token_for
 from tests.integration.geography.conftest import (  # noqa: F401 - re-exported fixtures
     Importer,
     clean_geography,
@@ -92,10 +92,7 @@ def scoped(client: AsyncClient, make_user: UserFactory, root: dict[str, str]) ->
         needs_totp = any(role in {"admin", "coordinator"} for role in roles)
         user = await make_user(roles=roles, with_totp=needs_totp)
         if scopes is not None:
-            response = await client.put(
-                f"/api/v1/users/{user.id}/scopes", headers=root, json={"scopes": scopes}
-            )
-            assert response.status_code == 200, response.text
+            await set_scopes(client, root, user.id, scopes)
         return user, await token_for(client, user)
 
     return factory

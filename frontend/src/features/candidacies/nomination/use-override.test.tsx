@@ -35,7 +35,7 @@ function me(permissions: string[]) {
     session_id: "01a17000-0000-7000-8000-000000000002",
     scope: "full",
     geo_unrestricted: true,
-    geo_scopes: [],
+    grants: [],
   };
 }
 

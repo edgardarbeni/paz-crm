@@ -29,7 +29,8 @@ from app.modules.identity.security.tokens import (
     hash_opaque_token,
     new_opaque_token,
 )
-from app.modules.identity.services.access import Access, ensure_can_grant
+from app.modules.identity.services.access import Access, Grant, ensure_can_grant
+from app.modules.identity.services.scopes import geo_for
 from tests.support import make_settings
 
 SETTINGS = make_settings()
@@ -198,16 +199,20 @@ def _role(**kwargs: Any) -> Role:
     return Role(code="r", name="R", **kwargs)
 
 
+def _grant(role: Role, permissions: set[str], *, national: bool = False) -> Grant:
+    return Grant(id=uuid.uuid4(), role=role, permissions=frozenset(permissions), national=national)
+
+
 def test_access_rules() -> None:
-    plain = Access(roles=(_role(),), permissions=frozenset({Perm.USER_READ}), grants_all=False)
+    plain = Access(grants=(_grant(_role(id=uuid.uuid4()), {Perm.USER_READ}),))
     assert plain.has(Perm.USER_READ)
     assert not plain.has(Perm.USER_CREATE)
     assert not plain.requires_mfa
     assert plain.effective_permissions() == [Perm.USER_READ]
 
-    mfa = Access(roles=(_role(requires_mfa=True),), permissions=frozenset(), grants_all=False)
+    mfa = Access(grants=(_grant(_role(id=uuid.uuid4(), requires_mfa=True), set()),))
     assert mfa.requires_mfa
-    root = Access(roles=(_role(grants_all=True),), permissions=frozenset(), grants_all=True)
+    root = Access(grants=(_grant(_role(id=uuid.uuid4(), grants_all=True), set()),))
     assert root.requires_mfa
     assert root.has("anything.at.all")
     assert root.effective_permissions() == sorted(permission_codes())
@@ -216,6 +221,28 @@ def test_access_rules() -> None:
     ensure_can_grant(plain, [Perm.USER_READ])
     with pytest.raises(ForbiddenError, match=r"audit\.log\.read"):
         ensure_can_grant(plain, ["audit.log.read"])
+
+
+def test_scope_is_per_permission() -> None:
+    """D-101: a legal role in one state and a coordination role in another do not mix."""
+    user = uuid.uuid4()
+    legal = _grant(_role(id=uuid.uuid4()), {"legal.case.read", Perm.USER_READ})
+    sectional = _grant(_role(id=uuid.uuid4()), {"structure.read", Perm.USER_READ})
+    access = Access(grants=(legal, sectional))
+
+    assert geo_for(user, access, "legal.case.read").grant_ids == (legal.id,)
+    assert geo_for(user, access, "structure.read").grant_ids == (sectional.id,)
+    assert geo_for(user, access, Perm.USER_READ).grant_ids == (legal.id, sectional.id)
+    assert geo_for(user, access, "not.held").grant_ids == ()
+    assert not geo_for(user, access, "not.held").unrestricted
+    assert geo_for(user, access).grant_ids == (legal.id, sectional.id)
+
+    national = _grant(_role(id=uuid.uuid4()), {"structure.read"}, national=True)
+    wide = Access(grants=(legal, national))
+    assert geo_for(user, wide, "structure.read").unrestricted
+    assert not geo_for(user, wide, "legal.case.read").unrestricted
+    root = Access(grants=(_grant(_role(id=uuid.uuid4(), grants_all=True), set()),))
+    assert geo_for(user, root, "legal.case.read").unrestricted
 
 
 # --- e-mail ------------------------------------------------------------------------------

@@ -9,7 +9,7 @@ of superadmins are only visible to users without restriction.
 from sqlalchemy import ColumnElement, Table, or_, select
 from sqlmodel import col
 
-from app.modules.identity.models import Role, User, UserRole
+from app.modules.identity.models import Role, User, UserGrant
 from app.modules.identity.services.scopes import GeoScope, manageable_users_filter
 
 
@@ -18,8 +18,8 @@ def readable_entries(geo: GeoScope, table: Table) -> ColumnElement[bool] | None:
     if geo.unrestricted:
         return None
     superadmins = (
-        select(col(UserRole.user_id))
-        .join(Role, col(Role.id) == col(UserRole.role_id))
+        select(col(UserGrant.user_id))
+        .join(Role, col(Role.id) == col(UserGrant.role_id))
         .where(col(Role.grants_all).is_(True), col(Role.deleted_at).is_(None))
     )
     manageable = manageable_users_filter(geo, col(User.id))

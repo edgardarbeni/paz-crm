@@ -1,4 +1,4 @@
-"""User and role administration. Geographic scope filtering arrives in phase C (D-42)."""
+"""User, grant and role administration (D-33, D-34, D-52, D-101)."""
 
 import uuid
 from dataclasses import dataclass
@@ -12,13 +12,30 @@ from app.core.errors import BadRequestError, ConflictError, ForbiddenError, NotF
 from app.core.modules import permission_codes
 from app.core.pagination import CursorPage, PageParams, paginate, parse_sort
 from app.modules.identity import repository as repo
-from app.modules.identity.models import Role, RolePermission, User, UserRole, UserStatus
+from app.modules.identity.models import (
+    GrantOrigin,
+    Role,
+    RolePermission,
+    User,
+    UserStatus,
+)
 from app.modules.identity.services.access import (
     Access,
     ensure_can_assign,
     ensure_can_grant,
     load_access,
     utcnow,
+)
+from app.modules.identity.services.grants import (
+    GrantView,
+    ScopeSpec,
+    add_grant,
+    ensure_can_hand_out,
+    grants_of,
+    remove_grant,
+    replace_scopes,
+    scope_key,
+    validate_scopes,
 )
 from app.modules.identity.services.scopes import (
     GeoScope,
@@ -193,40 +210,105 @@ async def unlock_user(
     return await user_view(db, user_id)
 
 
-async def set_user_roles(
+@dataclass(frozen=True, slots=True)
+class GrantRequest:
+    """A wanted manual grant: `id` keeps an existing one (its scopes may change)."""
+
+    role_id: uuid.UUID
+    scopes: list[ScopeSpec]
+    id: uuid.UUID | None = None
+
+
+async def _plan_grants(
+    db: AsyncSession,
+    actor_id: uuid.UUID,
+    actor: Access,
+    manual: dict[uuid.UUID | None, GrantView],
+    wanted: list[GrantRequest],
+) -> tuple[
+    list[tuple[Role, list[ScopeSpec]]], list[tuple[GrantView, list[ScopeSpec]]], list[GrantView]
+]:
+    """Validates the wanted grants against the current manual ones and checks that the actor
+    can hand out everything that changes."""
+    ids = [item.id for item in wanted if item.id is not None]
+    if len(ids) != len(set(ids)):
+        raise BadRequestError("Hay concesiones repetidas en la lista.")
+    for grant_id in ids:
+        if grant_id not in manual:
+            raise BadRequestError(
+                f"La concesión {grant_id} no existe o no es manual; las de un nombramiento "
+                "se cambian desde el nombramiento."
+            )
+    roles = {role.id: role for role in await repo.roles_by_ids(db, [w.role_id for w in wanted])}
+    if any(item.role_id not in roles for item in wanted):
+        raise BadRequestError("Uno o más roles no existen.")
+
+    plan_add: list[tuple[Role, list[ScopeSpec]]] = []
+    plan_change: list[tuple[GrantView, list[ScopeSpec]]] = []
+    for item in wanted:
+        scopes = await validate_scopes(db, item.scopes)
+        role = roles[item.role_id]
+        if item.id is None:
+            await ensure_can_hand_out(db, actor_id, actor, role, scopes)
+            plan_add.append((role, scopes))
+            continue
+        view = manual[item.id]
+        if view.role.id != item.role_id:
+            raise BadRequestError(
+                "No se cambia el rol de una concesión: quítala y agrega una nueva."
+            )
+        if set(scopes) != {scope_key(scope) for scope in view.scopes}:
+            await ensure_can_hand_out(
+                db, actor_id, actor, view.role, [scope_key(s) for s in view.scopes]
+            )
+            await ensure_can_hand_out(db, actor_id, actor, role, scopes)
+            plan_change.append((view, scopes))
+    removed = [view for gid, view in manual.items() if gid not in set(ids)]
+    for view in removed:
+        await ensure_can_hand_out(
+            db, actor_id, actor, view.role, [scope_key(scope) for scope in view.scopes]
+        )
+
+    return plan_add, plan_change, removed
+
+
+async def set_user_grants(
     db: AsyncSession,
     *,
     actor_id: uuid.UUID,
     actor: Access,
     user_id: uuid.UUID,
-    role_ids: list[uuid.UUID],
+    wanted: list[GrantRequest],
     geo: GeoScope | None = None,
-) -> UserView:
+) -> list[GrantView]:
+    """Replaces the user's manual grants. Grants from appointments are not touched here (they
+    follow their appointment, D-104). Each added, changed or removed grant needs the actor to
+    be able to hand it out (D-101)."""
     await ensure_can_manage(db, actor, user_id, geo)
     await _locked_user(db, user_id)
-    wanted = await repo.roles_by_ids(db, role_ids)
-    if len(wanted) != len(set(role_ids)):
-        raise BadRequestError("Uno o más roles no existen.")
-    current = await repo.roles_of(db, user_id)
-    added = [role for role in wanted if role.id not in {r.id for r in current}]
-    removed = [role for role in current if role.id not in {r.id for r in wanted}]
-    await ensure_can_assign(db, actor, [*added, *removed])
+    current = {view.grant.id: view for view in await grants_of(db, user_id)}
+    manual = {gid: view for gid, view in current.items() if view.grant.origin == GrantOrigin.MANUAL}
 
-    removes_superadmin = any(r.grants_all for r in removed) and not any(
-        r.grants_all for r in wanted
-    )
-    if removes_superadmin and await repo.count_active_superadmins(db, excluding=user_id) == 0:
+    plan_add, plan_change, removed = await _plan_grants(db, actor_id, actor, manual, wanted)
+
+    kept_superadmin = any(
+        view.role.grants_all for gid, view in current.items() if view not in removed
+    ) or any(role.grants_all for role, _ in plan_add)
+    if (
+        any(view.role.grants_all for view in removed)
+        and not kept_superadmin
+        and await repo.count_active_superadmins(db, excluding=user_id) == 0
+    ):
         raise ConflictError("No se puede quitar el rol al último superadministrador.")
 
-    for role in removed:
-        link = await db.get(UserRole, (user_id, role.id))
-        if link is not None:
-            await db.delete(link)
-    for role in added:
-        assert role.id is not None  # noqa: S101
-        db.add(UserRole(user_id=user_id, role_id=role.id, assigned_by_user_id=actor_id))
+    for view in removed:
+        await remove_grant(db, view.grant)
+    for view, scopes in plan_change:
+        await replace_scopes(db, view.grant, scopes)
+    for role, scopes in plan_add:
+        await add_grant(db, user_id=user_id, role=role, scopes=scopes, assigned_by=actor_id)
     await db.commit()
-    return await user_view(db, user_id)
+    return await grants_of(db, user_id)
 
 
 # --- roles -------------------------------------------------------------------------------

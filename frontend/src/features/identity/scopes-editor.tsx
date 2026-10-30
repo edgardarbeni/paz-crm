@@ -1,15 +1,7 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
-import {
-  getUserScopesOptions,
-  getUserScopesQueryKey,
-  setUserScopesMutation,
-} from "@/client/@tanstack/react-query.gen";
+import { useState } from "react";
 import type { ScopeIn, ScopeLevel } from "@/client/types.gen";
 import { AsyncCombobox, type ComboItem } from "@/components/async-combobox";
-import { ProblemAlert } from "@/components/problem-alert";
 import { Button } from "@/components/ui/button";
 import { GeoName } from "@/features/candidacies/geo-name";
 import { GEO_LEVEL_LABELS } from "@/lib/labels";
@@ -25,32 +17,31 @@ const SCOPE_LEVELS: ScopeLevel[] = [
   "section",
 ];
 
-/** Geographic scope (D-34): the user sees and edits only what lies under these nodes. */
-export function ScopesEditor({ userId, editable }: { userId: string; editable: boolean }) {
-  const queryClient = useQueryClient();
-  const scopes = useQuery(getUserScopesOptions({ path: { user_id: userId } }));
-  const [rows, setRows] = useState<(ScopeIn & { label?: string })[]>([]);
+export type ScopeRow = ScopeIn & { label?: string };
+
+/** The scope of one grant (D-34, D-101): nodes the grant's role is limited to. Controlled: the
+ * caller owns the rows and decides when to save. */
+export function ScopeRowsEditor({
+  rows,
+  onChange,
+  editable,
+  idPrefix,
+}: {
+  rows: ScopeRow[];
+  onChange: (rows: ScopeRow[]) => void;
+  editable: boolean;
+  idPrefix: string;
+}) {
   const [level, setLevel] = useState<ScopeLevel>("municipality");
   const [node, setNode] = useState<ComboItem | null>(null);
-  useEffect(() => {
-    if (scopes.data) setRows(scopes.data.map((s) => ({ level: s.level, node_id: s.node_id })));
-  }, [scopes.data]);
-  const save = useMutation({
-    ...setUserScopesMutation(),
-    onSuccess: (data) => {
-      queryClient.setQueryData(getUserScopesQueryKey({ path: { user_id: userId } }), data);
-      toast.success("Alcance actualizado.");
-    },
-  });
   return (
-    <div className="space-y-3">
-      <ProblemAlert error={save.error ?? scopes.error} />
+    <div className="space-y-2">
       {rows.length ? (
         <ul className="divide-y rounded-lg border">
           {rows.map((row, index) => (
             <li
               key={`${row.level}-${row.node_id ?? "all"}`}
-              className="flex items-center justify-between px-3 py-2 text-sm"
+              className="flex items-center justify-between px-3 py-1.5 text-sm"
             >
               <span>
                 <span className="text-muted-foreground">{GEO_LEVEL_LABELS[row.level]}: </span>
@@ -62,7 +53,7 @@ export function ScopesEditor({ userId, editable }: { userId: string; editable: b
                   variant="ghost"
                   size="icon-sm"
                   aria-label={`Quitar alcance ${GEO_LEVEL_LABELS[row.level]}`}
-                  onClick={() => setRows(rows.filter((_, i) => i !== index))}
+                  onClick={() => onChange(rows.filter((_, i) => i !== index))}
                 >
                   <Trash2 aria-hidden />
                 </Button>
@@ -72,12 +63,13 @@ export function ScopesEditor({ userId, editable }: { userId: string; editable: b
         </ul>
       ) : (
         <p className="text-sm text-muted-foreground">
-          Sin alcance: el usuario no ve geografía ni datos ligados a ella (denegación por defecto).
+          Sin alcance: este rol no ve geografía ni datos ligados a ella (denegación por defecto).
         </p>
       )}
       {editable ? (
-        <div className="flex flex-wrap items-center gap-2 rounded-lg border border-dashed p-3">
+        <div className="flex flex-wrap items-center gap-2">
           <select
+            id={`${idPrefix}-level`}
             aria-label="Nivel del alcance"
             value={level}
             onChange={(e) => {
@@ -109,7 +101,7 @@ export function ScopesEditor({ userId, editable }: { userId: string; editable: b
             size="sm"
             disabled={level !== "national" && !node}
             onClick={() => {
-              setRows([
+              onChange([
                 ...rows,
                 {
                   level,
@@ -120,20 +112,7 @@ export function ScopesEditor({ userId, editable }: { userId: string; editable: b
               setNode(null);
             }}
           >
-            <Plus aria-hidden /> Agregar
-          </Button>
-          <Button
-            size="sm"
-            className="ml-auto"
-            disabled={save.isPending}
-            onClick={() =>
-              save.mutate({
-                path: { user_id: userId },
-                body: { scopes: rows.map(({ label: _l, ...s }) => s) },
-              })
-            }
-          >
-            Guardar alcance
+            <Plus aria-hidden /> Agregar alcance
           </Button>
         </div>
       ) : null}

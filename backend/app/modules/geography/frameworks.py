@@ -1,8 +1,8 @@
 """Framework activation (D-01, D-41 point 7).
 
-Activating a framework moves every user scope to the equivalent node of the new framework by
+Activating a framework moves every grant scope to the equivalent node of the new framework by
 natural key (state code + municipality / district / section number, region number). Scopes
-whose node no longer exists are removed and reported. `user_scope_sections` is rebuilt.
+whose node no longer exists are removed and reported. `user_grant_sections` is rebuilt.
 The geography of personal addresses is remapped the same way; nodes without an equivalent are
 cleared (the address itself is kept) and reported.
 """
@@ -88,7 +88,7 @@ class ActivationReport:
     previous_framework_id: uuid.UUID | None
     remapped: dict[str, int] = field(default_factory=dict)
     removed: dict[str, int] = field(default_factory=dict)
-    users_rebuilt: int = 0
+    grants_rebuilt: int = 0
     addresses_remapped: dict[str, int] = field(default_factory=dict)
     addresses_cleared: dict[str, int] = field(default_factory=dict)
 
@@ -128,7 +128,7 @@ async def activate_framework(connection: AsyncConnection, *, name: str) -> Activ
     for column, (table, natural_key) in _REMAP.items():
         remapped = await connection.execute(
             text(
-                f"UPDATE identity.user_scopes us SET {column} = mapping.new_id, updated_at = now() "
+                f"UPDATE identity.user_grant_scopes us SET {column} = mapping.new_id, updated_at = now() "
                 f"FROM ({_mapping_sql(table, natural_key)}) mapping "
                 f"WHERE us.{column} = mapping.old_id"
             ),
@@ -137,7 +137,7 @@ async def activate_framework(connection: AsyncConnection, *, name: str) -> Activ
         report.remapped[column] = remapped.rowcount
         removed = await connection.execute(
             text(
-                f"DELETE FROM identity.user_scopes us USING geography.{table} o "
+                f"DELETE FROM identity.user_grant_scopes us USING geography.{table} o "
                 f"WHERE us.{column} = o.id AND o.framework_id <> :new"
             ),
             {"new": new.id},
@@ -159,10 +159,10 @@ async def activate_framework(connection: AsyncConnection, *, name: str) -> Activ
         {"id": new.id, "now": datetime.now(UTC)},
     )
     session = AsyncSession(bind=connection)
-    report.users_rebuilt = await rebuild_all(session)
+    report.grants_rebuilt = await rebuild_all(session)
     await session.flush()
     # Bulk rewrite: refresh planner statistics so scope EXISTS filters keep good plans.
-    await connection.execute(text("ANALYZE identity.user_scope_sections"))
+    await connection.execute(text("ANALYZE identity.user_grant_sections"))
     await record_audit(
         connection,
         action="framework_activated",

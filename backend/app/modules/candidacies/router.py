@@ -5,6 +5,7 @@ import uuid
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, Path, Query, status
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db.session import SessionDep
 from app.core.pagination import CursorPage, PageParams, page_params
@@ -55,12 +56,12 @@ NominationId = Annotated[uuid.UUID, Path(description="Id de la postulación.")]
 FormulaId = Annotated[uuid.UUID, Path(description="Id de la fórmula.")]
 
 
-def actor(user: CurrentUser) -> Actor:
+async def actor(db: AsyncSession, user: CurrentUser) -> Actor:
     return Actor(
         user_id=user.id,
         geo=user.geo,
-        can_approve=user.has(Perm.NOMINATION_APPROVE),
-        can_override=user.has(Perm.RULE_OVERRIDE),
+        can_approve=await user.holds_within(db, Perm.NOMINATION_APPROVE),
+        can_override=await user.holds_within(db, Perm.RULE_OVERRIDE),
     )
 
 
@@ -279,7 +280,7 @@ async def create_coalition(
 
 async def _view(db: SessionDep, user: CurrentUser, nomination: Any) -> NominationOut:
     return NominationOut.model_validate(
-        await nominations.nomination_view(db, actor(user), nomination)
+        await nominations.nomination_view(db, await actor(db, user), nomination)
     )
 
 
@@ -297,7 +298,7 @@ async def list_nominations(
 ) -> CursorPage[NominationSummary]:
     page = await nominations.list_nominations(
         db,
-        actor(user),
+        await actor(db, user),
         params,
         process_id=process_id,
         office_type_id=office_type_id,
@@ -321,7 +322,8 @@ async def list_nominations(
     status_code=status.HTTP_201_CREATED,
 )
 async def create_nomination(db: SessionDep, user: Writer, body: NominationIn) -> NominationOut:
-    return await _view(db, user, await nominations.create_nomination(db, actor(user), body))
+    act = await actor(db, user)
+    return await _view(db, user, await nominations.create_nomination(db, act, body))
 
 
 @router.get(
@@ -330,7 +332,8 @@ async def create_nomination(db: SessionDep, user: Writer, body: NominationIn) ->
 async def get_nomination(
     db: SessionDep, user: Reader, nomination_id: NominationId
 ) -> NominationOut:
-    return await _view(db, user, await nominations.load_nomination(db, actor(user), nomination_id))
+    act = await actor(db, user)
+    return await _view(db, user, await nominations.load_nomination(db, act, nomination_id))
 
 
 @router.patch(
@@ -340,7 +343,9 @@ async def update_nomination(
     db: SessionDep, user: Writer, nomination_id: NominationId, body: NominationUpdate
 ) -> NominationOut:
     return await _view(
-        db, user, await nominations.update_nomination(db, actor(user), nomination_id, body)
+        db,
+        user,
+        await nominations.update_nomination(db, await actor(db, user), nomination_id, body),
     )
 
 
@@ -353,7 +358,9 @@ async def submit_nomination(
     db: SessionDep, user: Writer, nomination_id: NominationId, body: NominationAction
 ) -> NominationOut:
     return await _view(
-        db, user, await nominations.submit_nomination(db, actor(user), nomination_id, body)
+        db,
+        user,
+        await nominations.submit_nomination(db, await actor(db, user), nomination_id, body),
     )
 
 
@@ -366,7 +373,9 @@ async def approve_nomination(
     db: SessionDep, user: Writer, nomination_id: NominationId, body: NominationAction
 ) -> NominationOut:
     return await _view(
-        db, user, await nominations.approve_nomination(db, actor(user), nomination_id, body)
+        db,
+        user,
+        await nominations.approve_nomination(db, await actor(db, user), nomination_id, body),
     )
 
 
@@ -379,7 +388,9 @@ async def cancel_nomination(
     db: SessionDep, user: Writer, nomination_id: NominationId, body: NominationAction
 ) -> NominationOut:
     return await _view(
-        db, user, await nominations.cancel_nomination(db, actor(user), nomination_id, body)
+        db,
+        user,
+        await nominations.cancel_nomination(db, await actor(db, user), nomination_id, body),
     )
 
 
@@ -391,7 +402,7 @@ async def cancel_nomination(
 async def validate_nomination(
     db: SessionDep, user: Reader, nomination_id: NominationId
 ) -> list[ViolationOut]:
-    violations = await nominations.validate(db, actor(user), nomination_id)
+    violations = await nominations.validate(db, await actor(db, user), nomination_id)
     return [ViolationOut.model_validate(nominations.violation_dict(v)) for v in violations]
 
 
@@ -405,7 +416,7 @@ async def get_nomination_history(
 ) -> list[StatusHistoryOut]:
     return [
         StatusHistoryOut.model_validate(h)
-        for h in await nominations.history(db, actor(user), nomination_id)
+        for h in await nominations.history(db, await actor(db, user), nomination_id)
     ]
 
 
@@ -418,9 +429,8 @@ async def get_nomination_history(
 async def create_formula(
     db: SessionDep, user: Writer, nomination_id: NominationId, body: FormulaIn
 ) -> NominationOut:
-    return await _view(
-        db, user, await nominations.create_formula(db, actor(user), nomination_id, body)
-    )
+    act = await actor(db, user)
+    return await _view(db, user, await nominations.create_formula(db, act, nomination_id, body))
 
 
 @router.patch(
@@ -431,9 +441,8 @@ async def create_formula(
 async def update_formula_members(
     db: SessionDep, user: Writer, formula_id: FormulaId, body: FormulaMembersUpdate
 ) -> NominationOut:
-    return await _view(
-        db, user, await nominations.update_members(db, actor(user), formula_id, body)
-    )
+    act = await actor(db, user)
+    return await _view(db, user, await nominations.update_members(db, act, formula_id, body))
 
 
 @router.post(
@@ -445,7 +454,9 @@ async def change_formula_status(
     db: SessionDep, user: Writer, formula_id: FormulaId, body: FormulaStatusIn
 ) -> NominationOut:
     return await _view(
-        db, user, await nominations.change_formula_status(db, actor(user), formula_id, body)
+        db,
+        user,
+        await nominations.change_formula_status(db, await actor(db, user), formula_id, body),
     )
 
 
@@ -457,6 +468,5 @@ async def change_formula_status(
 async def substitute_formula(
     db: SessionDep, user: Writer, formula_id: FormulaId, body: SubstitutionIn
 ) -> NominationOut:
-    return await _view(
-        db, user, await nominations.substitute_formula(db, actor(user), formula_id, body)
-    )
+    act = await actor(db, user)
+    return await _view(db, user, await nominations.substitute_formula(db, act, formula_id, body))

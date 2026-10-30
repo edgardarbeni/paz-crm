@@ -1,4 +1,4 @@
-"""/users, /roles, /permissions — administration (RBAC + geographic scope, D-33/D-34)."""
+"""/users, /roles, /permissions — administration (RBAC, grants and scope; D-33, D-34, D-101)."""
 
 import uuid
 from typing import Annotated
@@ -6,7 +6,7 @@ from typing import Annotated
 from fastapi import APIRouter, BackgroundTasks, Depends, Query, status
 
 from app.core.db.session import SessionDep
-from app.core.errors import ConflictError
+from app.core.errors import ConflictError, ForbiddenError
 from app.core.mail import send_safely
 from app.core.pagination import CursorPage, PageParams, page_params
 from app.modules.identity import repository as repo
@@ -15,23 +15,23 @@ from app.modules.identity.dependencies import CurrentUser, permission
 from app.modules.identity.models import UserStatus
 from app.modules.identity.permissions import Perm
 from app.modules.identity.schemas import (
+    GrantOut,
+    GrantsRequest,
     PermissionOut,
     RevokedCount,
     RoleCreateRequest,
     RoleOut,
     RolePermissionsRequest,
     RoleUpdateRequest,
-    ScopeOut,
-    ScopesRequest,
     SessionOut,
     UserInvitedResponse,
     UserInviteRequest,
     UserOut,
-    UserRolesRequest,
     UserUpdateRequest,
 )
-from app.modules.identity.services import admin, credentials, mfa, scopes, sessions
+from app.modules.identity.services import admin, credentials, mfa, sessions
 from app.modules.identity.services.access import utcnow
+from app.modules.identity.services.grants import GrantView, grants_of
 from app.modules.identity.services.scopes import ensure_within_scope
 
 users_router = APIRouter(prefix="/users", tags=["users"])
@@ -44,7 +44,6 @@ UserDisabler = Annotated[CurrentUser, permission(Perm.USER_DISABLE)]
 RoleAssigner = Annotated[CurrentUser, permission(Perm.USER_ASSIGN_ROLES)]
 MfaResetter = Annotated[CurrentUser, permission(Perm.USER_RESET_MFA)]
 SessionRevoker = Annotated[CurrentUser, permission(Perm.USER_REVOKE_SESSIONS)]
-ScopeAssigner = Annotated[CurrentUser, permission(Perm.USER_ASSIGN_SCOPES)]
 RoleReader = Annotated[CurrentUser, permission(Perm.ROLE_READ)]
 RoleCreator = Annotated[CurrentUser, permission(Perm.ROLE_CREATE)]
 RoleEditor = Annotated[CurrentUser, permission(Perm.ROLE_UPDATE)]
@@ -155,22 +154,6 @@ async def unlock_user(user_id: uuid.UUID, db: SessionDep, actor: UserDisabler) -
     )
 
 
-@users_router.put("/{user_id}/roles", operation_id="setUserRoles", summary="Reemplazar los roles")
-async def set_user_roles(
-    user_id: uuid.UUID, body: UserRolesRequest, db: SessionDep, actor: RoleAssigner
-) -> UserOut:
-    return _user_out(
-        await admin.set_user_roles(
-            db,
-            actor_id=actor.id,
-            actor=actor.access,
-            user_id=user_id,
-            role_ids=body.role_ids,
-            geo=actor.geo,
-        )
-    )
-
-
 @users_router.post(
     "/{user_id}/invitation", operation_id="resendInvitation", summary="Reenviar la invitación"
 )
@@ -230,30 +213,50 @@ async def revoke_user_sessions(
     return RevokedCount(revoked=count)
 
 
-@users_router.get("/{user_id}/scopes", operation_id="getUserScopes", summary="Alcance geográfico")
-async def get_user_scopes(user_id: uuid.UUID, db: SessionDep, actor: UserReader) -> list[ScopeOut]:
+def _grant_out(view: GrantView) -> GrantOut:
+    return GrantOut.from_parts(view.grant, view.role, view.scopes)
+
+
+@users_router.get(
+    "/{user_id}/grants", operation_id="listUserGrants", summary="Concesiones (rol y alcance)"
+)
+async def list_user_grants(user_id: uuid.UUID, db: SessionDep, actor: UserReader) -> list[GrantOut]:
     await admin.user_view(db, user_id)
     await ensure_within_scope(db, actor.geo, user_id=user_id)
-    return [ScopeOut.from_model(scope) for scope in await scopes.scopes_of(db, user_id)]
+    return [_grant_out(view) for view in await grants_of(db, user_id)]
 
 
 @users_router.put(
-    "/{user_id}/scopes",
-    operation_id="setUserScopes",
-    summary="Reemplazar el alcance geográfico (no puede exceder el propio)",
+    "/{user_id}/grants",
+    operation_id="setUserGrants",
+    summary="Reemplazar las concesiones manuales",
+    description=(
+        "Cada concesión es un rol con su alcance: sus permisos solo valen dentro de ese alcance "
+        "(D-101). Las concesiones de un nombramiento no se tocan aquí. No se puede conceder un "
+        "rol con permisos que no tienes ni un alcance mayor al que tienes para esos permisos."
+    ),
 )
-async def set_user_scopes(
-    user_id: uuid.UUID, body: ScopesRequest, db: SessionDep, actor: ScopeAssigner
-) -> list[ScopeOut]:
-    await admin.ensure_can_manage(db, actor.access, user_id, actor.geo)
-    created = await scopes.set_scopes(
+async def set_user_grants(
+    user_id: uuid.UUID, body: GrantsRequest, db: SessionDep, actor: RoleAssigner
+) -> list[GrantOut]:
+    if not actor.has(Perm.USER_ASSIGN_SCOPES):
+        raise ForbiddenError(f"No tienes el permiso «{Perm.USER_ASSIGN_SCOPES}».")
+    views = await admin.set_user_grants(
         db,
-        actor=actor.geo,
+        actor_id=actor.id,
+        actor=actor.access,
         user_id=user_id,
-        scopes=[(item.level, item.node_id) for item in body.scopes],
+        wanted=[
+            admin.GrantRequest(
+                id=item.id,
+                role_id=item.role_id,
+                scopes=[(scope.level, scope.node_id) for scope in item.scopes],
+            )
+            for item in body.grants
+        ],
+        geo=actor.geo,
     )
-    await db.commit()
-    return [ScopeOut.from_model(scope) for scope in created]
+    return [_grant_out(view) for view in views]
 
 
 # --- roles & permissions -------------------------------------------------------------------

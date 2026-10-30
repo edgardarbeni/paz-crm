@@ -21,7 +21,7 @@ async def test_activation_remaps_scopes(
 ) -> None:
     await run_import(framework="Marco A")
     await run_import(framework="Marco B", drop_section=108)
-    user = await make_user()
+    user = await make_user(roles=("viewer",))
     section_101_a = await scalar(
         owner_engine,
         "SELECT s.id FROM geography.sections s JOIN geography.geographic_frameworks f ON f.id = s.framework_id "
@@ -32,34 +32,37 @@ async def test_activation_remaps_scopes(
         "SELECT s.id FROM geography.sections s JOIN geography.geographic_frameworks f ON f.id = s.framework_id "
         "WHERE f.name = 'Marco A' AND s.section_number = 108",
     )
+    grant = await scalar(
+        owner_engine, "SELECT id FROM identity.user_grants WHERE user_id = :u", u=user.id
+    )
     async with owner_engine.begin() as connection:
         for node in (section_101_a, section_108_a):
             await connection.execute(
                 text(
-                    "INSERT INTO identity.user_scopes (user_id, scope_level, section_id) "
-                    "VALUES (:user, 'section', :node)"
+                    "INSERT INTO identity.user_grant_scopes (grant_id, scope_level, section_id) "
+                    "VALUES (:grant, 'section', :node)"
                 ),
-                {"user": user.id, "node": node},
+                {"grant": grant, "node": node},
             )
 
     async with owner_engine.begin() as connection:
         report = await activate_framework(connection, name="Marco B")
     assert report.remapped["section_id"] == 1
     assert report.removed["section_id"] == 1  # section 108 does not exist in Marco B
-    assert report.users_rebuilt == 1
+    assert report.grants_rebuilt == 1
 
     scopes = await rows(
         owner_engine,
-        "SELECT s.section_number, f.name FROM identity.user_scopes us JOIN geography.sections s ON s.id = us.section_id "
-        "JOIN geography.geographic_frameworks f ON f.id = s.framework_id WHERE us.user_id = :user",
-        user=user.id,
+        "SELECT s.section_number, f.name FROM identity.user_grant_scopes us JOIN geography.sections s ON s.id = us.section_id "
+        "JOIN geography.geographic_frameworks f ON f.id = s.framework_id WHERE us.grant_id = :grant",
+        grant=grant,
     )
     assert scopes == [{"section_number": 101, "name": "Marco B"}]
     materialized = await scalar(
         owner_engine,
-        "SELECT count(*) FROM identity.user_scope_sections uss JOIN geography.sections s ON s.id = uss.section_id "
-        "JOIN geography.geographic_frameworks f ON f.id = s.framework_id WHERE f.name = 'Marco B' AND uss.user_id = :user",
-        user=user.id,
+        "SELECT count(*) FROM identity.user_grant_sections uss JOIN geography.sections s ON s.id = uss.section_id "
+        "JOIN geography.geographic_frameworks f ON f.id = s.framework_id WHERE f.name = 'Marco B' AND uss.grant_id = :grant",
+        grant=grant,
     )
     assert materialized == 1
     active = await rows(

@@ -1,5 +1,5 @@
-"""Geographic scope for candidacies (D-34): a nomination is *readable* when it shares at least
-one section with the user's scope and *editable* only when all its sections are in scope."""
+"""Geographic scope for candidacies (D-34, D-101): a nomination is *readable* when it shares at
+least one section with the user's scope and *editable* only when all its sections are in scope."""
 
 import uuid
 
@@ -32,10 +32,10 @@ def readable_filter(geo: GeoScope) -> ColumnElement[bool] | None:
     if geo.unrestricted:
         return None
     return text(
-        "EXISTS (SELECT 1 FROM candidacies.nomination_sections ns "
-        "JOIN identity.user_scope_sections u ON u.section_id = ns.section_id "
-        "WHERE ns.nomination_id = candidacies.nominations.id AND u.user_id = :scope_user)"
-    ).bindparams(scope_user=geo.user_id)  # type: ignore[return-value]
+        "EXISTS (SELECT 1 FROM candidacies.nomination_sections ns "  # noqa: S608 - only scope SQL is interpolated
+        "WHERE ns.nomination_id = candidacies.nominations.id AND "
+        f"{geo.section_sql('ns.section_id')})"
+    ).bindparams(**geo.sql_params)  # type: ignore[return-value]
 
 
 async def is_editable(db: AsyncSession, geo: GeoScope, nomination_id: uuid.UUID) -> bool:
@@ -45,14 +45,13 @@ async def is_editable(db: AsyncSession, geo: GeoScope, nomination_id: uuid.UUID)
     outside = (
         await db.execute(
             text(
-                "SELECT 1 FROM candidacies.nominations WHERE id = :n "
+                "SELECT 1 FROM candidacies.nominations WHERE id = :n "  # noqa: S608 - only scope SQL is interpolated
                 "AND geographic_level = 'national' "
                 "UNION ALL "
                 "(SELECT 1 FROM candidacies.nomination_sections ns WHERE ns.nomination_id = :n "
-                "AND NOT EXISTS (SELECT 1 FROM identity.user_scope_sections u "
-                "WHERE u.user_id = :user AND u.section_id = ns.section_id) LIMIT 1)"
+                f"AND NOT {geo.section_sql('ns.section_id')} LIMIT 1)"
             ),
-            {"n": nomination_id, "user": geo.user_id},
+            {"n": nomination_id, **geo.sql_params},
         )
     ).first()
     return outside is None
@@ -64,11 +63,10 @@ async def is_readable(db: AsyncSession, geo: GeoScope, nomination_id: uuid.UUID)
     inside = (
         await db.execute(
             text(
-                "SELECT 1 FROM candidacies.nomination_sections ns "
-                "JOIN identity.user_scope_sections u ON u.section_id = ns.section_id "
-                "WHERE ns.nomination_id = :n AND u.user_id = :user LIMIT 1"
+                "SELECT 1 FROM candidacies.nomination_sections ns "  # noqa: S608
+                f"WHERE ns.nomination_id = :n AND {geo.section_sql('ns.section_id')} LIMIT 1"
             ),
-            {"n": nomination_id, "user": geo.user_id},
+            {"n": nomination_id, **geo.sql_params},
         )
     ).first()
     return inside is not None
@@ -93,11 +91,10 @@ async def ensure_node_within_scope(
     outside = (
         await db.execute(
             text(
-                f"SELECT 1 FROM ({_NODE_SECTIONS[level]}) n WHERE NOT EXISTS ("  # noqa: S608
-                "SELECT 1 FROM identity.user_scope_sections u WHERE u.user_id = :user "
-                "AND u.section_id = n.id) LIMIT 1"
+                f"SELECT 1 FROM ({_NODE_SECTIONS[level]}) n "  # noqa: S608
+                f"WHERE NOT {geo.section_sql('n.id')} LIMIT 1"
             ),
-            {"node": node, "user": geo.user_id},
+            {"node": node, **geo.sql_params},
         )
     ).first()
     if outside is not None:

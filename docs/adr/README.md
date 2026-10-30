@@ -75,7 +75,7 @@ separado en archivos sin cambiar su texto; solo se actualizaron las rutas de los
 | D | Tema | Estado |
 |---|---|---|
 | [D-33](D-33-roles-iniciales.md) | Roles iniciales | Aceptada |
-| [D-34](D-34-alcance-geografico.md) | Alcance geográfico | Aceptada (modelo reemplazado por D-101) |
+| [D-34](D-34-alcance-geografico.md) | Alcance geográfico | Aceptada (modelo reemplazado por D-101 y D-106) |
 | [D-35](D-35-alta-usuarios-correo.md) | Alta de usuarios y correo | Aceptada |
 | [D-36](D-36-auditoria-importaciones.md) | Auditoría de importaciones | Aceptada |
 | [D-37](D-37-bitacora-inmutable.md) | Bitácora inmutable | Aceptada (detallada por D-45) |
@@ -189,6 +189,7 @@ cambios.
 | [D-103](D-103-credito-casas-estructura.md) | Crédito de las Casas de Paz a asientos de estructura (reemplaza en parte D-92 y D-96) | Aceptada |
 | [D-104](D-104-cuentas-acceso-por-nombramiento.md) | Cuentas y acceso originados en nombramientos (amplía D-33, D-35 y D-52) | Aceptada |
 | [D-105](D-105-reglas-estructura-confirmadas.md) | Reglas de la estructura del partido confirmadas (precisa D-103 y D-104) | Aceptada |
+| [D-106](D-106-ajustes-implementacion-concesiones.md) | Ajustes de implementación de las concesiones (fase 0; detalla D-101) | Aceptada |
 
 ## Suposiciones vigentes
 

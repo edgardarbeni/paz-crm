@@ -36,7 +36,7 @@ No se crean roles nuevos: los roles existentes reciben permisos `peace_movement.
 |---|---|
 | `people` | `persons` (CURP, nombre, sexo, nacimiento), `person_contacts`, `person_addresses` (domicilio principal) y `privacy_consents`. Un pacificador **es** una persona |
 | `geography` | Marco activo, secciones y niveles superiores para domicilio, ubicación de casas y estadísticas por geografía |
-| `identity` | `CurrentUser`, `Perm`, `GeoScope` y `user_scope_sections`. El alcance por rama se propone dentro de este módulo, sin tocar `identity` ([D-83](../adr/D-83-alcance-por-rama.md)) |
+| `identity` | `CurrentUser`, `Perm` y `GeoScope` (alcance por concesión, D-101). El alcance por rama se propone dentro de este módulo, sin tocar `identity` ([D-83](../adr/D-83-alcance-por-rama.md)) |
 | `core` | `BusinessTable`, `AuditedSession`, `record_audit`, `paginate`, errores RFC 9457, `FieldCipher`, rate limiting y el almacenamiento de archivos de la fase 0 |
 
 ### Cambios a módulos existentes (requieren propuesta antes de implementar)
@@ -165,7 +165,7 @@ erDiagram
     members ||--o{ member_level_changes : ""
     members ||--o{ member_recruiter_changes : ""
     members ||--o{ user_branch_scopes : "rama"
-    users ||--o{ user_branch_scopes : ""
+    user_grants ||--o{ user_branch_scopes : ""
     members ||--o{ peace_houses : "anfitrión, contacto, abre, crédito"
     users |o--o{ peace_houses : "crédito sin Embajador"
     sections ||--o{ peace_houses : "ubicación"
@@ -216,7 +216,7 @@ erDiagram
         date valid_to
     }
     user_branch_scopes {
-        uuid user_id FK
+        uuid grant_id FK
         uuid member_id FK
     }
 ```
@@ -334,16 +334,19 @@ Los datos de contacto y domicilio se siguen rigiendo por `people.person.read_sen
 
 ### Alcance
 Un usuario ve un pacificador si se cumple **cualquiera** de estas condiciones:
-1. **Geográfico:** la sección de su domicilio está en el alcance del usuario (`user_scope_sections`).
-2. **Por rama (nuevo):** el pacificador está dentro de la red de algún nodo asignado al usuario
-   en `user_branch_scopes` (`path <@ rama.path`), aunque cruce estados.
+1. **Geográfico:** la sección de su domicilio está en el alcance del permiso que se ejerce (las concesiones que lo incluyen, `user_grant_sections`, D-101).
+2. **Por rama:** el pacificador está dentro de la red de algún nodo asignado a una de esas
+   concesiones en `user_branch_scopes` (`path <@ rama.path`), aunque cruce estados. La rama
+   amplía la concesión, no al usuario: solo alcanza lo que permite el rol de esa concesión
+   ([D-101](../adr/D-101-concesiones-rol-alcance.md)).
 
 Reglas:
 - Una casa es visible si su sección está en el alcance o su anfitrión, contacto o quien la abrió es visible.
 - Fuera del alcance, la red de un pacificador visible se muestra **solo en totales**, sin nombres ni datos.
 - **Antiescalamiento:** solo se otorga la rama del nodo X si el actor no tiene restricción o si
   X está dentro de una rama que ya tiene (`X.path <@ rama_del_actor.path`). Ver X por su
-  domicilio **no** basta: su subárbol puede cruzar a estados que el actor no ve.
+  domicilio **no** basta: su subárbol puede cruzar a estados que el actor no ve. Además, el
+  actor debe tener los permisos del MP del rol de la concesión.
 - **Datos personales:** el MP sirve los de sus pacificadores en sus propios endpoints, con este
   alcance y el enmascarado de D-66. `/people` sigue rigiéndose solo por la geografía.
 - **Dónde vive:** `peace_movement.user_branch_scopes`, resuelto por una dependencia del módulo
@@ -439,7 +442,7 @@ Bajo `/api/v1/peace-movement`, con el alcance de pacificadores (D-83) en todas l
 | `POST /members` · `POST /members/{id}/level` | `member.write` | Inscripción desde el panel (persona nueva o existente, consentimiento del aviso vigente) y cambio de nivel |
 | `POST /members/{id}/validate` · `/reject` · `/leave` | `member.validate` | Validar o rechazar pendientes y registrar salidas |
 | `POST /members/{id}/reassign` | `member.reassign` | Cambiar reclutador con toda su red |
-| `GET` / `PUT /users/{id}/branches` | `identity.user.read` / `identity.user.assign_scopes` | Alcance por rama con antiescalamiento |
+| `GET` / `PUT /grants/{id}/branches` | `identity.user.read` / `identity.user.assign_scopes` | Alcance por rama de una concesión ([D-101](../adr/D-101-concesiones-rol-alcance.md)) con antiescalamiento |
 
 | `GET /houses` · `GET /houses/{id}` · `/members` · `/meetings` · `/meetings/{id}` · `/photos` | `house.read` | Búsqueda (estatus, estado, crédito pendiente, por reasignar, publicable), detalle con avance contra la meta (queda en `audit.access_log`), integrantes, reuniones y fotos con URL firmada |
 | `POST /houses` · `PATCH /houses/{id}` · `/close` · `POST`/`DELETE /houses/{id}/members` · `POST /meetings` · `POST`/`DELETE /photos` · `POST`/`DELETE /public-location-consent` | `house.write` | Abrir (crédito automático), editar y cambiar anfitrión o contacto, cerrar, integrantes, reuniones con invitados, fotos y consentimiento de ubicación publicable |

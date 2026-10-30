@@ -79,7 +79,7 @@ async def search_people(
     phone: Annotated[str | None, Query(min_length=10, max_length=20)] = None,
 ) -> CursorPage[PersonSummary]:
     page = await service.search_people(db, crypto, user.geo, params, q=q, curp=curp, phone=phone)
-    sensitive = user.has(Perm.PERSON_READ_SENSITIVE)
+    sensitive = await user.holds_within(db, Perm.PERSON_READ_SENSITIVE)
     return CursorPage[PersonSummary](
         items=[person_summary(crypto, person, sensitive) for person in page.items],
         next_cursor=page.next_cursor,
@@ -97,16 +97,20 @@ async def create_person(
     db: SessionDep, crypto: CryptoDep, user: Writer, body: PersonCreate
 ) -> PersonOut:
     view = await service.create_person(
-        db, crypto, user.geo, body, can_accept_incoherence=user.has(Perm.PERSON_READ_SENSITIVE)
+        db,
+        crypto,
+        user.geo,
+        body,
+        can_accept_incoherence=await user.holds_within(db, Perm.PERSON_READ_SENSITIVE),
     )
-    return person_out(crypto, view, user.has(Perm.PERSON_READ_SENSITIVE))
+    return person_out(crypto, view, await user.holds_within(db, Perm.PERSON_READ_SENSITIVE))
 
 
 @router.get("/{person_id}", operation_id="getPerson", summary="Detalle de persona")
 async def get_person(
     db: SessionDep, crypto: CryptoDep, user: Reader, person_id: PersonId
 ) -> PersonOut:
-    sensitive = user.has(Perm.PERSON_READ_SENSITIVE)
+    sensitive = await user.holds_within(db, Perm.PERSON_READ_SENSITIVE)
     view = await service.read_person(db, user.geo, person_id, unmasked=sensitive)
     return person_out(crypto, view, sensitive)
 
@@ -121,9 +125,9 @@ async def update_person(
         user.geo,
         person_id,
         body,
-        can_accept_incoherence=user.has(Perm.PERSON_READ_SENSITIVE),
+        can_accept_incoherence=await user.holds_within(db, Perm.PERSON_READ_SENSITIVE),
     )
-    return person_out(crypto, view, user.has(Perm.PERSON_READ_SENSITIVE))
+    return person_out(crypto, view, await user.holds_within(db, Perm.PERSON_READ_SENSITIVE))
 
 
 @router.delete(

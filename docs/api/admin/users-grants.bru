@@ -1,0 +1,34 @@
+meta {
+  name: Reemplazar las concesiones (rol y alcance)
+  type: http
+  seq: 5
+}
+
+put {
+  url: {{baseUrl}}/api/v1/users/{{userId}}/grants
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "grants": [
+      {
+        "role_id": "{{roleId}}",
+        "scopes": [{ "level": "municipality", "node_id": "{{nodeId}}" }]
+      }
+    ]
+  }
+}
+
+docs {
+  Cada concesión es un rol con su alcance: sus permisos solo valen dentro de él (D-101).
+  Se reemplazan las concesiones manuales; para conservar una, manda su `id`. Las que vienen de un
+  nombramiento no se tocan. Niveles: national (sin node_id), electoral_region, state,
+  federal_district, local_district, municipality, section. No se concede un rol con permisos que
+  no tienes, ni un alcance mayor al que tienes para esos permisos. `GET` lista las concesiones.
+}

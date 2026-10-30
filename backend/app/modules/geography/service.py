@@ -846,13 +846,13 @@ TILE_LAYERS = {
     "blocks": ("blocks", "s.block_number::text", "NULL", "s.section_id", 14),
 }
 _TILE_SCOPE = {
-    "states": "EXISTS (SELECT 1 FROM geography.sections x JOIN identity.user_scope_sections u ON u.section_id = x.id WHERE x.state_id = s.id AND u.user_id = :user)",
-    "federal_districts": "EXISTS (SELECT 1 FROM geography.sections x JOIN identity.user_scope_sections u ON u.section_id = x.id WHERE x.federal_district_id = s.id AND u.user_id = :user)",
-    "local_districts": "EXISTS (SELECT 1 FROM geography.sections x JOIN identity.user_scope_sections u ON u.section_id = x.id WHERE x.local_district_id = s.id AND u.user_id = :user)",
-    "municipalities": "EXISTS (SELECT 1 FROM geography.sections x JOIN identity.user_scope_sections u ON u.section_id = x.id WHERE x.municipality_id = s.id AND u.user_id = :user)",
-    "sections": "EXISTS (SELECT 1 FROM identity.user_scope_sections u WHERE u.section_id = s.id AND u.user_id = :user)",
-    "neighborhoods": "EXISTS (SELECT 1 FROM geography.neighborhood_sections x JOIN identity.user_scope_sections u ON u.section_id = x.section_id WHERE x.neighborhood_id = s.id AND u.user_id = :user)",
-    "blocks": "EXISTS (SELECT 1 FROM identity.user_scope_sections u WHERE u.section_id = s.section_id AND u.user_id = :user)",
+    "states": "EXISTS (SELECT 1 FROM geography.sections x JOIN identity.user_grant_sections u ON u.section_id = x.id WHERE x.state_id = s.id AND u.grant_id = ANY(CAST(:scope_grants AS uuid[])))",
+    "federal_districts": "EXISTS (SELECT 1 FROM geography.sections x JOIN identity.user_grant_sections u ON u.section_id = x.id WHERE x.federal_district_id = s.id AND u.grant_id = ANY(CAST(:scope_grants AS uuid[])))",
+    "local_districts": "EXISTS (SELECT 1 FROM geography.sections x JOIN identity.user_grant_sections u ON u.section_id = x.id WHERE x.local_district_id = s.id AND u.grant_id = ANY(CAST(:scope_grants AS uuid[])))",
+    "municipalities": "EXISTS (SELECT 1 FROM geography.sections x JOIN identity.user_grant_sections u ON u.section_id = x.id WHERE x.municipality_id = s.id AND u.grant_id = ANY(CAST(:scope_grants AS uuid[])))",
+    "sections": "EXISTS (SELECT 1 FROM identity.user_grant_sections u WHERE u.section_id = s.id AND u.grant_id = ANY(CAST(:scope_grants AS uuid[])))",
+    "neighborhoods": "EXISTS (SELECT 1 FROM geography.neighborhood_sections x JOIN identity.user_grant_sections u ON u.section_id = x.section_id WHERE x.neighborhood_id = s.id AND u.grant_id = ANY(CAST(:scope_grants AS uuid[])))",
+    "blocks": "EXISTS (SELECT 1 FROM identity.user_grant_sections u WHERE u.section_id = s.section_id AND u.grant_id = ANY(CAST(:scope_grants AS uuid[])))",
 }
 
 
@@ -886,6 +886,6 @@ async def tile(db: AsyncSession, geo: GeoScope, layer: str, z: int, x: int, y: i
     """
     params: dict[str, Any] = {"z": z, "x": x, "y": y, "fw": framework.id, "layer": layer}
     if not geo.unrestricted:
-        params["user"] = geo.user_id
+        params.update(geo.sql_params)
     data = (await db.execute(text(sql), params)).scalar_one()
     return bytes(data or b"")
