@@ -55,6 +55,25 @@ export type AccessEntryOut = {
 };
 
 /**
+ * AccessIn
+ *
+ * Access to the system for the holder (D-104). The account is the person's: it is reused if
+ * it exists; if not, `email` is required and an invitation is sent.
+ */
+export type AccessIn = {
+    /**
+     * Email
+     */
+    email?: string | null;
+    /**
+     * Role Id
+     *
+     * Vacío: el rol por defecto del cargo.
+     */
+    role_id?: string | null;
+};
+
+/**
  * AddressIn
  */
 export type AddressIn = {
@@ -218,6 +237,10 @@ export type AppointmentIn = {
      * Agreement Ref
      */
     agreement_ref?: string | null;
+    /**
+     * Dar acceso al sistema. Si quien nombra no puede darlo, el nombramiento se registra sin acceso y `access_pending` dice por qué (D-104).
+     */
+    access?: AccessIn | null;
 };
 
 /**
@@ -269,6 +292,22 @@ export type AppointmentOut = {
      * Current
      */
     current: boolean;
+    /**
+     * Has Access
+     */
+    has_access: boolean;
+    /**
+     * User Id
+     *
+     * Cuenta de la persona, si el cargo da acceso.
+     */
+    user_id: string | null;
+    /**
+     * Access Pending
+     *
+     * Por qué no se dio el acceso pedido al nombrar.
+     */
+    access_pending?: string | null;
 };
 
 /**
@@ -3800,6 +3839,22 @@ export type PersonAppointmentOut = {
      * Current
      */
     current: boolean;
+    /**
+     * Has Access
+     */
+    has_access: boolean;
+    /**
+     * User Id
+     *
+     * Cuenta de la persona, si el cargo da acceso.
+     */
+    user_id: string | null;
+    /**
+     * Access Pending
+     *
+     * Por qué no se dio el acceso pedido al nombrar.
+     */
+    access_pending?: string | null;
     position_type: PositionTypeRef;
     body: BodyTypeRef;
     /**
@@ -11452,3 +11507,71 @@ export type ListPersonAppointmentsResponses = {
 };
 
 export type ListPersonAppointmentsResponse = ListPersonAppointmentsResponses[keyof ListPersonAppointmentsResponses];
+
+export type RevokeAppointmentAccessData = {
+    body?: never;
+    path: {
+        /**
+         * Appointment Id
+         */
+        appointment_id: string;
+    };
+    query?: never;
+    url: '/api/v1/party-structure/appointments/{appointment_id}/access';
+};
+
+export type RevokeAppointmentAccessErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type RevokeAppointmentAccessError = RevokeAppointmentAccessErrors[keyof RevokeAppointmentAccessErrors];
+
+export type RevokeAppointmentAccessResponses = {
+    /**
+     * Successful Response
+     */
+    200: AppointmentOut;
+};
+
+export type RevokeAppointmentAccessResponse = RevokeAppointmentAccessResponses[keyof RevokeAppointmentAccessResponses];
+
+export type GrantAppointmentAccessData = {
+    body: AccessIn;
+    path: {
+        /**
+         * Appointment Id
+         */
+        appointment_id: string;
+    };
+    query?: never;
+    url: '/api/v1/party-structure/appointments/{appointment_id}/access';
+};
+
+export type GrantAppointmentAccessErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type GrantAppointmentAccessError = GrantAppointmentAccessErrors[keyof GrantAppointmentAccessErrors];
+
+export type GrantAppointmentAccessResponses = {
+    /**
+     * Successful Response
+     */
+    200: AppointmentOut;
+};
+
+export type GrantAppointmentAccessResponse = GrantAppointmentAccessResponses[keyof GrantAppointmentAccessResponses];

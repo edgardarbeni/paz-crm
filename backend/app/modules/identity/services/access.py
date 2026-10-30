@@ -22,6 +22,7 @@ from app.modules.identity.models import (
     GrantOrigin,
     Role,
     ScopeLevel,
+    User,
     UserGrant,
     UserGrantScope,
 )
@@ -32,11 +33,33 @@ def utcnow() -> datetime:
 
 
 @dataclass(frozen=True, slots=True)
+class RoleInfo:
+    """A snapshot of a role: request-long and safe after a rollback (ORM rows would expire)."""
+
+    id: uuid.UUID
+    code: str
+    name: str
+    grants_all: bool
+    requires_mfa: bool
+
+    @classmethod
+    def of(cls, role: Role) -> "RoleInfo":
+        assert role.id is not None  # noqa: S101 - persisted
+        return cls(
+            id=role.id,
+            code=role.code,
+            name=role.name,
+            grants_all=role.grants_all,
+            requires_mfa=role.requires_mfa,
+        )
+
+
+@dataclass(frozen=True, slots=True)
 class Grant:
     """A loaded grant: its role, the role's permissions and whether its scope is national."""
 
     id: uuid.UUID
-    role: Role
+    role: RoleInfo
     permissions: frozenset[str]
     national: bool
     origin: GrantOrigin = GrantOrigin.MANUAL
@@ -47,9 +70,11 @@ class Access:
     """What a user may do. `grants_all` (superadmin) implies every permission everywhere."""
 
     grants: tuple[Grant, ...]
+    # Sticky requirement of the account (D-104), independent of its roles.
+    mfa_required: bool = False
 
     @property
-    def roles(self) -> tuple[Role, ...]:
+    def roles(self) -> tuple[RoleInfo, ...]:
         return tuple({grant.role.id: grant.role for grant in self.grants}.values())
 
     @property
@@ -62,7 +87,7 @@ class Access:
 
     @property
     def requires_mfa(self) -> bool:
-        return self.grants_all or any(role.requires_mfa for role in self.roles)
+        return self.mfa_required or self.grants_all or any(role.requires_mfa for role in self.roles)
 
     def has(self, permission: str) -> bool:
         """True if some grant includes `permission` (anywhere; see `grants_for` for where)."""
@@ -83,6 +108,11 @@ class Access:
 
 
 async def load_access(db: AsyncSession, user_id: uuid.UUID) -> Access:
+    mfa_required = bool(
+        (
+            await db.execute(select(col(User.mfa_required)).where(col(User.id) == user_id))
+        ).scalar_one_or_none()
+    )
     rows = (
         await db.execute(
             select(UserGrant, Role)
@@ -92,7 +122,7 @@ async def load_access(db: AsyncSession, user_id: uuid.UUID) -> Access:
         )
     ).all()
     if not rows:
-        return Access(grants=())
+        return Access(grants=(), mfa_required=mfa_required)
     by_role = await repo.permission_codes_by_role(db, {role.id for _, role in rows if role.id})
     grant_ids = [grant.id for grant, _ in rows]
     national = set(
@@ -109,13 +139,14 @@ async def load_access(db: AsyncSession, user_id: uuid.UUID) -> Access:
         grants=tuple(
             Grant(
                 id=grant.id,  # type: ignore[arg-type]
-                role=role,
+                role=RoleInfo.of(role),
                 permissions=frozenset(by_role.get(role.id, set())),  # type: ignore[arg-type]
                 national=grant.id in national,
                 origin=GrantOrigin(grant.origin),
             )
             for grant, role in rows
-        )
+        ),
+        mfa_required=mfa_required,
     )
 
 

@@ -192,6 +192,7 @@ cambios.
 | [D-106](D-106-ajustes-implementacion-concesiones.md) | Ajustes de implementación de las concesiones (fase 0; detalla D-101) | Aceptada |
 | [D-107](D-107-catalogo-y-organos.md) | Catálogo estatutario y órganos instalados (fase 1) | Aceptada |
 | [D-108](D-108-asientos-nombramientos.md) | Asientos y nombramientos (fase 2; precisa D-105) | Aceptada |
+| [D-109](D-109-acceso-por-nombramiento.md) | Acceso al sistema por nombramiento (fase 3; detalla D-104) | Aceptada |
 
 ## Suposiciones vigentes
 

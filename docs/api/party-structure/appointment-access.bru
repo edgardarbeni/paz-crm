@@ -1,0 +1,27 @@
+meta {
+  name: Dar acceso al titular
+  type: http
+  seq: 10
+}
+
+post {
+  url: {{baseUrl}}/api/v1/party-structure/appointments/{{appointmentId}}/access
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "email": "titular@example.com"
+  }
+}
+
+docs {
+  Reutiliza la cuenta de la persona o crea una invitada y envía la invitación; TOTP obligatorio.
+  role_id opcional (por defecto, el del cargo). Requiere party_structure.appointment.grant_access,
+  administrar el asiento y poder conceder ese rol en ese territorio. DELETE quita el acceso.
+}

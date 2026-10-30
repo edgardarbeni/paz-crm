@@ -21,6 +21,17 @@ export const zAccessEntryOut = z.object({
 });
 
 /**
+ * AccessIn
+ *
+ * Access to the system for the holder (D-104). The account is the person's: it is reused if
+ * it exists; if not, `email` is required and an invitation is sent.
+ */
+export const zAccessIn = z.object({
+    email: z.email().nullish(),
+    role_id: z.uuid().nullish()
+});
+
+/**
  * AddressIn
  */
 export const zAddressIn = z.object({
@@ -79,7 +90,8 @@ export const zAppointmentIn = z.object({
     starts_on: z.iso.date(),
     ends_on: z.iso.date().nullish(),
     appointed_by: z.string().max(300).nullish(),
-    agreement_ref: z.string().max(300).nullish()
+    agreement_ref: z.string().max(300).nullish(),
+    access: zAccessIn.nullish()
 });
 
 /**
@@ -1829,7 +1841,10 @@ export const zAppointmentOut = z.object({
     end_reason: zEndReason.nullable(),
     end_notes: z.string().nullable(),
     role: zRoleSummary.nullable(),
-    current: z.boolean()
+    current: z.boolean(),
+    has_access: z.boolean(),
+    user_id: z.uuid().nullable(),
+    access_pending: z.string().nullish()
 });
 
 /**
@@ -2278,6 +2293,9 @@ export const zPersonAppointmentOut = z.object({
     end_notes: z.string().nullable(),
     role: zRoleSummary.nullable(),
     current: z.boolean(),
+    has_access: z.boolean(),
+    user_id: z.uuid().nullable(),
+    access_pending: z.string().nullish(),
     position_type: zPositionTypeRef,
     body: zBodyTypeRef,
     body_id: z.uuid(),
@@ -4173,3 +4191,23 @@ export const zListPersonAppointmentsQuery = z.object({
  * Successful Response
  */
 export const zListPersonAppointmentsResponse = z.array(zPersonAppointmentOut);
+
+export const zRevokeAppointmentAccessPath = z.object({
+    appointment_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zRevokeAppointmentAccessResponse = zAppointmentOut;
+
+export const zGrantAppointmentAccessBody = zAccessIn;
+
+export const zGrantAppointmentAccessPath = z.object({
+    appointment_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zGrantAppointmentAccessResponse = zAppointmentOut;

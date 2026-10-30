@@ -43,6 +43,7 @@ export const Perm = {
   STRUCTURE_BODY_WRITE: "party_structure.body.write",
   STRUCTURE_APPOINTMENT_READ: "party_structure.appointment.read",
   STRUCTURE_APPOINTMENT_WRITE: "party_structure.appointment.write",
+  STRUCTURE_APPOINTMENT_GRANT_ACCESS: "party_structure.appointment.grant_access",
 } as const;
 
 export type PermCode = (typeof Perm)[keyof typeof Perm];

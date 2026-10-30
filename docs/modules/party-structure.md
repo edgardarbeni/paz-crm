@@ -1,8 +1,9 @@
 # Módulo: Estructura del partido
 
 **Estado:** en implementación. Fases 0 (concesiones en `identity`, [D-106](../adr/D-106-ajustes-implementacion-concesiones.md)) 1 (catálogo y
-órganos, [D-107](../adr/D-107-catalogo-y-organos.md)) y 2 (asientos y nombramientos,
-[D-108](../adr/D-108-asientos-nombramientos.md)) listas.
+órganos, [D-107](../adr/D-107-catalogo-y-organos.md)) 2 (asientos y nombramientos,
+[D-108](../adr/D-108-asientos-nombramientos.md)) y 3 (acceso por nombramiento,
+[D-109](../adr/D-109-acceso-por-nombramiento.md)) listas.
 **Paquete propuesto:** `backend/app/modules/party_structure` · esquema `party_structure` · API
 `/api/v1/party-structure`.
 **Brief:** respuestas de Darío del 2026-10-30 y catálogo estatutario [`cargos_paz.md`](../reference/cargos_paz.md). Lo marcado
@@ -281,7 +282,7 @@ permiso de lectura.
 | 0 | Concesiones en `identity` (D-101, D-106) | Lista |
 | 1 | Catálogo estatutario sembrado de `cargos_paz.md`, órganos, instalación y disolución (D-107) | Lista |
 | 2 | Asientos, nombramientos, periodos consecutivos, Presídium, incompatibilidades y administración delegada (D-108) | Lista |
-| 3 | Acceso por nombramiento: vínculo persona ↔ cuenta, invitación, `mfa_required`, revocación (D-104) | |
+| 3 | Acceso por nombramiento: vínculo persona ↔ cuenta, invitación, `mfa_required`, revocación (D-104, D-109) | Lista |
 | 4 | Coordinaciones territoriales: exclusividad y recálculo de alcance | |
 | 5 | Cambio de marco y bandeja de territorio por resolver (D-102, D-105) | |
 | 6 | Movimiento de Paz: crédito a quien abre o a un asiento, bandeja de casas y retiro de zonas (D-103) | |
@@ -304,6 +305,8 @@ y una ADR difieren, manda la ADR.**
   supuestos marcados) y los órganos (los estatales guardan la clave INE del estado).
 - [D-108](../adr/D-108-asientos-nombramientos.md): asientos, nombramientos y administración
   delegada (el nivel de una concesión manual es el de su alcance).
+- [D-109](../adr/D-109-acceso-por-nombramiento.md): cuenta de la persona, concesión con el
+  territorio del asiento, TOTP pegajoso, revocación y vencimiento diario.
 - [D-105](../adr/D-105-reglas-estructura-confirmadas.md): respuestas a las preguntas abiertas.
   - Sin incompatibilidades iniciales.
   - El orden de niveles para administrar.

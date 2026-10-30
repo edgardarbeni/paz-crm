@@ -9,3 +9,4 @@ class StructurePerm(StrEnum):
     BODY_WRITE = "party_structure.body.write"
     APPOINTMENT_READ = "party_structure.appointment.read"
     APPOINTMENT_WRITE = "party_structure.appointment.write"
+    APPOINTMENT_GRANT_ACCESS = "party_structure.appointment.grant_access"

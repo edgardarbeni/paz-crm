@@ -175,7 +175,7 @@ async def current_appointments(
 # --- territory and delegated administration ---------------------------------------------------
 
 
-async def _node_of(db: AsyncSession, table: str, where: str, value: int) -> uuid.UUID:
+async def node_of(db: AsyncSession, table: str, where: str, value: int) -> uuid.UUID:
     framework_id = await active_framework(db)
     found = (
         await db.execute(
@@ -198,7 +198,7 @@ async def ensure_seat_within(db: AsyncSession, geo: GeoScope, seat: Seat) -> Non
         return
     if seat.level == Level.CIRCUMSCRIPTION:
         assert seat.position.region_number is not None  # noqa: S101 - one seat per region
-        node = await _node_of(db, "electoral_regions", "region_number", seat.position.region_number)
+        node = await node_of(db, "electoral_regions", "region_number", seat.position.region_number)
         await ensure_node_within(db, geo, ScopeLevel.ELECTORAL_REGION, node)
         return
     body = seat.body
@@ -211,7 +211,7 @@ async def ensure_seat_within(db: AsyncSession, geo: GeoScope, seat: Seat) -> Non
             await ensure_node_within(db, geo, level, getattr(body, column))
             return
     if body.state_code is not None:
-        node = await _node_of(db, "states", "state_code", body.state_code)
+        node = await node_of(db, "states", "state_code", body.state_code)
         await ensure_node_within(db, geo, ScopeLevel.STATE, node)
         return
     raise ForbiddenError("Solo el nivel nacional administra los cargos nacionales.")
@@ -441,6 +441,9 @@ async def end_appointment(
     appointment.end_reason = reason
     appointment.end_notes = notes
     seat.position.vacant_since = ended_on
+    from app.modules.party_structure.access import revoke_access  # noqa: PLC0415 - cycle
+
+    await revoke_access(db, appointment)
     await db.commit()
     return appointment
 

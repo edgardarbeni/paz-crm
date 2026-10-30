@@ -11,3 +11,5 @@
 45 3 * * * paz peace-movement aggregate --full
 # Peace Movement imports queued from the panel (CSV/Excel), every minute.
 * * * * * paz peace-movement process-imports
+# Party structure: end the appointments whose period is over and revoke their access (D-104).
+50 3 * * * paz party-structure expire
