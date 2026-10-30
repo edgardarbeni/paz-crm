@@ -1,0 +1,21 @@
+meta {
+  name: Mapa de Casas de Paz (GeoJSON)
+  type: http
+  seq: 22
+}
+
+get {
+  url: {{baseUrl}}/api/v1/peace-movement/houses/map
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+docs {
+  Puntos aproximados (~100 m, D-85) de las casas abiertas y consolidadas dentro del alcance.
+  `?status=closed` filtra por estatus y `?state_id=` por estado. `truncated` indica que se
+  alcanzó el límite de 10 000 puntos (D-100).
+}
