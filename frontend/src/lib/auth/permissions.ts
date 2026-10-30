@@ -38,6 +38,9 @@ export const Perm = {
   PEACE_HOUSE_REASSIGN_CREDIT: "peace_movement.house.reassign_credit",
   PEACE_STATS_READ: "peace_movement.stats.read",
   PEACE_GOAL_MANAGE: "peace_movement.goal.manage",
+  STRUCTURE_CATALOG_MANAGE: "party_structure.catalog.manage",
+  STRUCTURE_BODY_READ: "party_structure.body.read",
+  STRUCTURE_BODY_WRITE: "party_structure.body.write",
 } as const;
 
 export type PermCode = (typeof Perm)[keyof typeof Perm];

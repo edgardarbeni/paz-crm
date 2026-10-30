@@ -1,0 +1,29 @@
+meta {
+  name: Instalar un comité municipal
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/api/v1/party-structure/bodies
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "body_type_id": "{{municipalCommitteeTypeId}}",
+    "municipality_id": "{{municipalityId}}",
+    "installed_on": "2026-11-01",
+    "installation_agreement": "CDN/015/2026"
+  }
+}
+
+docs {
+  Solo comités distritales (federal_district_id o local_district_id) y municipales
+  (municipality_id), dentro de tu alcance. 409 si ya hay uno vigente en ese territorio.
+}

@@ -10287,6 +10287,903 @@
           }
         }
       }
+    },
+    "/api/v1/party-structure/catalog": {
+      "get": {
+        "tags": [
+          "party-structure"
+        ],
+        "summary": "Órganos y cargos del estatuto",
+        "operationId": "getStructureCatalog",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BodyTypeOut"
+                  },
+                  "type": "array",
+                  "title": "Response Getstructurecatalog"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/party-structure/body-types": {
+      "post": {
+        "tags": [
+          "party-structure"
+        ],
+        "summary": "Agregar un tipo de órgano",
+        "operationId": "createBodyType",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BodyTypeIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BodyTypeOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/party-structure/body-types/{body_type_id}": {
+      "patch": {
+        "tags": [
+          "party-structure"
+        ],
+        "summary": "Editar un tipo de órgano",
+        "operationId": "updateBodyType",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "body_type_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Body Type Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BodyTypeUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BodyTypeRef"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/party-structure/position-types": {
+      "post": {
+        "tags": [
+          "party-structure"
+        ],
+        "summary": "Agregar un cargo (sin migraciones)",
+        "operationId": "createPositionType",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PositionTypeIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PositionTypeOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/party-structure/position-types/{position_type_id}": {
+      "patch": {
+        "tags": [
+          "party-structure"
+        ],
+        "summary": "Editar un cargo",
+        "operationId": "updatePositionType",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "position_type_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Position Type Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PositionTypeUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PositionTypeOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/party-structure/incompatibilities": {
+      "get": {
+        "tags": [
+          "party-structure"
+        ],
+        "summary": "Pares de cargos incompatibles",
+        "operationId": "listIncompatibilities",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/IncompatibilityOut"
+                  },
+                  "type": "array",
+                  "title": "Response Listincompatibilities"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "party-structure"
+        ],
+        "summary": "Registrar dos cargos incompatibles",
+        "operationId": "addIncompatibility",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IncompatibilityIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IncompatibilityOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/party-structure/incompatibilities/{incompatibility_id}": {
+      "delete": {
+        "tags": [
+          "party-structure"
+        ],
+        "summary": "Quitar una incompatibilidad",
+        "operationId": "removeIncompatibility",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "incompatibility_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Incompatibility Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/party-structure/coordination-position-types": {
+      "get": {
+        "tags": [
+          "party-structure"
+        ],
+        "summary": "Cargos del equipo de las coordinaciones territoriales",
+        "operationId": "listCoordinationPositionTypes",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CoordinationPositionTypeOut"
+                  },
+                  "type": "array",
+                  "title": "Response Listcoordinationpositiontypes"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "party-structure"
+        ],
+        "summary": "Agregar un cargo de coordinación",
+        "operationId": "createCoordinationPositionType",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CoordinationPositionTypeIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoordinationPositionTypeOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/party-structure/bodies": {
+      "get": {
+        "tags": [
+          "party-structure"
+        ],
+        "summary": "Órganos instalados en tu alcance",
+        "operationId": "listBodies",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "level",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/TerritorialLevel"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Level"
+            }
+          },
+          {
+            "name": "body_type_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Body Type Id"
+            }
+          },
+          {
+            "name": "state_code",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 32,
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "State Code"
+            }
+          },
+          {
+            "name": "include_dissolved",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Include Dissolved"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 1024
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 200
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Campos separados por coma; prefijo '-' para descendente.",
+              "examples": [
+                "-created_at,name"
+              ],
+              "title": "Sort"
+            },
+            "description": "Campos separados por coma; prefijo '-' para descendente."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CursorPage_BodyOut_"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "party-structure"
+        ],
+        "summary": "Registrar la instalación de un comité distrital o municipal",
+        "operationId": "installBody",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BodyInstallIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BodyOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/party-structure/bodies/{body_id}": {
+      "get": {
+        "tags": [
+          "party-structure"
+        ],
+        "summary": "Detalle de un órgano",
+        "operationId": "getBody",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "body_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Body Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BodyOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/party-structure/bodies/{body_id}/dissolve": {
+      "post": {
+        "tags": [
+          "party-structure"
+        ],
+        "summary": "Registrar la disolución de un comité distrital o municipal",
+        "operationId": "dissolveBody",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "body_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Body Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BodyDissolveIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BodyOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -11154,6 +12051,459 @@
         ],
         "title": "BatchOut"
       },
+      "BodyDissolveIn": {
+        "properties": {
+          "dissolved_on": {
+            "type": "string",
+            "format": "date",
+            "title": "Dissolved On"
+          },
+          "dissolution_agreement": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 2,
+            "title": "Dissolution Agreement"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "dissolved_on",
+          "dissolution_agreement"
+        ],
+        "title": "BodyDissolveIn"
+      },
+      "BodyInstallIn": {
+        "properties": {
+          "body_type_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Body Type Id"
+          },
+          "municipality_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Municipality Id"
+          },
+          "federal_district_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Federal District Id"
+          },
+          "local_district_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Local District Id"
+          },
+          "installed_on": {
+            "type": "string",
+            "format": "date",
+            "title": "Installed On"
+          },
+          "installation_agreement": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 2,
+            "title": "Installation Agreement"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "body_type_id",
+          "installed_on",
+          "installation_agreement"
+        ],
+        "title": "BodyInstallIn",
+        "description": "Registers the installation of a district or municipal body (agreement of the CDN)."
+      },
+      "BodyOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "body_type": {
+            "$ref": "#/components/schemas/BodyTypeRef"
+          },
+          "state_code": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "State Code"
+          },
+          "territory": {
+            "type": "string",
+            "title": "Territory",
+            "description": "Nombre del territorio en el marco activo."
+          },
+          "framework_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Framework Id"
+          },
+          "municipality_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Municipality Id"
+          },
+          "federal_district_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Federal District Id"
+          },
+          "local_district_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Local District Id"
+          },
+          "district_kind": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DistrictKind"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "installed_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Installed On"
+          },
+          "installation_agreement": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Installation Agreement"
+          },
+          "dissolved_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dissolved On"
+          },
+          "dissolution_agreement": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dissolution Agreement"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "installed",
+              "dissolved"
+            ],
+            "title": "Status"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "body_type",
+          "state_code",
+          "territory",
+          "framework_id",
+          "municipality_id",
+          "federal_district_id",
+          "local_district_id",
+          "district_kind",
+          "installed_on",
+          "installation_agreement",
+          "dissolved_on",
+          "dissolution_agreement",
+          "status"
+        ],
+        "title": "BodyOut"
+      },
+      "BodyTypeIn": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 2,
+            "pattern": "^[a-z0-9_]+$",
+            "title": "Code"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 2,
+            "title": "Name"
+          },
+          "territorial_level": {
+            "$ref": "#/components/schemas/TerritorialLevel"
+          },
+          "requires_installation": {
+            "type": "boolean",
+            "title": "Requires Installation",
+            "default": false
+          },
+          "statutory_basis": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Statutory Basis"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "sort_order": {
+            "type": "integer",
+            "title": "Sort Order",
+            "default": 0
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "name",
+          "territorial_level"
+        ],
+        "title": "BodyTypeIn"
+      },
+      "BodyTypeOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "territorial_level": {
+            "$ref": "#/components/schemas/TerritorialLevel"
+          },
+          "requires_installation": {
+            "type": "boolean",
+            "title": "Requires Installation"
+          },
+          "statutory_basis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Statutory Basis"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "sort_order": {
+            "type": "integer",
+            "title": "Sort Order"
+          },
+          "positions": {
+            "items": {
+              "$ref": "#/components/schemas/PositionTypeOut"
+            },
+            "type": "array",
+            "title": "Positions"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "code",
+          "name",
+          "territorial_level",
+          "requires_installation",
+          "statutory_basis",
+          "description",
+          "sort_order",
+          "positions"
+        ],
+        "title": "BodyTypeOut"
+      },
+      "BodyTypeRef": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "territorial_level": {
+            "$ref": "#/components/schemas/TerritorialLevel"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "code",
+          "name",
+          "territorial_level"
+        ],
+        "title": "BodyTypeRef"
+      },
+      "BodyTypeUpdate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 2,
+            "title": "Name"
+          },
+          "statutory_basis": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Statutory Basis"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "sort_order": {
+            "type": "integer",
+            "title": "Sort Order",
+            "default": 0
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "BodyTypeUpdate"
+      },
       "Body_queueMemberImport": {
         "properties": {
           "file": {
@@ -11588,6 +12938,105 @@
         ],
         "title": "ContactOut"
       },
+      "CoordinationKind": {
+        "type": "string",
+        "enum": [
+          "federal",
+          "local",
+          "sectional"
+        ],
+        "title": "CoordinationKind"
+      },
+      "CoordinationPositionTypeIn": {
+        "properties": {
+          "kind": {
+            "$ref": "#/components/schemas/CoordinationKind"
+          },
+          "code": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 2,
+            "pattern": "^[a-z0-9_]+$",
+            "title": "Code"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 2,
+            "title": "Name"
+          },
+          "default_role_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Default Role Id"
+          },
+          "sort_order": {
+            "type": "integer",
+            "title": "Sort Order",
+            "default": 0
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "kind",
+          "code",
+          "name"
+        ],
+        "title": "CoordinationPositionTypeIn"
+      },
+      "CoordinationPositionTypeOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/CoordinationKind"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "default_role": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RoleSummary"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sort_order": {
+            "type": "integer",
+            "title": "Sort Order"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "kind",
+          "code",
+          "name",
+          "default_role",
+          "sort_order"
+        ],
+        "title": "CoordinationPositionTypeOut"
+      },
       "CreditIn": {
         "properties": {
           "member_id": {
@@ -11693,6 +13142,39 @@
           "has_more"
         ],
         "title": "CursorPage[AuditEntryOut]"
+      },
+      "CursorPage_BodyOut_": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/BodyOut"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor",
+            "description": "Pasar en `cursor` para obtener la siguiente página."
+          },
+          "has_more": {
+            "type": "boolean",
+            "title": "Has More"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "has_more"
+        ],
+        "title": "CursorPage[BodyOut]"
       },
       "CursorPage_GeoNodeOut_": {
         "properties": {
@@ -12099,6 +13581,14 @@
           "hidden"
         ],
         "title": "DirectCounts"
+      },
+      "DistrictKind": {
+        "type": "string",
+        "enum": [
+          "federal",
+          "local"
+        ],
+        "title": "DistrictKind"
       },
       "ElectionLevel": {
         "type": "string",
@@ -14208,6 +15698,74 @@
           "triggered_by"
         ],
         "title": "ImportRunOut"
+      },
+      "IncompatibilityIn": {
+        "properties": {
+          "position_type_a_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Position Type A Id"
+          },
+          "position_type_b_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Position Type B Id"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "position_type_a_id",
+          "position_type_b_id"
+        ],
+        "title": "IncompatibilityIn"
+      },
+      "IncompatibilityOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "position_type_a": {
+            "$ref": "#/components/schemas/PositionTypeRef"
+          },
+          "position_type_b": {
+            "$ref": "#/components/schemas/PositionTypeRef"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "position_type_a",
+          "position_type_b",
+          "notes"
+        ],
+        "title": "IncompatibilityOut"
       },
       "InvitationAcceptRequest": {
         "properties": {
@@ -17024,6 +18582,376 @@
         ],
         "title": "PhotoOut"
       },
+      "PositionTypeIn": {
+        "properties": {
+          "body_type_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Body Type Id"
+          },
+          "code": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 2,
+            "pattern": "^[a-z0-9_]+$",
+            "title": "Code"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 2,
+            "title": "Name"
+          },
+          "scope_rule": {
+            "$ref": "#/components/schemas/ScopeRule",
+            "default": "body_territory"
+          },
+          "electing_body": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Electing Body"
+          },
+          "term_years": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 20.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Term Years"
+          },
+          "term_months": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 240.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Term Months"
+          },
+          "max_consecutive_terms": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 20.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Consecutive Terms"
+          },
+          "statutory_basis": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Statutory Basis"
+          },
+          "default_role_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Default Role Id"
+          },
+          "derived_from": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "maxItems": 10,
+            "title": "Derived From",
+            "description": "Cargos de los que toma a su titular (Presídium). Vacío: se nombra."
+          },
+          "sort_order": {
+            "type": "integer",
+            "title": "Sort Order",
+            "default": 0
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "body_type_id",
+          "code",
+          "name"
+        ],
+        "title": "PositionTypeIn"
+      },
+      "PositionTypeOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "body_type_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Body Type Id"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "scope_rule": {
+            "$ref": "#/components/schemas/ScopeRule"
+          },
+          "electing_body": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Electing Body"
+          },
+          "term_years": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Term Years"
+          },
+          "term_months": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Term Months"
+          },
+          "max_consecutive_terms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Consecutive Terms"
+          },
+          "statutory_basis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Statutory Basis"
+          },
+          "default_role": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RoleSummary"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "is_derived": {
+            "type": "boolean",
+            "title": "Is Derived"
+          },
+          "derived_from": {
+            "items": {
+              "$ref": "#/components/schemas/PositionTypeRef"
+            },
+            "type": "array",
+            "title": "Derived From",
+            "description": "De qué cargos toma a su titular. Uno: fijo; varios: se elige en cada periodo."
+          },
+          "sort_order": {
+            "type": "integer",
+            "title": "Sort Order"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "body_type_id",
+          "code",
+          "name",
+          "scope_rule",
+          "electing_body",
+          "term_years",
+          "term_months",
+          "max_consecutive_terms",
+          "statutory_basis",
+          "default_role",
+          "is_derived",
+          "derived_from",
+          "sort_order"
+        ],
+        "title": "PositionTypeOut"
+      },
+      "PositionTypeRef": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "code",
+          "name"
+        ],
+        "title": "PositionTypeRef"
+      },
+      "PositionTypeUpdate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 2,
+            "title": "Name"
+          },
+          "electing_body": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Electing Body"
+          },
+          "term_years": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 20.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Term Years"
+          },
+          "term_months": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 240.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Term Months"
+          },
+          "max_consecutive_terms": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 20.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Consecutive Terms"
+          },
+          "statutory_basis": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Statutory Basis"
+          },
+          "default_role_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Default Role Id"
+          },
+          "sort_order": {
+            "type": "integer",
+            "title": "Sort Order",
+            "default": 0
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "PositionTypeUpdate"
+      },
       "Principle": {
         "type": "string",
         "enum": [
@@ -18128,6 +20056,12 @@
           "name": {
             "type": "string",
             "title": "Name"
+          },
+          "grants_all": {
+            "type": "boolean",
+            "title": "Grants All",
+            "description": "Superadministrador: todo, sin alcance.",
+            "default": false
           }
         },
         "additionalProperties": false,
@@ -18296,6 +20230,15 @@
           "node_id"
         ],
         "title": "ScopeOut"
+      },
+      "ScopeRule": {
+        "type": "string",
+        "enum": [
+          "body_territory",
+          "circumscription",
+          "national"
+        ],
+        "title": "ScopeRule"
       },
       "SessionOut": {
         "properties": {
@@ -18621,6 +20564,16 @@
           "reason"
         ],
         "title": "SubstitutionIn"
+      },
+      "TerritorialLevel": {
+        "type": "string",
+        "enum": [
+          "national",
+          "state",
+          "district",
+          "municipal"
+        ],
+        "title": "TerritorialLevel"
       },
       "TokenScope": {
         "type": "string",

@@ -1,0 +1,31 @@
+meta {
+  name: Agregar un cargo
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/v1/party-structure/position-types
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "body_type_id": "{{bodyTypeId}}",
+    "code": "cdm_example",
+    "name": "Cargo de ejemplo",
+    "electing_body": "Órgano que elige o nombra",
+    "term_years": 3,
+    "statutory_basis": "Artículo del estatuto"
+  }
+}
+
+docs {
+  Cargos nuevos sin migraciones («demás cargos que se creen»). Requiere
+  party_structure.catalog.manage; el rol por defecto debe ser uno que puedas conceder.
+}

@@ -148,6 +148,13 @@ uv run paz --help                    # CLI de operación
     `scheduler`).
   - Antes de inscribir hace falta el aviso del MP: `POST /api/v1/people/privacy-notices` o, en
     desarrollo, `paz people sample-notice`.
+- **Estructura del partido (en curso).**
+  - Concesiones (D-101, D-106): el acceso es la suma de pares (rol, alcance); se gestionan en
+    `/api/v1/users/{id}/grants`.
+  - Catálogo estatutario y órganos (D-107) en `/api/v1/party-structure`: `catalog`,
+    `position-types` (cargos nuevos sin migración), `incompatibilities` y `bodies` (los
+    nacionales y estatales ya instalados; instalación y disolución de comités distritales y
+    municipales).
 - **Errores.** Siempre RFC 9457 (`application/problem+json`): `type` es `urn:pazos:problem:<code>`
   e incluye `request_id`.
 - **Paginación.** Por cursor (`app.core.pagination`): `limit` ≤ 200, `cursor` opaco y `sort`

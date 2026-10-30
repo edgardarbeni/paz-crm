@@ -1,0 +1,20 @@
+meta {
+  name: Catálogo estatutario (órganos y cargos)
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/v1/party-structure/catalog
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+docs {
+  Órganos y cargos sembrados de docs/reference/cargos_paz.md, con fundamento, órgano que elige,
+  periodo, rol por defecto y, en el Presídium, de qué cargos toman a su titular (D-105, D-107).
+}

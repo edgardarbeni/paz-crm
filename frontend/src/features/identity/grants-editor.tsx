@@ -135,7 +135,7 @@ function GrantItem({
         <Badge variant="secondary">{ORIGIN[grant.origin]}</Badge>
         {editable ? (
           <div className="ml-auto flex gap-1">
-            {editing ? null : (
+            {editing || grant.role.grants_all ? null : (
               <Button variant="ghost" size="sm" onClick={() => setEditing(toRows(grant))}>
                 <Pencil aria-hidden /> Editar alcance
               </Button>
@@ -155,7 +155,11 @@ function GrantItem({
           </div>
         ) : null}
       </div>
-      {editing ? (
+      {grant.role.grants_all ? (
+        <p className="text-sm text-muted-foreground">
+          Todo el sistema: el superadministrador no tiene restricción geográfica.
+        </p>
+      ) : editing ? (
         <div className="space-y-2">
           <ScopeRowsEditor
             rows={editing}

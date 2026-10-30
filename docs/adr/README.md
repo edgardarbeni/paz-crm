@@ -190,6 +190,7 @@ cambios.
 | [D-104](D-104-cuentas-acceso-por-nombramiento.md) | Cuentas y acceso originados en nombramientos (amplía D-33, D-35 y D-52) | Aceptada |
 | [D-105](D-105-reglas-estructura-confirmadas.md) | Reglas de la estructura del partido confirmadas (precisa D-103 y D-104) | Aceptada |
 | [D-106](D-106-ajustes-implementacion-concesiones.md) | Ajustes de implementación de las concesiones (fase 0; detalla D-101) | Aceptada |
+| [D-107](D-107-catalogo-y-organos.md) | Catálogo estatutario y órganos instalados (fase 1) | Aceptada |
 
 ## Suposiciones vigentes
 

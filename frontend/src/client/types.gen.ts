@@ -389,6 +389,221 @@ export type BatchOut = {
 };
 
 /**
+ * BodyDissolveIn
+ */
+export type BodyDissolveIn = {
+    /**
+     * Dissolved On
+     */
+    dissolved_on: string;
+    /**
+     * Dissolution Agreement
+     */
+    dissolution_agreement: string;
+};
+
+/**
+ * BodyInstallIn
+ *
+ * Registers the installation of a district or municipal body (agreement of the CDN).
+ */
+export type BodyInstallIn = {
+    /**
+     * Body Type Id
+     */
+    body_type_id: string;
+    /**
+     * Municipality Id
+     */
+    municipality_id?: string | null;
+    /**
+     * Federal District Id
+     */
+    federal_district_id?: string | null;
+    /**
+     * Local District Id
+     */
+    local_district_id?: string | null;
+    /**
+     * Installed On
+     */
+    installed_on: string;
+    /**
+     * Installation Agreement
+     */
+    installation_agreement: string;
+};
+
+/**
+ * BodyOut
+ */
+export type BodyOut = {
+    /**
+     * Id
+     */
+    id: string;
+    body_type: BodyTypeRef;
+    /**
+     * State Code
+     */
+    state_code: number | null;
+    /**
+     * Territory
+     *
+     * Nombre del territorio en el marco activo.
+     */
+    territory: string;
+    /**
+     * Framework Id
+     */
+    framework_id: string | null;
+    /**
+     * Municipality Id
+     */
+    municipality_id: string | null;
+    /**
+     * Federal District Id
+     */
+    federal_district_id: string | null;
+    /**
+     * Local District Id
+     */
+    local_district_id: string | null;
+    district_kind: DistrictKind | null;
+    /**
+     * Installed On
+     */
+    installed_on: string | null;
+    /**
+     * Installation Agreement
+     */
+    installation_agreement: string | null;
+    /**
+     * Dissolved On
+     */
+    dissolved_on: string | null;
+    /**
+     * Dissolution Agreement
+     */
+    dissolution_agreement: string | null;
+    /**
+     * Status
+     */
+    status: 'installed' | 'dissolved';
+};
+
+/**
+ * BodyTypeIn
+ */
+export type BodyTypeIn = {
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Name
+     */
+    name: string;
+    territorial_level: TerritorialLevel;
+    /**
+     * Requires Installation
+     */
+    requires_installation?: boolean;
+    /**
+     * Statutory Basis
+     */
+    statutory_basis?: string | null;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Sort Order
+     */
+    sort_order?: number;
+};
+
+/**
+ * BodyTypeOut
+ */
+export type BodyTypeOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Name
+     */
+    name: string;
+    territorial_level: TerritorialLevel;
+    /**
+     * Requires Installation
+     */
+    requires_installation: boolean;
+    /**
+     * Statutory Basis
+     */
+    statutory_basis: string | null;
+    /**
+     * Description
+     */
+    description: string | null;
+    /**
+     * Sort Order
+     */
+    sort_order: number;
+    /**
+     * Positions
+     */
+    positions: Array<PositionTypeOut>;
+};
+
+/**
+ * BodyTypeRef
+ */
+export type BodyTypeRef = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Name
+     */
+    name: string;
+    territorial_level: TerritorialLevel;
+};
+
+/**
+ * BodyTypeUpdate
+ */
+export type BodyTypeUpdate = {
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Statutory Basis
+     */
+    statutory_basis?: string | null;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Sort Order
+     */
+    sort_order?: number;
+};
+
+/**
  * Body_queueMemberImport
  */
 export type BodyQueueMemberImport = {
@@ -654,6 +869,58 @@ export type ContactOut = {
 };
 
 /**
+ * CoordinationKind
+ */
+export type CoordinationKind = 'federal' | 'local' | 'sectional';
+
+/**
+ * CoordinationPositionTypeIn
+ */
+export type CoordinationPositionTypeIn = {
+    kind: CoordinationKind;
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Default Role Id
+     */
+    default_role_id?: string | null;
+    /**
+     * Sort Order
+     */
+    sort_order?: number;
+};
+
+/**
+ * CoordinationPositionTypeOut
+ */
+export type CoordinationPositionTypeOut = {
+    /**
+     * Id
+     */
+    id: string;
+    kind: CoordinationKind;
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Name
+     */
+    name: string;
+    default_role: RoleSummary | null;
+    /**
+     * Sort Order
+     */
+    sort_order: number;
+};
+
+/**
  * CreditIn
  */
 export type CreditIn = {
@@ -699,6 +966,26 @@ export type CursorPageAuditEntryOut = {
      * Items
      */
     items: Array<AuditEntryOut>;
+    /**
+     * Next Cursor
+     *
+     * Pasar en `cursor` para obtener la siguiente página.
+     */
+    next_cursor?: string | null;
+    /**
+     * Has More
+     */
+    has_more: boolean;
+};
+
+/**
+ * CursorPage[BodyOut]
+ */
+export type CursorPageBodyOut = {
+    /**
+     * Items
+     */
+    items: Array<BodyOut>;
     /**
      * Next Cursor
      *
@@ -964,6 +1251,11 @@ export type DirectCounts = {
      */
     hidden: number;
 };
+
+/**
+ * DistrictKind
+ */
+export type DistrictKind = 'federal' | 'local';
 
 /**
  * ElectionLevel
@@ -2003,6 +2295,40 @@ export type ImportRunOut = {
      * Triggered By
      */
     triggered_by: string | null;
+};
+
+/**
+ * IncompatibilityIn
+ */
+export type IncompatibilityIn = {
+    /**
+     * Position Type A Id
+     */
+    position_type_a_id: string;
+    /**
+     * Position Type B Id
+     */
+    position_type_b_id: string;
+    /**
+     * Notes
+     */
+    notes?: string | null;
+};
+
+/**
+ * IncompatibilityOut
+ */
+export type IncompatibilityOut = {
+    /**
+     * Id
+     */
+    id: string;
+    position_type_a: PositionTypeRef;
+    position_type_b: PositionTypeRef;
+    /**
+     * Notes
+     */
+    notes: string | null;
 };
 
 /**
@@ -3505,6 +3831,173 @@ export type PhotoOut = {
 };
 
 /**
+ * PositionTypeIn
+ */
+export type PositionTypeIn = {
+    /**
+     * Body Type Id
+     */
+    body_type_id: string;
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Name
+     */
+    name: string;
+    scope_rule?: ScopeRule;
+    /**
+     * Electing Body
+     */
+    electing_body?: string | null;
+    /**
+     * Term Years
+     */
+    term_years?: number | null;
+    /**
+     * Term Months
+     */
+    term_months?: number | null;
+    /**
+     * Max Consecutive Terms
+     */
+    max_consecutive_terms?: number | null;
+    /**
+     * Statutory Basis
+     */
+    statutory_basis?: string | null;
+    /**
+     * Default Role Id
+     */
+    default_role_id?: string | null;
+    /**
+     * Derived From
+     *
+     * Cargos de los que toma a su titular (Presídium). Vacío: se nombra.
+     */
+    derived_from?: Array<string>;
+    /**
+     * Sort Order
+     */
+    sort_order?: number;
+};
+
+/**
+ * PositionTypeOut
+ */
+export type PositionTypeOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Body Type Id
+     */
+    body_type_id: string;
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Name
+     */
+    name: string;
+    scope_rule: ScopeRule;
+    /**
+     * Electing Body
+     */
+    electing_body: string | null;
+    /**
+     * Term Years
+     */
+    term_years: number | null;
+    /**
+     * Term Months
+     */
+    term_months: number | null;
+    /**
+     * Max Consecutive Terms
+     */
+    max_consecutive_terms: number | null;
+    /**
+     * Statutory Basis
+     */
+    statutory_basis: string | null;
+    default_role: RoleSummary | null;
+    /**
+     * Is Derived
+     */
+    is_derived: boolean;
+    /**
+     * Derived From
+     *
+     * De qué cargos toma a su titular. Uno: fijo; varios: se elige en cada periodo.
+     */
+    derived_from: Array<PositionTypeRef>;
+    /**
+     * Sort Order
+     */
+    sort_order: number;
+};
+
+/**
+ * PositionTypeRef
+ */
+export type PositionTypeRef = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Name
+     */
+    name: string;
+};
+
+/**
+ * PositionTypeUpdate
+ */
+export type PositionTypeUpdate = {
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Electing Body
+     */
+    electing_body?: string | null;
+    /**
+     * Term Years
+     */
+    term_years?: number | null;
+    /**
+     * Term Months
+     */
+    term_months?: number | null;
+    /**
+     * Max Consecutive Terms
+     */
+    max_consecutive_terms?: number | null;
+    /**
+     * Statutory Basis
+     */
+    statutory_basis?: string | null;
+    /**
+     * Default Role Id
+     */
+    default_role_id?: string | null;
+    /**
+     * Sort Order
+     */
+    sort_order?: number;
+};
+
+/**
  * Principle
  */
 export type Principle = 'mr' | 'rp';
@@ -4119,6 +4612,12 @@ export type RoleSummary = {
      * Name
      */
     name: string;
+    /**
+     * Grants All
+     *
+     * Superadministrador: todo, sin alcance.
+     */
+    grants_all?: boolean;
 };
 
 /**
@@ -4194,6 +4693,11 @@ export type ScopeOut = {
      */
     node_id: string | null;
 };
+
+/**
+ * ScopeRule
+ */
+export type ScopeRule = 'body_territory' | 'circumscription' | 'national';
 
 /**
  * SessionOut
@@ -4368,6 +4872,11 @@ export type SubstitutionIn = {
     reason: string;
     override?: Override | null;
 };
+
+/**
+ * TerritorialLevel
+ */
+export type TerritorialLevel = 'national' | 'state' | 'district' | 'municipal';
 
 /**
  * TokenScope
@@ -9991,3 +10500,471 @@ export type PublicEnrollResponses = {
 };
 
 export type PublicEnrollResponse = PublicEnrollResponses[keyof PublicEnrollResponses];
+
+export type GetStructureCatalogData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/party-structure/catalog';
+};
+
+export type GetStructureCatalogErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type GetStructureCatalogError = GetStructureCatalogErrors[keyof GetStructureCatalogErrors];
+
+export type GetStructureCatalogResponses = {
+    /**
+     * Response Getstructurecatalog
+     *
+     * Successful Response
+     */
+    200: Array<BodyTypeOut>;
+};
+
+export type GetStructureCatalogResponse = GetStructureCatalogResponses[keyof GetStructureCatalogResponses];
+
+export type CreateBodyTypeData = {
+    body: BodyTypeIn;
+    path?: never;
+    query?: never;
+    url: '/api/v1/party-structure/body-types';
+};
+
+export type CreateBodyTypeErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type CreateBodyTypeError = CreateBodyTypeErrors[keyof CreateBodyTypeErrors];
+
+export type CreateBodyTypeResponses = {
+    /**
+     * Successful Response
+     */
+    201: BodyTypeOut;
+};
+
+export type CreateBodyTypeResponse = CreateBodyTypeResponses[keyof CreateBodyTypeResponses];
+
+export type UpdateBodyTypeData = {
+    body: BodyTypeUpdate;
+    path: {
+        /**
+         * Body Type Id
+         */
+        body_type_id: string;
+    };
+    query?: never;
+    url: '/api/v1/party-structure/body-types/{body_type_id}';
+};
+
+export type UpdateBodyTypeErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type UpdateBodyTypeError = UpdateBodyTypeErrors[keyof UpdateBodyTypeErrors];
+
+export type UpdateBodyTypeResponses = {
+    /**
+     * Successful Response
+     */
+    200: BodyTypeRef;
+};
+
+export type UpdateBodyTypeResponse = UpdateBodyTypeResponses[keyof UpdateBodyTypeResponses];
+
+export type CreatePositionTypeData = {
+    body: PositionTypeIn;
+    path?: never;
+    query?: never;
+    url: '/api/v1/party-structure/position-types';
+};
+
+export type CreatePositionTypeErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type CreatePositionTypeError = CreatePositionTypeErrors[keyof CreatePositionTypeErrors];
+
+export type CreatePositionTypeResponses = {
+    /**
+     * Successful Response
+     */
+    201: PositionTypeOut;
+};
+
+export type CreatePositionTypeResponse = CreatePositionTypeResponses[keyof CreatePositionTypeResponses];
+
+export type UpdatePositionTypeData = {
+    body: PositionTypeUpdate;
+    path: {
+        /**
+         * Position Type Id
+         */
+        position_type_id: string;
+    };
+    query?: never;
+    url: '/api/v1/party-structure/position-types/{position_type_id}';
+};
+
+export type UpdatePositionTypeErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type UpdatePositionTypeError = UpdatePositionTypeErrors[keyof UpdatePositionTypeErrors];
+
+export type UpdatePositionTypeResponses = {
+    /**
+     * Successful Response
+     */
+    200: PositionTypeOut;
+};
+
+export type UpdatePositionTypeResponse = UpdatePositionTypeResponses[keyof UpdatePositionTypeResponses];
+
+export type ListIncompatibilitiesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/party-structure/incompatibilities';
+};
+
+export type ListIncompatibilitiesErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ListIncompatibilitiesError = ListIncompatibilitiesErrors[keyof ListIncompatibilitiesErrors];
+
+export type ListIncompatibilitiesResponses = {
+    /**
+     * Response Listincompatibilities
+     *
+     * Successful Response
+     */
+    200: Array<IncompatibilityOut>;
+};
+
+export type ListIncompatibilitiesResponse = ListIncompatibilitiesResponses[keyof ListIncompatibilitiesResponses];
+
+export type AddIncompatibilityData = {
+    body: IncompatibilityIn;
+    path?: never;
+    query?: never;
+    url: '/api/v1/party-structure/incompatibilities';
+};
+
+export type AddIncompatibilityErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type AddIncompatibilityError = AddIncompatibilityErrors[keyof AddIncompatibilityErrors];
+
+export type AddIncompatibilityResponses = {
+    /**
+     * Successful Response
+     */
+    201: IncompatibilityOut;
+};
+
+export type AddIncompatibilityResponse = AddIncompatibilityResponses[keyof AddIncompatibilityResponses];
+
+export type RemoveIncompatibilityData = {
+    body?: never;
+    path: {
+        /**
+         * Incompatibility Id
+         */
+        incompatibility_id: string;
+    };
+    query?: never;
+    url: '/api/v1/party-structure/incompatibilities/{incompatibility_id}';
+};
+
+export type RemoveIncompatibilityErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type RemoveIncompatibilityError = RemoveIncompatibilityErrors[keyof RemoveIncompatibilityErrors];
+
+export type RemoveIncompatibilityResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type RemoveIncompatibilityResponse = RemoveIncompatibilityResponses[keyof RemoveIncompatibilityResponses];
+
+export type ListCoordinationPositionTypesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/party-structure/coordination-position-types';
+};
+
+export type ListCoordinationPositionTypesErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ListCoordinationPositionTypesError = ListCoordinationPositionTypesErrors[keyof ListCoordinationPositionTypesErrors];
+
+export type ListCoordinationPositionTypesResponses = {
+    /**
+     * Response Listcoordinationpositiontypes
+     *
+     * Successful Response
+     */
+    200: Array<CoordinationPositionTypeOut>;
+};
+
+export type ListCoordinationPositionTypesResponse = ListCoordinationPositionTypesResponses[keyof ListCoordinationPositionTypesResponses];
+
+export type CreateCoordinationPositionTypeData = {
+    body: CoordinationPositionTypeIn;
+    path?: never;
+    query?: never;
+    url: '/api/v1/party-structure/coordination-position-types';
+};
+
+export type CreateCoordinationPositionTypeErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type CreateCoordinationPositionTypeError = CreateCoordinationPositionTypeErrors[keyof CreateCoordinationPositionTypeErrors];
+
+export type CreateCoordinationPositionTypeResponses = {
+    /**
+     * Successful Response
+     */
+    201: CoordinationPositionTypeOut;
+};
+
+export type CreateCoordinationPositionTypeResponse = CreateCoordinationPositionTypeResponses[keyof CreateCoordinationPositionTypeResponses];
+
+export type ListBodiesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Level
+         */
+        level?: TerritorialLevel | null;
+        /**
+         * Body Type Id
+         */
+        body_type_id?: string | null;
+        /**
+         * State Code
+         */
+        state_code?: number | null;
+        /**
+         * Include Dissolved
+         */
+        include_dissolved?: boolean;
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Cursor
+         */
+        cursor?: string | null;
+        /**
+         * Sort
+         *
+         * Campos separados por coma; prefijo '-' para descendente.
+         */
+        sort?: string | null;
+    };
+    url: '/api/v1/party-structure/bodies';
+};
+
+export type ListBodiesErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ListBodiesError = ListBodiesErrors[keyof ListBodiesErrors];
+
+export type ListBodiesResponses = {
+    /**
+     * Successful Response
+     */
+    200: CursorPageBodyOut;
+};
+
+export type ListBodiesResponse = ListBodiesResponses[keyof ListBodiesResponses];
+
+export type InstallBodyData = {
+    body: BodyInstallIn;
+    path?: never;
+    query?: never;
+    url: '/api/v1/party-structure/bodies';
+};
+
+export type InstallBodyErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type InstallBodyError = InstallBodyErrors[keyof InstallBodyErrors];
+
+export type InstallBodyResponses = {
+    /**
+     * Successful Response
+     */
+    201: BodyOut;
+};
+
+export type InstallBodyResponse = InstallBodyResponses[keyof InstallBodyResponses];
+
+export type GetBodyData = {
+    body?: never;
+    path: {
+        /**
+         * Body Id
+         */
+        body_id: string;
+    };
+    query?: never;
+    url: '/api/v1/party-structure/bodies/{body_id}';
+};
+
+export type GetBodyErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type GetBodyError = GetBodyErrors[keyof GetBodyErrors];
+
+export type GetBodyResponses = {
+    /**
+     * Successful Response
+     */
+    200: BodyOut;
+};
+
+export type GetBodyResponse = GetBodyResponses[keyof GetBodyResponses];
+
+export type DissolveBodyData = {
+    body: BodyDissolveIn;
+    path: {
+        /**
+         * Body Id
+         */
+        body_id: string;
+    };
+    query?: never;
+    url: '/api/v1/party-structure/bodies/{body_id}/dissolve';
+};
+
+export type DissolveBodyErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type DissolveBodyError = DissolveBodyErrors[keyof DissolveBodyErrors];
+
+export type DissolveBodyResponses = {
+    /**
+     * Successful Response
+     */
+    200: BodyOut;
+};
+
+export type DissolveBodyResponse = DissolveBodyResponses[keyof DissolveBodyResponses];
