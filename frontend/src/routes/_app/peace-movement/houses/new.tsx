@@ -1,9 +1,9 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { LocateFixed, Plus, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { openPeaceHouseMutation } from "@/client/@tanstack/react-query.gen";
+import { listMyPositionsOptions, openPeaceHouseMutation } from "@/client/@tanstack/react-query.gen";
 import type { ScheduleSlot } from "@/client/types.gen";
 import type { ComboItem } from "@/components/async-combobox";
 import { PageHeader } from "@/components/page-header";
@@ -15,6 +15,8 @@ import { Label } from "@/components/ui/label";
 import { GeoMap, type PointCollection } from "@/features/geography/geo-map";
 import { SELECT_CLASS, WEEKDAYS } from "@/features/peace-movement/labels";
 import { MemberPicker } from "@/features/peace-movement/shared";
+import { Perm } from "@/lib/auth/permissions";
+import { useCan } from "@/lib/auth/use-me";
 
 export const Route = createFileRoute("/_app/peace-movement/houses/new")({
   component: NewHousePage,
@@ -45,6 +47,12 @@ function NewHousePage() {
   const [locating, setLocating] = useState(false);
   const [schedule, setSchedule] = useState<Slot[]>([newSlot()]);
   const [opener, setOpener] = useState<ComboItem | null>(null);
+  const [seat, setSeat] = useState("");
+  const can = useCan();
+  const myPositions = useQuery({
+    ...listMyPositionsOptions(),
+    enabled: can(Perm.PEACE_HOUSE_LINK),
+  });
   const [host, setHost] = useState<ComboItem | null>(null);
   const [contact, setContact] = useState<ComboItem | null>(null);
   const [extra, setExtra] = useState<(ComboItem | null)[]>([]);
@@ -83,7 +91,6 @@ function NewHousePage() {
     name.trim().length >= 2 &&
     address.street.trim() &&
     hasPoint &&
-    opener &&
     host &&
     contact &&
     members.size >= 2;
@@ -111,13 +118,13 @@ function NewHousePage() {
     <section className="max-w-4xl">
       <PageHeader
         title="Abrir Casa de Paz"
-        description="Se abre con al menos 2 integrantes; el anfitrión y el contacto cuentan. El crédito va al primer Embajador hacia arriba de quien la abre o, si no hay, al coordinador de la zona."
+        description="Se abre con al menos 2 integrantes; el anfitrión y el contacto cuentan. El crédito es de quien la abre: un pacificador de cualquier nivel o uno de tus cargos de la estructura. Sin ninguno, queda en la bandeja de casas por enlazar."
       />
       <form
         className="grid gap-6"
         onSubmit={(event) => {
           event.preventDefault();
-          if (!ready || !opener || !host || !contact) return;
+          if (!ready || !host || !contact) return;
           open.mutate({
             body: {
               name: name.trim(),
@@ -132,7 +139,8 @@ function NewHousePage() {
                 latitude: lat,
                 longitude: lon,
               },
-              opened_by_member_id: opener.id,
+              opened_by_member_id: seat ? null : (opener?.id ?? null),
+              opened_by_position_id: seat || null,
               host_member_id: host.id,
               contact_member_id: contact.id,
               member_ids: [...members].filter((id) => id !== host.id && id !== contact.id),
@@ -346,10 +354,31 @@ function NewHousePage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="grid gap-4">
+            {myPositions.data?.length ? (
+              <div className="grid gap-1.5 md:max-w-md">
+                <Label htmlFor="house-seat">Abrir con uno de mis cargos</Label>
+                <select
+                  id="house-seat"
+                  value={seat}
+                  onChange={(e) => {
+                    setSeat(e.target.value);
+                    if (e.target.value) setOpener(null);
+                  }}
+                  className={SELECT_CLASS}
+                >
+                  <option value="">No: la abre un pacificador</option>
+                  {myPositions.data.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : null}
             <div className="grid gap-3 md:grid-cols-3">
               {(
                 [
-                  ["opener", "Quién la abre", opener, setOpener],
+                  ["opener", "Pacificador que la abre (opcional)", opener, setOpener],
                   ["host", "Anfitrión", host, setHost],
                   ["contact", "Contacto responsable", contact, setContact],
                 ] as const

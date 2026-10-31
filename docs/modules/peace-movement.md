@@ -1,6 +1,6 @@
 # Módulo: Movimiento de Paz
 
-**Estado:** implementado (fases 0a a 5: API y panel). Pendiente de una entrega posterior: la App (Flutter). No hay portal de pacificadores; el mapa de casas vive en el panel (D-100). ADR D-82 a D-100.
+**Estado:** implementado (fases 0a a 5: API y panel; crédito a la estructura del partido, D-103 y D-112). Pendiente de una entrega posterior: la App (Flutter). No hay portal de pacificadores; el mapa de casas vive en el panel (D-100). ADR D-82 a D-100.
 **Paquete propuesto:** `backend/app/modules/peace_movement` · esquema `peace_movement` · API
 `/api/v1/peace-movement`.
 **Brief:** respuestas de Darío del 2026-10-29. Las reglas que eran suposiciones quedaron
@@ -66,9 +66,6 @@ No se crean roles nuevos: los roles existentes reciben permisos `peace_movement.
 | `participation_levels` | `code`, `name`, `rank`, `sort_order` | Sembrados: `pacifier` (Pacificador), `peace_promoter` (Promotor de la Paz), `peace_messenger` (Mensajero de Paz), `peace_builder` (Constructor de Paz), `peace_ambassador` (Embajador de Paz), de menor a mayor `rank` |
 | `level_goals` | `level_id`, `state_id` (nulo = valor nacional por defecto), `recruit_goal`, `house_goal`, `valid_from`, `valid_to` | Metas ajustables **por estado** con historial. Semillas nacionales: 1, 10, 50, 100 y 500 reclutas; 5 casas para Embajador |
 | `house_goals` | `state_id` (nulo = nacional), `member_goal`, `valid_from`, `valid_to` | Meta de integrantes por casa, ajustable por estado. Semilla nacional: 100 |
-| `zone_coordinators` | `user_id`, `state_id`, `valid_from`, `valid_to` | Usuario del sistema que recibe el crédito de casas sin Embajador en su red. Varios por estado, cada uno con su zona (D-92) |
-| `zone_coordinator_nodes` | `zone_coordinator_id`, nodo de cualquier nivel dentro del estado (una FK por nivel, como `identity.user_scopes`) | Define la zona |
-| `zone_coordinator_sections` | `zone_coordinator_id`, `section_id` | Derivada de los nodos, como `user_scope_sections`; resuelve qué zona cubre una sección (gana la de menos secciones) |
 | `settings` | una fila: `traffic_light_yellow_pct` (50), `traffic_light_green_pct` (100), `depth_alert_threshold` (50) | Configuración del módulo editable por `admin` (D-92) |
 
 El avance siempre se mide contra la meta **vigente** del estado del pacificador o de la casa.
@@ -115,7 +112,7 @@ Dos metas vigentes no pueden empalmarse para el mismo nivel y estado (incluido e
 | `host_member_id` | Anfitrión; debe ser pacificador. El domicilio de la casa puede ser distinto al suyo |
 | `contact_member_id` | Un solo contacto responsable; debe ser pacificador. Puede coincidir con el anfitrión |
 | `opened_by_member_id` | Pacificador que la abrió (cualquier nivel) |
-| `credited_member_id` / `credited_user_id` | A quién se acredita la casa: a lo más uno; ninguno = **crédito pendiente** (D-92) |
+| `credited_member_id` / `credited_position_id` | A quién se acredita la casa: un pacificador o un asiento de la estructura del partido, a lo más uno; ninguno = **crédito pendiente**, en la bandeja de casas por enlazar ([D-103](../adr/D-103-credito-casas-estructura.md)) |
 | `needs_reassignment` | Sin anfitrión ni contacto vigente tras una salida (D-92) |
 | `first_consolidated_on` | Primera consolidación; se conserva si la casa regresa a `open` |
 | `status` | `open` (abierta) · `consolidated` (alcanzó la meta) · `closed` |
@@ -156,10 +153,6 @@ erDiagram
     participation_levels ||--o{ level_goals : "metas"
     states |o--o{ level_goals : "por estado"
     states |o--o{ house_goals : "por estado"
-    users ||--o{ zone_coordinators : ""
-    states ||--o{ zone_coordinators : ""
-    zone_coordinators ||--o{ zone_coordinator_nodes : "zona"
-    zone_coordinators ||--o{ zone_coordinator_sections : "derivada"
     members |o--o{ members : "recluta"
     sections ||--o{ members : "domicilio"
     members ||--o{ member_level_changes : ""
@@ -167,7 +160,7 @@ erDiagram
     members ||--o{ user_branch_scopes : "rama"
     user_grants ||--o{ user_branch_scopes : ""
     members ||--o{ peace_houses : "anfitrión, contacto, abre, crédito"
-    users |o--o{ peace_houses : "crédito sin Embajador"
+    positions |o--o{ peace_houses : "abre, crédito (estructura, D-103)"
     sections ||--o{ peace_houses : "ubicación"
     peace_houses ||--o{ peace_house_members : ""
     members ||--o{ peace_house_members : ""
@@ -203,8 +196,9 @@ erDiagram
         uuid host_member_id FK
         uuid contact_member_id FK
         uuid opened_by_member_id FK
+        uuid opened_by_position_id FK
         uuid credited_member_id FK
-        uuid credited_user_id FK
+        uuid credited_position_id FK
         uuid public_location_consent_id FK
     }
     level_goals {
@@ -274,7 +268,7 @@ stateDiagram-v2
 - El nivel lo elige la persona como compromiso. Puede **subir o bajar** después; cada cambio queda en `member_level_changes`.
 - **Avance contra meta** = reclutas **directos** `active` frente a `recruit_goal` del nivel
   vigente en su estado. La red total se reporta aparte y no cuenta para la meta.
-- El Embajador tiene además meta de casas (`house_goal`), medida con casas **consolidadas** a su crédito; las abiertas se reportan aparte.
+- El Embajador y el Constructor tienen además meta de casas (`house_goal`; 5 y 1 nacionales, ajustables por estado, D-103), medida con casas **consolidadas** a su crédito; las abiertas se reportan aparte.
 - Las metas son **acumuladas** desde la inscripción (no se reinician por periodo).
 - Semáforo de avance configurable en `settings`: rojo < 50 %, amarillo 50–99 %, verde ≥ 100 % (D-92).
 
@@ -307,12 +301,17 @@ Son dos cosas distintas:
 - Pasa a `consolidated` cuando sus integrantes vigentes alcanzan `member_goal` del estado de la
   casa (100 por defecto). Se da seguimiento al avance hacia esa meta.
 - Un pacificador entra a una casa de dos formas: indicándola al inscribirse (`source = enrollment`) o por asignación posterior (`assignment`).
-- Cualquier pacificador puede abrir una casa. **Crédito:**
-  1. se busca, desde quien la abre y hacia arriba en su `path` (incluido él mismo), el primer Embajador `active`;
-  2. si no hay ninguno, al coordinador cuya zona vigente cubre la sección de la casa (la más específica si hay varias);
-  3. si ninguna zona la cubre, queda con crédito pendiente para asignarlo a mano.
-
-  El crédito se fija al abrir la casa y solo un coordinator puede reasignarlo, con motivo; no se recalcula si después alguien asciende o cambia una zona (D-92).
+- **Crédito ([D-103](../adr/D-103-credito-casas-estructura.md), [D-105](../adr/D-105-reglas-estructura-confirmadas.md)):**
+  - va a **quien abre la casa**: un pacificador activo de cualquier nivel, o un asiento de la
+    estructura del partido que ocupa quien la registra (`peace_movement.house.link`; sin
+    importar la geografía). El crédito de un asiento lo hereda quien lo ocupe después;
+  - sin ninguno, queda pendiente en la **bandeja de casas por enlazar**
+    (`GET /houses/pending-credit`), visible para quien tiene `house.link`, que la enlaza a un
+    cargo propio (`POST /houses/{id}/link`);
+  - si el pacificador acreditado se da de baja, la casa regresa a la bandeja;
+  - se fija al abrir o enlazar y solo cambia a mano, con motivo (`house.reassign_credit`), hacia
+    un pacificador activo o un asiento ocupado; no se recalcula si alguien asciende.
+  Los coordinadores de zona de D-92 se retiraron.
 - La ubicación exacta solo es publicable con el consentimiento expreso del anfitrión. El mapa de casas del panel muestra el punto aproximado (D-100); el consentimiento queda listo para cuando la App o una salida pública muestren la ubicación exacta.
 
 ## Permisos y alcance
@@ -328,7 +327,8 @@ Son dos cosas distintas:
 | `peace_movement.house.write` | Abrir, editar y cerrar casas; integrantes, reuniones y fotos | admin, coordinator, capturist |
 | `peace_movement.house.reassign_credit` | Reasignar el crédito de una casa | admin, coordinator |
 | `peace_movement.stats.read` | Estadísticas y reportes | admin, coordinator, viewer |
-| `peace_movement.goal.manage` | Niveles, metas por estado, coordinadores de zona y configuración | admin |
+| `peace_movement.goal.manage` | Niveles, metas por estado y configuración | admin |
+| `peace_movement.house.link` | Abrir o enlazar casas con crédito a un cargo propio de la estructura (D-103) | admin, coordinator, Dirigente y Coordinador territorial |
 
 Los datos de contacto y domicilio se siguen rigiendo por `people.person.read_sensitive`.
 
@@ -436,8 +436,8 @@ Bajo `/api/v1/peace-movement`, con el alcance de pacificadores (D-83) en todas l
 
 | Ruta | Permiso | Uso |
 |---|---|---|
-| `GET /levels` · `GET /level-goals` · `GET /house-goals` · `GET /settings` · `GET /zone-coordinators` | `member.read` | Catálogos, metas (`state_id`, `history`), configuración y coordinadores |
-| `POST /level-goals` · `POST /house-goals` · `PUT /settings` · `POST /zone-coordinators` · `POST /zone-coordinators/{id}/end` | `goal.manage` | Metas con historial, umbrales y zonas |
+| `GET /levels` · `GET /level-goals` · `GET /house-goals` · `GET /settings` | `member.read` | Catálogos, metas (`state_id`, `history`), configuración y coordinadores |
+| `POST /level-goals` · `POST /house-goals` · `PUT /settings` | `goal.manage` | Metas con historial, umbrales y zonas |
 | `GET /members` · `GET /members/{id}` · `/children` · `/history` | `member.read` | Búsqueda (estatus, nivel, estado, reclutador, nombre), detalle con avance y semáforo (queda en `audit.access_log`), reclutas directos con los ocultos solo en total |
 | `POST /members` · `POST /members/{id}/level` | `member.write` | Inscripción desde el panel (persona nueva o existente, consentimiento del aviso vigente) y cambio de nivel |
 | `POST /members/{id}/validate` · `/reject` · `/leave` | `member.validate` | Validar o rechazar pendientes y registrar salidas |
@@ -446,7 +446,8 @@ Bajo `/api/v1/peace-movement`, con el alcance de pacificadores (D-83) en todas l
 
 | `GET /houses` · `GET /houses/{id}` · `/members` · `/meetings` · `/meetings/{id}` · `/photos` | `house.read` | Búsqueda (estatus, estado, crédito pendiente, por reasignar, publicable), detalle con avance contra la meta (queda en `audit.access_log`), integrantes, reuniones y fotos con URL firmada |
 | `POST /houses` · `PATCH /houses/{id}` · `/close` · `POST`/`DELETE /houses/{id}/members` · `POST /meetings` · `POST`/`DELETE /photos` · `POST`/`DELETE /public-location-consent` | `house.write` | Abrir (crédito automático), editar y cambiar anfitrión o contacto, cerrar, integrantes, reuniones con invitados, fotos y consentimiento de ubicación publicable |
-| `POST /houses/{id}/credit` | `house.reassign_credit` | Reasignar el crédito a un Embajador o a un usuario, con motivo |
+| `POST /houses/{id}/credit` | `house.reassign_credit` | Reasignar el crédito a un pacificador activo o a un asiento ocupado, con motivo |
+| `GET /houses/pending-credit` · `POST /houses/{id}/link` | `house.link` | Bandeja de casas por enlazar y enlazar a un cargo propio (D-103) |
 | `GET /members/{id}/network` | `member.read` | Agregados del nodo y de sus niveles inferiores (`max_depth` de 1 a 3), con los ocultos solo en total |
 | `GET /stats/geography` · `GET /stats/growth` · `GET /members-export` | `stats.read` | Activos por nivel geográfico, inscripciones por día y CSV (hasta 50,000 filas; queda en `audit.access_log`) |
 
@@ -487,7 +488,7 @@ Una sola App para pacificadores y brigadistas; no hay portal aparte (D-100).
 **Casas de Paz**
 - No se abre con menos de 2 integrantes; anfitrión y contacto deben ser pacificadores `active`.
 - Al llegar a la meta del estado pasa a `consolidated`; si la meta del estado cambia, el avance se mide contra la nueva.
-- El crédito va al primer Embajador hacia arriba de quien la abre; sin Embajador, al coordinador de la zona más específica que cubre la sección; sin zona, queda pendiente.
+- El crédito va a quien la abre (pacificador de cualquier nivel o asiento de la estructura); sin ninguno, o si el acreditado se da de baja, queda en la bandeja de casas por enlazar (D-103, D-105).
 - Una casa consolidada que baja de la meta regresa a `open` y conserva `first_consolidated_on`.
 - Si sale el anfitrión, el contacto toma su rol; sin ninguno, la casa queda con `needs_reassignment`.
 - Un pacificador puede pertenecer a varias casas.

@@ -219,3 +219,41 @@ async def expire_due(db: AsyncSession, today: date) -> int:
 async def user_of_appointment(db: AsyncSession, appointment_id: uuid.UUID) -> uuid.UUID | None:
     grant = await _grant_of(db, appointment_id)
     return grant.user_id if grant else None
+
+
+# --- for other modules (Peace Movement credit, D-103) -----------------------------------------
+
+
+async def current_seats_of_user(db: AsyncSession, user_id: uuid.UUID) -> list[uuid.UUID]:
+    """Seats the user's person currently holds."""
+    rows = await db.execute(
+        select(col(Appointment.position_id))
+        .join(PersonAccount, col(PersonAccount.person_id) == col(Appointment.person_id))
+        .where(
+            col(PersonAccount.user_id) == user_id,
+            col(PersonAccount.deleted_at).is_(None),
+            col(Appointment.ended_on).is_(None),
+            col(Appointment.deleted_at).is_(None),
+        )
+    )
+    return list(rows.scalars())
+
+
+async def seat_labels(db: AsyncSession, position_ids: list[uuid.UUID]) -> dict[uuid.UUID, str]:
+    """«Position, territory» of each seat (circumscription number when there is one)."""
+    from app.modules.party_structure.service import territory_names  # noqa: PLC0415 - cycle
+
+    labels: dict[uuid.UUID, str] = {}
+    seats_ = [await seats.load_seat(db, position_id) for position_id in dict.fromkeys(position_ids)]
+    names = await territory_names(db, [seat.body for seat in seats_])
+    for seat in seats_:
+        region = (
+            f" {seat.position.region_number}" if seat.position.region_number is not None else ""
+        )
+        labels[pk(seat.position)] = f"{seat.position_type.name}{region}, {names[pk(seat.body)]}"
+    return labels
+
+
+async def seat_is_held(db: AsyncSession, position_id: uuid.UUID) -> bool:
+    current = await seats.current_appointments(db, [position_id])
+    return position_id in current

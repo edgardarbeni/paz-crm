@@ -134,9 +134,10 @@ uv run paz --help                    # CLI de operación
   - API en `/api/v1/peace-movement`: inscripción de pacificadores (persona nueva o existente,
     consentimiento del aviso vigente), pirámide de reclutamiento con `ltree`, validación,
     cambio de nivel, reasignación con toda la red, salida del movimiento, metas por estado con
-    historial, configuración, coordinadores de zona y alcance por rama (D-82 a D-95).
-  - Casas de Paz en `/api/v1/peace-movement/houses`: apertura con crédito automático
-    (Embajador o coordinador de zona), integrantes, consolidación, reuniones con invitados,
+    historial, configuración y alcance por rama (D-82 a D-95).
+  - Casas de Paz en `/api/v1/peace-movement/houses`: apertura con crédito a quien la abre
+    (pacificador o cargo de la estructura; bandeja de casas por enlazar, D-112), integrantes,
+    consolidación, reuniones con invitados,
     fotos en S3 y consentimiento para publicar la ubicación (D-85, D-96).
   - Agregados y estadísticas: `paz peace-movement aggregate` (cada minuto en el `scheduler`; con
     `--full`, nocturno), `GET …/members/{id}/network`, `…/stats/geography`, `…/stats/growth` y

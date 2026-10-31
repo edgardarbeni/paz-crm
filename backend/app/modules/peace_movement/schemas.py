@@ -72,39 +72,6 @@ class SettingsOut(SettingsIn):
     pass
 
 
-ZoneLevelName = Literal["state", "federal_district", "local_district", "municipality", "section"]
-
-
-class ZoneNodeIn(Schema):
-    level: ZoneLevelName
-    node_id: uuid.UUID
-
-
-class ZoneNodeOut(ZoneNodeIn):
-    pass
-
-
-class ZoneCoordinatorIn(Schema):
-    user_id: uuid.UUID
-    state_id: uuid.UUID
-    nodes: list[ZoneNodeIn] = Field(min_length=1, max_length=500)
-    valid_from: date | None = None
-
-
-class ZoneCoordinatorOut(Schema):
-    id: uuid.UUID
-    user_id: uuid.UUID
-    user_name: str
-    state_id: uuid.UUID
-    valid_from: date
-    valid_to: date | None
-    nodes: list[ZoneNodeOut]
-    section_count: int
-
-
-# --- members ----------------------------------------------------------------------------------
-
-
 class ConsentCapture(Schema):
     """Acceptance of the current Peace Movement notice (D-82); the notice text comes from the
     catalog, so only how it was captured travels here."""
@@ -294,11 +261,22 @@ class HouseAddressIn(Schema):
 
 
 class HouseIn(Schema):
+    """Opened by a member or a seat, not both (D-103)."""
+
     name: Annotated[str, StringConstraints(strip_whitespace=True, min_length=2, max_length=150)]
     schedule: list[ScheduleSlot] = Field(default_factory=list, max_length=21)
     capacity: Annotated[int | None, Field(ge=1, le=10_000)] = None
     address: HouseAddressIn
-    opened_by_member_id: uuid.UUID
+    opened_by_member_id: uuid.UUID | None = Field(
+        default=None, description="Pacificador que la abre: se lleva el crédito (D-103)."
+    )
+    opened_by_position_id: uuid.UUID | None = Field(
+        default=None,
+        description=(
+            "O un cargo de la estructura que ocupas (permiso peace_movement.house.link): el "
+            "crédito es del asiento. Sin ninguno de los dos, la casa queda en la bandeja."
+        ),
+    )
     host_member_id: uuid.UUID
     contact_member_id: uuid.UUID
     member_ids: list[uuid.UUID] = Field(
@@ -306,6 +284,12 @@ class HouseIn(Schema):
         max_length=500,
         description="Integrantes además del anfitrión y el contacto, que se agregan solos.",
     )
+
+    @model_validator(mode="after")
+    def _one_opener(self) -> "HouseIn":
+        if self.opened_by_member_id is not None and self.opened_by_position_id is not None:
+            raise ValueError("La abre un pacificador o un cargo, no ambos.")
+        return self
 
 
 class HouseUpdate(Schema):
@@ -339,7 +323,10 @@ class HouseSummary(Schema):
     approx_latitude: float
     member_count: int
     credited_member_id: uuid.UUID | None
-    credited_user_id: uuid.UUID | None
+    credited_position_id: uuid.UUID | None
+    credited_position: str | None = Field(
+        default=None, description="Cargo y territorio del asiento acreditado."
+    )
     credit_pending: bool
     needs_reassignment: bool
     publishable: bool
@@ -352,7 +339,8 @@ class HouseOut(HouseSummary):
     address: HouseAddressOut = Field(description="Calle y coordenadas exactas solo con permiso.")
     host: MemberSummary | None
     contact: MemberSummary | None
-    opened_by_member_id: uuid.UUID
+    opened_by_member_id: uuid.UUID | None
+    opened_by_position_id: uuid.UUID | None
     member_goal: int | None
     progress_pct: int | None
     consolidated_on: date | None
@@ -372,15 +360,23 @@ class HouseMemberOut(Schema):
 
 
 class CreditIn(Schema):
-    member_id: uuid.UUID | None = None
-    user_id: uuid.UUID | None = None
+    member_id: uuid.UUID | None = Field(
+        default=None, description="Pacificador activo, de cualquier nivel."
+    )
+    position_id: uuid.UUID | None = Field(
+        default=None, description="Asiento ocupado de la estructura."
+    )
     reason: Reason
 
     @model_validator(mode="after")
     def _one(self) -> "CreditIn":
-        if (self.member_id is None) == (self.user_id is None):
-            raise ValueError("Indica un pacificador o un usuario, uno de los dos.")
+        if (self.member_id is None) == (self.position_id is None):
+            raise ValueError("Indica un pacificador o un cargo, uno de los dos.")
         return self
+
+
+class LinkIn(Schema):
+    position_id: uuid.UUID = Field(description="Un cargo de la estructura que ocupas.")
 
 
 class GuestIn(Schema):

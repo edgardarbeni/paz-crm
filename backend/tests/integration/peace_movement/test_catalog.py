@@ -1,4 +1,4 @@
-"""Levels, goals with history, settings, zone coordinators and privacy notices (D-82, D-92)."""
+"""Levels, goals with history, settings and privacy notices (D-82, D-92)."""
 
 import uuid
 from datetime import date, timedelta
@@ -11,7 +11,7 @@ from typer.testing import CliRunner
 from app.cli import cli
 from app.core.config import Settings, get_settings
 from app.core.db.session import build_sessionmaker
-from app.modules.peace_movement.catalog import coordinator_for_section, house_goal_for
+from app.modules.peace_movement.catalog import house_goal_for
 from tests.integration.peace_movement.conftest import API, Geo
 
 
@@ -110,81 +110,6 @@ async def test_settings(client: AsyncClient, root: dict[str, str], geo: Geo) -> 
     assert updated.json()["depth_alert_threshold"] == 30
 
 
-async def test_zone_coordinators(
-    client: AsyncClient,
-    root: dict[str, str],
-    scoped: Any,
-    geo: Geo,
-    owner_engine: AsyncEngine,
-) -> None:
-    whole, _ = await scoped(("coordinator",), [{"level": "state", "node_id": geo.state}])
-    local, _ = await scoped(("coordinator",), [{"level": "state", "node_id": geo.state}])
-
-    state_zone = await client.post(
-        f"{API}/zone-coordinators",
-        headers=root,
-        json={
-            "user_id": str(whole.id),
-            "state_id": geo.state,
-            "nodes": [{"level": "state", "node_id": geo.state}],
-        },
-    )
-    assert state_zone.status_code == 201, state_zone.text
-    assert state_zone.json()["section_count"] == 8
-    municipal = await client.post(
-        f"{API}/zone-coordinators",
-        headers=root,
-        json={
-            "user_id": str(local.id),
-            "state_id": geo.state,
-            "nodes": [{"level": "municipality", "node_id": geo.municipalities[2]}],
-        },
-    )
-    assert municipal.json()["section_count"] == 4
-    assert municipal.json()["nodes"] == [
-        {"level": "municipality", "node_id": geo.municipalities[2]}
-    ]
-    missing = await client.post(
-        f"{API}/zone-coordinators",
-        headers=root,
-        json={
-            "user_id": str(local.id),
-            "state_id": geo.state,
-            "nodes": [{"level": "section", "node_id": geo.municipalities[1]}],
-        },
-    )
-    assert missing.status_code == 400
-
-    async with build_sessionmaker(owner_engine)() as db:
-        # The most specific zone wins; without a zone the credit stays pending.
-        assert await coordinator_for_section(db, uuid.UUID(geo.sections[103])) == local.id
-        assert await coordinator_for_section(db, uuid.UUID(geo.sections[101])) == whole.id
-    ended = await client.post(f"{API}/zone-coordinators/{municipal.json()['id']}/end", headers=root)
-    assert ended.json()["valid_to"] == date.today().isoformat()
-    assert (
-        await client.post(f"{API}/zone-coordinators/{municipal.json()['id']}/end", headers=root)
-    ).status_code == 409
-    async with build_sessionmaker(owner_engine)() as db:
-        assert (
-            await coordinator_for_section(
-                db, uuid.UUID(geo.sections[103]), date.today() + timedelta(days=1)
-            )
-            == whole.id
-        )
-    listed = (
-        await client.get(f"{API}/zone-coordinators", headers=root, params={"state_id": geo.state})
-    ).json()
-    assert len(listed) == 2  # the ended one is still in force today
-    _, capturist = await scoped(("capturist",), [{"level": "national"}])
-    assert (
-        await client.post(
-            f"{API}/zone-coordinators",
-            headers=capturist,
-            json={"user_id": str(local.id), "state_id": geo.state, "nodes": []},
-        )
-    ).status_code == 403
-
-
 async def test_privacy_notices(
     client: AsyncClient, root: dict[str, str], scoped: Any, geo: Geo
 ) -> None:
@@ -257,10 +182,9 @@ async def test_house_goals_and_resolution(
         f"{API}/level-goals", headers=root, json={"level_id": geo.state, "recruit_goal": 3}
     )
     assert unknown.status_code == 400
-    zones = (
-        await client.get(f"{API}/zone-coordinators", headers=root, params={"history": True})
-    ).json()
-    assert zones == []
+    # D-103: zone coordinators are retired.
+    retired = await client.get(f"{API}/zone-coordinators", headers=root)
+    assert retired.status_code == 404
 
 
 def test_sample_notice_command(integration_settings: Settings, monkeypatch: Any) -> None:

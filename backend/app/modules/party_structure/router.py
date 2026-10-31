@@ -15,7 +15,7 @@ from app.core.errors import BadRequestError, ConflictError, ForbiddenError, NotF
 from app.core.mail import send_safely
 from app.core.pagination import CursorPage, PageParams, page_params
 from app.modules.identity.container import IdentityServices, ServicesDep
-from app.modules.identity.dependencies import CurrentUser, permission
+from app.modules.identity.dependencies import CurrentUser, CurrentUserDep, permission
 from app.modules.identity.permissions import Perm
 from app.modules.identity.schemas import RoleSummary
 from app.modules.identity.services.scopes import GeoScope
@@ -59,6 +59,7 @@ from app.modules.party_structure.schemas import (
     IncompatibilityIn,
     IncompatibilityOut,
     IssueResolveIn,
+    MyPositionOut,
     PersonAppointmentOut,
     PositionTypeIn,
     PositionTypeOut,
@@ -820,3 +821,17 @@ async def resolve_territory_issue(
         notes=body.notes,
     )
     return await _issue_out(db, issue)
+
+
+# --- the user's own seats ---------------------------------------------------------------------
+
+
+@router.get(
+    "/my-positions",
+    operation_id="listMyPositions",
+    summary="Mis cargos vigentes (para abrir o enlazar casas, D-103)",
+)
+async def list_my_positions(db: SessionDep, user: CurrentUserDep) -> list[MyPositionOut]:
+    seats = await access.current_seats_of_user(db, user.id)
+    labels = await access.seat_labels(db, seats)
+    return [MyPositionOut(id=seat, label=labels[seat]) for seat in seats]

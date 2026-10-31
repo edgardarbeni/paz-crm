@@ -22,6 +22,9 @@ from tests.integration.geography.conftest import (  # noqa: F401 - re-exported f
     clean_geography,
     run_import,
 )
+from tests.integration.party_structure.conftest import (  # noqa: F401 - seats for the credit
+    clean_party_structure,
+)
 
 __all__ = ["API", "Geo", "curp", "enroll", "person"]
 
@@ -49,7 +52,7 @@ async def clean_peace_movement(
     async with owner_engine.begin() as connection:
         await connection.execute(
             text(
-                "TRUNCATE peace_movement.members, peace_movement.zone_coordinators, "
+                "TRUNCATE peace_movement.members, "
                 "peace_movement.network_changes, peace_movement.level_goals, "
                 "peace_movement.house_goals, people.privacy_notices CASCADE"
             )

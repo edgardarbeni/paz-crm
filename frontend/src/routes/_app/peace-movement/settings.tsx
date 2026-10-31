@@ -4,22 +4,17 @@ import { Plus } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
-  createZoneCoordinatorMutation,
-  endZoneCoordinatorMutation,
   getPeaceSettingsOptions,
   listHouseGoalsOptions,
   listLevelGoalsOptions,
   listPrivacyNoticesOptions,
-  listZoneCoordinatorsOptions,
   publishPrivacyNoticeMutation,
   setHouseGoalMutation,
   setLevelGoalMutation,
   updatePeaceSettingsMutation,
 } from "@/client/@tanstack/react-query.gen";
-import { listUsers } from "@/client/sdk.gen";
-import type { LevelOut, ZoneNodeIn } from "@/client/types.gen";
+import type { LevelOut } from "@/client/types.gen";
 import { AsyncCombobox, type ComboItem } from "@/components/async-combobox";
-import { ConfirmDialog } from "@/components/confirm-dialog";
 import { FormDialog } from "@/components/form-dialog";
 import { PageHeader } from "@/components/page-header";
 import { ProblemAlert } from "@/components/problem-alert";
@@ -34,8 +29,8 @@ import { SELECT_CLASS } from "@/features/peace-movement/labels";
 import { useLevels } from "@/features/peace-movement/shared";
 import { Perm } from "@/lib/auth/permissions";
 import { useCan } from "@/lib/auth/use-me";
-import { formatDate, formatDateTime, GEO_LEVEL_LABELS } from "@/lib/labels";
-import { GEO_SEARCH_HINTS, type GeoSearchLevel, searchGeoItems } from "@/lib/search";
+import { formatDate, formatDateTime } from "@/lib/labels";
+import { GEO_SEARCH_HINTS, searchGeoItems } from "@/lib/search";
 
 export const Route = createFileRoute("/_app/peace-movement/settings")({
   component: SettingsPage,
@@ -50,14 +45,13 @@ function SettingsPage() {
     <section className="max-w-5xl">
       <PageHeader
         title="Configuración del Movimiento de Paz"
-        description="Metas por estado con historial, semáforo, coordinadores de zona y avisos de privacidad. Cambiar una meta no reescribe el pasado."
+        description="Metas por estado con historial, semáforo, y avisos de privacidad. Cambiar una meta no reescribe el pasado."
       />
       <Tabs defaultValue="goals">
         <TabsList>
           <TabsTrigger value="goals">Metas de reclutamiento</TabsTrigger>
           <TabsTrigger value="houses">Metas de casas</TabsTrigger>
           <TabsTrigger value="settings">Semáforo</TabsTrigger>
-          <TabsTrigger value="zones">Coordinadores de zona</TabsTrigger>
           <TabsTrigger value="notices">Avisos de privacidad</TabsTrigger>
         </TabsList>
         <TabsContent value="goals">
@@ -68,9 +62,6 @@ function SettingsPage() {
         </TabsContent>
         <TabsContent value="settings">
           <TrafficSettings editable={editable} />
-        </TabsContent>
-        <TabsContent value="zones">
-          <Zones editable={editable} />
         </TabsContent>
         <TabsContent value="notices">
           <Notices editable={can(Perm.NOTICE_MANAGE)} />
@@ -370,236 +361,6 @@ function TrafficSettings({ editable }: { editable: boolean }) {
         </form>
       </CardContent>
     </Card>
-  );
-}
-
-const ZONE_LEVELS = [
-  "state",
-  "federal_district",
-  "local_district",
-  "municipality",
-  "section",
-] as const;
-
-function Zones({ editable }: { editable: boolean }) {
-  const queryClient = useQueryClient();
-  const zones = useQuery(listZoneCoordinatorsOptions({ query: {} }));
-  const end = useMutation({
-    ...endZoneCoordinatorMutation(),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: [{ _id: "listZoneCoordinators" }] }),
-  });
-  return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>
-          <h2>Coordinadores de zona</h2>
-        </CardTitle>
-        {editable ? <NewZone /> : null}
-      </CardHeader>
-      <CardContent className="space-y-3">
-        <p className="text-xs text-muted-foreground">
-          Reciben el crédito de las casas sin Embajador en su red. Si dos zonas cubren la misma
-          sección, gana la más específica; sin zona, el crédito queda pendiente.
-        </p>
-        <ProblemAlert error={zones.error ?? end.error} />
-        <ul className="divide-y">
-          {zones.data?.map((zone) => (
-            <li key={zone.id} className="flex items-center justify-between gap-2 py-2 text-sm">
-              <div>
-                <div className="font-medium">{zone.user_name}</div>
-                <div className="text-xs text-muted-foreground">
-                  {zone.nodes.length} {zone.nodes.length === 1 ? "nodo" : "nodos"} ·{" "}
-                  {zone.section_count} secciones
-                </div>
-                <div className="text-xs text-muted-foreground">
-                  {zone.nodes.map((n) => GEO_LEVEL_LABELS[n.level] ?? n.level).join(", ")} · desde{" "}
-                  {formatDate(zone.valid_from)}
-                  {zone.valid_to ? ` hasta ${formatDate(zone.valid_to)}` : ""}
-                </div>
-              </div>
-              {editable && !zone.valid_to ? (
-                <ConfirmDialog
-                  trigger={
-                    <Button size="sm" variant="ghost">
-                      Terminar
-                    </Button>
-                  }
-                  title="¿Terminar la vigencia del coordinador?"
-                  description="Las casas ya acreditadas conservan su crédito."
-                  confirmLabel="Terminar"
-                  onConfirm={() => end.mutate({ path: { zone_id: zone.id } })}
-                />
-              ) : (
-                <Badge variant="outline">{zone.valid_to ? "Terminado" : "Vigente"}</Badge>
-              )}
-            </li>
-          ))}
-        </ul>
-        {zones.data?.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Sin coordinadores de zona vigentes.</p>
-        ) : null}
-      </CardContent>
-    </Card>
-  );
-}
-
-function NewZone() {
-  const queryClient = useQueryClient();
-  const [open, setOpen] = useState(false);
-  const [user, setUser] = useState<ComboItem | null>(null);
-  const [state, setState] = useState<ComboItem | null>(null);
-  const [level, setLevel] = useState<(typeof ZONE_LEVELS)[number]>("municipality");
-  const [node, setNode] = useState<ComboItem | null>(null);
-  const [nodes, setNodes] = useState<(ZoneNodeIn & { label: string })[]>([]);
-  const create = useMutation({
-    ...createZoneCoordinatorMutation(),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [{ _id: "listZoneCoordinators" }] });
-      setOpen(false);
-      setNodes([]);
-      toast.success("Coordinador de zona asignado.");
-    },
-  });
-  return (
-    <FormDialog
-      trigger={
-        <Button size="sm" variant="outline">
-          <Plus aria-hidden /> Asignar
-        </Button>
-      }
-      title="Asignar coordinador de zona"
-      open={open}
-      onOpenChange={setOpen}
-      wide
-    >
-      <form
-        className="grid gap-3"
-        onSubmit={(event) => {
-          event.preventDefault();
-          if (!user || !state || !nodes.length) return;
-          create.mutate({
-            body: {
-              user_id: user.id,
-              state_id: state.id,
-              nodes: nodes.map(({ level: l, node_id }) => ({ level: l, node_id })),
-            },
-          });
-        }}
-      >
-        <ProblemAlert error={create.error} />
-        <div className="grid gap-3 md:grid-cols-2">
-          <div className="grid gap-1.5">
-            <Label htmlFor="zone-user">Usuario</Label>
-            <AsyncCombobox
-              id="zone-user"
-              label="Usuario"
-              value={user}
-              onChange={setUser}
-              queryKey={["zone-user"]}
-              placeholder="Nombre o correo"
-              search={async (term) => {
-                const { data } = await listUsers({
-                  query: { q: term, limit: 20 },
-                  throwOnError: true,
-                });
-                return data.items.map((u) => ({ id: u.id, label: u.full_name, hint: u.email }));
-              }}
-            />
-          </div>
-          <div className="grid gap-1.5">
-            <Label htmlFor="zone-state">Estado</Label>
-            <AsyncCombobox
-              id="zone-state"
-              label="Estado"
-              value={state}
-              onChange={(item) => {
-                setState(item);
-                setNodes([]);
-              }}
-              queryKey={["zone-state"]}
-              minChars={1}
-              placeholder={GEO_SEARCH_HINTS.state}
-              search={(term) => searchGeoItems(term, ["state"])}
-            />
-          </div>
-        </div>
-        {state ? (
-          <fieldset className="grid gap-2 rounded-lg border p-3">
-            <legend className="px-1 text-sm font-medium">Zona (nodos dentro del estado)</legend>
-            <div className="flex flex-wrap items-end gap-2">
-              <select
-                aria-label="Nivel del nodo"
-                className={SELECT_CLASS}
-                value={level}
-                onChange={(event) => {
-                  setLevel(event.target.value as (typeof ZONE_LEVELS)[number]);
-                  setNode(null);
-                }}
-              >
-                {ZONE_LEVELS.map((value) => (
-                  <option key={value} value={value}>
-                    {GEO_LEVEL_LABELS[value] ?? value}
-                  </option>
-                ))}
-              </select>
-              <div className="min-w-64 flex-1">
-                {level === "state" ? (
-                  <p className="text-sm text-muted-foreground">Todo el estado.</p>
-                ) : (
-                  <AsyncCombobox
-                    label="Nodo"
-                    value={node}
-                    onChange={setNode}
-                    queryKey={["zone-node", level, state.id]}
-                    minChars={1}
-                    placeholder={GEO_SEARCH_HINTS[level]}
-                    search={(term) =>
-                      searchGeoItems(term, [level as GeoSearchLevel], { stateId: state.id })
-                    }
-                  />
-                )}
-              </div>
-              <Button
-                type="button"
-                variant="outline"
-                disabled={level !== "state" && !node}
-                onClick={() => {
-                  const id = level === "state" ? state.id : node?.id;
-                  const label = level === "state" ? state.label : (node?.label ?? "");
-                  if (id && !nodes.some((n) => n.node_id === id)) {
-                    setNodes((all) => [...all, { level, node_id: id, label }]);
-                  }
-                  setNode(null);
-                }}
-              >
-                Agregar
-              </Button>
-            </div>
-            <div className="flex flex-wrap gap-1">
-              {nodes.map((n) => (
-                <Badge key={n.node_id} variant="secondary" className="gap-1">
-                  {n.label}
-                  <button
-                    type="button"
-                    aria-label={`Quitar ${n.label}`}
-                    onClick={() => setNodes((all) => all.filter((x) => x.node_id !== n.node_id))}
-                  >
-                    ×
-                  </button>
-                </Badge>
-              ))}
-            </div>
-          </fieldset>
-        ) : null}
-        <Button
-          type="submit"
-          className="justify-self-start"
-          disabled={!user || !state || !nodes.length || create.isPending}
-        >
-          Asignar
-        </Button>
-      </form>
-    </FormDialog>
   );
 }
 

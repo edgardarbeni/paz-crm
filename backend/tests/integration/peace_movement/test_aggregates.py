@@ -109,9 +109,10 @@ async def test_house_counters_and_ambassador_progress(  # noqa: PLR0917
     )
     ambassador = await enroll(client, root, levels, geo.sections[101], level="peace_ambassador")
     helper = await enroll(client, root, levels, geo.sections[101], recruiter=ambassador["id"])
+    # The credit goes to whoever opens it (D-103): here, the Ambassador.
     house = await open_house(
         client, root, owner_engine, geo.sections[101],
-        opener=helper["id"], host=helper["id"], contact=ambassador["id"],
+        opener=ambassador["id"], host=helper["id"], contact=ambassador["id"],
     )  # fmt: skip
     assert house["status"] == "consolidated"
     await drain(owner_engine)

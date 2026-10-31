@@ -9,6 +9,7 @@ import {
   Home,
   House,
   Landmark,
+  Link2,
   ListChecks,
   type LucideIcon,
   Map as MapIcon,
@@ -78,6 +79,12 @@ export const NAV: NavSection[] = [
         label: "Mapa de casas",
         icon: MapPinHouse,
         perm: Perm.PEACE_HOUSE_READ,
+      },
+      {
+        to: "/peace-movement/houses/to-link",
+        label: "Casas por enlazar",
+        icon: Link2,
+        perm: Perm.PEACE_HOUSE_LINK,
       },
       {
         to: "/peace-movement/stats",

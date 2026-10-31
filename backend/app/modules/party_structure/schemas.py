@@ -342,3 +342,8 @@ class IssueResolveIn(Schema):
     node_id: uuid.UUID | None = None
     on: date = Field(description="Fecha de la disolución o del cierre.")
     notes: str | None = Field(default=None, max_length=500)
+
+
+class MyPositionOut(Schema):
+    id: uuid.UUID
+    label: str = Field(description="Cargo y territorio.")

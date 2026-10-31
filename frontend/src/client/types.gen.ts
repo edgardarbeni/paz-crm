@@ -1123,12 +1123,16 @@ export type CoordinationOut = {
 export type CreditIn = {
     /**
      * Member Id
+     *
+     * Pacificador activo, de cualquier nivel.
      */
     member_id?: string | null;
     /**
-     * User Id
+     * Position Id
+     *
+     * Asiento ocupado de la estructura.
      */
-    user_id?: string | null;
+    position_id?: string | null;
     /**
      * Reason
      */
@@ -2141,6 +2145,8 @@ export type HouseGoalOut = {
 
 /**
  * HouseIn
+ *
+ * Opened by a member or a seat, not both (D-103).
  */
 export type HouseIn = {
     /**
@@ -2158,8 +2164,16 @@ export type HouseIn = {
     address: HouseAddressIn;
     /**
      * Opened By Member Id
+     *
+     * Pacificador que la abre: se lleva el crédito (D-103).
      */
-    opened_by_member_id: string;
+    opened_by_member_id?: string | null;
+    /**
+     * Opened By Position Id
+     *
+     * O un cargo de la estructura que ocupas (permiso peace_movement.house.link): el crédito es del asiento. Sin ninguno de los dos, la casa queda en la bandeja.
+     */
+    opened_by_position_id?: string | null;
     /**
      * Host Member Id
      */
@@ -2270,9 +2284,15 @@ export type HouseOut = {
      */
     credited_member_id: string | null;
     /**
-     * Credited User Id
+     * Credited Position Id
      */
-    credited_user_id: string | null;
+    credited_position_id: string | null;
+    /**
+     * Credited Position
+     *
+     * Cargo y territorio del asiento acreditado.
+     */
+    credited_position?: string | null;
     /**
      * Credit Pending
      */
@@ -2306,7 +2326,11 @@ export type HouseOut = {
     /**
      * Opened By Member Id
      */
-    opened_by_member_id: string;
+    opened_by_member_id: string | null;
+    /**
+     * Opened By Position Id
+     */
+    opened_by_position_id: string | null;
     /**
      * Member Goal
      */
@@ -2378,9 +2402,15 @@ export type HouseSummary = {
      */
     credited_member_id: string | null;
     /**
-     * Credited User Id
+     * Credited Position Id
      */
-    credited_user_id: string | null;
+    credited_position_id: string | null;
+    /**
+     * Credited Position
+     *
+     * Cargo y territorio del asiento acreditado.
+     */
+    credited_position?: string | null;
     /**
      * Credit Pending
      */
@@ -2780,6 +2810,18 @@ export type LevelOut = {
      * Sort Order
      */
     sort_order: number;
+};
+
+/**
+ * LinkIn
+ */
+export type LinkIn = {
+    /**
+     * Position Id
+     *
+     * Un cargo de la estructura que ocupas.
+     */
+    position_id: string;
 };
 
 /**
@@ -3210,6 +3252,22 @@ export type MunicipalitySettingOut = {
      * Id
      */
     id: string;
+};
+
+/**
+ * MyPositionOut
+ */
+export type MyPositionOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Label
+     *
+     * Cargo y territorio.
+     */
+    label: string;
 };
 
 /**
@@ -5577,94 +5635,6 @@ export type ViolationOut = {
      * Formula Id
      */
     formula_id?: string | null;
-};
-
-/**
- * ZoneCoordinatorIn
- */
-export type ZoneCoordinatorIn = {
-    /**
-     * User Id
-     */
-    user_id: string;
-    /**
-     * State Id
-     */
-    state_id: string;
-    /**
-     * Nodes
-     */
-    nodes: Array<ZoneNodeIn>;
-    /**
-     * Valid From
-     */
-    valid_from?: string | null;
-};
-
-/**
- * ZoneCoordinatorOut
- */
-export type ZoneCoordinatorOut = {
-    /**
-     * Id
-     */
-    id: string;
-    /**
-     * User Id
-     */
-    user_id: string;
-    /**
-     * User Name
-     */
-    user_name: string;
-    /**
-     * State Id
-     */
-    state_id: string;
-    /**
-     * Valid From
-     */
-    valid_from: string;
-    /**
-     * Valid To
-     */
-    valid_to: string | null;
-    /**
-     * Nodes
-     */
-    nodes: Array<ZoneNodeOut>;
-    /**
-     * Section Count
-     */
-    section_count: number;
-};
-
-/**
- * ZoneNodeIn
- */
-export type ZoneNodeIn = {
-    /**
-     * Level
-     */
-    level: 'state' | 'federal_district' | 'local_district' | 'municipality' | 'section';
-    /**
-     * Node Id
-     */
-    node_id: string;
-};
-
-/**
- * ZoneNodeOut
- */
-export type ZoneNodeOut = {
-    /**
-     * Level
-     */
-    level: 'state' | 'federal_district' | 'local_district' | 'municipality' | 'section';
-    /**
-     * Node Id
-     */
-    node_id: string;
 };
 
 export type GetHealthData = {
@@ -9243,113 +9213,6 @@ export type UpdatePeaceSettingsResponses = {
 
 export type UpdatePeaceSettingsResponse = UpdatePeaceSettingsResponses[keyof UpdatePeaceSettingsResponses];
 
-export type ListZoneCoordinatorsData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * State Id
-         *
-         * Estado (incluye la meta nacional).
-         */
-        state_id?: string | null;
-        /**
-         * History
-         *
-         * Incluir metas o vigencias ya cerradas.
-         */
-        history?: boolean;
-    };
-    url: '/api/v1/peace-movement/zone-coordinators';
-};
-
-export type ListZoneCoordinatorsErrors = {
-    /**
-     * Error del cliente (RFC 9457)
-     */
-    '4XX': Problem;
-    /**
-     * Error del servidor (RFC 9457)
-     */
-    '5XX': Problem;
-};
-
-export type ListZoneCoordinatorsError = ListZoneCoordinatorsErrors[keyof ListZoneCoordinatorsErrors];
-
-export type ListZoneCoordinatorsResponses = {
-    /**
-     * Response Listzonecoordinators
-     *
-     * Successful Response
-     */
-    200: Array<ZoneCoordinatorOut>;
-};
-
-export type ListZoneCoordinatorsResponse = ListZoneCoordinatorsResponses[keyof ListZoneCoordinatorsResponses];
-
-export type CreateZoneCoordinatorData = {
-    body: ZoneCoordinatorIn;
-    path?: never;
-    query?: never;
-    url: '/api/v1/peace-movement/zone-coordinators';
-};
-
-export type CreateZoneCoordinatorErrors = {
-    /**
-     * Error del cliente (RFC 9457)
-     */
-    '4XX': Problem;
-    /**
-     * Error del servidor (RFC 9457)
-     */
-    '5XX': Problem;
-};
-
-export type CreateZoneCoordinatorError = CreateZoneCoordinatorErrors[keyof CreateZoneCoordinatorErrors];
-
-export type CreateZoneCoordinatorResponses = {
-    /**
-     * Successful Response
-     */
-    201: ZoneCoordinatorOut;
-};
-
-export type CreateZoneCoordinatorResponse = CreateZoneCoordinatorResponses[keyof CreateZoneCoordinatorResponses];
-
-export type EndZoneCoordinatorData = {
-    body?: never;
-    path: {
-        /**
-         * Zone Id
-         */
-        zone_id: string;
-    };
-    query?: never;
-    url: '/api/v1/peace-movement/zone-coordinators/{zone_id}/end';
-};
-
-export type EndZoneCoordinatorErrors = {
-    /**
-     * Error del cliente (RFC 9457)
-     */
-    '4XX': Problem;
-    /**
-     * Error del servidor (RFC 9457)
-     */
-    '5XX': Problem;
-};
-
-export type EndZoneCoordinatorError = EndZoneCoordinatorErrors[keyof EndZoneCoordinatorErrors];
-
-export type EndZoneCoordinatorResponses = {
-    /**
-     * Successful Response
-     */
-    200: ZoneCoordinatorOut;
-};
-
-export type EndZoneCoordinatorResponse = EndZoneCoordinatorResponses[keyof EndZoneCoordinatorResponses];
-
 export type SearchMembersData = {
     body?: never;
     path?: never;
@@ -9918,6 +9781,86 @@ export type OpenPeaceHouseResponses = {
 };
 
 export type OpenPeaceHouseResponse = OpenPeaceHouseResponses[keyof OpenPeaceHouseResponses];
+
+export type ListHousesToLinkData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Cursor
+         */
+        cursor?: string | null;
+        /**
+         * Sort
+         *
+         * Campos separados por coma; prefijo '-' para descendente.
+         */
+        sort?: string | null;
+    };
+    url: '/api/v1/peace-movement/houses/pending-credit';
+};
+
+export type ListHousesToLinkErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ListHousesToLinkError = ListHousesToLinkErrors[keyof ListHousesToLinkErrors];
+
+export type ListHousesToLinkResponses = {
+    /**
+     * Successful Response
+     */
+    200: CursorPageHouseSummary;
+};
+
+export type ListHousesToLinkResponse = ListHousesToLinkResponses[keyof ListHousesToLinkResponses];
+
+export type LinkPeaceHouseData = {
+    body: LinkIn;
+    path: {
+        /**
+         * House Id
+         *
+         * Id de la Casa de Paz.
+         */
+        house_id: string;
+    };
+    query?: never;
+    url: '/api/v1/peace-movement/houses/{house_id}/link';
+};
+
+export type LinkPeaceHouseErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type LinkPeaceHouseError = LinkPeaceHouseErrors[keyof LinkPeaceHouseErrors];
+
+export type LinkPeaceHouseResponses = {
+    /**
+     * Successful Response
+     */
+    200: HouseSummary;
+};
+
+export type LinkPeaceHouseResponse = LinkPeaceHouseResponses[keyof LinkPeaceHouseResponses];
 
 export type GetPeaceHousesMapData = {
     body?: never;
@@ -11948,3 +11891,34 @@ export type ResolveTerritoryIssueResponses = {
 };
 
 export type ResolveTerritoryIssueResponse = ResolveTerritoryIssueResponses[keyof ResolveTerritoryIssueResponses];
+
+export type ListMyPositionsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/party-structure/my-positions';
+};
+
+export type ListMyPositionsErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type ListMyPositionsError = ListMyPositionsErrors[keyof ListMyPositionsErrors];
+
+export type ListMyPositionsResponses = {
+    /**
+     * Response Listmypositions
+     *
+     * Successful Response
+     */
+    200: Array<MyPositionOut>;
+};
+
+export type ListMyPositionsResponse = ListMyPositionsResponses[keyof ListMyPositionsResponses];

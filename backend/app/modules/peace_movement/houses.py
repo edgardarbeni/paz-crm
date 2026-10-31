@@ -12,7 +12,7 @@ from datetime import UTC, date, datetime
 from typing import Any
 
 from geoalchemy2 import WKBElement, WKTElement
-from sqlalchemy import ColumnElement, exists, func, or_, select, text
+from sqlalchemy import ColumnElement, exists, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import aliased
 from sqlmodel import col
@@ -23,8 +23,8 @@ from app.core.errors import BadRequestError, ConflictError, ForbiddenError, NotF
 from app.core.pagination import CursorPage, PageParams, paginate, parse_sort
 from app.core.storage import ObjectStorage
 from app.modules.geography import service as geography
-from app.modules.identity.models import User
 from app.modules.identity.services.scopes import GeoScope
+from app.modules.party_structure import access as structure
 from app.modules.peace_movement import catalog
 from app.modules.peace_movement.members import Actor, visible_member
 from app.modules.peace_movement.models import (
@@ -34,7 +34,6 @@ from app.modules.peace_movement.models import (
     Member,
     MemberStatus,
     NetworkChange,
-    ParticipationLevel,
     PeaceHouse,
     PeaceHouseCreditChange,
     PeaceHouseMeeting,
@@ -50,7 +49,6 @@ from app.modules.people.schemas import ContactIn, PersonCreate
 
 ADDRESS_CONTEXT = "peace_movement.peace_houses.address"
 LOCATION_NOTICE = "peace_house_location"
-AMBASSADOR = "peace_ambassador"
 MIN_MEMBERS_TO_OPEN = 2
 # Rounding of the clear point: 3 decimals ≈ 110 m (D-85).
 APPROX_DECIMALS = 3
@@ -223,45 +221,32 @@ async def sync_status(db: AsyncSession, house: PeaceHouse) -> None:
     await db.flush()
 
 
-async def credit_for(
-    db: AsyncSession, opener: Member, section_id: uuid.UUID
-) -> tuple[uuid.UUID | None, uuid.UUID | None]:
-    """First active Ambassador from the opener up its path (itself included); else the most
-    specific zone coordinator of the section; else (None, None): credit pending (D-92)."""
-    ambassador = await db.execute(
-        select(col(Member.id))
-        .join(ParticipationLevel, col(ParticipationLevel.id) == col(Member.level_id))
-        .where(
-            col(Member.path).op("@>")(text("CAST(:path AS ltree)").bindparams(path=opener.path)),
-            col(ParticipationLevel.code) == AMBASSADOR,
-            col(Member.status) == MemberStatus.ACTIVE,
-            col(Member.deleted_at).is_(None),
-        )
-        .order_by(col(Member.depth).desc())
-        .limit(1)
-    )
-    member_id = ambassador.scalar_one_or_none()
-    if member_id is not None:
-        return member_id, None
-    return None, await catalog.coordinator_for_section(db, section_id)
-
-
 # --- commands ---------------------------------------------------------------------------------
 
 
 async def open_house(
-    db: AsyncSession, crypto: people.Crypto, actor: Actor, body: HouseIn
+    db: AsyncSession, crypto: people.Crypto, actor: Actor, body: HouseIn, *, can_link: bool
 ) -> PeaceHouse:
-    opener = await _active_member(db, actor.geo, body.opened_by_member_id, "pacificador que abre")
+    """The credit goes to whoever opens it (D-103): a member of any level, or a party structure
+    seat the user holds (then regardless of the geography). With neither, it is pending."""
+    opener = (
+        await _active_member(db, actor.geo, body.opened_by_member_id, "pacificador que abre")
+        if body.opened_by_member_id
+        else None
+    )
+    position_id = body.opened_by_position_id
+    if position_id is not None:
+        await _ensure_own_seat(db, actor, position_id, can_link=can_link)
     host = await _active_member(db, actor.geo, body.host_member_id, "anfitrión")
     contact = await _active_member(db, actor.geo, body.contact_member_id, "contacto")
     found = await geography.locate(
         db, UNRESTRICTED, longitude=body.address.longitude, latitude=body.address.latitude
     )
     section_id = uuid.UUID(str(found["section"]["id"]))
-    if not await _section_in_scope(db, actor.geo, section_id) and not await in_branch(
-        db, actor.geo, opener
-    ):
+    in_scope = await _section_in_scope(db, actor.geo, section_id) or (
+        opener is not None and await in_branch(db, actor.geo, opener)
+    )
+    if position_id is None and not in_scope:
         raise ForbiddenError("La casa queda fuera de tu alcance geográfico.")
 
     wanted = list(dict.fromkeys([pk(host), pk(contact), *body.member_ids]))
@@ -277,7 +262,7 @@ async def open_house(
     blob = crypto.cipher.encrypt(json.dumps(private, ensure_ascii=False), context=ADDRESS_CONTEXT)
     lon = round(body.address.longitude, APPROX_DECIMALS)
     lat = round(body.address.latitude, APPROX_DECIMALS)
-    credited_member, credited_user = await credit_for(db, opener, section_id)
+    credited_member = pk(opener) if opener is not None else None
     house = PeaceHouse(
         name=body.name,
         schedule=[slot.model_dump() for slot in body.schedule],
@@ -290,9 +275,10 @@ async def open_house(
         section_id=section_id,
         host_member_id=pk(host),
         contact_member_id=pk(contact),
-        opened_by_member_id=pk(opener),
+        opened_by_member_id=credited_member,
+        opened_by_position_id=position_id,
         credited_member_id=credited_member,
-        credited_user_id=credited_user,
+        credited_position_id=position_id,
         status=HouseStatus.OPEN,
         opened_on=date.today(),
     )
@@ -354,41 +340,119 @@ async def close_house(
     return house
 
 
+async def _ensure_own_seat(
+    db: AsyncSession, actor: Actor, position_id: uuid.UUID, *, can_link: bool
+) -> None:
+    if not can_link:
+        raise ForbiddenError("No tienes el permiso «peace_movement.house.link».")
+    if position_id not in await structure.current_seats_of_user(db, actor.user_id):
+        raise ForbiddenError("Solo abres o enlazas casas con un cargo que ocupas.")
+
+
+def _credit_change(
+    house: PeaceHouse,
+    *,
+    to_member: uuid.UUID | None,
+    to_position: uuid.UUID | None,
+    by: uuid.UUID | None,
+    reason: str,
+) -> PeaceHouseCreditChange:
+    return PeaceHouseCreditChange(
+        house_id=pk(house),
+        from_member_id=house.credited_member_id,
+        from_position_id=house.credited_position_id,
+        to_member_id=to_member,
+        to_position_id=to_position,
+        changed_by_user_id=by,
+        changed_at=datetime.now(UTC),
+        reason=reason,
+    )
+
+
 async def reassign_credit(
     db: AsyncSession, actor: Actor, house_id: uuid.UUID, body: CreditIn
 ) -> PeaceHouse:
-    """Only by hand: the credit never follows later promotions or zone changes (D-92)."""
+    """Only by hand, with a reason: to an active member of any level or to a held seat
+    (D-103). The credit never follows later promotions."""
     house = await visible_house(db, actor.geo, house_id, for_update=True)
     to_member: uuid.UUID | None = None
-    to_user: uuid.UUID | None = None
+    to_position: uuid.UUID | None = None
     if body.member_id is not None:
-        member = await _active_member(db, actor.geo, body.member_id, "pacificador acreditado")
-        level = await db.get(ParticipationLevel, member.level_id)
-        if level is None or level.code != AMBASSADOR:
-            raise ConflictError("El crédito de una casa se asigna a un Embajador de Paz.")
-        to_member = pk(member)
+        to_member = pk(
+            await _active_member(db, actor.geo, body.member_id, "pacificador acreditado")
+        )
     else:
-        user = await db.get(User, body.user_id)
-        if user is None or user.deleted_at is not None:
-            raise BadRequestError("El usuario no existe.")
-        to_user = body.user_id
-    if (to_member, to_user) == (house.credited_member_id, house.credited_user_id):
+        assert body.position_id is not None  # noqa: S101 - validated by the schema
+        if not await structure.seat_is_held(db, body.position_id):
+            raise ConflictError("El asiento está vacante: el crédito va a un cargo ocupado.")
+        to_position = body.position_id
+    if (to_member, to_position) == (house.credited_member_id, house.credited_position_id):
         raise ConflictError("La casa ya está acreditada a ese destinatario.")
     db.add(
-        PeaceHouseCreditChange(
-            house_id=pk(house),
-            from_member_id=house.credited_member_id,
-            from_user_id=house.credited_user_id,
-            to_member_id=to_member,
-            to_user_id=to_user,
-            changed_by_user_id=actor.user_id,
-            changed_at=datetime.now(UTC),
+        _credit_change(
+            house,
+            to_member=to_member,
+            to_position=to_position,
+            by=actor.user_id,
             reason=body.reason,
         )
     )
     await house_changed(db, house.credited_member_id, to_member)
     house.credited_member_id = to_member
-    house.credited_user_id = to_user
+    house.credited_position_id = to_position
+    await db.commit()
+    return house
+
+
+def _pending() -> list[ColumnElement[bool]]:
+    return [
+        col(PeaceHouse.credited_member_id).is_(None),
+        col(PeaceHouse.credited_position_id).is_(None),
+        col(PeaceHouse.status).in_(CURRENT_HOUSE_STATUSES),
+        col(PeaceHouse.deleted_at).is_(None),
+    ]
+
+
+async def pending_houses(db: AsyncSession, params: PageParams) -> CursorPage[PeaceHouse]:
+    """Tray of houses to link (D-103): every current house without credit, regardless of the
+    geography, for whoever may link them with a seat."""
+    sort = parse_sort(
+        params.sort,
+        allowed={"opened_on": col(PeaceHouse.opened_on), "name": col(PeaceHouse.name)},
+        tiebreaker=col(PeaceHouse.id),
+        default="opened_on",
+    )
+    page: CursorPage[PeaceHouse] = await paginate(
+        db,
+        select(PeaceHouse).where(*_pending()),
+        sort=sort,
+        limit=params.limit,
+        cursor=params.cursor,
+    )
+    return page
+
+
+async def link_house(
+    db: AsyncSession, actor: Actor, house_id: uuid.UUID, position_id: uuid.UUID, *, can_link: bool
+) -> PeaceHouse:
+    await _ensure_own_seat(db, actor, position_id, can_link=can_link)
+    house = (
+        await db.execute(
+            select(PeaceHouse).where(col(PeaceHouse.id) == house_id, *_pending()).with_for_update()
+        )
+    ).scalar_one_or_none()
+    if house is None:
+        raise ConflictError("La casa no está en la bandeja: ya tiene crédito o no está vigente.")
+    db.add(
+        _credit_change(
+            house,
+            to_member=None,
+            to_position=position_id,
+            by=actor.user_id,
+            reason="Enlazada desde la bandeja de casas por enlazar.",
+        )
+    )
+    house.credited_position_id = position_id
     await db.commit()
     return house
 
@@ -468,6 +532,26 @@ async def member_left(db: AsyncSession, member: Member) -> None:
         elif house.contact_member_id == member_id:
             house.contact_member_id = house.host_member_id
         house.needs_reassignment = house.host_member_id is None or house.contact_member_id is None
+        house_ids.add(pk(house))
+    # D-105: the credit of a member who leaves goes back to the tray of houses to link.
+    credited = await db.execute(
+        select(PeaceHouse).where(
+            col(PeaceHouse.credited_member_id) == member_id,
+            col(PeaceHouse.status).in_(CURRENT_HOUSE_STATUSES),
+            col(PeaceHouse.deleted_at).is_(None),
+        )
+    )
+    for house in credited.scalars():
+        db.add(
+            _credit_change(
+                house,
+                to_member=None,
+                to_position=None,
+                by=None,
+                reason="Baja del pacificador acreditado: la casa pasa a la bandeja.",
+            )
+        )
+        house.credited_member_id = None
         house_ids.add(pk(house))
     await db.flush()
     for house_id in house_ids:
@@ -698,7 +782,7 @@ async def search_houses(
         statement = statement.where(col(PeaceHouse.credited_member_id) == credited_member_id)
     if credit_pending is not None:
         pending = col(PeaceHouse.credited_member_id).is_(None) & col(
-            PeaceHouse.credited_user_id
+            PeaceHouse.credited_position_id
         ).is_(None)
         statement = statement.where(pending if credit_pending else ~pending)
     if needs_reassignment is not None:

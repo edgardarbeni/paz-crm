@@ -195,6 +195,7 @@ cambios.
 | [D-109](D-109-acceso-por-nombramiento.md) | Acceso al sistema por nombramiento (fase 3; detalla D-104) | Aceptada |
 | [D-110](D-110-coordinaciones-territoriales.md) | Coordinaciones territoriales (fase 4) | Aceptada |
 | [D-111](D-111-cambio-de-marco-estructura.md) | Cambio de marco en la estructura y bandeja de territorio (fase 5; implementa D-102) | Aceptada |
+| [D-112](D-112-credito-casas-implementado.md) | Crédito de las Casas de Paz a la estructura: implementación (fase 6; detalla D-103 y D-105) | Aceptada |
 
 ## Suposiciones vigentes
 

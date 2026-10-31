@@ -13,6 +13,7 @@ import {
   listHouseMeetingsOptions,
   listHouseMembersOptions,
   listHousePhotosOptions,
+  listMyPositionsOptions,
   reassignHouseCreditMutation,
   recordHouseLocationConsentMutation,
   removeHouseMemberMutation,
@@ -20,9 +21,8 @@ import {
   updatePeaceHouseMutation,
   uploadHousePhotoMutation,
 } from "@/client/@tanstack/react-query.gen";
-import { listUsers } from "@/client/sdk.gen";
 import type { GuestIn, HouseOut } from "@/client/types.gen";
-import { AsyncCombobox, type ComboItem } from "@/components/async-combobox";
+import type { ComboItem } from "@/components/async-combobox";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { FormDialog } from "@/components/form-dialog";
 import { PageHeader } from "@/components/page-header";
@@ -34,7 +34,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { GeoMap, type PointCollection } from "@/features/geography/geo-map";
-import { HOUSE_MEMBER_SOURCE, WEEKDAYS } from "@/features/peace-movement/labels";
+import { HOUSE_MEMBER_SOURCE, SELECT_CLASS, WEEKDAYS } from "@/features/peace-movement/labels";
 import {
   Facts,
   GoalProgress,
@@ -157,10 +157,10 @@ function HousePage() {
                         params={{ memberId: h.credited_member_id }}
                         className="underline-offset-4 hover:underline"
                       >
-                        Embajador de Paz
+                        Pacificador acreditado
                       </Link>
                     ) : (
-                      "Coordinador de zona"
+                      (h.credited_position ?? "Cargo de la estructura")
                     ),
                   ],
                   [
@@ -721,9 +721,11 @@ function EditRoles({ house, onDone }: { house: HouseOut; onDone: (h: HouseOut) =
 
 function ReassignCredit({ house, onDone }: { house: HouseOut; onDone: (h: HouseOut) => void }) {
   const [open, setOpen] = useState(false);
-  const [kind, setKind] = useState<"member" | "user">("member");
+  const [kind, setKind] = useState<"member" | "position">("member");
   const [target, setTarget] = useState<ComboItem | null>(null);
+  const [positionId, setPositionId] = useState("");
   const [reason, setReason] = useState("");
+  const mine = useQuery({ ...listMyPositionsOptions(), enabled: open && kind === "position" });
   const save = useMutation({
     ...reassignHouseCreditMutation(),
     onSuccess: (data) => {
@@ -732,11 +734,12 @@ function ReassignCredit({ house, onDone }: { house: HouseOut; onDone: (h: HouseO
       toast.success("Crédito reasignado.");
     },
   });
+  const chosen = kind === "member" ? target?.id : positionId;
   return (
     <FormDialog
       trigger={<Button variant="outline">Reasignar crédito</Button>}
       title="Reasignar el crédito"
-      description="El crédito no cambia solo; va a un Embajador de Paz o a un usuario coordinador, con motivo."
+      description="El crédito no cambia solo: va a un pacificador activo de cualquier nivel o a un cargo de la estructura, con motivo."
       open={open}
       onOpenChange={setOpen}
     >
@@ -744,19 +747,19 @@ function ReassignCredit({ house, onDone }: { house: HouseOut; onDone: (h: HouseO
         className="grid gap-3"
         onSubmit={(event) => {
           event.preventDefault();
-          if (!target) return;
+          if (!chosen) return;
           save.mutate({
             path: { house_id: house.id },
             body: {
-              ...(kind === "member" ? { member_id: target.id } : { user_id: target.id }),
+              ...(kind === "member" ? { member_id: chosen } : { position_id: chosen }),
               reason: reason.trim(),
             },
           });
         }}
       >
-        <ProblemAlert error={save.error} />
+        <ProblemAlert error={save.error ?? mine.error} />
         <div className="flex gap-2">
-          {(["member", "user"] as const).map((option) => (
+          {(["member", "position"] as const).map((option) => (
             <Button
               key={option}
               type="button"
@@ -765,9 +768,10 @@ function ReassignCredit({ house, onDone }: { house: HouseOut; onDone: (h: HouseO
               onClick={() => {
                 setKind(option);
                 setTarget(null);
+                setPositionId("");
               }}
             >
-              {option === "member" ? "Embajador de Paz" : "Usuario coordinador"}
+              {option === "member" ? "Pacificador" : "Uno de mis cargos"}
             </Button>
           ))}
         </div>
@@ -776,26 +780,24 @@ function ReassignCredit({ house, onDone }: { house: HouseOut; onDone: (h: HouseO
           {kind === "member" ? (
             <MemberPicker
               id="credit-target"
-              label="Embajador"
+              label="Pacificador"
               value={target}
               onChange={setTarget}
             />
           ) : (
-            <AsyncCombobox
+            <select
               id="credit-target"
-              label="Usuario"
-              value={target}
-              onChange={setTarget}
-              queryKey={["credit-user"]}
-              placeholder="Nombre o correo del usuario"
-              search={async (term) => {
-                const { data } = await listUsers({
-                  query: { q: term, limit: 20 },
-                  throwOnError: true,
-                });
-                return data.items.map((u) => ({ id: u.id, label: u.full_name, hint: u.email }));
-              }}
-            />
+              value={positionId}
+              onChange={(e) => setPositionId(e.target.value)}
+              className={SELECT_CLASS}
+            >
+              <option value="">Elige uno de tus cargos…</option>
+              {(mine.data ?? []).map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.label}
+                </option>
+              ))}
+            </select>
           )}
         </div>
         <div className="grid gap-1.5">
@@ -803,13 +805,15 @@ function ReassignCredit({ house, onDone }: { house: HouseOut; onDone: (h: HouseO
           <Textarea
             id="credit-reason"
             value={reason}
-            onChange={(event) => setReason(event.target.value)}
+            onChange={(e) => setReason(e.target.value)}
+            required
+            minLength={3}
           />
         </div>
         <Button
           type="submit"
           className="justify-self-start"
-          disabled={!target || reason.trim().length < 3 || save.isPending}
+          disabled={!chosen || reason.trim().length < 3 || save.isPending}
         >
           Reasignar
         </Button>
