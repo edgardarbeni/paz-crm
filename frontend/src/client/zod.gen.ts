@@ -333,7 +333,7 @@ export const zCoordinationIn = z.object({
  */
 export const zCreditIn = z.object({
     member_id: z.uuid().nullish(),
-    user_id: z.uuid().nullish(),
+    position_id: z.uuid().nullish(),
     reason: z.string().min(3).max(500)
 });
 
@@ -652,7 +652,8 @@ export const zHouseSummary = z.object({
     approx_latitude: z.number(),
     member_count: z.int(),
     credited_member_id: z.uuid().nullable(),
-    credited_user_id: z.uuid().nullable(),
+    credited_position_id: z.uuid().nullable(),
+    credited_position: z.string().nullish(),
     credit_pending: z.boolean(),
     needs_reassignment: z.boolean(),
     publishable: z.boolean(),
@@ -832,6 +833,13 @@ export const zLevelOut = z.object({
 });
 
 /**
+ * LinkIn
+ */
+export const zLinkIn = z.object({
+    position_id: z.uuid()
+});
+
+/**
  * LocationConsentIn
  */
 export const zLocationConsentIn = z.object({
@@ -1005,6 +1013,14 @@ export const zMunicipalitySettingOut = z.object({
     rp_councilor_count: z.int().gte(0).lte(100).optional().default(0),
     syndic_count: z.int().gte(0).lte(10).optional().default(0),
     id: z.uuid()
+});
+
+/**
+ * MyPositionOut
+ */
+export const zMyPositionOut = z.object({
+    id: z.uuid(),
+    label: z.string()
 });
 
 /**
@@ -1949,13 +1965,16 @@ export const zScheduleSlot = z.object({
 
 /**
  * HouseIn
+ *
+ * Opened by a member or a seat, not both (D-103).
  */
 export const zHouseIn = z.object({
     name: z.string().min(2).max(150),
     schedule: z.array(zScheduleSlot).max(21).optional(),
     capacity: z.int().gte(1).lte(10000).nullish(),
     address: zHouseAddressIn,
-    opened_by_member_id: z.uuid(),
+    opened_by_member_id: z.uuid().nullish(),
+    opened_by_position_id: z.uuid().nullish(),
     host_member_id: z.uuid(),
     contact_member_id: z.uuid(),
     member_ids: z.array(z.uuid()).max(500).optional()
@@ -1975,7 +1994,8 @@ export const zHouseOut = z.object({
     approx_latitude: z.number(),
     member_count: z.int(),
     credited_member_id: z.uuid().nullable(),
-    credited_user_id: z.uuid().nullable(),
+    credited_position_id: z.uuid().nullable(),
+    credited_position: z.string().nullish(),
     credit_pending: z.boolean(),
     needs_reassignment: z.boolean(),
     publishable: z.boolean(),
@@ -1985,7 +2005,8 @@ export const zHouseOut = z.object({
     address: zHouseAddressOut,
     host: zMemberSummary.nullable(),
     contact: zMemberSummary.nullable(),
-    opened_by_member_id: z.uuid(),
+    opened_by_member_id: z.uuid().nullable(),
+    opened_by_position_id: z.uuid().nullable(),
     member_goal: z.int().nullable(),
     progress_pct: z.int().nullable(),
     consolidated_on: z.iso.date().nullable(),
@@ -2560,58 +2581,6 @@ export const zNominationOut = z.object({
     slots: z.array(zSlotOut),
     formulas: z.array(zFormulaOut),
     warnings: z.array(zViolationOut).optional()
-});
-
-/**
- * ZoneNodeIn
- */
-export const zZoneNodeIn = z.object({
-    level: z.enum([
-        'state',
-        'federal_district',
-        'local_district',
-        'municipality',
-        'section'
-    ]),
-    node_id: z.uuid()
-});
-
-/**
- * ZoneCoordinatorIn
- */
-export const zZoneCoordinatorIn = z.object({
-    user_id: z.uuid(),
-    state_id: z.uuid(),
-    nodes: z.array(zZoneNodeIn).min(1).max(500),
-    valid_from: z.iso.date().nullish()
-});
-
-/**
- * ZoneNodeOut
- */
-export const zZoneNodeOut = z.object({
-    level: z.enum([
-        'state',
-        'federal_district',
-        'local_district',
-        'municipality',
-        'section'
-    ]),
-    node_id: z.uuid()
-});
-
-/**
- * ZoneCoordinatorOut
- */
-export const zZoneCoordinatorOut = z.object({
-    id: z.uuid(),
-    user_id: z.uuid(),
-    user_name: z.string(),
-    state_id: z.uuid(),
-    valid_from: z.iso.date(),
-    valid_to: z.iso.date().nullable(),
-    nodes: z.array(zZoneNodeOut),
-    section_count: z.int()
 });
 
 /**
@@ -3600,34 +3569,6 @@ export const zUpdatePeaceSettingsBody = zSettingsIn;
  */
 export const zUpdatePeaceSettingsResponse = zSettingsOut;
 
-export const zListZoneCoordinatorsQuery = z.object({
-    state_id: z.uuid().nullish(),
-    history: z.boolean().optional().default(false)
-});
-
-/**
- * Response Listzonecoordinators
- *
- * Successful Response
- */
-export const zListZoneCoordinatorsResponse = z.array(zZoneCoordinatorOut);
-
-export const zCreateZoneCoordinatorBody = zZoneCoordinatorIn;
-
-/**
- * Successful Response
- */
-export const zCreateZoneCoordinatorResponse = zZoneCoordinatorOut;
-
-export const zEndZoneCoordinatorPath = z.object({
-    zone_id: z.uuid()
-});
-
-/**
- * Successful Response
- */
-export const zEndZoneCoordinatorResponse = zZoneCoordinatorOut;
-
 export const zSearchMembersQuery = z.object({
     status: z.string().regex(/^(pending_validation|active|rejected|left|withdrawn)$/).nullish(),
     level_id: z.uuid().nullish(),
@@ -3785,6 +3726,28 @@ export const zOpenPeaceHouseBody = zHouseIn;
  * Successful Response
  */
 export const zOpenPeaceHouseResponse = zHouseOut;
+
+export const zListHousesToLinkQuery = z.object({
+    limit: z.int().gte(1).lte(200).optional().default(50),
+    cursor: z.string().max(1024).nullish(),
+    sort: z.string().max(200).nullish()
+});
+
+/**
+ * Successful Response
+ */
+export const zListHousesToLinkResponse = zCursorPageHouseSummary;
+
+export const zLinkPeaceHouseBody = zLinkIn;
+
+export const zLinkPeaceHousePath = z.object({
+    house_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zLinkPeaceHouseResponse = zHouseSummary;
 
 export const zGetPeaceHousesMapQuery = z.object({
     status: z.string().regex(/^(open|consolidated|closed)$/).nullish(),
@@ -4356,3 +4319,10 @@ export const zResolveTerritoryIssuePath = z.object({
  * Successful Response
  */
 export const zResolveTerritoryIssueResponse = zTerritoryIssueOut;
+
+/**
+ * Response Listmypositions
+ *
+ * Successful Response
+ */
+export const zListMyPositionsResponse = z.array(zMyPositionOut);

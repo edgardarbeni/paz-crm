@@ -36,6 +36,7 @@ export const Perm = {
   PEACE_HOUSE_READ: "peace_movement.house.read",
   PEACE_HOUSE_WRITE: "peace_movement.house.write",
   PEACE_HOUSE_REASSIGN_CREDIT: "peace_movement.house.reassign_credit",
+  PEACE_HOUSE_LINK: "peace_movement.house.link",
   PEACE_STATS_READ: "peace_movement.stats.read",
   PEACE_GOAL_MANAGE: "peace_movement.goal.manage",
   STRUCTURE_CATALOG_MANAGE: "party_structure.catalog.manage",

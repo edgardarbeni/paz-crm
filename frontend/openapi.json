@@ -6856,201 +6856,6 @@
         ]
       }
     },
-    "/api/v1/peace-movement/zone-coordinators": {
-      "get": {
-        "tags": [
-          "peace-movement"
-        ],
-        "summary": "Coordinadores de zona (crédito de casas sin Embajador)",
-        "operationId": "listZoneCoordinators",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "state_id",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Estado (incluye la meta nacional).",
-              "title": "State Id"
-            },
-            "description": "Estado (incluye la meta nacional)."
-          },
-          {
-            "name": "history",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "description": "Incluir metas o vigencias ya cerradas.",
-              "default": false,
-              "title": "History"
-            },
-            "description": "Incluir metas o vigencias ya cerradas."
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ZoneCoordinatorOut"
-                  },
-                  "title": "Response Listzonecoordinators"
-                }
-              }
-            }
-          },
-          "4XX": {
-            "description": "Error del cliente (RFC 9457)",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem"
-                }
-              }
-            }
-          },
-          "5XX": {
-            "description": "Error del servidor (RFC 9457)",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "peace-movement"
-        ],
-        "summary": "Asignar un coordinador de zona",
-        "operationId": "createZoneCoordinator",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ZoneCoordinatorIn"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ZoneCoordinatorOut"
-                }
-              }
-            }
-          },
-          "4XX": {
-            "description": "Error del cliente (RFC 9457)",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem"
-                }
-              }
-            }
-          },
-          "5XX": {
-            "description": "Error del servidor (RFC 9457)",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/peace-movement/zone-coordinators/{zone_id}/end": {
-      "post": {
-        "tags": [
-          "peace-movement"
-        ],
-        "summary": "Terminar la vigencia de un coordinador de zona",
-        "operationId": "endZoneCoordinator",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "zone_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Zone Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ZoneCoordinatorOut"
-                }
-              }
-            }
-          },
-          "4XX": {
-            "description": "Error del cliente (RFC 9457)",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem"
-                }
-              }
-            }
-          },
-          "5XX": {
-            "description": "Error del servidor (RFC 9457)",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v1/peace-movement/members": {
       "get": {
         "tags": [
@@ -8236,6 +8041,176 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/HouseOut"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/peace-movement/houses/pending-credit": {
+      "get": {
+        "tags": [
+          "peace-movement"
+        ],
+        "summary": "Bandeja de casas por enlazar (sin crédito, de cualquier lugar)",
+        "operationId": "listHousesToLink",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 1024
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 200
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Campos separados por coma; prefijo '-' para descendente.",
+              "examples": [
+                "-created_at,name"
+              ],
+              "title": "Sort"
+            },
+            "description": "Campos separados por coma; prefijo '-' para descendente."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CursorPage_HouseSummary_"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/peace-movement/houses/{house_id}/link": {
+      "post": {
+        "tags": [
+          "peace-movement"
+        ],
+        "summary": "Enlazar una casa de la bandeja a un cargo propio",
+        "description": "El crédito queda en el asiento, no en la persona: si cambia el titular, el nuevo lo hereda (D-103). Solo con un cargo de la estructura que ocupas, sin importar la geografía.",
+        "operationId": "linkPeaceHouse",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "house_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Id de la Casa de Paz.",
+              "title": "House Id"
+            },
+            "description": "Id de la Casa de Paz."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LinkIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HouseSummary"
                 }
               }
             }
@@ -12194,6 +12169,56 @@
           }
         }
       }
+    },
+    "/api/v1/party-structure/my-positions": {
+      "get": {
+        "tags": [
+          "party-structure"
+        ],
+        "summary": "Mis cargos vigentes (para abrir o enlazar casas, D-103)",
+        "operationId": "listMyPositions",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MyPositionOut"
+                  },
+                  "type": "array",
+                  "title": "Response Listmypositions"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Error del cliente (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Error del servidor (RFC 9457)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -14509,9 +14534,10 @@
                 "type": "null"
               }
             ],
-            "title": "Member Id"
+            "title": "Member Id",
+            "description": "Pacificador activo, de cualquier nivel."
           },
-          "user_id": {
+          "position_id": {
             "anyOf": [
               {
                 "type": "string",
@@ -14521,7 +14547,8 @@
                 "type": "null"
               }
             ],
-            "title": "User Id"
+            "title": "Position Id",
+            "description": "Asiento ocupado de la estructura."
           },
           "reason": {
             "type": "string",
@@ -16514,9 +16541,30 @@
             "$ref": "#/components/schemas/HouseAddressIn"
           },
           "opened_by_member_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Opened By Member Id"
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Opened By Member Id",
+            "description": "Pacificador que la abre: se lleva el crédito (D-103)."
+          },
+          "opened_by_position_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Opened By Position Id",
+            "description": "O un cargo de la estructura que ocupas (permiso peace_movement.house.link): el crédito es del asiento. Sin ninguno de los dos, la casa queda en la bandeja."
           },
           "host_member_id": {
             "type": "string",
@@ -16544,11 +16592,11 @@
         "required": [
           "name",
           "address",
-          "opened_by_member_id",
           "host_member_id",
           "contact_member_id"
         ],
-        "title": "HouseIn"
+        "title": "HouseIn",
+        "description": "Opened by a member or a seat, not both (D-103)."
       },
       "HouseMapOut": {
         "properties": {
@@ -16674,7 +16722,7 @@
             ],
             "title": "Credited Member Id"
           },
-          "credited_user_id": {
+          "credited_position_id": {
             "anyOf": [
               {
                 "type": "string",
@@ -16684,7 +16732,19 @@
                 "type": "null"
               }
             ],
-            "title": "Credited User Id"
+            "title": "Credited Position Id"
+          },
+          "credited_position": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Credited Position",
+            "description": "Cargo y territorio del asiento acreditado."
           },
           "credit_pending": {
             "type": "boolean",
@@ -16746,9 +16806,28 @@
             ]
           },
           "opened_by_member_id": {
-            "type": "string",
-            "format": "uuid",
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Opened By Member Id"
+          },
+          "opened_by_position_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Opened By Position Id"
           },
           "member_goal": {
             "anyOf": [
@@ -16833,7 +16912,7 @@
           "approx_latitude",
           "member_count",
           "credited_member_id",
-          "credited_user_id",
+          "credited_position_id",
           "credit_pending",
           "needs_reassignment",
           "publishable",
@@ -16844,6 +16923,7 @@
           "host",
           "contact",
           "opened_by_member_id",
+          "opened_by_position_id",
           "member_goal",
           "progress_pct",
           "consolidated_on",
@@ -16907,7 +16987,7 @@
             ],
             "title": "Credited Member Id"
           },
-          "credited_user_id": {
+          "credited_position_id": {
             "anyOf": [
               {
                 "type": "string",
@@ -16917,7 +16997,19 @@
                 "type": "null"
               }
             ],
-            "title": "Credited User Id"
+            "title": "Credited Position Id"
+          },
+          "credited_position": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Credited Position",
+            "description": "Cargo y territorio del asiento acreditado."
           },
           "credit_pending": {
             "type": "boolean",
@@ -16950,7 +17042,7 @@
           "approx_latitude",
           "member_count",
           "credited_member_id",
-          "credited_user_id",
+          "credited_position_id",
           "credit_pending",
           "needs_reassignment",
           "publishable",
@@ -17691,6 +17783,22 @@
         ],
         "title": "LevelOut"
       },
+      "LinkIn": {
+        "properties": {
+          "position_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Position Id",
+            "description": "Un cargo de la estructura que ocupas."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "position_id"
+        ],
+        "title": "LinkIn"
+      },
       "LocationConsentIn": {
         "properties": {
           "channel": {
@@ -18422,6 +18530,27 @@
           "id"
         ],
         "title": "MunicipalitySettingOut"
+      },
+      "MyPositionOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label",
+            "description": "Cargo y territorio."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "label"
+        ],
+        "title": "MyPositionOut"
       },
       "NetworkNode": {
         "properties": {
@@ -22973,167 +23102,6 @@
           "message"
         ],
         "title": "ViolationOut"
-      },
-      "ZoneCoordinatorIn": {
-        "properties": {
-          "user_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "User Id"
-          },
-          "state_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "State Id"
-          },
-          "nodes": {
-            "items": {
-              "$ref": "#/components/schemas/ZoneNodeIn"
-            },
-            "type": "array",
-            "maxItems": 500,
-            "minItems": 1,
-            "title": "Nodes"
-          },
-          "valid_from": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Valid From"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "user_id",
-          "state_id",
-          "nodes"
-        ],
-        "title": "ZoneCoordinatorIn"
-      },
-      "ZoneCoordinatorOut": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "user_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "User Id"
-          },
-          "user_name": {
-            "type": "string",
-            "title": "User Name"
-          },
-          "state_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "State Id"
-          },
-          "valid_from": {
-            "type": "string",
-            "format": "date",
-            "title": "Valid From"
-          },
-          "valid_to": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Valid To"
-          },
-          "nodes": {
-            "items": {
-              "$ref": "#/components/schemas/ZoneNodeOut"
-            },
-            "type": "array",
-            "title": "Nodes"
-          },
-          "section_count": {
-            "type": "integer",
-            "title": "Section Count"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "id",
-          "user_id",
-          "user_name",
-          "state_id",
-          "valid_from",
-          "valid_to",
-          "nodes",
-          "section_count"
-        ],
-        "title": "ZoneCoordinatorOut"
-      },
-      "ZoneNodeIn": {
-        "properties": {
-          "level": {
-            "type": "string",
-            "enum": [
-              "state",
-              "federal_district",
-              "local_district",
-              "municipality",
-              "section"
-            ],
-            "title": "Level"
-          },
-          "node_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Node Id"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "level",
-          "node_id"
-        ],
-        "title": "ZoneNodeIn"
-      },
-      "ZoneNodeOut": {
-        "properties": {
-          "level": {
-            "type": "string",
-            "enum": [
-              "state",
-              "federal_district",
-              "local_district",
-              "municipality",
-              "section"
-            ],
-            "title": "Level"
-          },
-          "node_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Node Id"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "level",
-          "node_id"
-        ],
-        "title": "ZoneNodeOut"
       }
     },
     "securitySchemes": {

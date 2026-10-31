@@ -1,4 +1,4 @@
-"""/peace-movement — members, goals, settings, zone coordinators and branch scopes
+"""/peace-movement — members, goals, settings and branch scopes
 (docs/modules/peace-movement.md). Everything is limited by the member scope (D-83)."""
 
 import uuid
@@ -25,15 +25,14 @@ from app.core.errors import BadRequestError
 from app.core.pagination import CursorPage, PageParams, page_params
 from app.core.storage import ObjectStorage, StorageDep
 from app.modules.identity.dependencies import CurrentUser, permission
-from app.modules.identity.models import User
 from app.modules.identity.permissions import Perm
+from app.modules.party_structure import access as structure
 from app.modules.peace_movement import catalog, houses, intake, members, scope, stats
 from app.modules.peace_movement.models import (
     Member,
     PeaceHouse,
     PeaceHouseMeeting,
     PeaceHousePhoto,
-    ZoneCoordinator,
 )
 from app.modules.peace_movement.permissions import PeacePerm
 from app.modules.peace_movement.schemas import (
@@ -63,6 +62,7 @@ from app.modules.peace_movement.schemas import (
     LevelGoalIn,
     LevelGoalOut,
     LevelOut,
+    LinkIn,
     LocationConsentIn,
     MeetingIn,
     MeetingOut,
@@ -82,9 +82,6 @@ from app.modules.peace_movement.schemas import (
     ScheduleSlot,
     SettingsIn,
     SettingsOut,
-    ZoneCoordinatorIn,
-    ZoneCoordinatorOut,
-    ZoneNodeOut,
 )
 from app.modules.people.models import Person
 from app.modules.people.views import CryptoDep, person_out, person_summary
@@ -184,61 +181,6 @@ async def get_settings(db: SessionDep, _: Reader) -> SettingsOut:
 @router.put("/settings", operation_id="updatePeaceSettings", summary="Cambiar la configuración")
 async def update_settings(db: SessionDep, _: GoalManager, body: SettingsIn) -> SettingsOut:
     return SettingsOut.model_validate(await catalog.update_settings(db, body))
-
-
-async def _zone_out(db: AsyncSession, zone: ZoneCoordinator) -> ZoneCoordinatorOut:
-    nodes, count = await catalog.zone_details(db, zone.id)  # type: ignore[arg-type]
-    user = await db.get(User, zone.user_id)
-    return ZoneCoordinatorOut(
-        id=zone.id,
-        user_id=zone.user_id,
-        user_name=user.full_name if user else "—",
-        state_id=zone.state_id,
-        valid_from=zone.valid_from,
-        valid_to=zone.valid_to,
-        nodes=[
-            ZoneNodeOut.model_validate(
-                {"level": node.level, "node_id": getattr(node, f"{node.level}_id")}
-            )
-            for node in nodes
-        ],
-        section_count=count,
-    )
-
-
-@router.get(
-    "/zone-coordinators",
-    operation_id="listZoneCoordinators",
-    summary="Coordinadores de zona (crédito de casas sin Embajador)",
-)
-async def list_zone_coordinators(
-    db: SessionDep, _: Reader, state_id: StateFilter = None, history: History = False
-) -> list[ZoneCoordinatorOut]:
-    zones = await catalog.list_zone_coordinators(db, state_id=state_id, history=history)
-    return [await _zone_out(db, zone) for zone in zones]
-
-
-@router.post(
-    "/zone-coordinators",
-    operation_id="createZoneCoordinator",
-    summary="Asignar un coordinador de zona",
-    status_code=status.HTTP_201_CREATED,
-)
-async def create_zone_coordinator(
-    db: SessionDep, _: GoalManager, body: ZoneCoordinatorIn
-) -> ZoneCoordinatorOut:
-    return await _zone_out(db, await catalog.create_zone_coordinator(db, body))
-
-
-@router.post(
-    "/zone-coordinators/{zone_id}/end",
-    operation_id="endZoneCoordinator",
-    summary="Terminar la vigencia de un coordinador de zona",
-)
-async def end_zone_coordinator(
-    db: SessionDep, _: GoalManager, zone_id: uuid.UUID
-) -> ZoneCoordinatorOut:
-    return await _zone_out(db, await catalog.end_zone_coordinator(db, zone_id))
 
 
 # --- members ----------------------------------------------------------------------------------
@@ -539,11 +481,15 @@ async def set_branches(
 HouseReader = Annotated[CurrentUser, permission(PeacePerm.HOUSE_READ)]
 HouseWriter = Annotated[CurrentUser, permission(PeacePerm.HOUSE_WRITE)]
 CreditManager = Annotated[CurrentUser, permission(PeacePerm.HOUSE_REASSIGN_CREDIT)]
+HouseLinker = Annotated[CurrentUser, permission(PeacePerm.HOUSE_LINK)]
 HouseId = Annotated[uuid.UUID, Path(description="Id de la Casa de Paz.")]
 
 
 async def _house_summaries(db: AsyncSession, items: list[PeaceHouse]) -> list[HouseSummary]:
     counts = await houses.member_counts(db, [h.id for h in items if h.id is not None])
+    seats = await structure.seat_labels(
+        db, [h.credited_position_id for h in items if h.credited_position_id]
+    )
     result = []
     for house in items:
         lon, lat = houses.approx_point(house)
@@ -559,8 +505,12 @@ async def _house_summaries(db: AsyncSession, items: list[PeaceHouse]) -> list[Ho
                 approx_latitude=lat,
                 member_count=counts.get(house.id, 0),  # type: ignore[arg-type]
                 credited_member_id=house.credited_member_id,
-                credited_user_id=house.credited_user_id,
-                credit_pending=house.credited_member_id is None and house.credited_user_id is None,
+                credited_position_id=house.credited_position_id,
+                credited_position=seats.get(house.credited_position_id)
+                if house.credited_position_id
+                else None,
+                credit_pending=house.credited_member_id is None
+                and house.credited_position_id is None,
                 needs_reassignment=house.needs_reassignment,
                 publishable=house.public_location_consent_id is not None,
                 opened_on=house.opened_on,
@@ -593,6 +543,7 @@ async def _house_out(
         host=roles["host"],
         contact=roles["contact"],
         opened_by_member_id=house.opened_by_member_id,
+        opened_by_position_id=house.opened_by_position_id,
         member_goal=goal,
         progress_pct=pct,
         consolidated_on=house.consolidated_on,
@@ -643,8 +594,46 @@ async def search_houses(
 async def open_house(
     db: SessionDep, crypto: CryptoDep, user: HouseWriter, body: HouseIn
 ) -> HouseOut:
-    house = await houses.open_house(db, crypto, await _actor(db, user), body)
+    house = await houses.open_house(
+        db, crypto, await _actor(db, user), body, can_link=user.has(PeacePerm.HOUSE_LINK)
+    )
     return await _house_out(db, crypto, user, house.id)  # type: ignore[arg-type]
+
+
+@router.get(
+    "/houses/pending-credit",
+    operation_id="listHousesToLink",
+    summary="Bandeja de casas por enlazar (sin crédito, de cualquier lugar)",
+)
+async def list_houses_to_link(
+    db: SessionDep, user: HouseLinker, params: Annotated[PageParams, Depends(page_params)]
+) -> CursorPage[HouseSummary]:
+    del user
+    page = await houses.pending_houses(db, params)
+    return CursorPage[HouseSummary](
+        items=await _house_summaries(db, page.items),
+        next_cursor=page.next_cursor,
+        has_more=page.has_more,
+    )
+
+
+@router.post(
+    "/houses/{house_id}/link",
+    operation_id="linkPeaceHouse",
+    summary="Enlazar una casa de la bandeja a un cargo propio",
+    description=(
+        "El crédito queda en el asiento, no en la persona: si cambia el titular, el nuevo lo "
+        "hereda (D-103). Solo con un cargo de la estructura que ocupas, sin importar la geografía."
+    ),
+)
+async def link_house(
+    db: SessionDep, user: HouseLinker, house_id: HouseId, body: LinkIn
+) -> HouseSummary:
+    house = await houses.link_house(
+        db, await _actor(db, user), house_id, body.position_id, can_link=True
+    )
+    [summary] = await _house_summaries(db, [house])
+    return summary
 
 
 @router.get(

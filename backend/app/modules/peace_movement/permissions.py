@@ -12,5 +12,6 @@ class PeacePerm(StrEnum):
     HOUSE_READ = "peace_movement.house.read"
     HOUSE_WRITE = "peace_movement.house.write"
     HOUSE_REASSIGN_CREDIT = "peace_movement.house.reassign_credit"
+    HOUSE_LINK = "peace_movement.house.link"
     STATS_READ = "peace_movement.stats.read"
     GOAL_MANAGE = "peace_movement.goal.manage"

@@ -58,6 +58,11 @@ test("Movimiento de Paz: validar, inscribir, ver la red y las integraciones del 
   await page.getByRole("link", { name: "Ver mapa" }).click();
   await expect(page.getByRole("heading", { name: "Mapa de Casas de Paz" })).toBeVisible();
   await expect(page.getByText(/\d+ casas/)).toBeVisible();
+
+  // D-103: the tray of houses to link; without a structure seat there is nothing to link with.
+  await page.getByRole("link", { name: "Casas por enlazar" }).click();
+  await expect(page.getByRole("heading", { name: "Casas por enlazar" })).toBeVisible();
+  await expect(page.getByText("No ocupas ningún cargo de la estructura")).toBeVisible();
 });
 
 test("la página pública de inscripción resuelve la verificación y recibe la inscripción", async ({

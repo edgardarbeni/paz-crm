@@ -1,4 +1,5 @@
-"""Peace Houses (docs/modules/peace-movement.md, D-85, D-92): opening and credit, consolidation,
+"""Peace Houses (docs/modules/peace-movement.md, D-85, D-92, D-103): opening and credit (to the
+opener or to a party structure seat, the tray of houses to link), consolidation,
 roles when a member leaves, meetings with guests, photos, the public-location consent and the
 house scope."""
 
@@ -13,7 +14,14 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 from app.core.storage import build_storage
 from tests.conftest import S3_ACCESS_KEY, S3_SECRET_KEY
 from tests.integration.candidacies.conftest import Geo
+from tests.integration.conftest import UserFactory, set_scopes, token_for
 from tests.integration.geography.conftest import rows, scalar
+from tests.integration.party_structure.test_appointments import (
+    _appoint,
+    _body,
+    _person,
+    _seats,
+)
 from tests.integration.peace_movement.conftest import API, enroll
 from tests.support import make_settings
 
@@ -38,11 +46,12 @@ async def open_house(
     engine: AsyncEngine,
     section: str,
     *,
-    opener: str,
+    opener: str | None,
     host: str,
     contact: str,
     members: list[str] | None = None,
     expect: int = 201,
+    **extra: Any,
 ) -> dict[str, Any]:
     lon, lat = await point(engine, section)
     response = await client.post(
@@ -60,6 +69,7 @@ async def open_house(
                 "latitude": lat,
             },
             "opened_by_member_id": opener,
+            **extra,
             "host_member_id": host,
             "contact_member_id": contact,
             "member_ids": members or [],
@@ -98,8 +108,8 @@ async def test_open_house_and_its_credit(  # noqa: PLR0917
         2,
         geo.sections[101],
     )
-    # The credit goes to the first Ambassador up the opener's path.
-    assert (house["credited_member_id"], house["credit_pending"]) == (ambassador["id"], False)
+    # The credit goes to whoever opens it, whatever their level; no search up the path (D-103).
+    assert (house["credited_member_id"], house["credit_pending"]) == (opener["id"], False)
     assert house["address"]["street"] == "Calle Girasol"
     lon, lat = await point(owner_engine, geo.sections[101])
     assert house["address"]["longitude"] == lon
@@ -107,10 +117,10 @@ async def test_open_house_and_its_credit(  # noqa: PLR0917
     assert (house["member_goal"], house["progress_pct"]) == (100, 2)
     assert house["host"]["id"] == opener["id"]
 
-    # No Ambassador and no zone: the credit stays pending (D-92).
+    # Opened by neither a member nor a seat: the credit stays pending, in the tray (D-103).
     pending = await open_house(
         client, root, owner_engine, geo.sections[102],
-        opener=lonely["id"], host=lonely["id"], contact=opener["id"],
+        opener=None, host=lonely["id"], contact=opener["id"],
     )  # fmt: skip
     assert pending["credit_pending"] is True
     listed = (
@@ -139,65 +149,127 @@ async def test_open_house_and_its_credit(  # noqa: PLR0917
     )
 
 
-async def test_zone_credit_and_manual_reassignment(  # noqa: PLR0917
+async def test_structure_seats_the_tray_and_reassignment(  # noqa: PLR0917
     client: AsyncClient,
     root: dict[str, str],
-    scoped: Any,
+    make_user: UserFactory,
     geo: Geo,
     levels: dict[str, str],
     notice: dict[str, Any],
     owner_engine: AsyncEngine,
 ) -> None:
-    coordinator, _ = await scoped(("coordinator",), [{"level": "state", "node_id": geo.state}])
-    zone = await client.post(
-        f"{API}/zone-coordinators",
-        headers=root,
-        json={
-            "user_id": str(coordinator.id),
-            "state_id": geo.state,
-            "nodes": [{"level": "municipality", "node_id": geo.municipalities[2]}],
-        },
+    # A coordinator who also holds a national seat with access (D-109).
+    account = await make_user(roles=("coordinator",), with_totp=True)
+    await set_scopes(client, root, account.id, [{"level": "national"}])
+    committee = await _seats(client, root, await _body(client, root, "national_committee"))
+    seat = committee["cdn_organization"]["id"]
+    holder = await _appoint(
+        client, root, seat, await _person(client, root), access={"email": account.email}
     )
-    assert zone.status_code == 201
+    holder_headers = await token_for(client, account)
+
     a = await enroll(client, root, levels, geo.sections[103])
     b = await enroll(client, root, levels, geo.sections[103], recruiter=a["id"])
-    house = await open_house(
-        client, root, owner_engine, geo.sections[103], opener=a["id"], host=a["id"], contact=b["id"]
+    by_seat = await open_house(
+        client, holder_headers, owner_engine, geo.sections[103],
+        opener=None, host=a["id"], contact=b["id"], opened_by_position_id=seat,
+    )  # fmt: skip
+    assert by_seat["credited_position_id"] == seat
+    assert by_seat["credited_member_id"] is None
+    assert by_seat["credited_position"].startswith("Secretaría de Organización")
+    assert by_seat["opened_by_position_id"] == seat
+    other_seat = committee["cdn_legal"]["id"]
+    await open_house(
+        client, holder_headers, owner_engine, geo.sections[103],
+        opener=None, host=a["id"], contact=b["id"], opened_by_position_id=other_seat, expect=403,
+    )  # fmt: skip
+    await open_house(
+        client, holder_headers, owner_engine, geo.sections[103],
+        opener=a["id"], host=a["id"], contact=b["id"], opened_by_position_id=seat, expect=422,
+    )  # fmt: skip
+
+    # The tray: houses without credit, linked to an own seat.
+    pending = await open_house(
+        client, root, owner_engine, geo.sections[104], opener=None, host=a["id"], contact=b["id"]
     )
-    assert (house["credited_member_id"], house["credited_user_id"]) == (None, str(coordinator.id))
+    tray = (await client.get(f"{API}/houses/pending-credit", headers=holder_headers)).json()
+    assert [h["id"] for h in tray["items"]] == [pending["id"]]
+    not_mine = await client.post(
+        f"{API}/houses/{pending['id']}/link",
+        headers=holder_headers,
+        json={"position_id": other_seat},
+    )
+    assert not_mine.status_code == 403
+    linked = await client.post(
+        f"{API}/houses/{pending['id']}/link", headers=holder_headers, json={"position_id": seat}
+    )
+    assert linked.status_code == 200, linked.text
+    assert linked.json()["credited_position_id"] == seat
+    twice = await client.post(
+        f"{API}/houses/{pending['id']}/link", headers=holder_headers, json={"position_id": seat}
+    )
+    assert twice.status_code == 409
 
+    # The credit stays in the seat when its holder changes (D-103).
+    ended = await client.post(
+        f"/api/v1/party-structure/appointments/{holder['id']}/end",
+        headers=root,
+        json={"ended_on": "2026-06-30", "reason": "resignation"},
+    )
+    assert ended.status_code == 200, ended.text
+    await _appoint(client, root, seat, await _person(client, root), starts_on="2026-07-01")
+    again = (await client.get(f"{API}/houses/{by_seat['id']}", headers=root)).json()
+    assert again["credited_position_id"] == seat
+
+    # By hand, with a reason: to a member of any level, or to a held seat.
     def credit(**body: Any) -> Any:
-        return client.post(f"{API}/houses/{house['id']}/credit", headers=root, json=body)
+        return client.post(f"{API}/houses/{by_seat['id']}/credit", headers=root, json=body)
 
-    assert (await credit(member_id=b["id"], reason="Ajuste de red")).status_code == 409
-    assert (await credit(user_id=str(coordinator.id), reason="Igual")).status_code == 409
-    ambassador = await enroll(client, root, levels, geo.sections[104], level="peace_ambassador")
-    moved = await credit(member_id=ambassador["id"], reason="Acuerdo estatal")
+    vacant = committee["cdn_legal"]["id"]
+    assert (await credit(position_id=vacant, reason="Vacante")).status_code == 409
+    assert (await credit(position_id=seat, reason="Igual")).status_code == 409
+    moved = await credit(member_id=b["id"], reason="Acuerdo estatal")
     assert moved.status_code == 200, moved.text
-    assert moved.json()["credited_member_id"] == ambassador["id"]
+    assert moved.json()["credited_member_id"] == b["id"]
+    assert moved.json()["credited_position_id"] is None
+
+    # D-105: if the credited member leaves the movement, the house goes back to the tray.
+    left = await client.post(
+        f"{API}/members/{b['id']}/leave", headers=root, json={"reason": "Renuncia"}
+    )
+    assert left.status_code == 200, left.text
+    after = (await client.get(f"{API}/houses/{by_seat['id']}", headers=root)).json()
+    assert after["credit_pending"] is True
     history = await rows(
         owner_engine,
-        "SELECT from_user_id::text AS f, to_member_id::text AS t, reason "
-        "FROM peace_movement.peace_house_credit_changes",
+        "SELECT from_position_id::text AS fp, from_member_id::text AS fm, "
+        "to_member_id::text AS tm, to_position_id::text AS tp, reason "
+        "FROM peace_movement.peace_house_credit_changes WHERE house_id = :h ORDER BY changed_at",
+        h=by_seat["id"],
     )
-    assert history == [
-        {"f": str(coordinator.id), "t": ambassador["id"], "reason": "Acuerdo estatal"}
+    assert [(h["fp"], h["fm"], h["tm"], h["tp"]) for h in history] == [
+        (seat, None, b["id"], None),
+        (None, b["id"], None, None),
     ]
-    # Promotions never move the credit by themselves (D-92).
-    await client.post(
-        f"{API}/members/{a['id']}/level",
-        headers=root,
-        json={"level_id": levels["peace_ambassador"]},
-    )
-    again = (await client.get(f"{API}/houses/{house['id']}", headers=root)).json()
-    assert again["credited_member_id"] == ambassador["id"]
-    _, capturist = await scoped(("capturist",), [{"level": "national"}])
+    assert history[1]["reason"].startswith("Baja del pacificador acreditado")
+
+    _, capturist = await (await _scoped_factory(client, make_user, root))(("capturist",))
     denied = await client.post(
-        f"{API}/houses/{house['id']}/credit",
+        f"{API}/houses/{by_seat['id']}/credit",
         headers=capturist,
-        json={"member_id": ambassador["id"], "reason": "No debería"},
+        json={"member_id": a["id"], "reason": "No debería"},
     )
     assert denied.status_code == 403
+    assert (await client.get(f"{API}/houses/pending-credit", headers=capturist)).status_code == 403
+
+
+async def _scoped_factory(client: AsyncClient, make_user: UserFactory, root: dict[str, str]) -> Any:
+    async def factory(roles: tuple[str, ...]) -> tuple[Any, dict[str, str]]:
+        user = await make_user(roles=roles)
+        await set_scopes(client, root, user.id, [{"level": "national"}])
+        return user, await token_for(client, user)
+
+    return factory
 
 
 async def test_consolidation_follows_the_members(  # noqa: PLR0917

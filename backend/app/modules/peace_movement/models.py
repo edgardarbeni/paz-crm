@@ -1,5 +1,6 @@
-"""Peace Movement (schema `peace_movement`): the recruitment pyramid, its goals and zone
-coordinators. See docs/modules/peace-movement.md and D-82..D-92.
+"""Peace Movement (schema `peace_movement`): the recruitment pyramid, its goals and the Peace
+Houses. See docs/modules/peace-movement.md, D-82..D-99 and D-103 (credit to members or to party
+structure seats; zone coordinators retired).
 
 The pyramid is a materialized `ltree` path of internal bigint labels (`tree_id`), so subtree and
 ancestor reads use the GiST index and never recurse (D-91).
@@ -165,76 +166,6 @@ class Settings(BusinessTable, table=True):
     depth_alert_threshold: int = Field(default=50)
 
 
-class ZoneCoordinator(BusinessTable, table=True):
-    """A system user who receives the credit of Peace Houses with no Ambassador above them, in
-    a zone of a state (D-92). Several per state; validity keeps the history."""
-
-    __tablename__ = "zone_coordinators"
-    __table_args__ = (
-        CheckConstraint("valid_to IS NULL OR valid_to >= valid_from", name="validity"),
-        {"schema": SCHEMA},
-    )
-
-    user_id: uuid.UUID = _fk("identity.users.id")
-    state_id: uuid.UUID = _fk("geography.states.id")
-    valid_from: date = Field(sa_type=Date)
-    valid_to: date | None = Field(default=None, sa_type=Date)
-
-
-class ZoneLevel(StrEnum):
-    STATE = "state"
-    FEDERAL_DISTRICT = "federal_district"
-    LOCAL_DISTRICT = "local_district"
-    MUNICIPALITY = "municipality"
-    SECTION = "section"
-
-
-ZONE_LEVELS: dict[str, str] = {level.value: f"{level.value}_id" for level in ZoneLevel}
-
-
-def _zone_check() -> CheckConstraint:
-    columns = ", ".join(ZONE_LEVELS.values())
-    clauses = [
-        f"(level = '{level}' AND num_nonnulls({columns}) = 1 AND {column} IS NOT NULL)"
-        for level, column in ZONE_LEVELS.items()
-    ]
-    return CheckConstraint(" OR ".join(clauses), name="level_matches_node")
-
-
-class ZoneCoordinatorNode(BusinessTable, table=True):
-    """A node of any level that forms part of a coordinator's zone (one FK column per level)."""
-
-    __tablename__ = "zone_coordinator_nodes"
-    __table_args__ = (
-        _in("level", ZoneLevel, "level"),
-        _zone_check(),
-        {"schema": SCHEMA},
-    )
-
-    zone_coordinator_id: uuid.UUID = _fk(f"{SCHEMA}.zone_coordinators.id", ondelete="CASCADE")
-    level: str = Field(sa_type=Text)
-    state_id: uuid.UUID | None = _fk("geography.states.id", nullable=True)
-    federal_district_id: uuid.UUID | None = _fk("geography.federal_districts.id", nullable=True)
-    local_district_id: uuid.UUID | None = _fk("geography.local_districts.id", nullable=True)
-    municipality_id: uuid.UUID | None = _fk("geography.municipalities.id", nullable=True)
-    section_id: uuid.UUID | None = _fk("geography.sections.id", nullable=True)
-
-
-class ZoneCoordinatorSection(SQLModel, table=True):
-    """Derived: the sections a coordinator's zone resolves to (like `user_scope_sections`)."""
-
-    __tablename__ = "zone_coordinator_sections"
-    __table_args__: ClassVar[dict[str, Any]] = {"schema": SCHEMA}
-    __audit__: ClassVar[bool] = False
-
-    zone_coordinator_id: uuid.UUID = Field(
-        foreign_key=f"{SCHEMA}.zone_coordinators.id", ondelete="CASCADE", primary_key=True
-    )
-    section_id: uuid.UUID = Field(
-        foreign_key="geography.sections.id", ondelete="CASCADE", primary_key=True, index=True
-    )
-
-
 # --- members ----------------------------------------------------------------------------------
 
 
@@ -388,8 +319,10 @@ class PeaceHouse(BusinessTable, table=True):
         Index("gx_peace_houses_location", "location", postgresql_using="gist"),
         _in("status", HouseStatus, "status"),
         CheckConstraint(
-            "NOT (credited_member_id IS NOT NULL AND credited_user_id IS NOT NULL)",
-            name="single_credit",
+            "num_nonnulls(credited_member_id, credited_position_id) <= 1", name="single_credit"
+        ),
+        CheckConstraint(
+            "num_nonnulls(opened_by_member_id, opened_by_position_id) <= 1", name="single_opener"
         ),
         CheckConstraint("capacity IS NULL OR capacity > 0", name="capacity"),
         {"schema": SCHEMA},
@@ -407,9 +340,12 @@ class PeaceHouse(BusinessTable, table=True):
     section_id: uuid.UUID = _fk("geography.sections.id")
     host_member_id: uuid.UUID | None = _fk(f"{SCHEMA}.members.id", nullable=True)
     contact_member_id: uuid.UUID | None = _fk(f"{SCHEMA}.members.id", nullable=True)
-    opened_by_member_id: uuid.UUID = _fk(f"{SCHEMA}.members.id")
+    # Opened by a member, or by a party structure seat (D-103); neither: the credit is pending.
+    opened_by_member_id: uuid.UUID | None = _fk(f"{SCHEMA}.members.id", nullable=True)
+    opened_by_position_id: uuid.UUID | None = _fk("party_structure.positions.id", nullable=True)
+    # A member of any level, or a seat: the next holder of the seat inherits it (D-103).
     credited_member_id: uuid.UUID | None = _fk(f"{SCHEMA}.members.id", nullable=True)
-    credited_user_id: uuid.UUID | None = _fk("identity.users.id", nullable=True)
+    credited_position_id: uuid.UUID | None = _fk("party_structure.positions.id", nullable=True)
     status: str = Field(sa_type=Text)
     needs_reassignment: bool = Field(
         default=False, sa_column_kwargs={"server_default": text("false")}
@@ -454,6 +390,9 @@ class PeaceHouseCreditChange(BusinessTable, table=True):
     from_user_id: uuid.UUID | None = _fk("identity.users.id", nullable=True)
     to_member_id: uuid.UUID | None = _fk(f"{SCHEMA}.members.id", nullable=True)
     to_user_id: uuid.UUID | None = _fk("identity.users.id", nullable=True)
+    # Seats of the party structure (D-103); the user columns are history before it.
+    from_position_id: uuid.UUID | None = _fk("party_structure.positions.id", nullable=True)
+    to_position_id: uuid.UUID | None = _fk("party_structure.positions.id", nullable=True)
     changed_by_user_id: uuid.UUID | None = _fk("identity.users.id", nullable=True)
     changed_at: datetime = Field(sa_type=TZ)
     reason: str = Field(max_length=500)

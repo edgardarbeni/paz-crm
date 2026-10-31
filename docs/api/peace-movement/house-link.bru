@@ -1,0 +1,26 @@
+meta {
+  name: Enlazar una casa de la bandeja a mi cargo
+  type: http
+  seq: 23
+}
+
+post {
+  url: {{baseUrl}}/api/v1/peace-movement/houses/{{houseId}}/link
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "position_id": "{{positionId}}"
+  }
+}
+
+docs {
+  La bandeja: GET /houses/pending-credit (casas vigentes sin crédito, de cualquier lugar). Mis
+  cargos: GET /api/v1/party-structure/my-positions. El crédito queda en el asiento (D-103).
+}
