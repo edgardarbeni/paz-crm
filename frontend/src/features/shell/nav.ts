@@ -1,4 +1,5 @@
 import {
+  BookOpen,
   Building2,
   ChartColumn,
   ClipboardList,
@@ -15,13 +16,16 @@ import {
   Map as MapIcon,
   MapPinHouse,
   MapPinned,
+  Network,
   ScrollText,
   Settings2,
   Shield,
+  TriangleAlert,
   Upload,
   UserRound,
   Users,
   Vote,
+  Waypoints,
 } from "lucide-react";
 import { Perm, type PermCode } from "@/lib/auth/permissions";
 
@@ -51,6 +55,35 @@ export const NAV: NavSection[] = [
       },
       { to: "/parties", label: "Partidos", icon: Flag, perm: Perm.CANDIDACIES_READ },
       { to: "/office-types", label: "Cargos", icon: Landmark, perm: Perm.CANDIDACIES_READ },
+    ],
+  },
+  {
+    label: "Estructura del partido",
+    items: [
+      {
+        to: "/structure/bodies",
+        label: "Órganos y cargos",
+        icon: Network,
+        perm: Perm.STRUCTURE_BODY_READ,
+      },
+      {
+        to: "/structure/coordinations",
+        label: "Coordinaciones",
+        icon: Waypoints,
+        perm: Perm.STRUCTURE_COORDINATION_READ,
+      },
+      {
+        to: "/structure/catalog",
+        label: "Catálogo estatutario",
+        icon: BookOpen,
+        perm: Perm.STRUCTURE_BODY_READ,
+      },
+      {
+        to: "/structure/territory",
+        label: "Territorio por resolver",
+        icon: TriangleAlert,
+        perm: Perm.STRUCTURE_CATALOG_MANAGE,
+      },
     ],
   },
   {

@@ -149,7 +149,7 @@ uv run paz --help                    # CLI de operación
     `scheduler`).
   - Antes de inscribir hace falta el aviso del MP: `POST /api/v1/people/privacy-notices` o, en
     desarrollo, `paz people sample-notice`.
-- **Estructura del partido (en curso).**
+- **Estructura del partido (D-101 a D-113).**
   - Concesiones (D-101, D-106): el acceso es la suma de pares (rol, alcance); se gestionan en
     `/api/v1/users/{id}/grants`.
   - Catálogo estatutario y órganos (D-107) en `/api/v1/party-structure`: `catalog`,
@@ -214,6 +214,9 @@ El script usa una base desechable con la geografía sintética de los tests
   Con D-100 se suman el mapa de casas, la participación en el MP en la ficha de cada persona,
   la pestaña «Lecturas sensibles» de la bitácora y el aviso de pendientes en el inicio. No hay
   portal de pacificadores: lo que haga el pacificador irá en la App.
+- **Estructura del partido (D-113):** menú propio (órganos y cargos, coordinaciones, catálogo
+  estatutario y territorio por resolver), cargos en la ficha de cada persona y concesiones (rol y
+  alcance) en la ficha de cada usuario.
 - **Mapa (D-72):** MapLibre con las teselas MVT de la API sobre OpenFreeMap. Para cambiar de
   proveedor se usan `VITE_MAP_STYLE_URL` y `PAZ_MAP_TILES_ORIGIN` (CSP de producción).
 

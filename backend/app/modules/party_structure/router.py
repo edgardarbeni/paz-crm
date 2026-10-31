@@ -835,3 +835,19 @@ async def list_my_positions(db: SessionDep, user: CurrentUserDep) -> list[MyPosi
     seats = await access.current_seats_of_user(db, user.id)
     labels = await access.seat_labels(db, seats)
     return [MyPositionOut(id=seat, label=labels[seat]) for seat in seats]
+
+
+@router.get(
+    "/positions/held",
+    operation_id="searchHeldPositions",
+    summary="Buscar cargos ocupados (en órganos visibles) por nombre del cargo o del titular",
+)
+async def search_held_positions(
+    db: SessionDep,
+    user: AppointmentReader,
+    q: Annotated[str, Query(min_length=2, max_length=100)],
+    limit: Annotated[int, Query(ge=1, le=50)] = 20,
+) -> list[MyPositionOut]:
+    seats = await appointments.search_held(db, user.geo, q, limit)
+    labels = await access.seat_labels(db, seats)
+    return [MyPositionOut(id=seat, label=labels[seat]) for seat in seats]

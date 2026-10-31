@@ -372,3 +372,24 @@ async def test_person_appointments_follow_the_scope(
     )
     seen = (await client.get(f"{API}/people/{person}/appointments", headers=elsewhere)).json()
     assert [a["position_type"]["code"] for a in seen] == ["cdn_causes"]
+
+
+async def test_search_held_positions(
+    client: AsyncClient, root: dict[str, str], scoped: Any, geo: Geo
+) -> None:
+    national = await _seats(client, root, await _body(client, root, "national_committee"))
+    person = await new_person(client, root, sex="H", curp=_curp(), given_names="Rigoberta")
+    await _appoint(client, root, national["cdn_legal"]["id"], str(person["id"]))
+    by_position = (
+        await client.get(f"{API}/positions/held", headers=root, params={"q": "jurídica"})
+    ).json()
+    assert [p["id"] for p in by_position] == [national["cdn_legal"]["id"]]
+    assert by_position[0]["label"].startswith("Secretaría Jurídica")
+    by_holder = (
+        await client.get(f"{API}/positions/held", headers=root, params={"q": "rigoberta"})
+    ).json()
+    assert [p["id"] for p in by_holder] == [national["cdn_legal"]["id"]]
+    vacant = (
+        await client.get(f"{API}/positions/held", headers=root, params={"q": "organización"})
+    ).json()
+    assert vacant == []

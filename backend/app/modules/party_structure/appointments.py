@@ -17,7 +17,7 @@ from dataclasses import dataclass
 from datetime import date, timedelta
 from enum import IntEnum
 
-from sqlalchemy import select, text
+from sqlalchemy import func, select, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import col
@@ -594,3 +594,32 @@ async def choose_source(
     db.add(choice)
     await db.commit()
     return choice
+
+
+async def search_held(db: AsyncSession, geo: GeoScope, term: str, limit: int) -> list[uuid.UUID]:
+    """Seats with a current appointment whose position or holder matches `term` (visible
+    bodies only)."""
+    from app.modules.party_structure.service import visible_filter  # noqa: PLC0415 - cycle
+    from app.modules.people.models import Person as Holder  # noqa: PLC0415
+
+    pattern = f"%{term.strip().lower()}%"
+    statement = (
+        select(col(Position.id))
+        .join(PositionType, col(PositionType.id) == col(Position.position_type_id))
+        .join(Appointment, col(Appointment.position_id) == col(Position.id))
+        .join(Holder, col(Holder.id) == col(Appointment.person_id))
+        .join(Body, col(Body.id) == col(Position.body_id))
+        .where(
+            col(Appointment.ended_on).is_(None),
+            col(Appointment.deleted_at).is_(None),
+            col(Position.deleted_at).is_(None),
+            (func.lower(col(PositionType.name)).like(pattern))
+            | (func.f_unaccent(func.lower(col(Holder.search_name))).like(func.f_unaccent(pattern))),
+        )
+        .order_by(col(PositionType.sort_order))
+        .limit(limit)
+    )
+    visible = visible_filter(geo)
+    if visible is not None:
+        statement = statement.where(visible)
+    return [seat for seat in (await db.execute(statement)).scalars() if seat is not None]
