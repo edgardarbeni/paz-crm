@@ -8,6 +8,7 @@ cleared (the address itself is kept) and reported.
 """
 
 import uuid
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 
@@ -91,6 +92,27 @@ class ActivationReport:
     grants_rebuilt: int = 0
     addresses_remapped: dict[str, int] = field(default_factory=dict)
     addresses_cleared: dict[str, int] = field(default_factory=dict)
+    # What each module that registered a hook remapped or left pending (D-102).
+    modules: dict[str, dict[str, int]] = field(default_factory=dict)
+
+
+# Extension point: modules with data tied to geographic nodes remap it on activation
+# (`ModuleSpec.setup`; geography never imports them). Hooks run inside the activation
+# transaction, after the grant scopes and addresses and before the switch of active framework.
+ActivationHook = Callable[[AsyncConnection, uuid.UUID, "ActivationReport"], Awaitable[None]]
+_activation_hooks: list[ActivationHook] = []
+
+
+def on_framework_activated(callback: ActivationHook) -> ActivationHook:
+    if callback not in _activation_hooks:
+        _activation_hooks.append(callback)
+    return callback
+
+
+def mapping_sql(table: str) -> str:
+    """Old node → equivalent node of the framework `:new` by natural key (D-41 point 7)."""
+    column = next(c for c, (t, _) in _REMAP.items() if t == table)
+    return _mapping_sql(table, _REMAP[column][1])
 
 
 async def activate_framework(connection: AsyncConnection, *, name: str) -> ActivationReport:
@@ -145,6 +167,8 @@ async def activate_framework(connection: AsyncConnection, *, name: str) -> Activ
         report.removed[column] = removed.rowcount
 
     await _remap_addresses(connection, new.id, report)
+    for hook in _activation_hooks:
+        await hook(connection, new.id, report)
 
     await connection.execute(
         text(
@@ -174,6 +198,7 @@ async def activate_framework(connection: AsyncConnection, *, name: str) -> Activ
             "removed": report.removed,
             "addresses_remapped": report.addresses_remapped,
             "addresses_cleared": report.addresses_cleared,
+            "modules": report.modules,
         },
     )
     return report

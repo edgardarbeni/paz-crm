@@ -19,7 +19,13 @@ from app.modules.identity.dependencies import CurrentUser, permission
 from app.modules.identity.permissions import Perm
 from app.modules.identity.schemas import RoleSummary
 from app.modules.identity.services.scopes import GeoScope
-from app.modules.party_structure import access, appointments, coordinations, service
+from app.modules.party_structure import (
+    access,
+    appointments,
+    coordinations,
+    framework_change,
+    service,
+)
 from app.modules.party_structure.appointments import Seat
 from app.modules.party_structure.models import (
     Appointment,
@@ -30,6 +36,7 @@ from app.modules.party_structure.models import (
     EndReason,
     PositionType,
     TerritorialLevel,
+    TerritoryIssue,
 )
 from app.modules.party_structure.permissions import StructurePerm
 from app.modules.party_structure.schemas import (
@@ -51,6 +58,7 @@ from app.modules.party_structure.schemas import (
     DerivedChoiceIn,
     IncompatibilityIn,
     IncompatibilityOut,
+    IssueResolveIn,
     PersonAppointmentOut,
     PositionTypeIn,
     PositionTypeOut,
@@ -58,6 +66,7 @@ from app.modules.party_structure.schemas import (
     PositionTypeUpdate,
     SeatOut,
     TerritoryIn,
+    TerritoryIssueOut,
     TerritoryNode,
 )
 from app.modules.people.models import Person
@@ -759,3 +768,55 @@ async def close_coordination(
         agreement=body.agreement,
     )
     return await _coordination_out(db, closed)
+
+
+# --- framework changes: the tray (phase 5) ----------------------------------------------------
+
+
+async def _issue_out(db: AsyncSession, issue: TerritoryIssue) -> TerritoryIssueOut:
+    body = await db.get(Body, issue.body_id)
+    assert body is not None  # noqa: S101 - FK
+    [body_out] = await _bodies_out(db, [body])
+    return TerritoryIssueOut.model_validate(
+        {**_fields(issue, TerritoryIssueOut), "body": body_out, "lost": issue.lost}
+    )
+
+
+@router.get(
+    "/territory-issues",
+    operation_id="listTerritoryIssues",
+    summary="Bandeja de territorio por resolver tras un cambio de marco",
+)
+async def list_territory_issues(
+    db: SessionDep, user: CatalogManager, include_resolved: bool = False
+) -> list[TerritoryIssueOut]:
+    framework_change.ensure_national(user.geo)
+    rows = await framework_change.issues(db, include_resolved=include_resolved)
+    return [await _issue_out(db, issue) for issue in rows]
+
+
+@router.post(
+    "/territory-issues/{issue_id}/resolve",
+    operation_id="resolveTerritoryIssue",
+    summary="Resolver un pendiente de territorio",
+    description=(
+        "Comité sin territorio: reasignarlo a un nodo del marco activo (sus titulares con "
+        "acceso lo toman como alcance) o disolverlo. Coordinación que perdió territorio: "
+        "aceptarla así o cerrarla. Disolver y cerrar terminan sus nombramientos vigentes."
+    ),
+)
+async def resolve_territory_issue(
+    db: SessionDep, user: CatalogManager, issue_id: uuid.UUID, body: IssueResolveIn
+) -> TerritoryIssueOut:
+    framework_change.ensure_national(user.geo)
+    issue = await framework_change.resolve(
+        db,
+        user_id=user.id,
+        access=user.access,
+        issue_id=issue_id,
+        action=body.action,
+        node_id=body.node_id,
+        on=body.on,
+        notes=body.notes,
+    )
+    return await _issue_out(db, issue)

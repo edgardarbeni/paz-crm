@@ -8,11 +8,12 @@ Territory of a body (D-107):
 """
 
 import uuid
-from datetime import date
+from datetime import date, datetime
 from enum import StrEnum
 from typing import Literal
 
-from sqlalchemy import CheckConstraint, Date, Index, SmallInteger, Text, text
+from sqlalchemy import CheckConstraint, Date, DateTime, Index, SmallInteger, Text, text
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import Field
 
 from app.core.db.base import BusinessTable
@@ -401,3 +402,40 @@ class CoordinationSection(BusinessTable, table=True):
     section_id: uuid.UUID = _fk("geography.sections.id")  # type: ignore[assignment]
     added_on: date = Field(sa_type=Date)
     removed_on: date | None = Field(default=None, sa_type=Date)
+
+
+# --- framework changes (phase 5, D-102 and D-105) ---------------------------------------------
+
+
+class IssueKind(StrEnum):
+    COMMITTEE_WITHOUT_TERRITORY = "committee_without_territory"
+    COORDINATION_NODES_REMOVED = "coordination_nodes_removed"
+
+
+class TerritoryIssue(BusinessTable, table=True):
+    """Tray of territory to resolve after activating a framework: what had no equivalent by
+    natural key. The rest was remapped automatically (D-102)."""
+
+    __tablename__ = "territory_issues"
+    __table_args__ = (
+        _in("kind", IssueKind, "kind"),
+        Index(
+            "ix_territory_issues_open",
+            "detected_on",
+            postgresql_where=text("resolved_at IS NULL AND deleted_at IS NULL"),
+        ),
+        {"schema": SCHEMA},
+    )
+
+    body_id: uuid.UUID = _fk(f"{SCHEMA}.bodies.id")  # type: ignore[assignment]
+    kind: IssueKind = Field(sa_type=Text)
+    framework_id: uuid.UUID = _fk("geography.geographic_frameworks.id")  # type: ignore[assignment]
+    detected_on: date = Field(sa_type=Date)
+    # The lost nodes as they were: [{"id": …, "label": …}].
+    lost: list[dict[str, str]] = Field(default_factory=list, sa_type=JSONB)
+    resolved_at: datetime | None = Field(default=None, sa_type=DateTime(timezone=True))
+    resolution: str | None = Field(default=None, max_length=40)
+    resolution_notes: str | None = Field(default=None, max_length=500)
+    resolved_by_user_id: uuid.UUID | None = _fk(
+        "identity.users.id", nullable=True, ondelete="SET NULL"
+    )  # type: ignore[assignment]

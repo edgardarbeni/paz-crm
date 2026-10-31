@@ -757,6 +757,26 @@ export const zInvitationTokenRequest = z.object({
 });
 
 /**
+ * IssueKind
+ */
+export const zIssueKind = z.enum(['committee_without_territory', 'coordination_nodes_removed']);
+
+/**
+ * IssueResolveIn
+ */
+export const zIssueResolveIn = z.object({
+    action: z.enum([
+        'reassign',
+        'dissolve',
+        'accept',
+        'close'
+    ]),
+    node_id: z.uuid().nullish(),
+    on: z.iso.date(),
+    notes: z.string().max(500).nullish()
+});
+
+/**
  * LevelChangeIn
  */
 export const zLevelChangeIn = z.object({
@@ -826,6 +846,14 @@ export const zLoginRequest = z.object({
     email: z.email(),
     password: z.string().min(1).max(256),
     device_label: z.string().max(200).nullish()
+});
+
+/**
+ * LostNode
+ */
+export const zLostNode = z.object({
+    id: z.uuid(),
+    label: z.string()
 });
 
 /**
@@ -2310,6 +2338,21 @@ export const zPersonAppointmentOut = z.object({
 export const zTerritoryIn = z.object({
     node_ids: z.array(z.uuid()).min(1).max(5000),
     on: z.iso.date()
+});
+
+/**
+ * TerritoryIssueOut
+ */
+export const zTerritoryIssueOut = z.object({
+    id: z.uuid(),
+    body: zBodyOut,
+    kind: zIssueKind,
+    framework_id: z.uuid(),
+    detected_on: z.iso.date(),
+    lost: z.array(zLostNode),
+    resolved_at: z.iso.datetime().nullable(),
+    resolution: z.string().nullable(),
+    resolution_notes: z.string().nullable()
 });
 
 /**
@@ -4291,3 +4334,25 @@ export const zCloseCoordinationPath = z.object({
  * Successful Response
  */
 export const zCloseCoordinationResponse = zCoordinationOut;
+
+export const zListTerritoryIssuesQuery = z.object({
+    include_resolved: z.boolean().optional().default(false)
+});
+
+/**
+ * Response Listterritoryissues
+ *
+ * Successful Response
+ */
+export const zListTerritoryIssuesResponse = z.array(zTerritoryIssueOut);
+
+export const zResolveTerritoryIssueBody = zIssueResolveIn;
+
+export const zResolveTerritoryIssuePath = z.object({
+    issue_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zResolveTerritoryIssueResponse = zTerritoryIssueOut;

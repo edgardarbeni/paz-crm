@@ -164,6 +164,9 @@ uv run paz --help                    # CLI de operación
   - Coordinaciones territoriales (D-110): `/api/v1/party-structure/coordinations` (federales,
     locales y seccionales; territorio exclusivo; el alcance de sus titulares sigue al
     territorio).
+  - Cambio de marco (D-111): `paz geo activate` remapea comités y coordinaciones; lo que no
+    tiene equivalente va a `/api/v1/party-structure/territory-issues`, que resuelve el nivel
+    nacional.
 - **Errores.** Siempre RFC 9457 (`application/problem+json`): `type` es `urn:pazos:problem:<code>`
   e incluye `request_id`.
 - **Paginación.** Por cursor (`app.core.pagination`): `limit` ≤ 200, `cursor` opaco y `sort`

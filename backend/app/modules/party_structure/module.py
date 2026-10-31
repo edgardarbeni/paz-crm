@@ -7,5 +7,6 @@ MODULE = ModuleSpec(
     models="app.modules.party_structure.models",
     routers=("app.modules.party_structure.router:router",),
     permissions="app.modules.party_structure.permissions:StructurePerm",
+    setup="app.modules.party_structure.hooks",
     cli="app.modules.party_structure.cli:app",
 )

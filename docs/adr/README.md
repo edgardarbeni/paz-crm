@@ -194,6 +194,7 @@ cambios.
 | [D-108](D-108-asientos-nombramientos.md) | Asientos y nombramientos (fase 2; precisa D-105) | Aceptada |
 | [D-109](D-109-acceso-por-nombramiento.md) | Acceso al sistema por nombramiento (fase 3; detalla D-104) | Aceptada |
 | [D-110](D-110-coordinaciones-territoriales.md) | Coordinaciones territoriales (fase 4) | Aceptada |
+| [D-111](D-111-cambio-de-marco-estructura.md) | Cambio de marco en la estructura y bandeja de territorio (fase 5; implementa D-102) | Aceptada |
 
 ## Suposiciones vigentes
 
