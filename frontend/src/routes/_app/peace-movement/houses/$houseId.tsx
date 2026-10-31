@@ -13,7 +13,6 @@ import {
   listHouseMeetingsOptions,
   listHouseMembersOptions,
   listHousePhotosOptions,
-  listMyPositionsOptions,
   reassignHouseCreditMutation,
   recordHouseLocationConsentMutation,
   removeHouseMemberMutation,
@@ -21,8 +20,9 @@ import {
   updatePeaceHouseMutation,
   uploadHousePhotoMutation,
 } from "@/client/@tanstack/react-query.gen";
+import { searchHeldPositions } from "@/client/sdk.gen";
 import type { GuestIn, HouseOut } from "@/client/types.gen";
-import type { ComboItem } from "@/components/async-combobox";
+import { AsyncCombobox, type ComboItem } from "@/components/async-combobox";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { FormDialog } from "@/components/form-dialog";
 import { PageHeader } from "@/components/page-header";
@@ -34,7 +34,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { GeoMap, type PointCollection } from "@/features/geography/geo-map";
-import { HOUSE_MEMBER_SOURCE, SELECT_CLASS, WEEKDAYS } from "@/features/peace-movement/labels";
+import { HOUSE_MEMBER_SOURCE, WEEKDAYS } from "@/features/peace-movement/labels";
 import {
   Facts,
   GoalProgress,
@@ -723,9 +723,8 @@ function ReassignCredit({ house, onDone }: { house: HouseOut; onDone: (h: HouseO
   const [open, setOpen] = useState(false);
   const [kind, setKind] = useState<"member" | "position">("member");
   const [target, setTarget] = useState<ComboItem | null>(null);
-  const [positionId, setPositionId] = useState("");
+  const [seat, setSeat] = useState<ComboItem | null>(null);
   const [reason, setReason] = useState("");
-  const mine = useQuery({ ...listMyPositionsOptions(), enabled: open && kind === "position" });
   const save = useMutation({
     ...reassignHouseCreditMutation(),
     onSuccess: (data) => {
@@ -734,7 +733,7 @@ function ReassignCredit({ house, onDone }: { house: HouseOut; onDone: (h: HouseO
       toast.success("Crédito reasignado.");
     },
   });
-  const chosen = kind === "member" ? target?.id : positionId;
+  const chosen = kind === "member" ? target?.id : seat?.id;
   return (
     <FormDialog
       trigger={<Button variant="outline">Reasignar crédito</Button>}
@@ -757,7 +756,7 @@ function ReassignCredit({ house, onDone }: { house: HouseOut; onDone: (h: HouseO
           });
         }}
       >
-        <ProblemAlert error={save.error ?? mine.error} />
+        <ProblemAlert error={save.error} />
         <div className="flex gap-2">
           {(["member", "position"] as const).map((option) => (
             <Button
@@ -768,10 +767,10 @@ function ReassignCredit({ house, onDone }: { house: HouseOut; onDone: (h: HouseO
               onClick={() => {
                 setKind(option);
                 setTarget(null);
-                setPositionId("");
+                setSeat(null);
               }}
             >
-              {option === "member" ? "Pacificador" : "Uno de mis cargos"}
+              {option === "member" ? "Pacificador" : "Cargo de la estructura"}
             </Button>
           ))}
         </div>
@@ -785,19 +784,21 @@ function ReassignCredit({ house, onDone }: { house: HouseOut; onDone: (h: HouseO
               onChange={setTarget}
             />
           ) : (
-            <select
+            <AsyncCombobox
               id="credit-target"
-              value={positionId}
-              onChange={(e) => setPositionId(e.target.value)}
-              className={SELECT_CLASS}
-            >
-              <option value="">Elige uno de tus cargos…</option>
-              {(mine.data ?? []).map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.label}
-                </option>
-              ))}
-            </select>
+              label="Cargo"
+              value={seat}
+              onChange={setSeat}
+              queryKey={["credit-seat"]}
+              placeholder="Nombre del cargo o de su titular"
+              search={async (term) => {
+                const { data } = await searchHeldPositions({
+                  query: { q: term, limit: 20 },
+                  throwOnError: true,
+                });
+                return data.map((p) => ({ id: p.id, label: p.label }));
+              }}
+            />
           )}
         </div>
         <div className="grid gap-1.5">

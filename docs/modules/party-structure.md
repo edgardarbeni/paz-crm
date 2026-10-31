@@ -1,13 +1,7 @@
 # Módulo: Estructura del partido
 
-**Estado:** en implementación. Fases 0 (concesiones en `identity`, [D-106](../adr/D-106-ajustes-implementacion-concesiones.md)) 1 (catálogo y
-órganos, [D-107](../adr/D-107-catalogo-y-organos.md)) 2 (asientos y nombramientos,
-[D-108](../adr/D-108-asientos-nombramientos.md)) 3 (acceso por nombramiento,
-[D-109](../adr/D-109-acceso-por-nombramiento.md)) 4 (coordinaciones territoriales,
-[D-110](../adr/D-110-coordinaciones-territoriales.md)) 5 (cambio de marco,
-[D-111](../adr/D-111-cambio-de-marco-estructura.md)) y 6 (Casas de Paz,
-[D-112](../adr/D-112-credito-casas-implementado.md)) listas.
-**Paquete propuesto:** `backend/app/modules/party_structure` · esquema `party_structure` · API
+**Estado:** implementado (fases 0 a 7: API y panel), D-101 a D-113.
+**Paquete:** `backend/app/modules/party_structure` · esquema `party_structure` · API
 `/api/v1/party-structure`.
 **Brief:** respuestas de Darío del 2026-10-30 y catálogo estatutario [`cargos_paz.md`](../reference/cargos_paz.md). Lo marcado
 como **[SUPUESTO]** debe confirmarse; lo marcado como **[ADR]** requiere proponer una decisión con
@@ -289,7 +283,7 @@ permiso de lectura.
 | 4 | Coordinaciones territoriales: exclusividad y recálculo de alcance (D-110) | Lista |
 | 5 | Cambio de marco y bandeja de territorio por resolver (D-102, D-105, D-111) | Lista |
 | 6 | Movimiento de Paz: crédito a quien abre o a un asiento, bandeja de casas y retiro de zonas (D-103, D-112) | Lista |
-| 7 | Panel de la estructura y de las bandejas | |
+| 7 | Panel de la estructura y de las bandejas (D-113) | Lista |
 
 ## Decisiones
 
@@ -317,6 +311,7 @@ y una ADR difieren, manda la ADR.**
   `geography`) y bandeja que resuelve el nivel nacional.
 - [D-112](../adr/D-112-credito-casas-implementado.md): crédito a quien abre (pacificador o
   asiento), bandeja de casas por enlazar y retiro de los coordinadores de zona.
+- [D-113](../adr/D-113-panel-estructura.md): pantallas del panel.
 - [D-105](../adr/D-105-reglas-estructura-confirmadas.md): respuestas a las preguntas abiertas.
   - Sin incompatibilidades iniciales.
   - El orden de niveles para administrar.

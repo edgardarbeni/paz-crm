@@ -1,0 +1,20 @@
+meta {
+  name: Buscar cargos ocupados
+  type: http
+  seq: 14
+}
+
+get {
+  url: {{baseUrl}}/api/v1/party-structure/positions/held?q=jurídica
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+docs {
+  Asientos con titular vigente, por nombre del cargo o del titular, en órganos visibles. Mis
+  cargos: GET /api/v1/party-structure/my-positions.
+}

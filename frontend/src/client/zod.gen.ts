@@ -4326,3 +4326,15 @@ export const zResolveTerritoryIssueResponse = zTerritoryIssueOut;
  * Successful Response
  */
 export const zListMyPositionsResponse = z.array(zMyPositionOut);
+
+export const zSearchHeldPositionsQuery = z.object({
+    q: z.string().min(2).max(100),
+    limit: z.int().gte(1).lte(50).optional().default(20)
+});
+
+/**
+ * Response Searchheldpositions
+ *
+ * Successful Response
+ */
+export const zSearchHeldPositionsResponse = z.array(zMyPositionOut);

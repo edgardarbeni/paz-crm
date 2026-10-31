@@ -16,7 +16,7 @@ resultados electorales. Sus prioridades son:
 
 **Estado:** el MVP está completo (fases A–E, D-77). Desde entonces se agregaron la identidad
 visual (D-78), la búsqueda geográfica por nombre (D-79) y el módulo Movimiento de Paz (D-82 a
-D-100). No hay portal de pacificadores: el personal usa el panel y quien está en campo usará la
+D-100) y la estructura del partido (D-101 a D-113). No hay portal de pacificadores: el personal usa el panel y quien está en campo usará la
 App (Flutter, todavía sin construir). Cada módulo nuevo se especifica primero en su ficha de
 `docs/modules/`.
 
@@ -40,7 +40,7 @@ App (Flutter, todavía sin construir). Cada módulo nuevo se especifica primero 
 | Personas (base del futuro padrón) | `app/modules/people` | Implementado | [people.md](docs/modules/people.md) |
 | Candidaturas | `app/modules/candidacies` | Implementado | [candidacies.md](docs/modules/candidacies.md) |
 | Movimiento de Paz (pacificadores, Casas de Paz, metas) | `app/modules/peace_movement` | Implementado (API y panel) | [peace-movement.md](docs/modules/peace-movement.md) |
-| Estructura del partido (cargos, nombramientos, coordinaciones territoriales) | `app/modules/party_structure` | En curso: fases 0 a 6 (falta el panel; D-106 a D-112) | [party-structure.md](docs/modules/party-structure.md) |
+| Estructura del partido (cargos, nombramientos, coordinaciones territoriales) | `app/modules/party_structure` | Implementado (API y panel) | [party-structure.md](docs/modules/party-structure.md) |
 
 Módulos futuros nombrados en el brief, todavía sin ficha:
 - padrón de militancia y afiliación al partido (aparte del Movimiento de Paz);

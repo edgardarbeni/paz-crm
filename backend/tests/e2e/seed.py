@@ -67,6 +67,7 @@ USERS: dict[str, tuple[tuple[str, ...], bool]] = {
     "geography": (("superadmin",), True),
     "peace": (("superadmin",), True),
     "grants": (("superadmin",), True),
+    "structure": (("superadmin",), True),
     "target": (("viewer",), False),
 }
 PEOPLE = [

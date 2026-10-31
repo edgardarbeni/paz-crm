@@ -11922,3 +11922,43 @@ export type ListMyPositionsResponses = {
 };
 
 export type ListMyPositionsResponse = ListMyPositionsResponses[keyof ListMyPositionsResponses];
+
+export type SearchHeldPositionsData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Q
+         */
+        q: string;
+        /**
+         * Limit
+         */
+        limit?: number;
+    };
+    url: '/api/v1/party-structure/positions/held';
+};
+
+export type SearchHeldPositionsErrors = {
+    /**
+     * Error del cliente (RFC 9457)
+     */
+    '4XX': Problem;
+    /**
+     * Error del servidor (RFC 9457)
+     */
+    '5XX': Problem;
+};
+
+export type SearchHeldPositionsError = SearchHeldPositionsErrors[keyof SearchHeldPositionsErrors];
+
+export type SearchHeldPositionsResponses = {
+    /**
+     * Response Searchheldpositions
+     *
+     * Successful Response
+     */
+    200: Array<MyPositionOut>;
+};
+
+export type SearchHeldPositionsResponse = SearchHeldPositionsResponses[keyof SearchHeldPositionsResponses];

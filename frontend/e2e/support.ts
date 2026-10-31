@@ -13,6 +13,7 @@ export interface Seed {
     | "geography"
     | "peace"
     | "grants"
+    | "structure"
     | "target",
     { email: string; totp_secret: string | null; id: string }
   >;

@@ -39,6 +39,8 @@ import { Route as AppProcessesIndexRouteImport } from './routes/_app/processes/i
 import { Route as AppProcessesProcessIdRouteImport } from './routes/_app/processes/$processId'
 import { Route as AppRolesIndexRouteImport } from './routes/_app/roles/index'
 import { Route as AppRolesRoleIdRouteImport } from './routes/_app/roles/$roleId'
+import { Route as AppStructureCatalogRouteImport } from './routes/_app/structure/catalog'
+import { Route as AppStructureTerritoryRouteImport } from './routes/_app/structure/territory'
 import { Route as AppUsersIndexRouteImport } from './routes/_app/users/index'
 import { Route as AppUsersUserIdRouteImport } from './routes/_app/users/$userId'
 import { Route as AppGeographyLevelNodeIdRouteImport } from './routes/_app/geography/$level/$nodeId'
@@ -52,6 +54,10 @@ import { Route as AppPeaceMovementHousesToLinkRouteImport } from './routes/_app/
 import { Route as AppPeaceMovementMembersIndexRouteImport } from './routes/_app/peace-movement/members/index'
 import { Route as AppPeaceMovementMembersMemberIdRouteImport } from './routes/_app/peace-movement/members/$memberId'
 import { Route as AppPeaceMovementMembersNewRouteImport } from './routes/_app/peace-movement/members/new'
+import { Route as AppStructureBodiesIndexRouteImport } from './routes/_app/structure/bodies/index'
+import { Route as AppStructureBodiesBodyIdRouteImport } from './routes/_app/structure/bodies/$bodyId'
+import { Route as AppStructureCoordinationsIndexRouteImport } from './routes/_app/structure/coordinations/index'
+import { Route as AppStructureCoordinationsCoordinationIdRouteImport } from './routes/_app/structure/coordinations/$coordinationId'
 
 const AppRoute = AppRouteImport.update({
   id: '/_app',
@@ -205,6 +211,16 @@ const AppRolesRoleIdRoute = AppRolesRoleIdRouteImport.update({
   path: '/roles/$roleId',
   getParentRoute: () => AppRoute,
 } as any)
+const AppStructureCatalogRoute = AppStructureCatalogRouteImport.update({
+  id: '/structure/catalog',
+  path: '/structure/catalog',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppStructureTerritoryRoute = AppStructureTerritoryRouteImport.update({
+  id: '/structure/territory',
+  path: '/structure/territory',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppUsersIndexRoute = AppUsersIndexRouteImport.update({
   id: '/users/',
   path: '/users/',
@@ -280,6 +296,29 @@ const AppPeaceMovementMembersNewRoute =
     path: '/peace-movement/members/new',
     getParentRoute: () => AppRoute,
   } as any)
+const AppStructureBodiesIndexRoute = AppStructureBodiesIndexRouteImport.update({
+  id: '/structure/bodies/',
+  path: '/structure/bodies/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppStructureBodiesBodyIdRoute =
+  AppStructureBodiesBodyIdRouteImport.update({
+    id: '/structure/bodies/$bodyId',
+    path: '/structure/bodies/$bodyId',
+    getParentRoute: () => AppRoute,
+  } as any)
+const AppStructureCoordinationsIndexRoute =
+  AppStructureCoordinationsIndexRouteImport.update({
+    id: '/structure/coordinations/',
+    path: '/structure/coordinations/',
+    getParentRoute: () => AppRoute,
+  } as any)
+const AppStructureCoordinationsCoordinationIdRoute =
+  AppStructureCoordinationsCoordinationIdRouteImport.update({
+    id: '/structure/coordinations/$coordinationId',
+    path: '/structure/coordinations/$coordinationId',
+    getParentRoute: () => AppRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
@@ -305,6 +344,8 @@ export interface FileRoutesByFullPath {
   '/people/new': typeof AppPeopleNewRoute
   '/processes/$processId': typeof AppProcessesProcessIdRoute
   '/roles/$roleId': typeof AppRolesRoleIdRoute
+  '/structure/catalog': typeof AppStructureCatalogRoute
+  '/structure/territory': typeof AppStructureTerritoryRoute
   '/users/$userId': typeof AppUsersUserIdRoute
   '/geography/': typeof AppGeographyIndexRoute
   '/nominations/': typeof AppNominationsIndexRoute
@@ -321,9 +362,13 @@ export interface FileRoutesByFullPath {
   '/peace-movement/houses/to-link': typeof AppPeaceMovementHousesToLinkRoute
   '/peace-movement/members/$memberId': typeof AppPeaceMovementMembersMemberIdRoute
   '/peace-movement/members/new': typeof AppPeaceMovementMembersNewRoute
+  '/structure/bodies/$bodyId': typeof AppStructureBodiesBodyIdRoute
+  '/structure/coordinations/$coordinationId': typeof AppStructureCoordinationsCoordinationIdRoute
   '/geography/imports/': typeof AppGeographyImportsIndexRoute
   '/peace-movement/houses/': typeof AppPeaceMovementHousesIndexRoute
   '/peace-movement/members/': typeof AppPeaceMovementMembersIndexRoute
+  '/structure/bodies/': typeof AppStructureBodiesIndexRoute
+  '/structure/coordinations/': typeof AppStructureCoordinationsIndexRoute
 }
 export interface FileRoutesByTo {
   '/accept-invitation': typeof AcceptInvitationRoute
@@ -349,6 +394,8 @@ export interface FileRoutesByTo {
   '/people/new': typeof AppPeopleNewRoute
   '/processes/$processId': typeof AppProcessesProcessIdRoute
   '/roles/$roleId': typeof AppRolesRoleIdRoute
+  '/structure/catalog': typeof AppStructureCatalogRoute
+  '/structure/territory': typeof AppStructureTerritoryRoute
   '/users/$userId': typeof AppUsersUserIdRoute
   '/geography': typeof AppGeographyIndexRoute
   '/nominations': typeof AppNominationsIndexRoute
@@ -365,9 +412,13 @@ export interface FileRoutesByTo {
   '/peace-movement/houses/to-link': typeof AppPeaceMovementHousesToLinkRoute
   '/peace-movement/members/$memberId': typeof AppPeaceMovementMembersMemberIdRoute
   '/peace-movement/members/new': typeof AppPeaceMovementMembersNewRoute
+  '/structure/bodies/$bodyId': typeof AppStructureBodiesBodyIdRoute
+  '/structure/coordinations/$coordinationId': typeof AppStructureCoordinationsCoordinationIdRoute
   '/geography/imports': typeof AppGeographyImportsIndexRoute
   '/peace-movement/houses': typeof AppPeaceMovementHousesIndexRoute
   '/peace-movement/members': typeof AppPeaceMovementMembersIndexRoute
+  '/structure/bodies': typeof AppStructureBodiesIndexRoute
+  '/structure/coordinations': typeof AppStructureCoordinationsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -395,6 +446,8 @@ export interface FileRoutesById {
   '/_app/people/new': typeof AppPeopleNewRoute
   '/_app/processes/$processId': typeof AppProcessesProcessIdRoute
   '/_app/roles/$roleId': typeof AppRolesRoleIdRoute
+  '/_app/structure/catalog': typeof AppStructureCatalogRoute
+  '/_app/structure/territory': typeof AppStructureTerritoryRoute
   '/_app/users/$userId': typeof AppUsersUserIdRoute
   '/_app/geography/': typeof AppGeographyIndexRoute
   '/_app/nominations/': typeof AppNominationsIndexRoute
@@ -411,9 +464,13 @@ export interface FileRoutesById {
   '/_app/peace-movement/houses/to-link': typeof AppPeaceMovementHousesToLinkRoute
   '/_app/peace-movement/members/$memberId': typeof AppPeaceMovementMembersMemberIdRoute
   '/_app/peace-movement/members/new': typeof AppPeaceMovementMembersNewRoute
+  '/_app/structure/bodies/$bodyId': typeof AppStructureBodiesBodyIdRoute
+  '/_app/structure/coordinations/$coordinationId': typeof AppStructureCoordinationsCoordinationIdRoute
   '/_app/geography/imports/': typeof AppGeographyImportsIndexRoute
   '/_app/peace-movement/houses/': typeof AppPeaceMovementHousesIndexRoute
   '/_app/peace-movement/members/': typeof AppPeaceMovementMembersIndexRoute
+  '/_app/structure/bodies/': typeof AppStructureBodiesIndexRoute
+  '/_app/structure/coordinations/': typeof AppStructureCoordinationsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -441,6 +498,8 @@ export interface FileRouteTypes {
     | '/people/new'
     | '/processes/$processId'
     | '/roles/$roleId'
+    | '/structure/catalog'
+    | '/structure/territory'
     | '/users/$userId'
     | '/geography/'
     | '/nominations/'
@@ -457,9 +516,13 @@ export interface FileRouteTypes {
     | '/peace-movement/houses/to-link'
     | '/peace-movement/members/$memberId'
     | '/peace-movement/members/new'
+    | '/structure/bodies/$bodyId'
+    | '/structure/coordinations/$coordinationId'
     | '/geography/imports/'
     | '/peace-movement/houses/'
     | '/peace-movement/members/'
+    | '/structure/bodies/'
+    | '/structure/coordinations/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/accept-invitation'
@@ -485,6 +548,8 @@ export interface FileRouteTypes {
     | '/people/new'
     | '/processes/$processId'
     | '/roles/$roleId'
+    | '/structure/catalog'
+    | '/structure/territory'
     | '/users/$userId'
     | '/geography'
     | '/nominations'
@@ -501,9 +566,13 @@ export interface FileRouteTypes {
     | '/peace-movement/houses/to-link'
     | '/peace-movement/members/$memberId'
     | '/peace-movement/members/new'
+    | '/structure/bodies/$bodyId'
+    | '/structure/coordinations/$coordinationId'
     | '/geography/imports'
     | '/peace-movement/houses'
     | '/peace-movement/members'
+    | '/structure/bodies'
+    | '/structure/coordinations'
   id:
     | '__root__'
     | '/_app'
@@ -530,6 +599,8 @@ export interface FileRouteTypes {
     | '/_app/people/new'
     | '/_app/processes/$processId'
     | '/_app/roles/$roleId'
+    | '/_app/structure/catalog'
+    | '/_app/structure/territory'
     | '/_app/users/$userId'
     | '/_app/geography/'
     | '/_app/nominations/'
@@ -546,9 +617,13 @@ export interface FileRouteTypes {
     | '/_app/peace-movement/houses/to-link'
     | '/_app/peace-movement/members/$memberId'
     | '/_app/peace-movement/members/new'
+    | '/_app/structure/bodies/$bodyId'
+    | '/_app/structure/coordinations/$coordinationId'
     | '/_app/geography/imports/'
     | '/_app/peace-movement/houses/'
     | '/_app/peace-movement/members/'
+    | '/_app/structure/bodies/'
+    | '/_app/structure/coordinations/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -773,6 +848,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRolesRoleIdRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/structure/catalog': {
+      id: '/_app/structure/catalog'
+      path: '/structure/catalog'
+      fullPath: '/structure/catalog'
+      preLoaderRoute: typeof AppStructureCatalogRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/structure/territory': {
+      id: '/_app/structure/territory'
+      path: '/structure/territory'
+      fullPath: '/structure/territory'
+      preLoaderRoute: typeof AppStructureTerritoryRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/users/': {
       id: '/_app/users/'
       path: '/users'
@@ -864,6 +953,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPeaceMovementMembersNewRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/structure/bodies/': {
+      id: '/_app/structure/bodies/'
+      path: '/structure/bodies'
+      fullPath: '/structure/bodies/'
+      preLoaderRoute: typeof AppStructureBodiesIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/structure/bodies/$bodyId': {
+      id: '/_app/structure/bodies/$bodyId'
+      path: '/structure/bodies/$bodyId'
+      fullPath: '/structure/bodies/$bodyId'
+      preLoaderRoute: typeof AppStructureBodiesBodyIdRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/structure/coordinations/': {
+      id: '/_app/structure/coordinations/'
+      path: '/structure/coordinations'
+      fullPath: '/structure/coordinations/'
+      preLoaderRoute: typeof AppStructureCoordinationsIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/structure/coordinations/$coordinationId': {
+      id: '/_app/structure/coordinations/$coordinationId'
+      path: '/structure/coordinations/$coordinationId'
+      fullPath: '/structure/coordinations/$coordinationId'
+      preLoaderRoute: typeof AppStructureCoordinationsCoordinationIdRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
@@ -885,6 +1002,8 @@ interface AppRouteChildren {
   AppPeopleNewRoute: typeof AppPeopleNewRoute
   AppProcessesProcessIdRoute: typeof AppProcessesProcessIdRoute
   AppRolesRoleIdRoute: typeof AppRolesRoleIdRoute
+  AppStructureCatalogRoute: typeof AppStructureCatalogRoute
+  AppStructureTerritoryRoute: typeof AppStructureTerritoryRoute
   AppUsersUserIdRoute: typeof AppUsersUserIdRoute
   AppGeographyIndexRoute: typeof AppGeographyIndexRoute
   AppNominationsIndexRoute: typeof AppNominationsIndexRoute
@@ -901,9 +1020,13 @@ interface AppRouteChildren {
   AppPeaceMovementHousesToLinkRoute: typeof AppPeaceMovementHousesToLinkRoute
   AppPeaceMovementMembersMemberIdRoute: typeof AppPeaceMovementMembersMemberIdRoute
   AppPeaceMovementMembersNewRoute: typeof AppPeaceMovementMembersNewRoute
+  AppStructureBodiesBodyIdRoute: typeof AppStructureBodiesBodyIdRoute
+  AppStructureCoordinationsCoordinationIdRoute: typeof AppStructureCoordinationsCoordinationIdRoute
   AppGeographyImportsIndexRoute: typeof AppGeographyImportsIndexRoute
   AppPeaceMovementHousesIndexRoute: typeof AppPeaceMovementHousesIndexRoute
   AppPeaceMovementMembersIndexRoute: typeof AppPeaceMovementMembersIndexRoute
+  AppStructureBodiesIndexRoute: typeof AppStructureBodiesIndexRoute
+  AppStructureCoordinationsIndexRoute: typeof AppStructureCoordinationsIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -924,6 +1047,8 @@ const AppRouteChildren: AppRouteChildren = {
   AppPeopleNewRoute: AppPeopleNewRoute,
   AppProcessesProcessIdRoute: AppProcessesProcessIdRoute,
   AppRolesRoleIdRoute: AppRolesRoleIdRoute,
+  AppStructureCatalogRoute: AppStructureCatalogRoute,
+  AppStructureTerritoryRoute: AppStructureTerritoryRoute,
   AppUsersUserIdRoute: AppUsersUserIdRoute,
   AppGeographyIndexRoute: AppGeographyIndexRoute,
   AppNominationsIndexRoute: AppNominationsIndexRoute,
@@ -940,9 +1065,14 @@ const AppRouteChildren: AppRouteChildren = {
   AppPeaceMovementHousesToLinkRoute: AppPeaceMovementHousesToLinkRoute,
   AppPeaceMovementMembersMemberIdRoute: AppPeaceMovementMembersMemberIdRoute,
   AppPeaceMovementMembersNewRoute: AppPeaceMovementMembersNewRoute,
+  AppStructureBodiesBodyIdRoute: AppStructureBodiesBodyIdRoute,
+  AppStructureCoordinationsCoordinationIdRoute:
+    AppStructureCoordinationsCoordinationIdRoute,
   AppGeographyImportsIndexRoute: AppGeographyImportsIndexRoute,
   AppPeaceMovementHousesIndexRoute: AppPeaceMovementHousesIndexRoute,
   AppPeaceMovementMembersIndexRoute: AppPeaceMovementMembersIndexRoute,
+  AppStructureBodiesIndexRoute: AppStructureBodiesIndexRoute,
+  AppStructureCoordinationsIndexRoute: AppStructureCoordinationsIndexRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
